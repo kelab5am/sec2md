@@ -1,4 +1,5 @@
 from collections import Counter
+import re
 
 import pytest
 from bs4 import BeautifulSoup
@@ -8,6 +9,7 @@ from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 from tests.accuracy.metrics import (
     _financial_row_recall,
     _mapping_and_trace,
+    _markdown_cells,
     _parse_once,
     audit_document,
     extract_financial_rows,
@@ -90,7 +92,7 @@ def test_known_legacy_c1_defect_is_exactly_bounded():
 
 
 def test_known_legacy_accounting_defect_is_exactly_bounded():
-    contract, source = load_fixture("nvda-2002-10k")
+    _, source = load_fixture("nvda-2002-10k")
     markdown, _, _, _ = _parse_once(source)
     expected_width_errors = (
         "line 27: expected 2 columns, got 1",
@@ -105,18 +107,33 @@ def test_known_legacy_accounting_defect_is_exactly_bounded():
     assert actual_width_errors == ()
     assert split_accounting_row not in markdown
 
+    rows = [line for line in markdown.splitlines() if "16,173" in line]
+    assert len(rows) == 1
+    cells = _markdown_cells(rows[0])
+    assert len(cells) == 4
+    assert [normalize_numbers(cell) for cell in cells[1:]] == [
+        ["-16173"],
+        ["-4852"],
+        ["-332"],
+    ]
+
 
 def test_known_8k_link_defect_is_exactly_bounded():
     contract, source = load_fixture("nvda-2026-08-26-8k")
     markdown, _, _, _ = _parse_once(source)
     result = audit_document(source, contract, quality_policy="off")
+    links = re.findall(r"\[[^]]+\]\(([^)]+)\)", markdown)
     if (
         result.exhibit_link_count == 0
         and markdown.count("Augu st 2 6") == 1
         and markdown.count("Se cond") == 1
+        and not any(link.endswith("q2fy27pr.htm") for link in links)
+        and not any(link.endswith("q2fy27cfocommentary.htm") for link in links)
     ):
         pytest.xfail("known baseline defect: lost exhibit links and fragmented text")
     assert result.exhibit_link_count >= 2
+    assert any(link.endswith("q2fy27pr.htm") for link in links)
+    assert any(link.endswith("q2fy27cfocommentary.htm") for link in links)
     assert "Augu st 2 6" not in markdown
     assert "Se cond" not in markdown
 
@@ -152,6 +169,12 @@ def test_financial_row_recall_collapses_only_label_whitespace():
     source = [("Net (loss) from operations", ("1", "2"))]
     actual = [("Net  (loss)   from operations", ("1", "2"))]
     assert _financial_row_recall(source, actual) == 1.0
+
+
+def test_financial_row_recall_preserves_nonwhitespace_label_case():
+    source = [("Net (loss) from operations", ("1", "2"))]
+    actual = [("net (loss) from operations", ("1", "2"))]
+    assert _financial_row_recall(source, actual) == 0.0
 
 
 def test_trace_validation_counts_duplicate_expected_numbers():

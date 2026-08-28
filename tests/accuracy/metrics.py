@@ -182,7 +182,7 @@ def _has_label_text(text: str) -> bool:
 def _normalized_row_label(label: str) -> str:
     """Normalize a financial-row label without discarding its content."""
 
-    return re.sub(r"\s+", " ", label).strip().casefold()
+    return re.sub(r"\s+", " ", label).strip()
 
 
 def _label_words(label: str) -> list[str]:
