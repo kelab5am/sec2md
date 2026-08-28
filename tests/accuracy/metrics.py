@@ -173,25 +173,37 @@ def _cell_text(cell) -> str:
     return re.sub(r"\s+", " ", cell.get_text(" ", strip=True)).strip()
 
 
-def _alpha_words(text: str) -> list[str]:
-    return [token.casefold() for token in re.findall(r"[A-Za-z]+", text)]
+def _has_label_text(text: str) -> bool:
+    """Return whether a cell contains at least one Unicode letter."""
+
+    return bool(re.search(r"[^\W\d_]", text, re.UNICODE))
+
+
+def _normalized_row_label(label: str) -> str:
+    """Normalize a financial-row label without discarding its content."""
+
+    return re.sub(r"\s+", " ", label).strip().casefold()
+
+
+def _label_words(label: str) -> list[str]:
+    """Count alphabetic words only for deciding whether a row is eligible."""
+
+    return re.findall(r"[^\W\d_]+(?:['’][^\W\d_]+)?", label, re.UNICODE)
 
 
 def _row_key(cells: Sequence[str]) -> tuple[str, tuple[str, ...]] | None:
-    label = next((cell for cell in cells if len(_alpha_words(cell)) >= 2), "")
-    label_tokens = _alpha_words(label)
+    label = next((cell for cell in cells if _has_label_text(cell)), "")
     numbers = tuple(normalize_numbers(" | ".join(cells)))
-    if len(label_tokens) < 2 or len(numbers) < 2:
+    if len(_label_words(label)) < 2 or len(numbers) < 2:
         return None
-    return (" ".join(label_tokens[:8]), numbers)
+    return (_normalized_row_label(label), numbers)
 
 
 def _canonical_row(row: tuple[str, tuple[str, ...]]) -> tuple[str, tuple[str, ...]] | None:
     label, numbers = row
-    label_tokens = _alpha_words(label)
-    if len(label_tokens) < 2 or len(numbers) < 2:
+    if len(_label_words(label)) < 2 or len(numbers) < 2:
         return None
-    return (" ".join(label_tokens[:8]), numbers)
+    return (_normalized_row_label(label), numbers)
 
 
 def _html_rows(text: str | bytes) -> list[tuple[str, tuple[str, ...]]]:
@@ -210,7 +222,7 @@ def _html_rows(text: str | bytes) -> list[tuple[str, tuple[str, ...]]]:
                 continue
             values = [_cell_text(cell) for cell in cells]
             numbers = tuple(normalize_numbers(" | ".join(values)))
-            label = next((value for value in values if _alpha_words(value)), "")
+            label = next((value for value in values if _has_label_text(value)), "")
             if numbers:
                 result.append((label, numbers))
     return result
@@ -255,7 +267,7 @@ def _markdown_rows(markdown: str) -> list[tuple[str, tuple[str, ...]]]:
         if len(cells) < 2 or _is_delimiter_row(cells):
             continue
         numbers = tuple(normalize_numbers(" | ".join(cells)))
-        label = next((cell for cell in cells if _alpha_words(cell)), "")
+        label = next((cell for cell in cells if _has_label_text(cell)), "")
         if numbers and label:
             result.append((label, numbers))
     return result
@@ -270,8 +282,7 @@ def extract_financial_rows(text: str | bytes) -> list[tuple[str, tuple[str, ...]
 
 
 def _normalized_label(label: str) -> str:
-    label = re.sub(r"[*_`]+", "", label)
-    return re.sub(r"\s+", " ", label).strip().casefold()
+    return _normalized_row_label(label)
 
 
 def _financial_row_recall(
@@ -302,7 +313,7 @@ def _representative_row_failures(
         expected_label = _normalized_label(representative.label)
         found = any(
             expected_label in _normalized_label(label)
-            and bool(_alpha_words(label))
+            and _has_label_text(label)
             and multiset_recall(representative.numbers, numbers) == 1.0
             for label, numbers in actual
         )
@@ -366,7 +377,7 @@ def _mapping_and_trace(
             ]
             expected_content = re.sub(r"!\[[^]]*\]\([^)]*\)", "", element.content)
             expected_numbers = normalize_numbers(expected_content)
-            if not set(expected_numbers).issubset(Counter(source_numbers)):
+            if Counter(expected_numbers) - Counter(source_numbers):
                 failures.append(element.id)
             element_tags = set(element.tags or [])
             visible_tags: set[str] = set()
@@ -381,7 +392,7 @@ def _mapping_and_trace(
                     if name and (candidate_text or candidate.get("xsi:nil") == "true"):
                         visible_tags.add(name)
             invalid_tags.update(element_tags - visible_tags)
-    return tuple(sorted(set(missing))), tuple(sorted(set(failures))), tuple(sorted(invalid_tags))
+    return tuple(sorted(set(missing))), tuple(failures), tuple(sorted(invalid_tags))
 
 
 def _section_keys(pages: Sequence[Page], form: str) -> tuple[str, ...]:

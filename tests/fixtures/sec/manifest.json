@@ -66,7 +66,7 @@
       "min_financial_row_recall": 0.89,
       "expected_sections": [
         "PART I/ITEM 1", "PART I/ITEM 2", "PART I/ITEM 3", "PART I/ITEM 4",
-        "PART II/ITEM 5", "PART II/ITEM 6", "PART II/ITEM 7", "PART II/ITEM 7A", "PART II/ITEM 8", "PART II/ITEM 9", "PART II/ITEM 10",
+        "PART II/ITEM 5", "PART II/ITEM 6", "PART II/ITEM 7", "PART II/ITEM 7A", "PART II/ITEM 8", "PART II/ITEM 9", "PART III/ITEM 10",
         "PART III/ITEM 11", "PART III/ITEM 12", "PART III/ITEM 13", "PART III/ITEM 14"
       ],
       "representative_rows": [

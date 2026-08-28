@@ -1,8 +1,20 @@
+from collections import Counter
+
 import pytest
 from bs4 import BeautifulSoup
+from sec2md.models import Element, Page
 
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
-from tests.accuracy.metrics import audit_document, extract_financial_rows, multiset_recall, normalize_numbers, normalize_words
+from tests.accuracy.metrics import (
+    _financial_row_recall,
+    _mapping_and_trace,
+    _parse_once,
+    audit_document,
+    extract_financial_rows,
+    multiset_recall,
+    normalize_numbers,
+    normalize_words,
+)
 
 
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
@@ -35,28 +47,78 @@ def test_audited_document_meets_baseline_contract(fixture_id: str):
     contract, source = load_fixture(fixture_id)
     result = audit_document(source, contract, quality_policy="off")
 
-    if fixture_id == "nvda-2002-10k" and result.c1_control_characters:
-        pytest.xfail("known baseline defect: 629 C1 controls and split accounting negative")
-    if fixture_id == "nvda-2026-08-26-8k" and result.exhibit_link_count < 2:
-        pytest.xfail("known baseline defect: lost exhibit URLs and fragmented exhibit text")
-    if fixture_id == "aapl-2023-10k" and result.trace_failures:
-        pytest.xfail("known baseline defect: two trace failures")
-
     assert result.word_recall >= contract.min_word_recall
     assert result.numeric_recall >= contract.min_numeric_recall
     assert result.financial_row_recall >= contract.min_financial_row_recall
     assert not result.representative_row_failures
     assert result.expected_sections == contract.expected_sections
-    assert not result.table_width_errors
+    if fixture_id != "nvda-2002-10k":
+        assert not result.table_width_errors
     assert result.replacement_characters == 0
-    assert result.c1_control_characters == 0
+    if fixture_id != "nvda-2002-10k":
+        assert result.c1_control_characters == 0
     assert not result.duplicate_element_ids
     assert not result.missing_mappings
-    assert not result.trace_failures
+    if fixture_id != "aapl-2023-10k":
+        assert not result.trace_failures
     assert not result.invalid_visible_node_xbrl_tags
     assert result.deterministic_markdown
     assert result.deterministic_pages
     assert result.deterministic_annotated_html
+
+
+def test_known_apple_trace_defect_is_exactly_bounded():
+    contract, source = load_fixture("aapl-2023-10k")
+    result = audit_document(source, contract, quality_policy="off")
+    expected = Counter(
+        {
+            "sec2md-p55-t3-2d2bcdab": 1,
+            "sec2md-p56-t3-56ef4eec": 1,
+        }
+    )
+    if Counter(result.trace_failures) == expected:
+        pytest.xfail("known baseline defect: exactly two Apple trace failures")
+    assert result.trace_failures == ()
+
+
+def test_known_legacy_c1_defect_is_exactly_bounded():
+    contract, source = load_fixture("nvda-2002-10k")
+    result = audit_document(source, contract, quality_policy="off")
+    if result.c1_control_characters == 629:
+        pytest.xfail("known baseline defect: exactly 629 legacy C1 controls")
+    assert result.c1_control_characters == 0
+
+
+def test_known_legacy_accounting_defect_is_exactly_bounded():
+    contract, source = load_fixture("nvda-2002-10k")
+    markdown, _, _, _ = _parse_once(source)
+    expected_width_errors = (
+        "line 27: expected 2 columns, got 1",
+        "line 1198: expected 4 columns, got 1",
+    )
+    split_accounting_row = "| Interest expense | (16,173 | ) | (4,852 | ) | (332 | ) |"
+    from tests.accuracy.metrics import _table_width_errors
+
+    actual_width_errors = _table_width_errors(markdown)
+    if actual_width_errors == expected_width_errors and split_accounting_row in markdown:
+        pytest.xfail("known baseline defect: split legacy accounting negative")
+    assert actual_width_errors == ()
+    assert split_accounting_row not in markdown
+
+
+def test_known_8k_link_defect_is_exactly_bounded():
+    contract, source = load_fixture("nvda-2026-08-26-8k")
+    markdown, _, _, _ = _parse_once(source)
+    result = audit_document(source, contract, quality_policy="off")
+    if (
+        result.exhibit_link_count == 0
+        and markdown.count("Augu st 2 6") == 1
+        and markdown.count("Se cond") == 1
+    ):
+        pytest.xfail("known baseline defect: lost exhibit links and fragmented text")
+    assert result.exhibit_link_count >= 2
+    assert "Augu st 2 6" not in markdown
+    assert "Se cond" not in markdown
 
 
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
@@ -78,3 +140,46 @@ def test_positioned_fixture_contains_visible_text_inside_positioned_leaf():
     visible = BeautifulSoup(path.read_text(encoding="utf-8"), "lxml").get_text(" ", strip=True)
     assert "POSITIONED LOSS SENTINEL" in visible
     assert len(visible) >= 1200
+
+
+def test_financial_row_recall_rejects_labels_that_differ_after_eighth_word():
+    source = [("One two three four five six seven eight nine ten", ("1", "2"))]
+    actual = [("One two three four five six seven eight nine eleven", ("1", "2"))]
+    assert _financial_row_recall(source, actual) == 0.0
+
+
+def test_financial_row_recall_collapses_only_label_whitespace():
+    source = [("Net (loss) from operations", ("1", "2"))]
+    actual = [("Net  (loss)   from operations", ("1", "2"))]
+    assert _financial_row_recall(source, actual) == 1.0
+
+
+def test_trace_validation_counts_duplicate_expected_numbers():
+    page = Page(
+        number=1,
+        content="10 10",
+        elements=[
+            Element(id="element-1", content="10 10", kind="paragraph", page_start=1, page_end=1)
+        ],
+    )
+    missing, failures, invalid_tags = _mapping_and_trace(
+        [page], '<p data-sec2md-block="element-1">10</p>'
+    )
+    assert missing == ()
+    assert failures == ("element-1",)
+    assert invalid_tags == ()
+
+
+def test_trace_validation_preserves_repeated_element_failures():
+    page = Page(
+        number=1,
+        content="10 10 10 10",
+        elements=[
+            Element(id="element-1", content="10 10", kind="paragraph", page_start=1, page_end=1),
+            Element(id="element-1", content="10 10", kind="paragraph", page_start=1, page_end=1),
+        ],
+    )
+    _, failures, _ = _mapping_and_trace(
+        [page], '<p data-sec2md-block="element-1">10</p>'
+    )
+    assert failures == ("element-1", "element-1")
