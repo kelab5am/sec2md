@@ -245,7 +245,7 @@ class TableParser:
         self,
         grid: List[List[GridCell]],
     ) -> dict[int, dict[int, int]]:
-        """Find column removals whose marker fragments have numeric neighbors."""
+        """Find column removals whose fully rebuilt rows are numeric tokens."""
 
         if not grid or not grid[0]:
             return {}
@@ -260,42 +260,29 @@ class TableParser:
             ]
             for column in range(column_count)
         }
-        actions: dict[int, dict[int, int]] = {}
+        candidate_actions: dict[int, dict[int, int]] = {}
 
         for column, values in values_by_column.items():
             marker_class = _classify_structural_column(values)
-            if marker_class is not None:
-                row_actions: dict[int, int] = {}
-                for row in body_rows:
-                    value = grid[row][column].text.strip() if grid[row][column] else ""
-                    if not value:
-                        continue
-                    target = self._structural_target(column, marker_class)
-                    if not 0 <= target < column_count:
-                        row_actions = {}
-                        break
-                    target_value = grid[row][target].text if grid[row][target] else ""
-                    if not self._is_numeric_fragment(target_value):
-                        row_actions = {}
-                        break
-                    row_actions[row] = target
-                if row_actions:
-                    actions[column] = row_actions
-                continue
-
             nonempty = [value.strip() for value in values if value.strip()]
-            if len(nonempty) < 2 or not all(value in STRUCTURAL_MARKERS for value in nonempty):
-                continue
+            if marker_class is None:
+                marker_classes = {STRUCTURAL_MARKERS.get(value) for value in nonempty}
+                legacy_mixed = (
+                    marker_classes == {"currency", "close_paren"}
+                    and sum(value == "$" for value in nonempty) >= 2
+                    and sum(value == ")" for value in nonempty) >= 2
+                    and all(value in STRUCTURAL_MARKERS for value in nonempty)
+                )
+                if not legacy_mixed:
+                    continue
 
-            # Some legacy SEC tables reuse one visual column for a currency
-            # marker on positive rows and a closing parenthesis on negatives.
-            # Accept that shape only when every body marker has a numeric side.
-            row_actions = {}
+            row_actions: dict[int, int] = {}
             for row in body_rows:
                 value = grid[row][column].text.strip() if grid[row][column] else ""
                 if not value:
                     continue
-                target = self._structural_target(column, STRUCTURAL_MARKERS[value])
+                row_marker_class = marker_class or STRUCTURAL_MARKERS[value]
+                target = self._structural_target(column, row_marker_class)
                 if not 0 <= target < column_count:
                     row_actions = {}
                     break
@@ -305,43 +292,105 @@ class TableParser:
                     break
                 row_actions[row] = target
             if row_actions:
-                actions[column] = row_actions
+                candidate_actions[column] = row_actions
 
-        # A final accounting column can contain one close marker when the
-        # preceding repeated columns establish the same structural pattern.
-        # Require that sibling evidence before allowing this narrow recovery.
+        actions = self._validated_structural_actions(grid, candidate_actions)
+
+        # The legacy NVIDIA table has two repeated close-marker columns and
+        # at least one validated currency column, followed by one final close
+        # marker. Keep this exception explicit and require the paired numeric
+        # token to validate as well.
+        repeated_close_columns = {
+            column
+            for column in actions
+            if _classify_structural_column(values_by_column[column]) == "close_paren"
+        }
+        currency_columns = {
+            column
+            for column in actions
+            if _classify_structural_column(values_by_column[column]) == "currency"
+        }
+        if len(repeated_close_columns) < 2 or not currency_columns:
+            return actions
+
         for column, values in values_by_column.items():
-            if column in actions or len([value for value in values if value.strip()]) != 1:
+            nonempty = [value.strip() for value in values if value.strip()]
+            if column in actions or len(nonempty) != 1 or column != column_count - 1:
                 continue
-            marker = next(value.strip() for value in values if value.strip())
-            marker_class = STRUCTURAL_MARKERS.get(marker)
-            if marker_class not in {"close_paren", "percent"} or column != column_count - 1:
-                continue
-            peers = sum(
-                marker in other_values
-                for other_column, other_values in values_by_column.items()
-                if other_column < column
-            )
-            if peers < 2:
+            marker_class = STRUCTURAL_MARKERS.get(nonempty[0])
+            if marker_class != "close_paren":
                 continue
             row = next(row for row in body_rows if grid[row][column] and grid[row][column].text.strip())
             target = self._structural_target(column, marker_class)
             target_value = grid[row][target].text if grid[row][target] else ""
-            if self._is_numeric_fragment(target_value):
-                actions[column] = {row: target}
+            if not target_value.strip().startswith("("):
+                continue
+            if normalize_numeric_token(f"{target_value.strip()})") is None:
+                continue
+            trial_actions = dict(actions)
+            trial_actions[column] = {row: target}
+            validated = self._validated_structural_actions(grid, trial_actions)
+            if column in validated:
+                actions = validated
 
         return actions
 
+    def _validated_structural_actions(
+        self,
+        grid: List[List[GridCell]],
+        actions: dict[int, dict[int, int]],
+    ) -> dict[int, dict[int, int]]:
+        """Keep only actions whose complete rebuilt numeric token is valid."""
+
+        while actions:
+            invalid_sources: set[int] = set()
+            for source, source_actions in actions.items():
+                for row, target in source_actions.items():
+                    prefixes: list[str] = []
+                    suffixes: list[str] = []
+                    for other_source, other_actions in actions.items():
+                        if other_actions.get(row) != target:
+                            continue
+                        value = grid[row][other_source].text.strip()
+                        if other_source < target:
+                            prefixes.append(value)
+                        else:
+                            suffixes.append(value)
+                    target_value = grid[row][target].text if grid[row][target] else ""
+                    merged = self._join_structural_text(prefixes, target_value, suffixes)
+                    if normalize_numeric_token(merged) is None:
+                        invalid_sources.add(source)
+                        break
+            if not invalid_sources:
+                return actions
+            actions = {
+                source: source_actions
+                for source, source_actions in actions.items()
+                if source not in invalid_sources
+            }
+        return {}
+
     @staticmethod
-    def _fallback_merge_target(
+    def _header_merge_target(
         source: int,
+        value: str,
+        source_actions: dict[int, int],
         removed: set[int],
         column_count: int,
     ) -> int | None:
-        for distance in range(1, column_count):
-            for target in (source + distance, source - distance):
-                if 0 <= target < column_count and target not in removed:
-                    return target
+        """Keep header fragments on the same side as their body actions."""
+
+        targets = sorted(set(source_actions.values()))
+        if len(targets) == 1 and targets[0] not in removed:
+            return targets[0]
+        marker_class = STRUCTURAL_MARKERS.get(value)
+        if marker_class is not None:
+            target = TableParser._structural_target(source, marker_class)
+            if 0 <= target < column_count and target not in removed:
+                return target
+        for target in targets:
+            if target not in removed:
+                return target
         return None
 
     @staticmethod
@@ -388,7 +437,13 @@ class TableParser:
                         continue
                     merge_target = source_actions.get(row_index)
                     if merge_target is None and row_index < body_start:
-                        merge_target = self._fallback_merge_target(source, removed, column_count)
+                        merge_target = self._header_merge_target(
+                            source,
+                            value,
+                            source_actions,
+                            removed,
+                            column_count,
+                        )
                     if merge_target != target:
                         continue
                     if source < target:

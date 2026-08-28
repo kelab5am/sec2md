@@ -160,6 +160,56 @@ class TestToMatrix:
         assert matrix[1] == ["A", "3 %"]
         assert matrix[2] == ["B", "4 %"]
 
+    def test_unmatched_repeated_open_parentheses_do_not_merge(self):
+        html = """
+        <table><tr><th>Label</th><th>Marker</th><th>Value</th></tr>
+        <tr><td>A</td><td>(</td><td>10</td></tr>
+        <tr><td>B</td><td>(</td><td>20</td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert matrix[1] == ["A", "(", "10"]
+        assert matrix[2] == ["B", "(", "20"]
+
+    def test_unmatched_repeated_close_parentheses_do_not_merge(self):
+        html = """
+        <table><tr><th>Label</th><th>Value</th><th>Marker</th></tr>
+        <tr><td>A</td><td>10</td><td>)</td></tr>
+        <tr><td>B</td><td>20</td><td>)</td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert matrix[1] == ["A", "10", ")"]
+        assert matrix[2] == ["B", "20", ")"]
+
+    def test_alternating_structural_markers_do_not_merge(self):
+        html = """
+        <table><tr><th>Label</th><th>Left</th><th>Marker</th><th>Right</th></tr>
+        <tr><td>A</td><td>10</td><td>%</td><td>100</td></tr>
+        <tr><td>B</td><td>20</td><td>$</td><td>200</td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert matrix[1] == ["A", "10", "%", "100"]
+        assert matrix[2] == ["B", "20", "$", "200"]
+
+    def test_singleton_structural_marker_does_not_bypass_two_row_floor(self):
+        html = """
+        <table><tr><th>Label</th><th>A</th><th></th><th>B</th><th></th><th>C</th><th></th></tr>
+        <tr><td>R1</td><td>(10</td><td>)</td><td>(20</td><td>)</td><td>(30</td><td>)</td></tr>
+        <tr><td>R2</td><td>(11</td><td>)</td><td>(21</td><td>)</td><td>31</td><td></td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert len(matrix[0]) == 5
+        assert matrix[1][-2:] == ["(30", ")"]
+
+    def test_suffix_marker_header_merges_to_left_numeric_column(self):
+        html = """
+        <table><tr><th>Label</th><th>2022</th><th>Change</th><th>2021</th></tr>
+        <tr><td>A</td><td>10</td><td>%</td><td>20</td></tr>
+        <tr><td>B</td><td>30</td><td>%</td><td>40</td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert matrix[0] == ["Label", "2022 Change", "2021"]
+        assert matrix[1] == ["A", "10 %", "20"]
+
     def test_matrix_dimensions(self):
         html = """<table>
         <tr><td>A</td><td>B</td></tr>
