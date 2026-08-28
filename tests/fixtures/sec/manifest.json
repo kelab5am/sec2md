@@ -1,0 +1,154 @@
+{
+  "capture_date": "2026-08-28",
+  "capture_evidence": "source-manifest.json and supplemental-source-manifest.json from the audited SEC HTML bakeoff captured 2026-08-28 UTC",
+  "fixtures": [
+    {
+      "fixture_id": "aapl-2023-10k",
+      "filename": "aapl-2023-10k.html.gz",
+      "cik": "0000320193",
+      "accession": "0000320193-23-000106",
+      "form": "10-K",
+      "report_date": "2023-09-30",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+      "role": "primary",
+      "sha256": "bda1f34435199672c16ecdf2034c650872d2cac8399ed0d179fc25450b080b90",
+      "expected_encoding_reason": "html-declaration",
+      "min_word_recall": 0.98,
+      "min_numeric_recall": 0.93,
+      "min_financial_row_recall": 0.99,
+      "expected_sections": [
+        "PART I/ITEM 1", "PART I/ITEM 1A", "PART I/ITEM 1B", "PART I/ITEM 1C", "PART I/ITEM 2", "PART I/ITEM 3", "PART I/ITEM 4",
+        "PART II/ITEM 5", "PART II/ITEM 6", "PART II/ITEM 7", "PART II/ITEM 7A", "PART II/ITEM 8", "PART II/ITEM 9", "PART II/ITEM 9A", "PART II/ITEM 9B", "PART II/ITEM 9C",
+        "PART III/ITEM 10", "PART III/ITEM 11", "PART III/ITEM 12", "PART III/ITEM 13", "PART III/ITEM 14",
+        "PART IV/ITEM 15", "PART IV/ITEM 16"
+      ],
+      "representative_rows": [
+        {"label": "Total net sales", "numbers": ["383285", "394328", "365817"]}
+      ]
+    },
+    {
+      "fixture_id": "nvda-2026-10k",
+      "filename": "nvda-2026-10k.html.gz",
+      "cik": "0001045810",
+      "accession": "0001045810-26-000021",
+      "form": "10-K",
+      "report_date": "2026-01-25",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+      "role": "primary",
+      "sha256": "73d81f5a111abcf72426c840871e76f5f5edc9631f436d495a86b6f87306d58b",
+      "expected_encoding_reason": "html-declaration",
+      "min_word_recall": 0.98,
+      "min_numeric_recall": 0.93,
+      "min_financial_row_recall": 0.99,
+      "expected_sections": [
+        "PART I/ITEM 1", "PART I/ITEM 1A", "PART I/ITEM 1B", "PART I/ITEM 1C", "PART I/ITEM 2", "PART I/ITEM 3", "PART I/ITEM 4",
+        "PART II/ITEM 5", "PART II/ITEM 6", "PART II/ITEM 7", "PART II/ITEM 7A", "PART II/ITEM 8", "PART II/ITEM 9", "PART II/ITEM 9A", "PART II/ITEM 9B", "PART II/ITEM 9C",
+        "PART III/ITEM 10", "PART III/ITEM 11", "PART III/ITEM 12", "PART III/ITEM 13", "PART III/ITEM 14",
+        "PART IV/ITEM 15", "PART IV/ITEM 16"
+      ],
+      "representative_rows": [
+        {"label": "Revenue", "numbers": ["215938", "130497", "60922"]}
+      ]
+    },
+    {
+      "fixture_id": "nvda-2002-10k",
+      "filename": "nvda-2002-10k.html.gz",
+      "cik": "0001045810",
+      "accession": "0001012870-02-002262",
+      "form": "10-K",
+      "report_date": "2002-01-27",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1045810/000101287002002262/d10k.htm",
+      "role": "primary",
+      "sha256": "04136c61bb8ea9490da4916f358a2275f019ed6536878715da412d7056a0739d",
+      "expected_encoding_reason": "utf-8",
+      "min_word_recall": 0.99,
+      "min_numeric_recall": 0.95,
+      "min_financial_row_recall": 0.89,
+      "expected_sections": [
+        "PART I/ITEM 1", "PART I/ITEM 2", "PART I/ITEM 3", "PART I/ITEM 4",
+        "PART II/ITEM 5", "PART II/ITEM 6", "PART II/ITEM 7", "PART II/ITEM 7A", "PART II/ITEM 8", "PART II/ITEM 9", "PART II/ITEM 10",
+        "PART III/ITEM 11", "PART III/ITEM 12", "PART III/ITEM 13", "PART III/ITEM 14"
+      ],
+      "representative_rows": [
+        {"label": "Revenue", "numbers": ["1369471", "735264", "374505"]}
+      ]
+    },
+    {
+      "fixture_id": "nvda-2026-q2-10q",
+      "filename": "nvda-2026-q2-10q.html.gz",
+      "cik": "0001045810",
+      "accession": "0001045810-26-000075",
+      "form": "10-Q",
+      "report_date": "2026-07-26",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+      "role": "primary",
+      "sha256": "e2634e509c241c5f45e3f6c115dc38a85645e5fdbee760b4a04f5e9035f6f7a9",
+      "expected_encoding_reason": "html-declaration",
+      "min_word_recall": 0.98,
+      "min_numeric_recall": 0.93,
+      "min_financial_row_recall": 0.99,
+      "expected_sections": [
+        "PART I/ITEM 1", "PART I/ITEM 2", "PART I/ITEM 3", "PART I/ITEM 4",
+        "PART II/ITEM 1", "PART II/ITEM 1A", "PART II/ITEM 2", "PART II/ITEM 5", "PART II/ITEM 6"
+      ],
+      "representative_rows": [
+        {"label": "Revenue", "numbers": ["96221", "46743", "177837", "90805"]}
+      ]
+    },
+    {
+      "fixture_id": "nvda-2026-08-26-8k",
+      "filename": "nvda-2026-08-26-8k.html.gz",
+      "cik": "0001045810",
+      "accession": "0001045810-26-000073",
+      "form": "8-K",
+      "report_date": "2026-08-26",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/nvda-20260826.htm",
+      "role": "primary",
+      "sha256": "84335b3247873da9fc91b4d9aa146be012801158183a7e9b0e98f0d31e50d0ea",
+      "expected_encoding_reason": "html-declaration",
+      "min_word_recall": 0.98,
+      "min_numeric_recall": 0.93,
+      "min_financial_row_recall": 0.99,
+      "expected_sections": ["ITEM 2.02", "ITEM 9.01"],
+      "representative_rows": []
+    },
+    {
+      "fixture_id": "nvda-2026-ex99-1",
+      "filename": "nvda-2026-ex99-1.html.gz",
+      "cik": "0001045810",
+      "accession": "0001045810-26-000073",
+      "form": "EX-99.1",
+      "report_date": "2026-08-26",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+      "role": "exhibit",
+      "sha256": "1809cb206590dcfeb959f3a1a64157f4e5ee42788ec51289b74f3ea299931eb7",
+      "expected_encoding_reason": "utf-8",
+      "min_word_recall": 0.99,
+      "min_numeric_recall": 0.98,
+      "min_financial_row_recall": 0.97,
+      "expected_sections": [],
+      "representative_rows": [
+        {"label": "Revenue", "numbers": ["96221", "81615", "46743"]}
+      ]
+    },
+    {
+      "fixture_id": "nvda-2026-ex99-2",
+      "filename": "nvda-2026-ex99-2.html.gz",
+      "cik": "0001045810",
+      "accession": "0001045810-26-000073",
+      "form": "EX-99.2",
+      "report_date": "2026-08-26",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27cfocommentary.htm",
+      "role": "exhibit",
+      "sha256": "6a522635d049044b2ff9ff63cb78220cf29d960e96614c88afe30560c3ee0659",
+      "expected_encoding_reason": "utf-8",
+      "min_word_recall": 0.99,
+      "min_numeric_recall": 0.98,
+      "min_financial_row_recall": 0.94,
+      "expected_sections": [],
+      "representative_rows": [
+        {"label": "Data Center", "numbers": ["89023", "75246", "41096"]}
+      ]
+    }
+  ]
+}
