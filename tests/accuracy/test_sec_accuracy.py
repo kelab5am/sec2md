@@ -1,4 +1,3 @@
-from collections import Counter
 import re
 import warnings
 from urllib.parse import urljoin
@@ -129,25 +128,16 @@ def test_audited_document_meets_baseline_contract(fixture_id: str):
     assert result.c1_control_characters == 0
     assert not result.duplicate_element_ids
     assert not result.missing_mappings
-    if fixture_id != "aapl-2023-10k":
-        assert not result.trace_failures
+    assert not result.trace_failures
     assert not result.invalid_visible_node_xbrl_tags
     assert result.deterministic_markdown
     assert result.deterministic_pages
     assert result.deterministic_annotated_html
 
 
-def test_known_apple_trace_defect_is_exactly_bounded():
+def test_apple_trace_has_no_failures():
     contract, source = load_fixture("aapl-2023-10k")
     result = audit_document(source, contract, quality_policy="off")
-    expected = Counter(
-        {
-            "sec2md-p55-t3-2d2bcdab": 1,
-            "sec2md-p56-t3-56ef4eec": 1,
-        }
-    )
-    if Counter(result.trace_failures) == expected:
-        pytest.xfail("known baseline defect: exactly two Apple trace failures")
     assert result.trace_failures == ()
 
 
@@ -310,7 +300,7 @@ def test_trace_validation_counts_duplicate_expected_numbers():
         [page], '<p data-sec2md-block="element-1">10</p>'
     )
     assert missing == ()
-    assert failures == ("element-1",)
+    assert failures == ("element-1:10",)
     assert invalid_tags == ()
 
 
@@ -326,4 +316,4 @@ def test_trace_validation_preserves_repeated_element_failures():
     _, failures, _ = _mapping_and_trace(
         [page], '<p data-sec2md-block="element-1">10</p>'
     )
-    assert failures == ("element-1", "element-1")
+    assert failures == ("element-1:10", "element-1:10")

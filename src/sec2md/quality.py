@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import logging
 import re
+from collections import Counter
 from dataclasses import dataclass
 from typing import Collection, Literal, Sequence
 
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
-from sec2md.models import Page
+from sec2md.models import Element, Page
 
 
 logger = logging.getLogger(__name__)
@@ -51,6 +53,36 @@ def normalize_numeric_token(value: str) -> str | None:
     if accounting and not cleaned.startswith("-"):
         cleaned = "-" + cleaned
     return cleaned
+
+
+def _normalized_numbers(text: str) -> tuple[str, ...]:
+    """Extract normalized numeric tokens in source order."""
+
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
+    normalized: list[str] = []
+    pattern = r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?![\w.])"
+    for match in re.finditer(pattern, text):
+        token = normalize_numeric_token(match.group(0))
+        if token is not None:
+            normalized.append(token)
+    return tuple(normalized)
+
+
+def trace_numeric_failures(element: Element, nodes: Sequence[Tag]) -> tuple[str, ...]:
+    """Report each expected normalized number missing from mapped source nodes."""
+
+    expected = Counter(_normalized_numbers(element.content))
+    available = Counter(
+        _normalized_numbers(
+            " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
+        )
+    )
+    failures: list[str] = []
+    for token, count in sorted(expected.items()):
+        failures.extend(
+            f"{element.id}:{token}" for _ in range(max(0, count - available[token]))
+        )
+    return tuple(failures)
 
 
 @dataclass(frozen=True)

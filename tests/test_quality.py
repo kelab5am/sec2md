@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from bs4 import BeautifulSoup
 
 from sec2md.core import convert_to_markdown, parse_filing
 from sec2md.models import Element, Page
@@ -12,7 +13,20 @@ from sec2md.quality import (
     build_diagnostics,
     enforce_quality,
     normalize_numeric_token,
+    trace_numeric_failures,
 )
+
+
+def test_untraceable_normalized_number_is_reported():
+    element = Element(id="e1", content="Revenue $1,234", kind="paragraph", page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<p>Revenue 999</p>", "lxml").p]
+    assert trace_numeric_failures(element, nodes) == ("e1:1234",)
+
+
+def test_accounting_format_change_remains_traceable():
+    element = Element(id="e1", content="Loss (16,173)", kind="table", page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<td>(</td><td>16,173</td><td>)</td>", "lxml").body]
+    assert trace_numeric_failures(element, nodes) == ()
 
 
 def test_strict_rejects_empty_output_from_substantial_source(monkeypatch):

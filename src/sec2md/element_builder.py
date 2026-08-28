@@ -8,24 +8,63 @@ from __future__ import annotations
 
 import re
 import hashlib
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Tuple, Any, Sequence
 
 from bs4.element import Tag
 
 from sec2md.models import Page, Element, TextBlock
+from sec2md.quality import _is_hidden_tag
 
 # iXBRL tag names used for fact extraction
 _XBRL_FACT_TAGS = {'ix:nonfraction', 'nonfraction', 'ix:nonnumeric', 'nonnumeric'}
 
 
-def _extract_xbrl_tags(nodes: List[Tag]) -> Optional[List[str]]:
-    """Extract distinct XBRL concept names from source DOM nodes."""
+def ordered_unique_nodes(*groups: Sequence[Tag]) -> list[Tag]:
+    """Return source nodes in first-seen order, keyed by object identity."""
+
+    result: list[Tag] = []
+    seen: set[int] = set()
+    for group in groups:
+        for node in group:
+            identity = id(node)
+            if identity not in seen:
+                seen.add(identity)
+                result.append(node)
+    return result
+
+
+def _source_node_group(node: Optional[Tag] | Sequence[Tag]) -> Sequence[Tag]:
+    """Normalize one parser segment's source reference to a node sequence."""
+
+    if isinstance(node, Tag):
+        return (node,)
+    return node or ()
+
+
+def _is_hidden_or_under_hidden(node: Tag) -> bool:
+    """Return whether a mapped node is hidden by itself or an ancestor."""
+
+    current: Tag | None = node
+    while isinstance(current, Tag):
+        if _is_hidden_tag(current):
+            return True
+        current = current.parent if isinstance(current.parent, Tag) else None
+    return False
+
+
+def _extract_xbrl_tags(nodes: Sequence[Tag]) -> Optional[List[str]]:
+    """Extract distinct XBRL concepts from visible mapped DOM nodes only."""
+
     tags: List[str] = []
     seen: set = set()
     for node in nodes:
-        if not isinstance(node, Tag):
+        if not isinstance(node, Tag) or _is_hidden_or_under_hidden(node):
             continue
-        for el in node.find_all(_XBRL_FACT_TAGS):
+        for el in [node, *node.find_all(_XBRL_FACT_TAGS)]:
+            if not isinstance(el, Tag) or el.name not in _XBRL_FACT_TAGS:
+                continue
+            if _is_hidden_or_under_hidden(el):
+                continue
             name = el.get('name', '')
             if name and name not in seen:
                 seen.add(name)
@@ -35,7 +74,7 @@ def _extract_xbrl_tags(nodes: List[Tag]) -> Optional[List[str]]:
 
 def build_elements_for_pages(
     pages: List[Page],
-    page_segments: Dict[int, List[Tuple[str, Optional[Tag], Any]]],
+    page_segments: Dict[int, List[Tuple[str, Optional[Tag] | Sequence[Tag], Any]]],
     min_chars: int = 500,
 ) -> Tuple[List[Page], Dict[str, List[Tag]]]:
     """Build Elements and TextBlocks for pages from parsed segments.
@@ -68,7 +107,8 @@ def build_elements_for_pages(
         elements = []
         text_block_map: Dict[str, List[str]] = {}
 
-        for element, nodes, text_block_info in merged_blocks:
+        for element, raw_nodes, text_block_info in merged_blocks:
+            nodes = ordered_unique_nodes(raw_nodes)
             element.tags = _extract_xbrl_tags(nodes)
             elements.append(element)
             block_nodes_map[element.id] = nodes
@@ -138,12 +178,15 @@ def augment_html_with_ids(
 ) -> None:
     """Add id attributes and data-sec2md-block to source DOM nodes."""
     seen_pages: set = set()
+    mapped_nodes = ordered_unique_nodes(*block_nodes_map.values())
+    for node in mapped_nodes:
+        node.attrs.pop('data-sec2md-block', None)
 
     for page_num in sorted(page_elements.keys()):
         elements = page_elements[page_num]
 
         for element in elements:
-            nodes = block_nodes_map.get(element.id, [])
+            nodes = ordered_unique_nodes(block_nodes_map.get(element.id, []))
             if not nodes:
                 continue
 
@@ -226,6 +269,9 @@ def _create_block(
     content = "".join(segments).strip()
     if not content:
         return None
+    nodes = ordered_unique_nodes(nodes)
+    if not nodes:
+        return None
 
     kind = _infer_kind_from_nodes(nodes)
     block_id = _generate_block_id(page_num, block_idx, content, kind)
@@ -240,7 +286,7 @@ def _create_block(
 
 
 def _group_segments_into_blocks(
-    segments: List[Tuple[str, Optional[Tag], Any]],
+    segments: List[Tuple[str, Optional[Tag] | Sequence[Tag], Any]],
     page_num: int,
 ) -> List[Tuple[Element, List[Tag], Any]]:
     """Group sequential segments into semantic blocks (split on double newlines)."""
@@ -261,7 +307,7 @@ def _group_segments_into_blocks(
                         block_idx
                     )
                     if block:
-                        blocks.append((block, list(current_block_nodes), current_text_block))
+                        blocks.append((block, ordered_unique_nodes(current_block_nodes), current_text_block))
                         block_idx += 1
                 current_block_segments = []
                 current_block_nodes = []
@@ -269,8 +315,10 @@ def _group_segments_into_blocks(
                 continue
 
         current_block_segments.append(content)
-        if node is not None and node not in current_block_nodes:
-            current_block_nodes.append(node)
+        current_block_nodes = ordered_unique_nodes(
+            current_block_nodes,
+            _source_node_group(node),
+        )
         if text_block is not None:
             current_text_block = text_block
 
@@ -286,7 +334,7 @@ def _group_segments_into_blocks(
                 block_idx
             )
             if block:
-                blocks.append((block, list(current_block_nodes), current_text_block))
+                blocks.append((block, ordered_unique_nodes(current_block_nodes), current_text_block))
 
     return blocks
 
@@ -323,6 +371,12 @@ def _merge_small_blocks(
 
         block_id = _generate_block_id(page_num, block_idx, merged_content, kind)
 
+        if not current_nodes:
+            current_elements = []
+            current_nodes = []
+            current_chars = 0
+            return
+
         merged_element = Element(
             id=block_id,
             content=merged_content,
@@ -331,12 +385,15 @@ def _merge_small_blocks(
             page_end=page_num
         )
 
-        merged.append((merged_element, list(current_nodes), current_text_block))
+        merged.append((merged_element, ordered_unique_nodes(current_nodes), current_text_block))
         current_elements = []
         current_nodes = []
         current_chars = 0
 
     for i, (element, nodes, text_block) in enumerate(blocks_with_nodes):
+        nodes = ordered_unique_nodes(nodes)
+        if element.content and not nodes:
+            continue
         text_block_changed = False
         if current_text_block is not None or text_block is not None:
             if current_text_block is None and text_block is not None:
@@ -354,11 +411,11 @@ def _merge_small_blocks(
         if element.kind == 'table':
             if current_elements and current_chars < min_chars:
                 current_elements.append(element)
-                current_nodes.extend([n for n in nodes if n not in current_nodes])
+                current_nodes = ordered_unique_nodes(current_nodes, nodes)
                 flush(len(merged))
             else:
                 flush(len(merged))
-                merged.append((element, nodes, text_block))
+                merged.append((element, ordered_unique_nodes(nodes), text_block))
             continue
 
         bold_header = _is_bold_header(element)
@@ -372,7 +429,7 @@ def _merge_small_blocks(
                 flush(len(merged))
 
         current_elements.append(element)
-        current_nodes.extend([n for n in nodes if n not in current_nodes])
+        current_nodes = ordered_unique_nodes(current_nodes, nodes)
         current_chars += element.char_count
 
         should_flush = False

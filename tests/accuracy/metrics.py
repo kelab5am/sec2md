@@ -14,8 +14,10 @@ from bs4 import BeautifulSoup
 from bs4 import XMLParsedAsHTMLWarning
 
 from sec2md.encoding import decode_html, normalize_legacy_characters
+from sec2md.element_builder import _extract_xbrl_tags
 from sec2md.models import Page
 from sec2md.parser import Parser
+from sec2md.quality import _is_hidden_tag, trace_numeric_failures
 from sec2md.sections import extract_sections
 
 from .fixtures import FixtureContract
@@ -26,8 +28,6 @@ NUMBER_RE = re.compile(
     r"(?<!\w)(?:[$€£]\s*)?(?:\(?[−–-]?\d[\d,]*(?:\.\d+)?\)?%?)(?!\w)"
 )
 _C1_RE = re.compile(r"[\x80-\x9f]")
-_XBRL_FACT_TAGS = {"ix:nonfraction", "nonfraction", "ix:nonnumeric", "nonnumeric"}
-_HIDDEN_STYLES = re.compile(r"(?:display\s*:\s*none|visibility\s*:\s*hidden)", re.I)
 
 
 @dataclass(frozen=True)
@@ -162,10 +162,8 @@ def _visible_text(soup: BeautifulSoup) -> str:
         clone = BeautifulSoup(str(soup), "lxml")
     for tag in clone.find_all(["script", "style", "template"]):
         tag.decompose()
-    for tag in clone.find_all(True):
-        attrs = tag.attrs or {}
-        style = attrs.get("style", "")
-        if "hidden" in attrs or _HIDDEN_STYLES.search(style):
+    for tag in list(clone.find_all(True)):
+        if _is_hidden_tag(tag) and tag.parent is not None:
             tag.decompose()
     return clone.get_text(" ", strip=True)
 
@@ -372,27 +370,9 @@ def _mapping_and_trace(
             if not nodes:
                 missing.append(element.id)
                 continue
-            source_numbers = [
-                number
-                for node in nodes
-                for number in normalize_numbers(_visible_text(BeautifulSoup(str(node), "lxml")))
-            ]
-            expected_content = re.sub(r"!\[[^]]*\]\([^)]*\)", "", element.content)
-            expected_numbers = normalize_numbers(expected_content)
-            if Counter(expected_numbers) - Counter(source_numbers):
-                failures.append(element.id)
+            failures.extend(trace_numeric_failures(element, nodes))
             element_tags = set(element.tags or [])
-            visible_tags: set[str] = set()
-            for node in nodes:
-                for candidate in [node, *node.find_all(True)]:
-                    if candidate.name.lower() not in _XBRL_FACT_TAGS:
-                        continue
-                    name = candidate.get("name", "")
-                    candidate_text = _visible_text(BeautifulSoup(str(candidate), "lxml")).strip()
-                    # Nil XBRL facts carry a valid visible concept even though
-                    # their value is intentionally empty.
-                    if name and (candidate_text or candidate.get("xsi:nil") == "true"):
-                        visible_tags.add(name)
+            visible_tags = set(_extract_xbrl_tags(nodes) or ())
             invalid_tags.update(element_tags - visible_tags)
     return tuple(sorted(set(missing))), tuple(failures), tuple(sorted(invalid_tags))
 

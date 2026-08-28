@@ -3,10 +3,17 @@
 import re
 
 import pytest
+from bs4 import BeautifulSoup
 
-from sec2md.parser import Parser
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
-from sec2md.models import Page
+from sec2md.element_builder import (
+    _extract_xbrl_tags,
+    _merge_small_blocks,
+    augment_html_with_ids,
+    ordered_unique_nodes,
+)
+from sec2md.models import Element, Page
+from sec2md.parser import Parser
 
 
 class TestParserBasics:
@@ -25,6 +32,55 @@ class TestParserBasics:
         assert parser.diagnostics.source_visible_chars == 11
         assert parser.diagnostics.output_visible_chars == 11
         assert parser.diagnostics.warnings == ()
+
+    def test_merged_blocks_preserve_identity_order_and_final_annotations(self):
+        first = BeautifulSoup("<p>First paragraph</p>", "lxml").p
+        second = BeautifulSoup("<p>Second paragraph</p>", "lxml").p
+        proxy_one = BeautifulSoup("<p>Proxy paragraph</p>", "lxml").p
+        proxy_two = BeautifulSoup("<p>Proxy paragraph</p>", "lxml").p
+        generated_heading = BeautifulSoup(
+            "<table><tr><th>Generated heading</th></tr></table>", "lxml"
+        ).table
+        proxy_one["data-sec2md-block"] = "stale-element"
+        proxy_two["data-sec2md-block"] = "stale-element"
+
+        blocks = [
+            (
+                Element(id="old-1", content="First paragraph", kind="paragraph", page_start=1, page_end=1),
+                [first, proxy_one],
+                None,
+            ),
+            (
+                Element(id="old-2", content="Second paragraph", kind="paragraph", page_start=1, page_end=1),
+                [second, proxy_two, generated_heading, proxy_one],
+                None,
+            ),
+        ]
+
+        merged = _merge_small_blocks(blocks, page_num=1, min_chars=500)
+        assert len(merged) == 1
+        element, nodes, _ = merged[0]
+        expected_nodes = ordered_unique_nodes(
+            [first, proxy_one], [second, proxy_two, generated_heading, proxy_one]
+        )
+        assert [id(node) for node in nodes] == [id(node) for node in expected_nodes]
+
+        augment_html_with_ids({1: [element]}, {element.id: nodes})
+        assert all(node.get("data-sec2md-block") == element.id for node in nodes)
+        assert all(node.get("data-sec2md-block") != "stale-element" for node in nodes)
+
+    def test_xbrl_tags_include_only_visible_mapped_nodes(self):
+        soup = BeautifulSoup(
+            """
+            <div>
+              <p><ix:nonfraction name="us-gaap:Revenue">100</ix:nonfraction></p>
+              <p style="display:none"><ix:nonfraction name="us-gaap:Hidden">200</ix:nonfraction></p>
+              <ix:hidden><ix:nonnumeric name="us-gaap:AlsoHidden">text</ix:nonnumeric></ix:hidden>
+            </div>
+            """,
+            "lxml",
+        )
+        assert _extract_xbrl_tags([soup.div]) == ["us-gaap:Revenue"]
 
     def test_multiple_paragraphs(self):
         parser = Parser("<html><body><p>Para one</p><p>Para two</p></body></html>")

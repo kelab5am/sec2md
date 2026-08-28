@@ -5,7 +5,7 @@ import logging
 from copy import deepcopy
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Dict, Union, Optional, Tuple
+from typing import List, Dict, Union, Optional, Tuple, Sequence
 
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
@@ -14,9 +14,17 @@ from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
 from sec2md.table_parser import TableParser, render_cell_content
 from sec2md.models import Page, Element
-from sec2md.element_builder import build_elements_for_pages, augment_html_with_ids
+from sec2md.element_builder import (
+    build_elements_for_pages,
+    augment_html_with_ids,
+    ordered_unique_nodes,
+)
 from sec2md.encoding import DecodeDiagnostics, normalize_legacy_characters
-from sec2md.quality import ParseDiagnostics, build_diagnostics
+from sec2md.quality import (
+    ParseDiagnostics,
+    build_diagnostics,
+    trace_numeric_failures as compute_trace_numeric_failures,
+)
 
 BLOCK_TAGS = {"div", "p", "h1", "h2", "h3", "h4", "h5", "h6", "table", "br", "hr", "ul", "ol", "li"}
 BOLD_TAGS = {"b", "strong"}
@@ -55,7 +63,10 @@ class Parser:
         self.includes_table = False
         self.include_images = True
         self.pages: Dict[int, List[str]] = defaultdict(list)
-        self.page_segments: Dict[int, List[Tuple[str, Optional[Tag], Optional[TextBlockInfo]]]] = defaultdict(list)
+        self.page_segments: Dict[
+            int,
+            List[Tuple[str, Optional[Tag] | Sequence[Tag], Optional[TextBlockInfo]]],
+        ] = defaultdict(list)
         self.input_char_count = len(self.soup.get_text())
         self.current_text_block: Optional[TextBlockInfo] = None
         self.continuation_map: Dict[str, TextBlockInfo] = {}
@@ -221,7 +232,7 @@ class Parser:
                 isinstance(last_source, Tag) and isinstance(current_source, Tag)):
             return None
 
-        if last_source.parent != current_source.parent:
+        if last_source.parent is not current_source.parent:
             return None
 
         last_stripped = last_text.rstrip()
@@ -242,7 +253,28 @@ class Parser:
 
         return None
 
-    def _append(self, page_num: int, s: str, source_node: Optional[Tag] = None, text_block: Optional[TextBlockInfo] = None) -> None:
+    @staticmethod
+    def _last_source_node(source_ref: Optional[Tag] | Sequence[Tag]) -> Optional[Tag]:
+        if isinstance(source_ref, Tag):
+            return source_ref
+        if source_ref:
+            return source_ref[-1]
+        return None
+
+    @staticmethod
+    def _source_nodes(source_ref: Optional[Tag] | Sequence[Tag]) -> Sequence[Tag]:
+        if isinstance(source_ref, Tag):
+            return (source_ref,)
+        return source_ref or ()
+
+    def _append(
+        self,
+        page_num: int,
+        s: str,
+        source_node: Optional[Tag] = None,
+        text_block: Optional[TextBlockInfo] = None,
+        source_nodes: Sequence[Tag] | None = None,
+    ) -> None:
         if not s:
             return
 
@@ -254,22 +286,32 @@ class Parser:
         if buf and seg_buf:
             last_text = buf[-1]
             last_seg = seg_buf[-1]
-            last_source = last_seg[1]
+            last_source_ref = last_seg[1]
+            last_source = self._last_source_node(last_source_ref)
+            current_source_nodes = (
+                source_nodes if source_nodes is not None
+                else ((source_node,) if source_node else ())
+            )
 
             merged = self._try_merge_inline_spans(last_text, s, last_source, source_node)
             if merged:
                 buf[-1] = merged
                 seg_buf[-1] = (
                     self._element_segment_content(merged, source_node),
-                    last_source,
+                    ordered_unique_nodes(self._source_nodes(last_source_ref), current_source_nodes),
                     last_seg[2],
                 )
                 return
 
         self.pages[page_num].append(s)
-        self.page_segments[page_num].append(
-            (self._element_segment_content(s, source_node), source_node, tb)
+        current_nodes = ordered_unique_nodes(
+            (source_node,) if source_node else (),
+            source_nodes or (),
         )
+        source_ref: Optional[Tag] | Sequence[Tag] = (
+            current_nodes if source_nodes is not None else source_node
+        )
+        self.page_segments[page_num].append((self._element_segment_content(s, source_node), source_ref, tb))
 
     def _blankline_before(self, page_num: int) -> None:
         buf = self.pages[page_num]
@@ -582,14 +624,24 @@ class Parser:
                 self.includes_table = True
                 markdown_table = table_parser.to_markdown()
                 if markdown_table:
-                    self._append(page_num, markdown_table, source_node=group[0] if group else None)
+                    self._append(
+                        page_num,
+                        markdown_table,
+                        source_node=group[0] if group else None,
+                        source_nodes=group,
+                    )
                     self._blankline_after(page_num)
             else:
                 text = table_parser.to_text()
                 if text:
                     if i > 0:
                         self._blankline_before(page_num)
-                    self._append(page_num, text, source_node=group[0] if group else None)
+                    self._append(
+                        page_num,
+                        text,
+                        source_node=group[0] if group else None,
+                        source_nodes=group,
+                    )
 
         return page_num
 
@@ -876,6 +928,15 @@ class Parser:
 
         if include_elements:
             result = self._add_elements_to_pages(result)
+
+            self.trace_numeric_failures = tuple(
+                failure
+                for page in result
+                for element in page.elements or ()
+                for failure in compute_trace_numeric_failures(
+                    element, self.block_nodes_map.get(element.id, ())
+                )
+            )
 
         markdown = "\n\n".join(page.content for page in result if page.content)
         self._last_pages = result
