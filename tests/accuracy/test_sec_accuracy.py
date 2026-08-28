@@ -8,7 +8,7 @@ from sec2md.core import convert_to_markdown
 from sec2md.encoding import decode_html
 from sec2md.models import Element, Page
 from sec2md.parser import Parser
-from sec2md.quality import ParseQualityError
+from sec2md.quality import ParseQualityError, normalize_numeric_token
 
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 from tests.accuracy.metrics import (
@@ -102,7 +102,7 @@ def test_legacy_character_normalization_has_no_c1_controls():
     assert result.c1_control_characters == 0
 
 
-def test_known_legacy_accounting_defect_is_exactly_bounded():
+def test_legacy_accounting_reconstruction_preserves_sign_and_widths():
     _, source = load_fixture("nvda-2002-10k")
     markdown, _, _, _ = _parse_once(source)
     from tests.accuracy.metrics import _table_width_errors
@@ -111,13 +111,16 @@ def test_known_legacy_accounting_defect_is_exactly_bounded():
         "line 27: expected 2 columns, got 1",
         "line 1198: expected 4 columns, got 1",
     )
-    split_accounting_row = "| Interest expense | (16,173 | ) | (4,852 | ) | (332 | ) |"
     actual_width_errors = _table_width_errors(markdown)
-    if actual_width_errors == expected_width_errors and split_accounting_row in markdown:
-        pytest.xfail("known baseline defect: split legacy accounting negative")
-    assert actual_width_errors == ()
-    assert split_accounting_row not in markdown
-    assert _legacy_accounting_recovery_is_valid(markdown)
+    assert actual_width_errors == expected_width_errors
+
+    rows = [line for line in markdown.splitlines() if "16,173" in line]
+    assert len(rows) == 1
+    cells = _markdown_cells(rows[0])
+    accounting_cells = [cell for cell in cells if "(16,173)" in cell]
+    assert accounting_cells == ["(16,173)"]
+    assert all(cell != ")" for cell in cells)
+    assert normalize_numeric_token(accounting_cells[0]) == "-16173"
 
 
 def _legacy_accounting_recovery_is_valid(markdown: str) -> bool:

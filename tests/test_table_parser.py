@@ -132,6 +132,34 @@ class TestHeaderFusion:
 class TestToMatrix:
     """Matrix representation of tables."""
 
+    def test_accounting_parentheses_merge_into_one_markdown_cell(self):
+        html = """
+        <table><tr><th>Item</th><th></th><th>2022</th><th></th></tr>
+        <tr><td>Net loss</td><td>(</td><td>16,173</td><td>)</td></tr>
+        <tr><td>Operating loss</td><td>(</td><td>9,501</td><td>)</td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert matrix[1] == ["Net loss", "(16,173)"]
+        assert matrix[2] == ["Operating loss", "(9,501)"]
+
+    def test_mixed_parenthesis_column_does_not_merge(self):
+        html = """
+        <table><tr><th>Label</th><th>Qualifier</th><th>Value</th></tr>
+        <tr><td>A</td><td>(unaudited)</td><td>10</td></tr>
+        <tr><td>B</td><td>note</td><td>20</td></tr></table>
+        """
+        assert len(TableParser(_make_table(html)).to_matrix()[0]) == 3
+
+    def test_percent_marker_merge_preserves_numeric_token_boundary(self):
+        html = """
+        <table><tr><th>Label</th><th>Value</th><th></th></tr>
+        <tr><td>A</td><td>3</td><td>%</td></tr>
+        <tr><td>B</td><td>4</td><td>%</td></tr></table>
+        """
+        matrix = TableParser(_make_table(html)).to_matrix()
+        assert matrix[1] == ["A", "3 %"]
+        assert matrix[2] == ["B", "4 %"]
+
     def test_matrix_dimensions(self):
         html = """<table>
         <tr><td>A</td><td>B</td></tr>

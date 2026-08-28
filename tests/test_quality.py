@@ -11,6 +11,7 @@ from sec2md.quality import (
     ParseQualityError,
     build_diagnostics,
     enforce_quality,
+    normalize_numeric_token,
 )
 
 
@@ -107,6 +108,17 @@ def test_off_returns_diagnostics_without_logging(caplog):
     with caplog.at_level("WARNING"):
         assert enforce_quality(diagnostics, "off") is diagnostics
     assert not caplog.records
+
+
+def test_normalize_numeric_token_preserves_accounting_signs_and_blanks():
+    assert normalize_numeric_token("$ (16,173)") == "-16173"
+    assert normalize_numeric_token("−42") == "-42"
+    assert normalize_numeric_token("65%") == "65"
+    assert normalize_numeric_token("—") is None
+
+
+def test_normalize_numeric_token_strips_markdown_emphasis():
+    assert normalize_numeric_token("**$ (16,173)**") == "-16173"
 
 
 @pytest.mark.parametrize("policy", ["invalid", "strictish", ""])

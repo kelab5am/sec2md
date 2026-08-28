@@ -4,11 +4,33 @@ import re
 import logging
 from bs4 import Tag
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Literal, Optional, Sequence, cast
+
+from sec2md.quality import normalize_numeric_token
 
 logger = logging.getLogger(__name__)
 
 BULLETS = {"•", "●", "◦", "–", "-", "—", "·", ""}
+
+StructuralColumn = Literal["currency", "open_paren", "close_paren", "percent"]
+STRUCTURAL_MARKERS: dict[str, StructuralColumn] = {
+    "$": "currency",
+    "(": "open_paren",
+    ")": "close_paren",
+    "%": "percent",
+}
+
+
+def _classify_structural_column(values: Sequence[str]) -> StructuralColumn | None:
+    """Classify a column only when its marker evidence is uniform and repeated."""
+
+    nonempty = [value.strip() for value in values if value.strip()]
+    if len(nonempty) < 2:
+        return None
+    classes = {STRUCTURAL_MARKERS.get(value) for value in nonempty}
+    if None in classes or len(classes) != 1:
+        return None
+    return cast(StructuralColumn, classes.pop())
 
 
 @dataclass
@@ -183,8 +205,215 @@ class TableParser:
 
         return filtered_grid
 
+    @staticmethod
+    def _is_numeric_fragment(value: str) -> bool:
+        """Return whether a cell contains a complete or accounting numeric fragment."""
+
+        if normalize_numeric_token(value) is not None:
+            return True
+        if value.startswith("(") and not value.endswith(")"):
+            return normalize_numeric_token(value[1:].strip()) is not None
+        if value.endswith(")") and not value.startswith("("):
+            return normalize_numeric_token(value[:-1].strip()) is not None
+        return False
+
+    @staticmethod
+    def _body_start(grid: List[List[GridCell]]) -> int:
+        """Skip leading nonnumeric header rows before classifying structural columns."""
+
+        body_start = 1
+        while body_start < len(grid) - 1:
+            if any(
+                TableParser._is_numeric_fragment(cell.text)
+                for cell in grid[body_start]
+                if cell is not None and cell.text.strip()
+            ):
+                break
+            body_start += 1
+        return body_start
+
+    @staticmethod
+    def _structural_target(
+        column: int,
+        marker_class: StructuralColumn,
+    ) -> int:
+        if marker_class in {"currency", "open_paren"}:
+            return column + 1
+        return column - 1
+
+    def _safe_structural_actions(
+        self,
+        grid: List[List[GridCell]],
+    ) -> dict[int, dict[int, int]]:
+        """Find column removals whose marker fragments have numeric neighbors."""
+
+        if not grid or not grid[0]:
+            return {}
+
+        column_count = len(grid[0])
+        body_start = self._body_start(grid)
+        body_rows = range(body_start, len(grid))
+        values_by_column = {
+            column: [
+                grid[row][column].text if grid[row][column] is not None else ""
+                for row in body_rows
+            ]
+            for column in range(column_count)
+        }
+        actions: dict[int, dict[int, int]] = {}
+
+        for column, values in values_by_column.items():
+            marker_class = _classify_structural_column(values)
+            if marker_class is not None:
+                row_actions: dict[int, int] = {}
+                for row in body_rows:
+                    value = grid[row][column].text.strip() if grid[row][column] else ""
+                    if not value:
+                        continue
+                    target = self._structural_target(column, marker_class)
+                    if not 0 <= target < column_count:
+                        row_actions = {}
+                        break
+                    target_value = grid[row][target].text if grid[row][target] else ""
+                    if not self._is_numeric_fragment(target_value):
+                        row_actions = {}
+                        break
+                    row_actions[row] = target
+                if row_actions:
+                    actions[column] = row_actions
+                continue
+
+            nonempty = [value.strip() for value in values if value.strip()]
+            if len(nonempty) < 2 or not all(value in STRUCTURAL_MARKERS for value in nonempty):
+                continue
+
+            # Some legacy SEC tables reuse one visual column for a currency
+            # marker on positive rows and a closing parenthesis on negatives.
+            # Accept that shape only when every body marker has a numeric side.
+            row_actions = {}
+            for row in body_rows:
+                value = grid[row][column].text.strip() if grid[row][column] else ""
+                if not value:
+                    continue
+                target = self._structural_target(column, STRUCTURAL_MARKERS[value])
+                if not 0 <= target < column_count:
+                    row_actions = {}
+                    break
+                target_value = grid[row][target].text if grid[row][target] else ""
+                if not self._is_numeric_fragment(target_value):
+                    row_actions = {}
+                    break
+                row_actions[row] = target
+            if row_actions:
+                actions[column] = row_actions
+
+        # A final accounting column can contain one close marker when the
+        # preceding repeated columns establish the same structural pattern.
+        # Require that sibling evidence before allowing this narrow recovery.
+        for column, values in values_by_column.items():
+            if column in actions or len([value for value in values if value.strip()]) != 1:
+                continue
+            marker = next(value.strip() for value in values if value.strip())
+            marker_class = STRUCTURAL_MARKERS.get(marker)
+            if marker_class not in {"close_paren", "percent"} or column != column_count - 1:
+                continue
+            peers = sum(
+                marker in other_values
+                for other_column, other_values in values_by_column.items()
+                if other_column < column
+            )
+            if peers < 2:
+                continue
+            row = next(row for row in body_rows if grid[row][column] and grid[row][column].text.strip())
+            target = self._structural_target(column, marker_class)
+            target_value = grid[row][target].text if grid[row][target] else ""
+            if self._is_numeric_fragment(target_value):
+                actions[column] = {row: target}
+
+        return actions
+
+    @staticmethod
+    def _fallback_merge_target(
+        source: int,
+        removed: set[int],
+        column_count: int,
+    ) -> int | None:
+        for distance in range(1, column_count):
+            for target in (source + distance, source - distance):
+                if 0 <= target < column_count and target not in removed:
+                    return target
+        return None
+
+    @staticmethod
+    def _join_structural_text(
+        prefixes: Sequence[str],
+        target: str,
+        suffixes: Sequence[str],
+    ) -> str:
+        parts = [part for part in [*prefixes, target, *suffixes] if part]
+        if not parts:
+            return ""
+        if not all(part in STRUCTURAL_MARKERS or part == target for part in parts):
+            return " ".join(parts)
+
+        merged = target
+        for marker in reversed(prefixes):
+            merged = f"{marker} {merged}" if marker == "$" else f"{marker}{merged}"
+        for marker in suffixes:
+            merged = f"{merged} %" if marker == "%" else f"{merged}{marker}"
+        return merged
+
+    def _merge_structural_columns(self, grid: List[List[GridCell]]) -> List[List[GridCell]]:
+        """Merge only proven accounting marker columns into numeric neighbors."""
+
+        actions = self._safe_structural_actions(grid)
+        if not actions:
+            return grid
+
+        removed = set(actions)
+        column_count = len(grid[0])
+        result: List[List[GridCell]] = []
+        body_start = self._body_start(grid)
+        for row_index, row in enumerate(grid):
+            rebuilt: List[GridCell] = []
+            for target in range(column_count):
+                if target in removed:
+                    continue
+
+                prefixes: list[str] = []
+                suffixes: list[str] = []
+                for source, source_actions in actions.items():
+                    value = row[source].text.strip() if row[source] else ""
+                    if not value:
+                        continue
+                    merge_target = source_actions.get(row_index)
+                    if merge_target is None and row_index < body_start:
+                        merge_target = self._fallback_merge_target(source, removed, column_count)
+                    if merge_target != target:
+                        continue
+                    if source < target:
+                        prefixes.append(value)
+                    else:
+                        suffixes.append(value)
+
+                original = row[target]
+                original_text = original.text.strip() if original else ""
+                merged_text = self._join_structural_text(prefixes, original_text, suffixes)
+                if merged_text != original_text:
+                    rebuilt.append(GridCell(Cell(text=merged_text)))
+                elif original is not None:
+                    rebuilt.append(original)
+                else:
+                    rebuilt.append(GridCell(Cell(text="")))
+            result.append(rebuilt)
+        return result
+
     def _merge_grid(self, grid: List[List[GridCell]]) -> List[List[GridCell]]:
         """Merge columns in one clean pass"""
+        if not grid or not grid[0]:
+            return grid
+
+        grid = self._merge_structural_columns(grid)
         if not grid or not grid[0]:
             return grid
 

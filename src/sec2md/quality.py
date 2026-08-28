@@ -27,6 +27,32 @@ _MARKDOWN_CODE_RE = re.compile(r"(`{1,3})(.*?)\1", re.DOTALL)
 _TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
 
 
+def normalize_numeric_token(value: str) -> str | None:
+    """Normalize one complete numeric token, preserving accounting signs."""
+
+    cleaned = value.strip().translate(str.maketrans({"−": "-", "–": "-"}))
+    if cleaned in {"", "—", "-"}:
+        return None
+
+    emphasis = re.fullmatch(
+        r"(?P<mark>\*{1,3}|_{1,3}|~{1,3})\s*(?P<body>.*?)\s*(?P=mark)",
+        cleaned,
+    )
+    if emphasis:
+        cleaned = emphasis.group("body").strip()
+
+    cleaned = cleaned.replace(",", "").replace("$", "").replace("%", "").strip()
+    accounting = cleaned.startswith("(") and cleaned.endswith(")")
+    if cleaned.startswith("(") != cleaned.endswith(")"):
+        return None
+    cleaned = cleaned.strip("()").strip()
+    if not re.fullmatch(r"-?\d+(?:\.\d+)?", cleaned):
+        return None
+    if accounting and not cleaned.startswith("-"):
+        cleaned = "-" + cleaned
+    return cleaned
+
+
 @dataclass(frozen=True)
 class ParseDiagnostics:
     """Immutable measurements and warnings from one parser invocation."""
