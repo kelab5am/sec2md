@@ -1,5 +1,7 @@
 # sec2md
 
+This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin `v0.1.22-rcq.1` together with its resolved commit for reproducible use.
+
 [![PyPI](https://img.shields.io/pypi/v/sec2md.svg)](https://pypi.org/project/sec2md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-readthedocs-blue.svg)](https://sec2md.readthedocs.io)

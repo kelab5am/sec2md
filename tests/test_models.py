@@ -1,8 +1,10 @@
 """Tests for data models (models.py)."""
 
+from importlib.metadata import metadata, version
 from unittest.mock import patch, MagicMock
 
 import pytest
+import sec2md
 
 from sec2md.models import (
     Page, Section, Element, TextBlock,
@@ -130,3 +132,14 @@ class TestVersionConsistency:
         with open("pyproject.toml", "rb") as f:
             pyproject = tomllib.load(f)
         assert sec2md.__version__ == pyproject["project"]["version"]
+
+
+def test_internal_version_matches_distribution():
+    assert version("sec2md") == "0.1.22+rcq.1"
+    assert sec2md.__version__ == "0.1.22+rcq.1"
+
+
+def test_distribution_points_to_maintained_fork():
+    project_urls = metadata("sec2md").get_all("Project-URL") or []
+    assert "Repository, https://github.com/kelab5am/sec2md" in project_urls
+    assert "Upstream, https://github.com/lucasastorian/sec2md" in project_urls
