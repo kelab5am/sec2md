@@ -90,3 +90,57 @@ the worktree cache directory was permission-restricted.
 The implementation is committed as:
 
 `feat: fail closed on catastrophic parse loss`
+
+## Fix Round 1: Empty Source-Node Lists
+
+### Finding
+
+The independent review found that an element ID present in
+`block_nodes_map` was counted as mapped even when its node collection was
+empty. This could let strict mode accept an element without a source node.
+
+### RED verification
+
+Added `test_strict_rejects_element_with_empty_source_node_mapping`, which
+injects an element mapped to `[]` through the public `convert_to_markdown`
+API. Before the fix:
+
+```text
+.\.venv\Scripts\python -m pytest tests/test_quality.py::test_strict_rejects_element_with_empty_source_node_mapping -q
+```
+
+Result: failed because `ParseQualityError` was not raised.
+
+### Fix and GREEN verification
+
+Parser and all core fallback diagnostics builders now pass only IDs whose
+mapped node collections are non-empty. The regression also asserts
+`diagnostics.mapped_elements == 0` and the required missing-mapping message.
+
+Focused command:
+
+```text
+.\.venv\Scripts\python -m pytest tests/test_quality.py::test_strict_rejects_element_with_empty_source_node_mapping tests/test_quality.py tests/test_core.py tests/test_parser.py -q
+```
+
+Result: `60 passed`.
+
+Full command:
+
+```text
+.\.venv\Scripts\python -m pytest -q
+```
+
+Result: `240 passed, 14 deselected, 4 xfailed`.
+
+Ruff and whitespace checks passed:
+
+```text
+.\.venv\Scripts\ruff check src tests
+git diff --check
+```
+
+Self-review confirms that only non-empty source-node mappings are counted in
+the parser diagnostics path and each of the three core fallback paths;
+`build_diagnostics` retains its documented ID-based interface, and no Task 2
+fixture or XFAIL behavior changed.

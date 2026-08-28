@@ -177,7 +177,11 @@ def convert_to_markdown(
                 html,
                 "\n\n".join(page.content for page in pages if page.content),
                 pages,
-                mapped_element_ids=parser.block_nodes_map.keys(),
+                mapped_element_ids=tuple(
+                    element_id
+                    for element_id, nodes in parser.block_nodes_map.items()
+                    if nodes
+                ),
                 trace_failures=parser.trace_numeric_failures,
                 enforce_mappings=True,
             )
@@ -193,7 +197,11 @@ def convert_to_markdown(
             html,
             output,
             pages,
-            mapped_element_ids=parser.block_nodes_map.keys(),
+            mapped_element_ids=tuple(
+                element_id
+                for element_id, nodes in parser.block_nodes_map.items()
+                if nodes
+            ),
             trace_failures=parser.trace_numeric_failures,
             enforce_mappings=True,
         )
@@ -260,7 +268,11 @@ def parse_filing(
             html,
             "\n\n".join(page.content for page in pages if page.content),
             pages,
-            mapped_element_ids=parser.block_nodes_map.keys(),
+            mapped_element_ids=tuple(
+                element_id
+                for element_id, nodes in parser.block_nodes_map.items()
+                if nodes
+            ),
             trace_failures=parser.trace_numeric_failures,
             enforce_mappings=include_elements,
         )

@@ -138,3 +138,25 @@ def test_positioned_fixture_rejects_silent_loss(monkeypatch):
     monkeypatch.setattr(Parser, "markdown", lambda self: "")
     with pytest.raises(ParseQualityError):
         convert_to_markdown(path.read_text(encoding="utf-8"))
+
+
+def test_strict_rejects_element_with_empty_source_node_mapping(monkeypatch):
+    source = "<html><body><p>" + ("mapped content " * 100) + "</p></body></html>"
+
+    def add_element_without_source_nodes(self, pages):
+        pages[0].elements = [
+            Element(
+                id="empty-node-map",
+                content=pages[0].content,
+                kind="paragraph",
+                page_start=1,
+                page_end=1,
+            )
+        ]
+        self.block_nodes_map = {"empty-node-map": []}
+        return pages
+
+    monkeypatch.setattr(Parser, "_add_elements_to_pages", add_element_without_source_nodes)
+    with pytest.raises(ParseQualityError, match="element lacks a source-node mapping") as exc:
+        convert_to_markdown(source, return_pages=True)
+    assert exc.value.diagnostics.mapped_elements == 0

@@ -850,7 +850,11 @@ class Parser:
             self.source_text,
             markdown,
             result,
-            mapped_element_ids=self.block_nodes_map.keys(),
+            mapped_element_ids=tuple(
+                element_id
+                for element_id, nodes in self.block_nodes_map.items()
+                if nodes
+            ),
             trace_failures=self.trace_numeric_failures,
             enforce_mappings=include_elements,
         )
