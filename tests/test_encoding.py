@@ -38,6 +38,34 @@ def test_document_declaration_is_limited_to_first_8_kib():
     assert diagnostics == DecodeDiagnostics("iso8859-1", "document-declaration")
 
 
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        b'<meta charset="windows-1252">',
+        b'<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">',
+    ],
+)
+def test_valid_meta_declarations_are_honored(declaration):
+    decoded, diagnostics = decode_html(declaration + b"<p>caf\xe9</p>")
+
+    assert decoded.endswith("<p>café</p>")
+    assert diagnostics == DecodeDiagnostics("cp1252", "document-declaration")
+
+
+@pytest.mark.parametrize(
+    "declaration",
+    [
+        b'<meta name="note" content="charset=windows-1252">',
+        b'<meta data-charset="windows-1252">',
+    ],
+)
+def test_descriptive_meta_attributes_are_not_encoding_declarations(declaration):
+    decoded, diagnostics = decode_html(declaration + b"<p>caf\xc3\xa9</p>")
+
+    assert decoded.endswith("<p>café</p>")
+    assert diagnostics == DecodeDiagnostics("utf-8", "strict-utf-8")
+
+
 def test_declaration_after_first_8_kib_does_not_override_strict_utf8():
     data = b" " * 8192 + b'<meta charset="windows-1252"><p>caf\xc3\xa9</p>'
 

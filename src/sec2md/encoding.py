@@ -16,14 +16,10 @@ class DecodeDiagnostics:
 
 
 _ENCODING_TOKEN = rb"([A-Za-z][A-Za-z0-9._:-]*)"
-_META_CHARSET_RE = re.compile(
-    rb"<meta\b[^>]*?\bcharset\s*=\s*[\"']?\s*" + _ENCODING_TOKEN,
-    re.IGNORECASE | re.DOTALL,
-)
-_META_CONTENT_CHARSET_RE = re.compile(
-    rb"<meta\b[^>]*?\bcontent\s*=\s*[\"'][^\"']*?\bcharset\s*=\s*[\"']?\s*"
-    + _ENCODING_TOKEN,
-    re.IGNORECASE | re.DOTALL,
+_META_START_RE = re.compile(rb"<meta(?=[\s/>])", re.IGNORECASE)
+_CONTENT_CHARSET_RE = re.compile(
+    rb"(?:^|;)\s*charset\s*=\s*[\"']?\s*" + _ENCODING_TOKEN,
+    re.IGNORECASE,
 )
 _XML_ENCODING_RE = re.compile(
     rb"<\?xml\b[^>]*?\bencoding\s*=\s*[\"']\s*" + _ENCODING_TOKEN,
@@ -63,14 +59,94 @@ def _canonical_explicit_encoding(label: str) -> str:
         raise ValueError(f"unknown encoding: {label}") from exc
 
 
+def _meta_attributes(tag: bytes) -> dict[bytes, bytes | None]:
+    """Parse one meta tag's attributes without decoding arbitrary bytes."""
+
+    attributes: dict[bytes, bytes | None] = {}
+    index = len(b"<meta")
+    length = len(tag)
+    while index < length:
+        while index < length and (tag[index] in b" \t\r\n" or tag[index] == ord("/")):
+            index += 1
+        if index >= length or tag[index] == ord(">"):
+            break
+        name_start = index
+        while index < length and tag[index] not in b" \t\r\n=>/":
+            index += 1
+        if name_start == index:
+            index += 1
+            continue
+        name = tag[name_start:index].lower()
+        while index < length and tag[index] in b" \t\r\n":
+            index += 1
+        value: bytes | None = None
+        if index < length and tag[index] == ord("="):
+            index += 1
+            while index < length and tag[index] in b" \t\r\n":
+                index += 1
+            if index < length and tag[index] in (ord('"'), ord("'")):
+                quote = tag[index]
+                index += 1
+                value_start = index
+                while index < length and tag[index] != quote:
+                    index += 1
+                value = tag[value_start:index]
+                if index < length:
+                    index += 1
+            else:
+                value_start = index
+                while index < length and tag[index] not in b" \t\r\n>":
+                    index += 1
+                value = tag[value_start:index].rstrip(b"/")
+        attributes[name] = value
+    return attributes
+
+
+def _find_meta_declared_encodings(prefix: bytes) -> list[tuple[int, str]]:
+    """Return real charset-bearing meta declarations in source order."""
+
+    declarations: list[tuple[int, str]] = []
+    cursor = 0
+    while (match := _META_START_RE.search(prefix, cursor)) is not None:
+        tag_start = match.start()
+        index = match.end()
+        quote: int | None = None
+        while index < len(prefix):
+            value = prefix[index]
+            if quote is not None:
+                if value == quote:
+                    quote = None
+            elif value in (ord('"'), ord("'")):
+                quote = value
+            elif value == ord(">"):
+                break
+            index += 1
+        if index >= len(prefix):
+            break
+        attributes = _meta_attributes(prefix[tag_start : index + 1])
+        declared: bytes | None = None
+        charset = attributes.get(b"charset")
+        if charset:
+            declared = charset.strip()
+        elif attributes.get(b"http-equiv", b"").strip().lower() == b"content-type":
+            content = attributes.get(b"content")
+            if content:
+                content_match = _CONTENT_CHARSET_RE.search(content)
+                if content_match is not None:
+                    declared = content_match.group(1)
+        if declared:
+            declarations.append((tag_start, declared.decode("ascii")))
+        cursor = index + 1
+    return declarations
+
+
 def _find_declared_encoding(prefix: bytes) -> str | None:
     """Find the first supported HTML/XML declaration in a byte prefix."""
 
-    matches = []
-    for pattern in (_META_CHARSET_RE, _META_CONTENT_CHARSET_RE, _XML_ENCODING_RE):
-        match = pattern.search(prefix)
-        if match is not None:
-            matches.append((match.start(), match.group(1).decode("ascii")))
+    matches = _find_meta_declared_encodings(prefix)
+    xml_match = _XML_ENCODING_RE.search(prefix)
+    if xml_match is not None:
+        matches.append((xml_match.start(), xml_match.group(1).decode("ascii")))
     if not matches:
         return None
     return min(matches, key=lambda item: item[0])[1]
