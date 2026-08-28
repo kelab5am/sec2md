@@ -1,5 +1,6 @@
 from collections import Counter
 import re
+from urllib.parse import urljoin
 
 import pytest
 from bs4 import BeautifulSoup
@@ -94,28 +95,35 @@ def test_known_legacy_c1_defect_is_exactly_bounded():
 def test_known_legacy_accounting_defect_is_exactly_bounded():
     _, source = load_fixture("nvda-2002-10k")
     markdown, _, _, _ = _parse_once(source)
+    from tests.accuracy.metrics import _table_width_errors
+
     expected_width_errors = (
         "line 27: expected 2 columns, got 1",
         "line 1198: expected 4 columns, got 1",
     )
     split_accounting_row = "| Interest expense | (16,173 | ) | (4,852 | ) | (332 | ) |"
-    from tests.accuracy.metrics import _table_width_errors
-
     actual_width_errors = _table_width_errors(markdown)
     if actual_width_errors == expected_width_errors and split_accounting_row in markdown:
         pytest.xfail("known baseline defect: split legacy accounting negative")
     assert actual_width_errors == ()
     assert split_accounting_row not in markdown
+    assert _legacy_accounting_recovery_is_valid(markdown)
 
+
+def _legacy_accounting_recovery_is_valid(markdown: str) -> bool:
     rows = [line for line in markdown.splitlines() if "16,173" in line]
-    assert len(rows) == 1
+    if len(rows) != 1:
+        return False
     cells = _markdown_cells(rows[0])
-    assert len(cells) == 4
-    assert [normalize_numbers(cell) for cell in cells[1:]] == [
-        ["-16173"],
-        ["-4852"],
-        ["-332"],
-    ]
+    label = re.sub(r"\s+", " ", cells[0]).strip() if cells else ""
+    return label == "Interest expense" and len(cells) == 4 and [
+        normalize_numbers(cell) for cell in cells[1:]
+    ] == [["-16173"], ["-4852"], ["-332"]]
+
+
+def test_legacy_accounting_recovery_rejects_wrong_label():
+    markdown = "| Other expense | (16,173) | (4,852) | (332) |"
+    assert not _legacy_accounting_recovery_is_valid(markdown)
 
 
 def test_known_8k_link_defect_is_exactly_bounded():
@@ -127,15 +135,31 @@ def test_known_8k_link_defect_is_exactly_bounded():
         result.exhibit_link_count == 0
         and markdown.count("Augu st 2 6") == 1
         and markdown.count("Se cond") == 1
-        and not any(link.endswith("q2fy27pr.htm") for link in links)
-        and not any(link.endswith("q2fy27cfocommentary.htm") for link in links)
+        and not _has_audited_exhibit_links(links)
     ):
         pytest.xfail("known baseline defect: lost exhibit links and fragmented text")
     assert result.exhibit_link_count >= 2
-    assert any(link.endswith("q2fy27pr.htm") for link in links)
-    assert any(link.endswith("q2fy27cfocommentary.htm") for link in links)
+    assert _has_audited_exhibit_links(links)
     assert "Augu st 2 6" not in markdown
     assert "Se cond" not in markdown
+
+
+def _has_audited_exhibit_links(links: list[str]) -> bool:
+    primary_url = load_fixture("nvda-2026-08-26-8k")[0].sec_url
+    expected_urls = {
+        load_fixture("nvda-2026-ex99-1")[0].sec_url,
+        load_fixture("nvda-2026-ex99-2")[0].sec_url,
+    }
+    resolved_urls = {urljoin(primary_url, link) for link in links}
+    return expected_urls <= resolved_urls
+
+
+def test_8k_link_recovery_rejects_arbitrary_host_same_suffix_urls():
+    links = [
+        "https://example.test/q2fy27pr.htm",
+        "https://example.test/q2fy27cfocommentary.htm",
+    ]
+    assert not _has_audited_exhibit_links(links)
 
 
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
