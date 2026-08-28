@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import pytest
 from bs4 import BeautifulSoup
 from sec2md.core import convert_to_markdown
+from sec2md.encoding import decode_html
 from sec2md.models import Element, Page
 from sec2md.parser import Parser
 from sec2md.quality import ParseQualityError
@@ -61,8 +62,7 @@ def test_audited_document_meets_baseline_contract(fixture_id: str):
     if fixture_id != "nvda-2002-10k":
         assert not result.table_width_errors
     assert result.replacement_characters == 0
-    if fixture_id != "nvda-2002-10k":
-        assert result.c1_control_characters == 0
+    assert result.c1_control_characters == 0
     assert not result.duplicate_element_ids
     assert not result.missing_mappings
     if fixture_id != "aapl-2023-10k":
@@ -87,11 +87,18 @@ def test_known_apple_trace_defect_is_exactly_bounded():
     assert result.trace_failures == ()
 
 
-def test_known_legacy_c1_defect_is_exactly_bounded():
+def test_fixture_encoding_reasons_match_manifest():
+    for fixture_id in FIXTURE_IDS:
+        contract, source = load_fixture(fixture_id)
+        _, diagnostics = decode_html(source)
+        assert diagnostics.reason == contract.expected_encoding_reason
+
+
+def test_legacy_character_normalization_has_no_c1_controls():
     contract, source = load_fixture("nvda-2002-10k")
     result = audit_document(source, contract, quality_policy="off")
-    if result.c1_control_characters == 629:
-        pytest.xfail("known baseline defect: exactly 629 legacy C1 controls")
+
+    assert result.replacement_characters == 0
     assert result.c1_control_characters == 0
 
 

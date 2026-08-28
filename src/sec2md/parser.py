@@ -14,6 +14,7 @@ from sec2md.utils import median, clean_text
 from sec2md.table_parser import TableParser
 from sec2md.models import Page, Element
 from sec2md.element_builder import build_elements_for_pages, augment_html_with_ids
+from sec2md.encoding import DecodeDiagnostics, normalize_legacy_characters
 from sec2md.quality import ParseDiagnostics, build_diagnostics
 
 BLOCK_TAGS = {"div", "p", "h1", "h2", "h3", "h4", "h5", "h6", "table", "br", "hr", "ul", "ol", "li"}
@@ -37,8 +38,12 @@ class TextBlockInfo:
 class Parser:
     """Document parser with support for regular tables and pseudo-tables."""
 
-    def __init__(self, content: str):
+    def __init__(
+        self, content: str, *, decode_diagnostics: DecodeDiagnostics | None = None
+    ):
+        content = normalize_legacy_characters(content)
         self.source_text = content
+        self.decode_diagnostics = decode_diagnostics
         self.soup = BeautifulSoup(content, "lxml")
         self.includes_table = False
         self.include_images = True

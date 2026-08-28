@@ -3,7 +3,9 @@
 import pytest
 
 from sec2md.core import convert_to_markdown, parse_filing
+from sec2md.encoding import DecodeDiagnostics
 from sec2md.models import Page
+from sec2md.utils import FetchedHtml
 
 
 class TestConvertToMarkdown:
@@ -30,6 +32,34 @@ class TestConvertToMarkdown:
         html = b"<html><body><p>Bytes input</p></body></html>"
         result = convert_to_markdown(html)
         assert "Bytes input" in result
+
+    def test_bytes_input_uses_lossless_legacy_normalization(self):
+        result = convert_to_markdown(b"<html><body><p>GPU\x92s &#151; outlook</p></body></html>")
+
+        assert "GPU’s — outlook" in result
+        assert "\ufffd" not in result
+
+    def test_url_input_uses_response_content_and_retains_decode_diagnostics(self, monkeypatch):
+        fetched = FetchedHtml(
+            b'<html><body><p>caf\xe9</p></body></html>', "windows-1252"
+        )
+        monkeypatch.setattr("sec2md.core.fetch", lambda url, user_agent=None: fetched)
+
+        result = convert_to_markdown("https://example.test/filing.htm")
+
+        assert "café" in result
+        assert isinstance(result, str)
+
+        pages = parse_filing("https://example.test/filing.htm", quality_policy="off")
+        assert pages
+
+    def test_parser_stores_decode_diagnostics(self):
+        from sec2md.parser import Parser
+
+        diagnostics = DecodeDiagnostics("utf-8", "strict-utf-8")
+        parser = Parser("<p>Text</p>", decode_diagnostics=diagnostics)
+
+        assert parser.decode_diagnostics == diagnostics
 
     def test_pdf_rejected(self):
         with pytest.raises(ValueError, match="PDF content detected"):

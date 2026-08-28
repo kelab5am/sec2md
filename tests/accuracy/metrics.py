@@ -13,6 +13,7 @@ from typing import Literal, Sequence
 from bs4 import BeautifulSoup
 from bs4 import XMLParsedAsHTMLWarning
 
+from sec2md.encoding import decode_html, normalize_legacy_characters
 from sec2md.models import Page
 from sec2md.parser import Parser
 from sec2md.sections import extract_sections
@@ -208,7 +209,8 @@ def _canonical_row(row: tuple[str, tuple[str, ...]]) -> tuple[str, tuple[str, ..
 
 def _html_rows(text: str | bytes) -> list[tuple[str, tuple[str, ...]]]:
     if isinstance(text, bytes):
-        text = text.decode("utf-8")
+        decoded, _ = decode_html(text)
+        text = normalize_legacy_characters(decoded)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         soup = BeautifulSoup(text, "lxml")
@@ -408,7 +410,8 @@ def _section_keys(pages: Sequence[Page], form: str) -> tuple[str, ...]:
 
 
 def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page]]:
-    text = source.decode("utf-8")
+    text, _ = decode_html(source)
+    text = normalize_legacy_characters(text)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         parser = Parser(text)
@@ -434,7 +437,8 @@ def audit_document(
     markdown_2, pages_bytes_2, annotated_html_2, _ = second
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
-        source_soup = BeautifulSoup(source.decode("utf-8"), "lxml")
+        source_text, _ = decode_html(source)
+        source_soup = BeautifulSoup(normalize_legacy_characters(source_text), "lxml")
     source_visible = _visible_text(source_soup)
     output_visible = BeautifulSoup(markdown, "lxml").get_text(" ", strip=True)
 

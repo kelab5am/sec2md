@@ -2,11 +2,24 @@
 
 import re
 import requests
+from dataclasses import dataclass
 from typing import List, Optional
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 _ws = re.compile(r"\s+")
+_CONTENT_TYPE_CHARSET = re.compile(
+    r"(?:^|;)\s*charset\s*=\s*(?:\"([^\"]+)\"|'([^']+)'|([^;\s]+))",
+    re.IGNORECASE,
+)
+
+
+@dataclass(frozen=True)
+class FetchedHtml:
+    """Raw HTTP HTML bytes and the server-declared charset, if provided."""
+
+    content: bytes
+    charset: str | None
 
 
 def clean_text(text: str) -> str:
@@ -58,7 +71,18 @@ def is_edgar_url(url: str) -> bool:
     return "sec.gov" in url.lower()
 
 
-def fetch(url: str, user_agent: str | None = None) -> str:
+def _content_type_charset(content_type: str | None) -> str | None:
+    """Extract an optional charset parameter from a Content-Type header."""
+
+    if not content_type:
+        return None
+    match = _CONTENT_TYPE_CHARSET.search(content_type)
+    if match is None:
+        return None
+    return next(value for value in match.groups() if value is not None).strip()
+
+
+def fetch(url: str, user_agent: str | None = None) -> FetchedHtml:
     """
     Fetch HTML content from a URL.
 
@@ -67,7 +91,7 @@ def fetch(url: str, user_agent: str | None = None) -> str:
         user_agent: User agent string (required for EDGAR URLs)
 
     Returns:
-        HTML content as string
+        Raw HTML bytes and the optional Content-Type charset.
 
     Raises:
         ValueError: If EDGAR URL is accessed without user_agent
@@ -85,7 +109,10 @@ def fetch(url: str, user_agent: str | None = None) -> str:
 
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
-    return response.text
+    return FetchedHtml(
+        response.content,
+        _content_type_charset(response.headers.get("Content-Type")),
+    )
 
 
 def flatten_note(content: str) -> Optional[str]:

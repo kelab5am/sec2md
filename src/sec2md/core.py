@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 
 import requests
 
+from sec2md.encoding import DecodeDiagnostics, decode_html, normalize_legacy_characters
 from sec2md.utils import is_url, fetch
 from sec2md.parser import Parser
 from sec2md.models import Page
@@ -77,15 +78,18 @@ def _embed_images(html: str, source_url: str, user_agent: str | None = None) -> 
     )
 
 
-def _resolve_source(source: str | bytes, user_agent: str | None = None) -> str:
-    """Validate input and resolve to HTML string."""
+def _resolve_source(
+    source: str | bytes, user_agent: str | None = None
+) -> tuple[str, DecodeDiagnostics | None]:
+    """Validate input and resolve it to normalized HTML and decode diagnostics."""
     if isinstance(source, bytes):
         if source.startswith(b'%PDF'):
             raise ValueError(
                 "PDF content detected. This library only supports HTML input. "
                 "Please extract HTML from the filing first."
             )
-        source = source.decode('utf-8', errors='ignore')
+        html, diagnostics = decode_html(source)
+        return normalize_legacy_characters(html), diagnostics
 
     if isinstance(source, str) and source.strip().startswith('%PDF'):
         raise ValueError(
@@ -94,8 +98,15 @@ def _resolve_source(source: str | bytes, user_agent: str | None = None) -> str:
         )
 
     if is_url(source):
-        return fetch(source, user_agent=user_agent)
-    return source
+        fetched = fetch(source, user_agent=user_agent)
+        if fetched.content.startswith(b"%PDF"):
+            raise ValueError(
+                "PDF content detected. This library only supports HTML input. "
+                "Please extract HTML from the filing first."
+            )
+        html, diagnostics = decode_html(fetched.content, http_charset=fetched.charset)
+        return normalize_legacy_characters(html), diagnostics
+    return normalize_legacy_characters(source), None
 
 
 @overload
@@ -162,12 +173,12 @@ def convert_to_markdown(
         >>> md = convert_to_markdown(filing.html())
     """
     source_url = source if isinstance(source, str) and is_url(source) else None
-    html = _resolve_source(source, user_agent=user_agent)
+    html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
 
     if embed_images and source_url:
         html = _embed_images(html, source_url, user_agent)
 
-    parser = Parser(html)
+    parser = Parser(html, decode_diagnostics=decode_diagnostics)
 
     if return_pages:
         pages = parser.get_pages()
@@ -255,12 +266,12 @@ def parse_filing(
         >>> essentials = page.model_dump(include={'number', 'content', 'elements'})
     """
     source_url = source if isinstance(source, str) and is_url(source) else None
-    html = _resolve_source(source, user_agent=user_agent)
+    html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
 
     if embed_images and source_url:
         html = _embed_images(html, source_url, user_agent)
 
-    parser = Parser(html)
+    parser = Parser(html, decode_diagnostics=decode_diagnostics)
     pages = parser.get_pages(include_elements=include_elements)
     diagnostics = parser.diagnostics
     if diagnostics is None:

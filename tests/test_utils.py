@@ -1,6 +1,6 @@
 """Tests for utility functions (utils.py)."""
 
-from sec2md.utils import is_url, is_edgar_url, flatten_note
+from sec2md.utils import _content_type_charset, is_url, is_edgar_url, flatten_note
 
 
 class TestIsUrl:
@@ -24,6 +24,16 @@ class TestIsEdgarUrl:
 
     def test_case_insensitive(self):
         assert is_edgar_url("https://WWW.SEC.GOV/filing") is True
+
+
+class TestContentTypeCharset:
+    def test_extracts_quoted_and_unquoted_charset_parameters(self):
+        assert _content_type_charset("text/html; charset=ISO-8859-1") == "ISO-8859-1"
+        assert _content_type_charset('text/html; CHARSET="UTF-8"') == "UTF-8"
+
+    def test_missing_charset_returns_none(self):
+        assert _content_type_charset("text/html") is None
+        assert _content_type_charset(None) is None
 
 
 class TestFlattenNote:

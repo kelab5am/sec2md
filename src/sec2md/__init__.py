@@ -11,6 +11,7 @@ from sec2md.chunker.chunker import Chunker
 from sec2md.parser import Parser
 from sec2md.section_extractor import SectionExtractor
 from sec2md.quality import ParseDiagnostics, ParseQualityError
+from sec2md.encoding import DecodeDiagnostics
 
 __version__ = "0.1.22+rcq.1"
 __all__ = [
@@ -41,4 +42,5 @@ __all__ = [
     "SectionExtractor",
     "ParseDiagnostics",
     "ParseQualityError",
+    "DecodeDiagnostics",
 ]
