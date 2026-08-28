@@ -7,7 +7,7 @@ import pytest
 import sec2md
 
 from sec2md.models import (
-    Page, Section, Element, TextBlock,
+    Page, Section, Element, TextBlock, Exhibit,
     Item10K, Item10Q, Item8K, FilingType,
     ITEM_10K_MAPPING, ITEM_10Q_MAPPING, ITEM_8K_TITLES,
     _count_tokens,
@@ -83,6 +83,16 @@ class TestSection:
         section = Section(part="PART I", item="ITEM 1", pages=pages)
         assert "---" in section.content
         assert "---" not in section.markdown()
+
+
+class TestExhibit:
+    def test_optional_url_is_preserved(self):
+        exhibit = Exhibit(
+            exhibit_no="99.1",
+            description="Earnings Release",
+            url="https://www.sec.gov/Archives/a/q2fy27pr.htm",
+        )
+        assert exhibit.url == "https://www.sec.gov/Archives/a/q2fy27pr.htm"
 
 
 class TestTextBlock:

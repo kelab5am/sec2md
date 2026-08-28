@@ -178,6 +178,7 @@ class SectionExtractor:
         r'<tr[^>]*>\s*<t[dh][^>]*>\s*([^<]+?)\s*</t[dh]>\s*<t[dh][^>]*>\s*([^<]+?)\s*</t[dh]>\s*</tr>',
         re.IGNORECASE | re.DOTALL
     )
+    _MARKDOWN_LINK_RE = re.compile(r"\[([^]]+)\]\(([^)]+)\)")
 
     @staticmethod
     def _normalize_8k_item_code(code: str) -> str:
@@ -226,13 +227,30 @@ class SectionExtractor:
         from sec2md.models import Exhibit
         rows: List[Exhibit] = []
 
+        def parse_description(value: str) -> tuple[str, Optional[str]]:
+            value = value.strip()
+            exact_link = re.fullmatch(r"\[([^]]+)\]\(([^)]+)\)", value)
+            if exact_link:
+                return exact_link.group(1), exact_link.group(2)
+
+            first_link = self._MARKDOWN_LINK_RE.search(value)
+            if first_link:
+                description = (
+                    value[:first_link.start()]
+                    + first_link.group(1)
+                    + value[first_link.end():]
+                )
+                return re.sub(r"\s+", " ", description).strip(), first_link.group(2)
+            return value, None
+
         for m in self._PIPE_ROW_RE.finditer(block):
             left, right = m.group(1).strip(), m.group(2).strip()
             if not re.match(r'^\d', left):
                 continue
             if left.startswith('---') or right.startswith('---'):
                 continue
-            rows.append(Exhibit(exhibit_no=left, description=right))
+            description, url = parse_description(right)
+            rows.append(Exhibit(exhibit_no=left, description=description, url=url))
         if rows:
             return rows
 
@@ -240,7 +258,8 @@ class SectionExtractor:
             left, right = m.group(1).strip(), m.group(2).strip()
             if not re.match(r'^\d', left):
                 continue
-            rows.append(Exhibit(exhibit_no=left, description=right))
+            description, url = parse_description(right)
+            rows.append(Exhibit(exhibit_no=left, description=description, url=url))
         if rows:
             return rows
 
@@ -248,7 +267,8 @@ class SectionExtractor:
             left, right = m.group(1).strip(), m.group(2).strip()
             if not re.match(r'^\d', left):
                 continue
-            rows.append(Exhibit(exhibit_no=left, description=right))
+            description, url = parse_description(right)
+            rows.append(Exhibit(exhibit_no=left, description=description, url=url))
 
         return rows
 

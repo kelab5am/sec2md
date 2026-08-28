@@ -3,8 +3,10 @@ from __future__ import annotations
 import re
 import logging
 from bs4 import Tag
+from bs4.element import NavigableString
 from dataclasses import dataclass
 from typing import List, Literal, Optional, Sequence, cast
+from urllib.parse import urljoin
 
 from sec2md.quality import normalize_numeric_token
 
@@ -19,6 +21,138 @@ STRUCTURAL_MARKERS: dict[str, StructuralColumn] = {
     ")": "close_paren",
     "%": "percent",
 }
+
+_BLOCK_DESCENDANT_TAGS = {
+    "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "p"
+}
+_STRUCTURAL_BOUNDARY = "\x00"
+
+
+@dataclass(frozen=True)
+class InlineFragment:
+    """A rendered text fragment with optional link and structural boundary."""
+
+    text: str
+    href: str | None = None
+    boundary: bool = False
+
+
+def _inline_fragments(
+    node: Tag,
+    *,
+    base_url: str | None = None,
+    inherited_href: str | None = None,
+) -> list[InlineFragment]:
+    """Walk a cell's descendants in DOM order without inventing inline spaces."""
+
+    fragments: list[InlineFragment] = []
+    for child in node.children:
+        if isinstance(child, NavigableString):
+            text = str(child).replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
+            if text:
+                fragments.append(InlineFragment(text=text, href=inherited_href))
+            continue
+        if not isinstance(child, Tag):
+            continue
+
+        tag_name = child.name.lower()
+        if tag_name in _BLOCK_DESCENDANT_TAGS:
+            fragments.append(InlineFragment(text=" ", boundary=True))
+            if tag_name != "br":
+                fragments.extend(
+                    _inline_fragments(
+                        child,
+                        base_url=base_url,
+                        inherited_href=inherited_href,
+                    )
+                )
+            fragments.append(InlineFragment(text=" ", boundary=True))
+            continue
+
+        href = inherited_href
+        if tag_name == "a":
+            raw_href = child.get("href")
+            if raw_href is not None:
+                href = urljoin(base_url, raw_href) if base_url else raw_href
+        fragments.extend(
+            _inline_fragments(
+                child,
+                base_url=base_url,
+                inherited_href=href,
+            )
+        )
+    return fragments
+
+
+def _coalesce_same_href(fragments: Sequence[InlineFragment]) -> list[InlineFragment]:
+    """Coalesce only adjacent, non-boundary fragments sharing the same href."""
+
+    merged: list[InlineFragment] = []
+    for fragment in fragments:
+        if (
+            merged
+            and not merged[-1].boundary
+            and not fragment.boundary
+            and merged[-1].href == fragment.href
+        ):
+            previous = merged[-1]
+            merged[-1] = InlineFragment(
+                text=previous.text + fragment.text,
+                href=previous.href,
+            )
+        else:
+            merged.append(fragment)
+    return merged
+
+
+def _collapse_structural_whitespace(text: str) -> str:
+    """Collapse whitespace introduced by block boundaries after rendering."""
+
+    boundary = re.escape(_STRUCTURAL_BOUNDARY)
+    text = re.sub(rf"\s*{boundary}(?:\s*{boundary})*\s*", " ", text)
+    return text.replace(_STRUCTURAL_BOUNDARY, "")
+
+
+def render_cell_content(cell: Tag, *, base_url: str | None = None) -> str:
+    """Render visible table-cell content, retaining links as Markdown."""
+
+    fragments = _coalesce_same_href(_inline_fragments(cell, base_url=base_url))
+    has_link = any(fragment.href for fragment in fragments)
+    rendered: list[str] = []
+    for fragment in fragments:
+        if fragment.boundary:
+            rendered.append(_STRUCTURAL_BOUNDARY)
+            continue
+        text = fragment.text.replace("|", r"\|")
+        if has_link:
+            text = re.sub(r"\s+", " ", text)
+            if fragment.href:
+                text = text.strip()
+        rendered.append(f"[{text}]({fragment.href})" if fragment.href else text)
+
+    return _collapse_structural_whitespace("".join(rendered)).strip()
+
+
+def _escape_table_pipes(text: str) -> str:
+    """Escape visible, unescaped pipes without changing Markdown link URLs."""
+
+    output: list[str] = []
+    index = 0
+    while index < len(text):
+        if text[index] == "[":
+            close_label = text.find("](", index + 1)
+            if close_label != -1:
+                close_url = text.find(")", close_label + 2)
+                if close_url != -1:
+                    output.append(text[index : close_url + 1])
+                    index = close_url + 1
+                    continue
+        if text[index] == "|" and (index == 0 or text[index - 1] != "\\"):
+            output.append(r"\|")
+        else:
+            output.append(text[index])
+        index += 1
+    return "".join(output)
 
 
 def _classify_structural_column(values: Sequence[str]) -> StructuralColumn | None:
@@ -68,7 +202,7 @@ class GridCell:
 class TableParser:
     """A table within a filing document"""
 
-    def __init__(self, table_element: Tag):
+    def __init__(self, table_element: Tag, *, base_url: str | None = None):
         """
         Initialize table from a BS4 table tag
 
@@ -79,6 +213,7 @@ class TableParser:
             raise ValueError("table_element must be a table tag")
 
         self.table_element = table_element
+        self.base_url = base_url
 
         self.cells = self._extract_cells()
         self.grid = self._create_grid()
@@ -88,7 +223,10 @@ class TableParser:
         for tr in self.table_element.find_all('tr'):
             row = []
             for td in tr.find_all(['td', 'th']):
-                text = td.get_text(separator=" ", strip=True).replace('\xa0', ' ')
+                if td.find("a"):
+                    text = render_cell_content(td, base_url=self.base_url)
+                else:
+                    text = td.get_text(separator=" ", strip=True).replace('\xa0', ' ')
                 if not text:
                     if td.find('img'):
                         text = '●'  # or '•' depending on your BULLETS set
@@ -637,7 +775,7 @@ class TableParser:
 
         # Header row
         if headers:
-            escaped_headers = [str(h).replace("|", "\\|") for h in headers]
+            escaped_headers = [_escape_table_pipes(str(h)) for h in headers]
             lines.append("| " + " | ".join(escaped_headers) + " |")
             lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
 
@@ -647,7 +785,7 @@ class TableParser:
             while len(row) < len(headers):
                 row.append("")
             # Escape pipe characters
-            escaped_row = [str(cell).replace("|", "\\|") for cell in row[:len(headers)]]
+            escaped_row = [_escape_table_pipes(str(cell)) for cell in row[:len(headers)]]
             lines.append("| " + " | ".join(escaped_row) + " |")
 
         return "\n".join(lines)

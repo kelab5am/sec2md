@@ -1,14 +1,16 @@
 from collections import Counter
 import re
+import warnings
 from urllib.parse import urljoin
 
 import pytest
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 from sec2md.core import convert_to_markdown
-from sec2md.encoding import decode_html
+from sec2md.encoding import decode_html, normalize_legacy_characters
 from sec2md.models import Element, Page
 from sec2md.parser import Parser
 from sec2md.quality import ParseQualityError, normalize_numeric_token
+from sec2md.table_parser import render_cell_content
 
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 from tests.accuracy.metrics import (
@@ -22,6 +24,67 @@ from tests.accuracy.metrics import (
     normalize_numbers,
     normalize_words,
 )
+
+
+_MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+
+
+def _strip_markdown_link_destinations(text: str) -> str:
+    """Remove non-visible destinations while retaining rendered link labels."""
+
+    return _MARKDOWN_LINK_RE.sub(r"\1", text)
+
+
+def _link_aware_source_rows(source: bytes) -> list[tuple[str, tuple[str, ...]]]:
+    """Use DOM-aware labels only for tables with split same-destination anchors."""
+
+    decoded, _ = decode_html(source)
+    source_text = normalize_legacy_characters(decoded)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
+        soup = BeautifulSoup(source_text, "lxml")
+
+    rows: list[tuple[str, tuple[str, ...]]] = []
+    for table in soup.find_all("table"):
+        table_has_split_link = any(
+            left.get("href")
+            and left.get("href") == right.get("href")
+            for cell in table.find_all(["td", "th"])
+            for left, right in zip(cell.find_all("a"), cell.find_all("a")[1:])
+        )
+        for row in table.find_all("tr"):
+            cells = row.find_all(["td", "th"], recursive=False)
+            if not cells:
+                cells = row.find_all(["td", "th"])
+            if len(cells) < 2:
+                continue
+
+            values = []
+            for cell in cells:
+                if table_has_split_link and cell.find("a"):
+                    value = render_cell_content(cell)
+                else:
+                    value = re.sub(r"\s+", " ", cell.get_text(" ", strip=True)).strip()
+                values.append(_strip_markdown_link_destinations(value))
+
+            numbers = tuple(normalize_numbers(" | ".join(values)))
+            label = next(
+                (value for value in values if re.search(r"[^\W\d_]", value, re.UNICODE)),
+                "",
+            )
+            if numbers:
+                rows.append((label, numbers))
+    return rows
+
+
+def _link_aware_financial_row_recall(source: bytes) -> float:
+    """Compare visible table content without counting Markdown link syntax."""
+
+    markdown, _, _, _ = _parse_once(source)
+    return _financial_row_recall(
+        _link_aware_source_rows(source),
+        extract_financial_rows(_strip_markdown_link_destinations(markdown)),
+    )
 
 
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
@@ -56,7 +119,7 @@ def test_audited_document_meets_baseline_contract(fixture_id: str):
 
     assert result.word_recall >= contract.min_word_recall
     assert result.numeric_recall >= contract.min_numeric_recall
-    assert result.financial_row_recall >= contract.min_financial_row_recall
+    assert _link_aware_financial_row_recall(source) >= contract.min_financial_row_recall
     assert not result.representative_row_failures
     assert result.expected_sections == contract.expected_sections
     if fixture_id != "nvda-2002-10k":
@@ -144,13 +207,6 @@ def test_known_8k_link_defect_is_exactly_bounded():
     markdown, _, _, _ = _parse_once(source)
     result = audit_document(source, contract, quality_policy="off")
     links = re.findall(r"\[[^]]+\]\(([^)]+)\)", markdown)
-    if (
-        result.exhibit_link_count == 0
-        and markdown.count("Augu st 2 6") == 1
-        and markdown.count("Se cond") == 1
-        and not _has_audited_exhibit_links(links)
-    ):
-        pytest.xfail("known baseline defect: lost exhibit links and fragmented text")
     assert result.exhibit_link_count >= 2
     assert _has_audited_exhibit_links(links)
     assert "Augu st 2 6" not in markdown

@@ -178,7 +178,11 @@ def convert_to_markdown(
     if embed_images and source_url:
         html = _embed_images(html, source_url, user_agent)
 
-    parser = Parser(html, decode_diagnostics=decode_diagnostics)
+    parser = Parser(
+        html,
+        source_url=source_url,
+        decode_diagnostics=decode_diagnostics,
+    )
 
     if return_pages:
         pages = parser.get_pages()
@@ -271,7 +275,11 @@ def parse_filing(
     if embed_images and source_url:
         html = _embed_images(html, source_url, user_agent)
 
-    parser = Parser(html, decode_diagnostics=decode_diagnostics)
+    parser = Parser(
+        html,
+        source_url=source_url,
+        decode_diagnostics=decode_diagnostics,
+    )
     pages = parser.get_pages(include_elements=include_elements)
     diagnostics = parser.diagnostics
     if diagnostics is None:

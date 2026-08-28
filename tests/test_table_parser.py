@@ -12,6 +12,18 @@ def _make_table(html: str) -> Tag:
     return soup.find("table")
 
 
+def test_adjacent_fragments_with_same_href_coalesce():
+    html = '<table><tr><td><a href="ex99.htm">Augu</a><a href="ex99.htm">st 26</a></td></tr></table>'
+    parser = TableParser(_make_table(html), base_url="https://www.sec.gov/Archives/a/filing.htm")
+    assert parser.to_matrix()[0][0] == "[August 26](https://www.sec.gov/Archives/a/ex99.htm)"
+
+
+def test_distinct_links_remain_distinct_and_pipe_is_escaped():
+    html = '<table><tr><td><a href="a.htm">First</a> | <a href="b.htm">Second</a></td></tr></table>'
+    rendered = TableParser(_make_table(html), base_url=None).to_matrix()[0][0]
+    assert rendered == "[First](a.htm) \\| [Second](b.htm)"
+
+
 class TestBasicTables:
     """Simple table parsing."""
 

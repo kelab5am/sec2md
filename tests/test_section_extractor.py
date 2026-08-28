@@ -4,7 +4,7 @@ import pytest
 
 from sec2md.section_extractor import SectionExtractor, ITEM_PATTERN, PART_PATTERN
 from sec2md.sections import extract_sections, get_section
-from sec2md.models import Page, Section, Item10K, Item10Q, Item13D, Item13G
+from sec2md.models import Exhibit, Page, Section, Item10K, Item10Q, Item13D, Item13G
 
 
 class TestItemPatternMatching:
@@ -196,6 +196,32 @@ class TestSectionExtractor8K:
         assert extractor._is_8k_boilerplate_page("anything", 1) is True
         # Page with TABLE OF CONTENTS
         assert extractor._is_8k_boilerplate_page("TABLE OF CONTENTS here", 2) is True
+
+    def test_parses_markdown_exhibit_link_with_relative_url(self):
+        pages = self._make_pages([
+            "Cover page",
+            "ITEM 9.01 Financial Statements and Exhibits\n\n"
+            "(d) Exhibits\n\n"
+            "| 99.1 | [Earnings Release](q2fy27pr.htm) |",
+        ])
+
+        sections = SectionExtractor(pages, filing_type="8-K").get_sections()
+
+        assert sections[0].exhibits == [
+            Exhibit(exhibit_no="99.1", description="Earnings Release", url="q2fy27pr.htm")
+        ]
+
+    def test_parses_absolute_exhibit_url_from_rendered_markdown(self):
+        pages = self._make_pages([
+            "Cover page",
+            "ITEM 9.01 Financial Statements and Exhibits\n\n"
+            "(d) Exhibits\n\n"
+            "| 99.1 | [Earnings Release](https://www.sec.gov/Archives/a/q2fy27pr.htm) |",
+        ])
+
+        sections = SectionExtractor(pages, filing_type="8-K").get_sections()
+
+        assert sections[0].exhibits[0].url == "https://www.sec.gov/Archives/a/q2fy27pr.htm"
 
 
 class TestGetSection:

@@ -53,6 +53,26 @@ class TestConvertToMarkdown:
         pages = parse_filing("https://example.test/filing.htm", quality_policy="off")
         assert pages
 
+    def test_url_input_resolves_relative_table_links(self, monkeypatch):
+        fetched = FetchedHtml(
+            b"<html><body><table><tr><th>Exhibit</th></tr><tr><td><a href='q2fy27pr.htm'>Earnings Release</a></td></tr></table></body></html>",
+            "utf-8",
+        )
+        monkeypatch.setattr("sec2md.core.fetch", lambda url, user_agent=None: fetched)
+
+        result = convert_to_markdown(
+            "https://www.sec.gov/Archives/a/filing.htm", quality_policy="off"
+        )
+
+        assert "[Earnings Release](https://www.sec.gov/Archives/a/q2fy27pr.htm)" in result
+
+    def test_raw_html_keeps_relative_table_links(self):
+        html = "<html><body><table><tr><th>Exhibit</th></tr><tr><td><a href='q2fy27pr.htm'>Earnings Release</a></td></tr></table></body></html>"
+
+        result = convert_to_markdown(html, quality_policy="off")
+
+        assert "[Earnings Release](q2fy27pr.htm)" in result
+
     def test_parser_stores_decode_diagnostics(self):
         from sec2md.parser import Parser
 

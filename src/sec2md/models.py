@@ -316,6 +316,7 @@ class Exhibit(BaseModel):
     """8-K exhibit entry."""
     exhibit_no: str = Field(..., description="Exhibit number (e.g., '99.1', '104')")
     description: str = Field(..., description="Exhibit description")
+    url: Optional[str] = Field(None, description="Resolved or source-relative exhibit URL")
 
     model_config = {"frozen": False}
 

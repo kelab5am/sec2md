@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import logging
+from copy import deepcopy
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Dict, Union, Optional, Tuple
@@ -11,7 +12,7 @@ from bs4.element import NavigableString, Tag
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
-from sec2md.table_parser import TableParser
+from sec2md.table_parser import TableParser, render_cell_content
 from sec2md.models import Page, Element
 from sec2md.element_builder import build_elements_for_pages, augment_html_with_ids
 from sec2md.encoding import DecodeDiagnostics, normalize_legacy_characters
@@ -24,6 +25,7 @@ ITALIC_TAGS = {"i", "em"}
 _css_decl = re.compile(r"^[a-zA-Z\-]+\s*:\s*[^;]+;\s*$")
 ITEM_HEADER_CELL_RE = re.compile(r"^\s*Item\s+([0-9IVX]+)\.\s*$", re.I)
 PART_HEADER_CELL_RE = re.compile(r"^\s*Part\s+([IVX]+)\s*$", re.I)
+MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +41,15 @@ class Parser:
     """Document parser with support for regular tables and pseudo-tables."""
 
     def __init__(
-        self, content: str, *, decode_diagnostics: DecodeDiagnostics | None = None
+        self,
+        content: str,
+        *,
+        source_url: str | None = None,
+        decode_diagnostics: DecodeDiagnostics | None = None,
     ):
         content = normalize_legacy_characters(content)
         self.source_text = content
+        self.source_url = source_url
         self.decode_diagnostics = decode_diagnostics
         self.soup = BeautifulSoup(content, "lxml")
         self.includes_table = False
@@ -252,11 +259,17 @@ class Parser:
             merged = self._try_merge_inline_spans(last_text, s, last_source, source_node)
             if merged:
                 buf[-1] = merged
-                seg_buf[-1] = (merged, last_source, last_seg[2])
+                seg_buf[-1] = (
+                    self._element_segment_content(merged, source_node),
+                    last_source,
+                    last_seg[2],
+                )
                 return
 
         self.pages[page_num].append(s)
-        self.page_segments[page_num].append((s, source_node, tb))
+        self.page_segments[page_num].append(
+            (self._element_segment_content(s, source_node), source_node, tb)
+        )
 
     def _blankline_before(self, page_num: int) -> None:
         buf = self.pages[page_num]
@@ -279,6 +292,21 @@ class Parser:
         if text and _css_decl.match(text):
             return ""
         return text
+
+    def _element_segment_content(self, text: str, source_node: Optional[Tag] = None) -> str:
+        """Keep link labels in citation content but exclude non-visible destinations."""
+
+        if (
+            source_node is not None
+            and source_node.name == "table"
+            and source_node.find("a") is not None
+        ):
+            legacy_table = deepcopy(source_node)
+            for anchor in legacy_table.find_all("a"):
+                anchor.unwrap()
+            return TableParser(legacy_table).md().strip()
+
+        return MARKDOWN_LINK_RE.sub(r"\1", text)
 
     @staticmethod
     def _img_to_markdown(el: Tag) -> str:
@@ -305,7 +333,7 @@ class Parser:
                 return self._one_row_table_to_text(cells)
 
             self.includes_table = True
-            return TableParser(element).md().strip()
+            return TableParser(element, base_url=self.source_url).md().strip()
 
         if element.name in {"ul", "ol"}:
             items = []
@@ -876,7 +904,12 @@ class Parser:
         return rows
 
     def _one_row_table_to_text(self, cells: list[Tag]) -> str:
-        texts = [clean_text(c.get_text(" ", strip=True)) for c in cells]
+        texts = [
+            render_cell_content(c, base_url=self.source_url)
+            if c.find("a")
+            else clean_text(c.get_text(" ", strip=True))
+            for c in cells
+        ]
         if not texts:
             return ""
 
