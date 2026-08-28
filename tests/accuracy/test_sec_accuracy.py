@@ -11,6 +11,7 @@ from sec2md.models import Element, Page
 from sec2md.parser import Parser
 from sec2md.quality import ParseQualityError, normalize_numeric_token
 from sec2md.table_parser import render_cell_content
+from sec2md.utils import FetchedHtml
 
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 from tests.accuracy.metrics import (
@@ -211,6 +212,26 @@ def test_known_8k_link_defect_is_exactly_bounded():
     assert _has_audited_exhibit_links(links)
     assert "Augu st 2 6" not in markdown
     assert "Se cond" not in markdown
+    assert "August 26" in markdown
+    assert "Second" in markdown
+
+
+def test_8k_link_recovery_fetches_only_the_primary_filing(monkeypatch):
+    contract, source = load_fixture("nvda-2026-08-26-8k")
+    calls: list[str] = []
+
+    def fetch_primary_only(url: str, user_agent: str | None = None) -> FetchedHtml:
+        calls.append(url)
+        assert url == contract.sec_url
+        return FetchedHtml(source, "utf-8")
+
+    monkeypatch.setattr("sec2md.core.fetch", fetch_primary_only)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
+        convert_to_markdown(contract.sec_url, quality_policy="off")
+
+    assert calls == [contract.sec_url]
 
 
 def _has_audited_exhibit_links(links: list[str]) -> bool:

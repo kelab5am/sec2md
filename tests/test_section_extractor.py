@@ -223,6 +223,24 @@ class TestSectionExtractor8K:
 
         assert sections[0].exhibits[0].url == "https://www.sec.gov/Archives/a/q2fy27pr.htm"
 
+    def test_replaces_all_markdown_links_in_exhibit_description(self):
+        pages = self._make_pages([
+            "Cover page",
+            "ITEM 9.01 Financial Statements and Exhibits\n\n"
+            "(d) Exhibits\n\n"
+            "| 99.1 | See [Earnings Release](q2fy27pr.htm) and [Supplement](supplement.htm) |",
+        ])
+
+        sections = SectionExtractor(pages, filing_type="8-K").get_sections()
+
+        assert sections[0].exhibits == [
+            Exhibit(
+                exhibit_no="99.1",
+                description="See Earnings Release and Supplement",
+                url="q2fy27pr.htm",
+            )
+        ]
+
 
 class TestGetSection:
     """get_section function for retrieving specific sections."""

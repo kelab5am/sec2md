@@ -235,10 +235,8 @@ class SectionExtractor:
 
             first_link = self._MARKDOWN_LINK_RE.search(value)
             if first_link:
-                description = (
-                    value[:first_link.start()]
-                    + first_link.group(1)
-                    + value[first_link.end():]
+                description = self._MARKDOWN_LINK_RE.sub(
+                    lambda match: match.group(1), value
                 )
                 return re.sub(r"\s+", " ", description).strip(), first_link.group(2)
             return value, None

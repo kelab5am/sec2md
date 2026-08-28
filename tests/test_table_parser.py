@@ -24,6 +24,12 @@ def test_distinct_links_remain_distinct_and_pipe_is_escaped():
     assert rendered == "[First](a.htm) \\| [Second](b.htm)"
 
 
+def test_linked_cell_preserves_navigable_string_whitespace():
+    html = '<table><tr><td><a href="a.htm">First </a>  \nmiddle  <a href="b.htm"> Second</a></td></tr></table>'
+    rendered = TableParser(_make_table(html), base_url=None).to_matrix()[0][0]
+    assert rendered == "[First ](a.htm)   middle  [ Second](b.htm)"
+
+
 class TestBasicTables:
     """Simple table parsing."""
 

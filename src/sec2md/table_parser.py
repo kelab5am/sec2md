@@ -117,20 +117,16 @@ def render_cell_content(cell: Tag, *, base_url: str | None = None) -> str:
     """Render visible table-cell content, retaining links as Markdown."""
 
     fragments = _coalesce_same_href(_inline_fragments(cell, base_url=base_url))
-    has_link = any(fragment.href for fragment in fragments)
     rendered: list[str] = []
     for fragment in fragments:
         if fragment.boundary:
             rendered.append(_STRUCTURAL_BOUNDARY)
             continue
         text = fragment.text.replace("|", r"\|")
-        if has_link:
-            text = re.sub(r"\s+", " ", text)
-            if fragment.href:
-                text = text.strip()
         rendered.append(f"[{text}]({fragment.href})" if fragment.href else text)
 
-    return _collapse_structural_whitespace("".join(rendered)).strip()
+    joined = "".join(rendered).replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+    return _collapse_structural_whitespace(joined).strip()
 
 
 def _escape_table_pipes(text: str) -> str:
