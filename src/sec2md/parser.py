@@ -14,6 +14,7 @@ from sec2md.utils import median, clean_text
 from sec2md.table_parser import TableParser
 from sec2md.models import Page, Element
 from sec2md.element_builder import build_elements_for_pages, augment_html_with_ids
+from sec2md.quality import ParseDiagnostics, build_diagnostics
 
 BLOCK_TAGS = {"div", "p", "h1", "h2", "h3", "h4", "h5", "h6", "table", "br", "hr", "ul", "ol", "li"}
 BOLD_TAGS = {"b", "strong"}
@@ -37,6 +38,7 @@ class Parser:
     """Document parser with support for regular tables and pseudo-tables."""
 
     def __init__(self, content: str):
+        self.source_text = content
         self.soup = BeautifulSoup(content, "lxml")
         self.includes_table = False
         self.include_images = True
@@ -46,6 +48,10 @@ class Parser:
         self.current_text_block: Optional[TextBlockInfo] = None
         self.continuation_map: Dict[str, TextBlockInfo] = {}
         self.footer_page_numbers: Dict[int, int] = {}
+        self.block_nodes_map: Dict[str, List[Tag]] = {}
+        self.trace_numeric_failures: tuple[str, ...] = ()
+        self.diagnostics: Optional[ParseDiagnostics] = None
+        self._last_pages: Optional[List[Page]] = None
 
     @staticmethod
     def _is_text_block_tag(el: Tag) -> bool:
@@ -807,6 +813,8 @@ class Parser:
         self.pages = defaultdict(list)
         self.page_segments = defaultdict(list)
         self.includes_table = False
+        self.block_nodes_map = {}
+        self.trace_numeric_failures = ()
         root = self.soup.body if self.soup.body else self.soup
         self._stream_pages(root, page_num=1)
 
@@ -835,6 +843,17 @@ class Parser:
 
         if include_elements:
             result = self._add_elements_to_pages(result)
+
+        markdown = "\n\n".join(page.content for page in result if page.content)
+        self._last_pages = result
+        self.diagnostics = build_diagnostics(
+            self.source_text,
+            markdown,
+            result,
+            mapped_element_ids=self.block_nodes_map.keys(),
+            trace_failures=self.trace_numeric_failures,
+            enforce_mappings=include_elements,
+        )
 
         return result
 
@@ -866,6 +885,7 @@ class Parser:
 
     def _add_elements_to_pages(self, pages: List[Page]) -> List[Page]:
         result, block_nodes_map = build_elements_for_pages(pages, self.page_segments)
+        self.block_nodes_map = block_nodes_map
         page_elements = {}
         for page in result:
             if page.elements:

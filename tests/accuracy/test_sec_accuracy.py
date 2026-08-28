@@ -4,7 +4,10 @@ from urllib.parse import urljoin
 
 import pytest
 from bs4 import BeautifulSoup
+from sec2md.core import convert_to_markdown
 from sec2md.models import Element, Page
+from sec2md.parser import Parser
+from sec2md.quality import ParseQualityError
 
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 from tests.accuracy.metrics import (
@@ -181,6 +184,13 @@ def test_positioned_fixture_contains_visible_text_inside_positioned_leaf():
     visible = BeautifulSoup(path.read_text(encoding="utf-8"), "lxml").get_text(" ", strip=True)
     assert "POSITIONED LOSS SENTINEL" in visible
     assert len(visible) >= 1200
+
+
+def test_positioned_fixture_quality_guard_rejects_silent_loss(monkeypatch):
+    path = __import__("pathlib").Path(__file__).parents[1] / "fixtures" / "sec" / "positioned-issue-4.html"
+    monkeypatch.setattr(Parser, "markdown", lambda self: "")
+    with pytest.raises(ParseQualityError):
+        convert_to_markdown(path.read_text(encoding="utf-8"))
 
 
 def test_financial_row_recall_rejects_labels_that_differ_after_eighth_word():

@@ -9,6 +9,10 @@ from sec2md.models import Page
 class TestConvertToMarkdown:
     """Tests for convert_to_markdown function."""
 
+    def test_quality_policy_is_keyword_only(self):
+        with pytest.raises(TypeError):
+            convert_to_markdown("<p>Content</p>", "warn")
+
     def test_returns_string_by_default(self):
         html = "<html><body><p>Hello world</p></body></html>"
         result = convert_to_markdown(html)

@@ -18,6 +18,14 @@ class TestParserBasics:
         assert len(pages) == 1
         assert "Hello world" in pages[0].content
 
+    def test_exposes_latest_parse_diagnostics(self):
+        parser = Parser("<html><body><p>Hello world</p></body></html>")
+        parser.get_pages(include_elements=False)
+        assert parser.diagnostics is not None
+        assert parser.diagnostics.source_visible_chars == 11
+        assert parser.diagnostics.output_visible_chars == 11
+        assert parser.diagnostics.warnings == ()
+
     def test_multiple_paragraphs(self):
         parser = Parser("<html><body><p>Para one</p><p>Para two</p></body></html>")
         pages = parser.get_pages(include_elements=False)

@@ -11,6 +11,7 @@ import requests
 from sec2md.utils import is_url, fetch
 from sec2md.parser import Parser
 from sec2md.models import Page
+from sec2md.quality import QualityPolicy, build_diagnostics, enforce_quality
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +105,7 @@ def convert_to_markdown(
     user_agent: str | None = None,
     return_pages: bool = False,
     embed_images: bool = False,
+    quality_policy: QualityPolicy = "strict",
 ) -> str: ...
 
 
@@ -114,6 +116,7 @@ def convert_to_markdown(
     user_agent: str | None = None,
     return_pages: bool = True,
     embed_images: bool = False,
+    quality_policy: QualityPolicy = "strict",
 ) -> List[Page]: ...
 
 
@@ -123,6 +126,7 @@ def convert_to_markdown(
     user_agent: str | None = None,
     return_pages: bool = False,
     embed_images: bool = False,
+    quality_policy: QualityPolicy = "strict",
 ) -> str | List[Page]:
     """
     Convert SEC filing HTML to Markdown.
@@ -132,6 +136,7 @@ def convert_to_markdown(
         user_agent: User agent for EDGAR requests (required for sec.gov URLs)
         return_pages: If True, returns List[Page] instead of markdown string
         embed_images: If True, fetch and embed images as base64 data URIs (default: False)
+        quality_policy: Quality enforcement mode: ``strict`` (default), ``warn``, or ``off``
 
     Returns:
         Markdown string (default) or List[Page] if return_pages=True
@@ -165,9 +170,35 @@ def convert_to_markdown(
     parser = Parser(html)
 
     if return_pages:
-        return parser.get_pages()
-    else:
-        return parser.markdown()
+        pages = parser.get_pages()
+        diagnostics = parser.diagnostics
+        if diagnostics is None:
+            diagnostics = build_diagnostics(
+                html,
+                "\n\n".join(page.content for page in pages if page.content),
+                pages,
+                mapped_element_ids=parser.block_nodes_map.keys(),
+                trace_failures=parser.trace_numeric_failures,
+                enforce_mappings=True,
+            )
+        enforce_quality(diagnostics, quality_policy)
+        return pages
+
+    output = parser.markdown()
+    pages = parser._last_pages
+    diagnostics = parser.diagnostics
+    if diagnostics is None or pages is None:
+        pages = pages or parser.get_pages()
+        diagnostics = build_diagnostics(
+            html,
+            output,
+            pages,
+            mapped_element_ids=parser.block_nodes_map.keys(),
+            trace_failures=parser.trace_numeric_failures,
+            enforce_mappings=True,
+        )
+    enforce_quality(diagnostics, quality_policy)
+    return output
 
 
 def parse_filing(
@@ -176,6 +207,7 @@ def parse_filing(
     user_agent: str | None = None,
     include_elements: bool = True,
     embed_images: bool = False,
+    quality_policy: QualityPolicy = "strict",
 ) -> List[Page]:
     """
     Parse SEC filing HTML into structured Page objects.
@@ -188,6 +220,7 @@ def parse_filing(
         user_agent: User agent for EDGAR requests (required for sec.gov URLs)
         include_elements: If True, extract citable elements (default: True)
         embed_images: If True, fetch and embed images as base64 data URIs (default: False)
+        quality_policy: Quality enforcement mode: ``strict`` (default), ``warn``, or ``off``
 
     Returns:
         List[Page]: Parsed pages with content, elements, and text blocks
@@ -220,4 +253,16 @@ def parse_filing(
         html = _embed_images(html, source_url, user_agent)
 
     parser = Parser(html)
-    return parser.get_pages(include_elements=include_elements)
+    pages = parser.get_pages(include_elements=include_elements)
+    diagnostics = parser.diagnostics
+    if diagnostics is None:
+        diagnostics = build_diagnostics(
+            html,
+            "\n\n".join(page.content for page in pages if page.content),
+            pages,
+            mapped_element_ids=parser.block_nodes_map.keys(),
+            trace_failures=parser.trace_numeric_failures,
+            enforce_mappings=include_elements,
+        )
+    enforce_quality(diagnostics, quality_policy)
+    return pages
