@@ -175,11 +175,15 @@ def build_elements_for_pages(
 def augment_html_with_ids(
     page_elements: Dict[int, List[Element]],
     block_nodes_map: Dict[str, List[Tag]],
+    source_root: Any | None = None,
 ) -> None:
     """Add id attributes and data-sec2md-block to source DOM nodes."""
     seen_pages: set = set()
     mapped_nodes = ordered_unique_nodes(*block_nodes_map.values())
-    for node in mapped_nodes:
+    cleanup_nodes = (
+        source_root.find_all(True) if source_root is not None else mapped_nodes
+    )
+    for node in ordered_unique_nodes(cleanup_nodes, mapped_nodes):
         node.attrs.pop('data-sec2md-block', None)
 
     for page_num in sorted(page_elements.keys()):

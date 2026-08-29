@@ -82,6 +82,19 @@ class TestParserBasics:
         )
         assert _extract_xbrl_tags([soup.div]) == ["us-gaap:Revenue"]
 
+    def test_repeated_parse_clears_annotations_from_removed_image_nodes(self):
+        parser = Parser(
+            '<html><body><p>Visible filing text</p>'
+            '<img src="chart.png" alt="Chart"></body></html>'
+        )
+        image_node = parser.soup.find("img")
+
+        parser.get_pages(include_images=True)
+        assert image_node.get("data-sec2md-block")
+
+        parser.get_pages(include_images=False)
+        assert image_node.get("data-sec2md-block") is None
+
     def test_multiple_paragraphs(self):
         parser = Parser("<html><body><p>Para one</p><p>Para two</p></body></html>")
         pages = parser.get_pages(include_elements=False)

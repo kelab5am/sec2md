@@ -993,7 +993,7 @@ class Parser:
         for page in result:
             if page.elements:
                 page_elements[page.number] = page.elements
-        augment_html_with_ids(page_elements, block_nodes_map)
+        augment_html_with_ids(page_elements, block_nodes_map, self.soup)
         return result
 
     def markdown(self) -> str:
