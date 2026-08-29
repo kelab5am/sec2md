@@ -22,7 +22,7 @@ filing capture.
 - Task 2 compatibility tests: `c507a85fd0154d581d7849ec77d05b0bf8fe355c`.
 - Task 2 repair round 1: `052d31df2f04ce7d903391009e4801051ea9391d`.
 - Task 3 base: `052d31df2f04ce7d903391009e4801051ea9391d`.
-- Task 3 committed HEAD: `PENDING_UNTIL_COMMIT_COMPLETES`.
+- Task 3 committed HEAD: `70f218014795d6e7f5f428974179200305b414b2`.
 - Task 4 evidence-finalization commit: `PENDING_NOT_RUN`.
 
 ## Task 3 RED evidence
