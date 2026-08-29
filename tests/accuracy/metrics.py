@@ -19,6 +19,7 @@ from sec2md.models import Page
 from sec2md.parser import Parser
 from sec2md.quality import _is_hidden_tag, trace_numeric_failures
 from sec2md.sections import extract_sections
+from sec2md.table_parser import render_cell_content
 
 from .fixtures import FixtureContract
 
@@ -28,6 +29,7 @@ NUMBER_RE = re.compile(
     r"(?<!\w)(?:[$€£]\s*)?(?:\(?[−–-]?\d[\d,]*(?:\.\d+)?\)?%?)(?!\w)"
 )
 _C1_RE = re.compile(r"[\x80-\x9f]")
+_MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
 
 
 @dataclass(frozen=True)
@@ -281,6 +283,54 @@ def extract_financial_rows(text: str | bytes) -> list[tuple[str, tuple[str, ...]
     return _markdown_rows(text)
 
 
+def _strip_markdown_link_destinations(text: str) -> str:
+    """Remove non-visible destinations while retaining rendered link labels."""
+
+    return _MARKDOWN_LINK_RE.sub(r"\1", text)
+
+
+def _link_aware_source_rows(source: bytes) -> list[tuple[str, tuple[str, ...]]]:
+    """Use DOM-aware labels only for tables with split same-destination anchors."""
+
+    decoded, _ = decode_html(source)
+    source_text = normalize_legacy_characters(decoded)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
+        soup = BeautifulSoup(source_text, "lxml")
+
+    rows: list[tuple[str, tuple[str, ...]]] = []
+    for table in soup.find_all("table"):
+        table_has_split_link = any(
+            left.get("href")
+            and left.get("href") == right.get("href")
+            for cell in table.find_all(["td", "th"])
+            for left, right in zip(cell.find_all("a"), cell.find_all("a")[1:])
+        )
+        for row in table.find_all("tr"):
+            cells = row.find_all(["td", "th"], recursive=False)
+            if not cells:
+                cells = row.find_all(["td", "th"])
+            if len(cells) < 2:
+                continue
+
+            values = []
+            for cell in cells:
+                if table_has_split_link and cell.find("a"):
+                    value = render_cell_content(cell)
+                else:
+                    value = re.sub(r"\s+", " ", cell.get_text(" ", strip=True)).strip()
+                values.append(_strip_markdown_link_destinations(value))
+
+            numbers = tuple(normalize_numbers(" | ".join(values)))
+            label = next(
+                (value for value in values if re.search(r"[^\W\d_]", value, re.UNICODE)),
+                "",
+            )
+            if numbers:
+                rows.append((label, numbers))
+    return rows
+
+
 def _normalized_label(label: str) -> str:
     return _normalized_row_label(label)
 
@@ -401,6 +451,15 @@ def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page]]:
     return markdown, canonical_pages(pages), annotated_html, pages
 
 
+def _link_aware_financial_row_recall(source: bytes, markdown: str) -> float:
+    """Compare visible source and Markdown table content without link syntax."""
+
+    return _financial_row_recall(
+        _link_aware_source_rows(source),
+        extract_financial_rows(_strip_markdown_link_destinations(markdown)),
+    )
+
+
 def audit_document(
     source: bytes,
     contract: FixtureContract,
@@ -435,9 +494,7 @@ def audit_document(
         annotated_html_sha256=sha256_bytes(annotated_html),
         word_recall=multiset_recall(normalize_words(source_visible), normalize_words(output_visible)),
         numeric_recall=multiset_recall(normalize_numbers(source_visible), normalize_numbers(markdown)),
-        financial_row_recall=_financial_row_recall(
-            extract_financial_rows(source), extract_financial_rows(markdown)
-        ),
+        financial_row_recall=_link_aware_financial_row_recall(source, markdown),
         table_width_errors=_table_width_errors(markdown),
         replacement_characters=markdown.count("\ufffd"),
         c1_control_characters=len(_C1_RE.findall(markdown)),
