@@ -85,6 +85,31 @@ def test_raw_input_base_url_does_not_enable_image_fetch(monkeypatch):
     assert "safe" in result
 
 
+def test_omitted_base_url_preserves_raw_relative_link_output():
+    html = "<table><tr><td><a href='ex99.htm'>Release</a></td></tr></table>"
+
+    assert convert_to_markdown(html, quality_policy="off") == convert_to_markdown(
+        html,
+        base_url=None,
+        quality_policy="off",
+    )
+
+
+def test_base_url_does_not_change_decoding_or_strict_quality():
+    source = b"<html><body><p>GPU\x92s \x9711</p></body></html>"
+
+    without = convert_to_markdown(source, return_pages=True)
+    with_context = convert_to_markdown(
+        source,
+        base_url="https://www.sec.gov/Archives/a.htm",
+        return_pages=True,
+    )
+
+    assert [page.content for page in with_context] == [
+        page.content for page in without
+    ]
+
+
 class TestConvertToMarkdown:
     """Tests for convert_to_markdown function."""
 
