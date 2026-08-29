@@ -17,8 +17,14 @@ publication, and complete-accession capture remain separately authorized work.
 - Task 8 prerequisite baseline: `5437ee4435812e146eb3f25952cffad12a882994`
   (`test: align legacy table width expectation`).
 - Upstream baseline: `a243bd782cd9d20a6e0f69c04bc484ea069d0e51`.
-- Release candidate commit: `PENDING_UNTIL_TASK_8_COMMIT` at this evidence
-  revision; the final committed SHA is recorded after the commit gate.
+- Task 8 implementation candidate commit: `235814f709dbca969ff35ba735bc42f4a92a22ba`
+  (`release: prepare sec2md 0.1.22+rcq.1`).
+- Later prerequisite/review commit: `013bc4039c0fd5ef1b8f1670cc5769c7936273b1`
+  (not part of the Task 8 implementation candidate; it addresses the
+  separately reviewed accuracy-metric finding).
+- This evidence document intentionally names the Task 8 implementation
+  candidate. It does not claim to contain the SHA of a later commit that may
+  update this document itself.
 - Proposed tag: `v0.1.22-rcq.1` (not created).
 
 ## Offline fixture identity
@@ -66,8 +72,10 @@ Pre-commit exit-code evidence:
 
 ## Build artifact and metadata
 
-- Wheel filename: `sec2md-0.1.22+rcq.1-py3-none-any.whl`.
-- Wheel SHA-256: `9f547d1915dba35da00f47b86f66159a2b1f118389d2031616fca2ee7140cdd8`.
+- Pre-commit wheel filename: `sec2md-0.1.22+rcq.1-py3-none-any.whl`.
+- Pre-commit wheel SHA-256: `9f547d1915dba35da00f47b86f66159a2b1f118389d2031616fca2ee7140cdd8`.
+- Committed-state wheel filename: `sec2md-0.1.22+rcq.1-py3-none-any.whl`.
+- Committed-state wheel SHA-256: `44106d792577a5847b7053efd37dc1cb2ab1fb011d5b622899ee35828ca1cbd3`.
 - Required wheel metadata assertions: `Version: 0.1.22+rcq.1`,
   `Requires-Python: <3.13,>=3.10`, and
   `Project-URL: Repository, https://github.com/kelab5am/sec2md`.
@@ -75,6 +83,39 @@ Pre-commit exit-code evidence:
   `Name: sec2md`, `Version: 0.1.22+rcq.1`, `Requires-Python: <3.13,>=3.10`,
   `Project-URL: Repository, https://github.com/kelab5am/sec2md`, and
   `Project-URL: Upstream, https://github.com/lucasastorian/sec2md`.
+
+The committed-state build emitted these exact setuptools warnings and exited
+`0`:
+
+- 4 occurrences of `SetuptoolsDeprecationWarning: \`project.license\` as a
+  TOML table is deprecated`, with the accompanying notice: `Please use a
+  simple string containing a SPDX expression for \`project.license\`. You can
+  also use \`project.license-files\`. (Both options available on
+  setuptools>=77.0.0).`
+- 8 occurrences of `SetuptoolsDeprecationWarning: License classifiers are
+  deprecated.`
+
+Remediation state: `DEFERRED_OUT_OF_SCOPE` — the inherited `pyproject.toml`
+license table and license classifier remain unchanged because Task 8 is bound
+to its nine named paths. A warning-free build requires a separately authorized
+packaging-metadata change.
+
+## Committed-state commands
+
+These commands were run after the Task 8 implementation candidate commit
+`235814f709dbca969ff35ba735bc42f4a92a22ba`:
+
+| Command | Exit code | Result |
+| --- | ---: | --- |
+| `git status --short --branch` | 0 | Clean `codex/rcq-hardening-v1` |
+| `git log -8 --oneline` | 0 | Eight expected implementation/review commits listed |
+| `.\.venv\Scripts\python -m pytest -q` | 0 | `292 passed, 14 deselected`; zero failed and zero xfailed |
+| `.\.venv\Scripts\python -m ruff check src tests` | 0 | `All checks passed!` |
+| `.\.venv\Scripts\python -m build` | 0 | sdist and committed-state wheel built; warnings recorded above |
+
+The committed-state wheel and metadata evidence are the values recorded above;
+the pre-commit and committed-state hashes are labeled separately because the
+wheel ZIP entry timestamps differ between builds.
 
 ## External gates
 
