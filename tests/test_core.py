@@ -8,6 +8,83 @@ from sec2md.models import Page
 from sec2md.utils import FetchedHtml
 
 
+@pytest.mark.parametrize(
+    "source",
+    [
+        "<table><tr><td><a href='ex99-1.htm'>Release</a></td></tr></table>",
+        b"<table><tr><td><a href='ex99-1.htm'>Release</a></td></tr></table>",
+    ],
+)
+def test_raw_input_base_url_resolves_links_without_fetch(source, monkeypatch):
+    calls: list[str] = []
+    monkeypatch.setattr(
+        "sec2md.core.fetch",
+        lambda url, user_agent=None: calls.append(url),
+    )
+    result = convert_to_markdown(
+        source,
+        base_url="https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+        quality_policy="off",
+    )
+    assert "[Release](https://www.sec.gov/Archives/edgar/data/1/2/ex99-1.htm)" in result
+    assert calls == []
+
+
+def test_parse_filing_raw_bytes_passes_base_url_without_fetch(monkeypatch):
+    def unexpected_fetch(*args, **kwargs):
+        raise AssertionError("raw bytes must not fetch")
+
+    monkeypatch.setattr("sec2md.core.fetch", unexpected_fetch)
+    pages = parse_filing(
+        b"<p><a href='note.htm'>Note</a></p>",
+        base_url="https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+        quality_policy="off",
+    )
+    assert pages
+
+
+@pytest.mark.parametrize(
+    "base_url",
+    [
+        "http://www.sec.gov/a.htm",
+        "//www.sec.gov/a.htm",
+        "https:///a.htm",
+        "https://user@www.sec.gov/a.htm",
+        "https://user:pass@www.sec.gov/a.htm",
+        "https://www.sec.gov/a.htm#fragment",
+    ],
+)
+def test_base_url_rejects_unsafe_or_nonabsolute_values(base_url):
+    with pytest.raises(ValueError, match="base_url"):
+        convert_to_markdown("<p>safe</p>", base_url=base_url)
+
+
+def test_url_input_rejects_conflicting_base_before_fetch(monkeypatch):
+    monkeypatch.setattr(
+        "sec2md.core.fetch",
+        lambda *args, **kwargs: pytest.fail("conflict must fail before fetch"),
+    )
+    with pytest.raises(ValueError, match="base_url.*source URL"):
+        convert_to_markdown(
+            "https://www.sec.gov/Archives/a.htm",
+            base_url="https://www.sec.gov/Archives/b.htm",
+        )
+
+
+def test_raw_input_base_url_does_not_enable_image_fetch(monkeypatch):
+    monkeypatch.setattr(
+        "sec2md.core._embed_images",
+        lambda *args, **kwargs: pytest.fail("raw input must not embed by fetching"),
+    )
+    result = convert_to_markdown(
+        "<p>safe</p><img src='chart.png'>",
+        base_url="https://www.sec.gov/Archives/a.htm",
+        embed_images=True,
+        quality_policy="off",
+    )
+    assert "safe" in result
+
+
 class TestConvertToMarkdown:
     """Tests for convert_to_markdown function."""
 
