@@ -68,6 +68,23 @@ def test_commented_and_raw_text_meta_declarations_are_ignored(data):
 
 
 @pytest.mark.parametrize(
+    "data",
+    [
+        b'<script></style><meta charset="windows-1252"></script><p>caf\xc3\xa9</p>',
+        b'<style></script><meta charset="windows-1252"></style><p>caf\xc3\xa9</p>',
+        b'<title><meta charset="windows-1252"></title><p>caf\xc3\xa9</p>',
+        b'<textarea><meta charset="windows-1252"></textarea><p>caf\xc3\xa9</p>',
+    ],
+    ids=["script", "style", "title", "textarea"],
+)
+def test_matching_raw_text_and_rcdata_closers_hide_meta_declarations(data):
+    decoded, diagnostics = decode_html(data)
+
+    assert decoded.endswith("<p>caf\N{LATIN SMALL LETTER E WITH ACUTE}</p>")
+    assert diagnostics == DecodeDiagnostics("utf-8", "strict-utf-8")
+
+
+@pytest.mark.parametrize(
     ("encoding", "bom"),
     [
         ("utf-16-le", b"\xff\xfe"),

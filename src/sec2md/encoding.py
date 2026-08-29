@@ -18,7 +18,10 @@ class DecodeDiagnostics:
 _ENCODING_TOKEN = rb"([A-Za-z][A-Za-z0-9._:-]*)"
 _META_START_RE = re.compile(rb"<meta(?=[\s/>])", re.IGNORECASE)
 _XML_START_RE = re.compile(rb"<\?xml\b", re.IGNORECASE)
-_RAW_TEXT_CLOSE_RE = re.compile(rb"</\s*(?:script|style)\b[^>]*>", re.IGNORECASE)
+_TEXT_CONTAINER_CLOSE_RES = {
+    tag_name: re.compile(rb"</\s*" + tag_name + rb"\b[^>]*>", re.IGNORECASE)
+    for tag_name in (b"script", b"style", b"title", b"textarea")
+}
 _CONTENT_CHARSET_RE = re.compile(
     rb"(?:^|;)\s*charset\s*=\s*[\"']?\s*" + _ENCODING_TOKEN,
     re.IGNORECASE,
@@ -142,11 +145,12 @@ def _markup_tags(prefix: bytes):
         tag_name_match = re.match(rb"<([A-Za-z][A-Za-z0-9:-]*)\b", tag)
         if tag_name_match is not None:
             tag_name = tag_name_match.group(1).lower()
-            if tag_name in {b"script", b"style"} and not tag.rstrip().endswith(b"/>"):
-                raw_close = _RAW_TEXT_CLOSE_RE.search(prefix, tag_end + 1)
-                if raw_close is None:
+            close_re = _TEXT_CONTAINER_CLOSE_RES.get(tag_name)
+            if close_re is not None and not tag.rstrip().endswith(b"/>"):
+                text_close = close_re.search(prefix, tag_end + 1)
+                if text_close is None:
                     return
-                index = raw_close.start()
+                index = text_close.start()
                 continue
 
         index = tag_end + 1
