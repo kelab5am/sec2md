@@ -53,6 +53,42 @@ def test_valid_meta_declarations_are_honored(declaration):
 
 
 @pytest.mark.parametrize(
+    "data",
+    [
+        b'<!-- <meta charset="windows-1252"> --><p>caf\xc3\xa9</p>',
+        b'<script>const fake = \'<meta charset="windows-1252">\';</script><p>caf\xc3\xa9</p>',
+        b'<style>/* <meta charset="windows-1252"> */</style><p>caf\xc3\xa9</p>',
+    ],
+)
+def test_commented_and_raw_text_meta_declarations_are_ignored(data):
+    decoded, diagnostics = decode_html(data)
+
+    assert decoded.endswith("<p>caf" + chr(0xE9) + "</p>")
+    assert diagnostics == DecodeDiagnostics("utf-8", "strict-utf-8")
+
+
+@pytest.mark.parametrize(
+    ("encoding", "bom"),
+    [
+        ("utf-16-le", b"\xff\xfe"),
+        ("utf-16-be", b"\xfe\xff"),
+        ("utf-32-le", b"\xff\xfe\x00\x00"),
+        ("utf-32-be", b"\x00\x00\xfe\xff"),
+    ],
+)
+def test_all_unicode_boms_precede_conflicting_transport_and_document_declarations(
+    encoding, bom
+):
+    text = '<meta charset="windows-1252"><p>caf' + chr(0xE9) + '</p>'
+    data = bom + text.encode(encoding)
+
+    decoded, diagnostics = decode_html(data, http_charset="ascii")
+
+    assert decoded == text
+    assert diagnostics == DecodeDiagnostics(encoding, "bom")
+
+
+@pytest.mark.parametrize(
     "declaration",
     [
         b'<meta name="note" content="charset=windows-1252">',

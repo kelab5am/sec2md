@@ -60,7 +60,7 @@ def _normalized_numbers(text: str) -> tuple[str, ...]:
 
     text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
     normalized: list[str] = []
-    pattern = r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?![\w.])"
+    pattern = r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)"
     for match in re.finditer(pattern, text):
         token = normalize_numeric_token(match.group(0))
         if token is not None:

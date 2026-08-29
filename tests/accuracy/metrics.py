@@ -12,12 +12,12 @@ from typing import Literal, Sequence
 
 from bs4 import BeautifulSoup
 from bs4 import XMLParsedAsHTMLWarning
+from bs4.element import Tag
 
 from sec2md.encoding import decode_html, normalize_legacy_characters
-from sec2md.element_builder import _extract_xbrl_tags
 from sec2md.models import Page
 from sec2md.parser import Parser
-from sec2md.quality import _is_hidden_tag, trace_numeric_failures
+from sec2md.quality import ParseDiagnostics, enforce_quality
 from sec2md.sections import extract_sections
 from sec2md.table_parser import render_cell_content
 
@@ -30,6 +30,13 @@ NUMBER_RE = re.compile(
 )
 _C1_RE = re.compile(r"[\x80-\x9f]")
 _MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+_ORACLE_HIDDEN_STYLE_RE = re.compile(
+    r"(?:^|;)\s*(?:display\s*:\s*none\b|visibility\s*:\s*hidden\b)",
+    re.IGNORECASE,
+)
+_ORACLE_XBRL_FACT_TAGS = frozenset(
+    {"ix:nonfraction", "nonfraction", "ix:nonnumeric", "nonnumeric"}
+)
 
 
 @dataclass(frozen=True)
@@ -156,6 +163,72 @@ def sha256_bytes(value: str | bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def _oracle_is_hidden_tag(tag: Tag) -> bool:
+    attrs = tag.attrs or {}
+    if "hidden" in attrs:
+        return True
+    if str(attrs.get("aria-hidden", "")).casefold() == "true":
+        return True
+    style = attrs.get("style", "")
+    if isinstance(style, list):
+        style = " ".join(style)
+    if _ORACLE_HIDDEN_STYLE_RE.search(str(style)):
+        return True
+    name = str(getattr(tag, "name", "")).casefold()
+    return name in {"ix:hidden", "hidden"} or name.endswith(":hidden")
+
+
+def _oracle_is_hidden_or_under_hidden(node: Tag) -> bool:
+    current: Tag | None = node
+    while isinstance(current, Tag):
+        if _oracle_is_hidden_tag(current):
+            return True
+        current = current.parent if isinstance(current.parent, Tag) else None
+    return False
+
+
+def _oracle_visible_xbrl_tags(nodes: Sequence[Tag]) -> tuple[str, ...]:
+    """Extract visible mapped-node concepts without using production helpers."""
+
+    tags: list[str] = []
+    seen: set[str] = set()
+    for node in nodes:
+        if not isinstance(node, Tag) or _oracle_is_hidden_or_under_hidden(node):
+            continue
+        candidates = [node, *node.find_all(_ORACLE_XBRL_FACT_TAGS)]
+        for candidate in candidates:
+            if not isinstance(candidate, Tag):
+                continue
+            if candidate.name not in _ORACLE_XBRL_FACT_TAGS:
+                continue
+            if _oracle_is_hidden_or_under_hidden(candidate):
+                continue
+            concept = candidate.get("name", "")
+            if concept and concept not in seen:
+                seen.add(concept)
+                tags.append(concept)
+    return tuple(tags)
+
+
+def _oracle_trace_numeric_failures(element, nodes: Sequence[Tag]) -> tuple[str, ...]:
+    """Compare numeric multisets using only the accuracy harness normalizer."""
+
+    expected = Counter(
+        normalize_numbers(re.sub(r"!\[[^\]]*\]\([^)]*\)", "", element.content))
+    )
+    available = Counter(
+        normalize_numbers(
+            " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
+        )
+    )
+    failures: list[str] = []
+    for token, count in sorted(expected.items()):
+        failures.extend(
+            f"{element.id}:{token}" for _ in range(max(0, count - available[token]))
+        )
+    return tuple(failures)
+
+
 def _visible_text(soup: BeautifulSoup) -> str:
     """Extract visible text while excluding style/script and hidden subtrees."""
 
@@ -165,7 +238,7 @@ def _visible_text(soup: BeautifulSoup) -> str:
     for tag in clone.find_all(["script", "style", "template"]):
         tag.decompose()
     for tag in list(clone.find_all(True)):
-        if _is_hidden_tag(tag) and tag.parent is not None:
+        if _oracle_is_hidden_tag(tag) and tag.parent is not None:
             tag.decompose()
     return clone.get_text(" ", strip=True)
 
@@ -420,9 +493,9 @@ def _mapping_and_trace(
             if not nodes:
                 missing.append(element.id)
                 continue
-            failures.extend(trace_numeric_failures(element, nodes))
+            failures.extend(_oracle_trace_numeric_failures(element, nodes))
             element_tags = set(element.tags or [])
-            visible_tags = set(_extract_xbrl_tags(nodes) or ())
+            visible_tags = set(_oracle_visible_xbrl_tags(nodes))
             invalid_tags.update(element_tags - visible_tags)
     return tuple(sorted(set(missing))), tuple(failures), tuple(sorted(invalid_tags))
 
@@ -439,7 +512,7 @@ def _section_keys(pages: Sequence[Page], form: str) -> tuple[str, ...]:
     return tuple(keys)
 
 
-def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page]]:
+def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page], ParseDiagnostics]:
     text, _ = decode_html(source)
     text = normalize_legacy_characters(text)
     with warnings.catch_warnings():
@@ -447,8 +520,10 @@ def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page]]:
         parser = Parser(text)
         pages = parser.get_pages(include_elements=True)
         annotated_html = parser.html()
+    if parser.diagnostics is None:
+        raise RuntimeError("Parser did not provide parse diagnostics")
     markdown = "\n\n".join(page.content for page in pages if page.content)
-    return markdown, canonical_pages(pages), annotated_html, pages
+    return markdown, canonical_pages(pages), annotated_html, pages, parser.diagnostics
 
 
 def _link_aware_financial_row_recall(source: bytes, markdown: str) -> float:
@@ -472,8 +547,9 @@ def audit_document(
         raise ValueError(f"unknown quality policy: {quality_policy}")
     first = _parse_once(source)
     second = _parse_once(source)
-    markdown, pages_bytes, annotated_html, pages = first
-    markdown_2, pages_bytes_2, annotated_html_2, _ = second
+    markdown, pages_bytes, annotated_html, pages, diagnostics = first
+    markdown_2, pages_bytes_2, annotated_html_2, _, _ = second
+    enforce_quality(diagnostics, quality_policy)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         source_text, _ = decode_html(source)

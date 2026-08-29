@@ -10,6 +10,7 @@ def convert_to_markdown(
     *,
     user_agent: str | None = None,
     return_pages: bool = False,
+    embed_images: bool = False,
     quality_policy: Literal["strict", "warn", "off"] = "strict",
 ) -> str | List[Page]
 ```
@@ -28,6 +29,11 @@ keyword-only option is available on `parse_filing()`.
 
 **`return_pages`** *(bool)*
 : If `True`, returns `List[Page]` instead of markdown string
+: Default: `False`
+
+**`embed_images`** *(bool)*
+: If `True` and the source is a URL, fetch and embed referenced images as
+  base64 data URIs
 : Default: `False`
 
 **`quality_policy`** *(`"strict"` | `"warn"` | `"off"`)*

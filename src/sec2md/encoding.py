@@ -17,6 +17,8 @@ class DecodeDiagnostics:
 
 _ENCODING_TOKEN = rb"([A-Za-z][A-Za-z0-9._:-]*)"
 _META_START_RE = re.compile(rb"<meta(?=[\s/>])", re.IGNORECASE)
+_XML_START_RE = re.compile(rb"<\?xml\b", re.IGNORECASE)
+_RAW_TEXT_CLOSE_RE = re.compile(rb"</\s*(?:script|style)\b[^>]*>", re.IGNORECASE)
 _CONTENT_CHARSET_RE = re.compile(
     rb"(?:^|;)\s*charset\s*=\s*[\"']?\s*" + _ENCODING_TOKEN,
     re.IGNORECASE,
@@ -102,17 +104,27 @@ def _meta_attributes(tag: bytes) -> dict[bytes, bytes | None]:
     return attributes
 
 
-def _find_meta_declared_encodings(prefix: bytes) -> list[tuple[int, str]]:
-    """Return real charset-bearing meta declarations in source order."""
+def _markup_tags(prefix: bytes):
+    """Yield actual markup tags, skipping comments and raw-text contents."""
 
-    declarations: list[tuple[int, str]] = []
-    cursor = 0
-    while (match := _META_START_RE.search(prefix, cursor)) is not None:
-        tag_start = match.start()
-        index = match.end()
+    index = 0
+    length = len(prefix)
+    while index < length:
+        if prefix[index] != ord("<"):
+            index += 1
+            continue
+
+        if prefix.startswith(b"<!--", index):
+            comment_end = prefix.find(b"-->", index + 4)
+            if comment_end < 0:
+                return
+            index = comment_end + 3
+            continue
+
+        tag_end = index + 1
         quote: int | None = None
-        while index < len(prefix):
-            value = prefix[index]
+        while tag_end < length:
+            value = prefix[tag_end]
             if quote is not None:
                 if value == quote:
                     quote = None
@@ -120,10 +132,34 @@ def _find_meta_declared_encodings(prefix: bytes) -> list[tuple[int, str]]:
                 quote = value
             elif value == ord(">"):
                 break
-            index += 1
-        if index >= len(prefix):
-            break
-        attributes = _meta_attributes(prefix[tag_start : index + 1])
+            tag_end += 1
+        if tag_end >= length:
+            return
+
+        tag = prefix[index : tag_end + 1]
+        yield index, tag
+
+        tag_name_match = re.match(rb"<([A-Za-z][A-Za-z0-9:-]*)\b", tag)
+        if tag_name_match is not None:
+            tag_name = tag_name_match.group(1).lower()
+            if tag_name in {b"script", b"style"} and not tag.rstrip().endswith(b"/>"):
+                raw_close = _RAW_TEXT_CLOSE_RE.search(prefix, tag_end + 1)
+                if raw_close is None:
+                    return
+                index = raw_close.start()
+                continue
+
+        index = tag_end + 1
+
+
+def _find_meta_declared_encodings(prefix: bytes) -> list[tuple[int, str]]:
+    """Return real charset-bearing meta declarations in source order."""
+
+    declarations: list[tuple[int, str]] = []
+    for tag_start, tag in _markup_tags(prefix):
+        if _META_START_RE.match(tag) is None:
+            continue
+        attributes = _meta_attributes(tag)
         declared: bytes | None = None
         charset = attributes.get(b"charset")
         if charset:
@@ -136,7 +172,6 @@ def _find_meta_declared_encodings(prefix: bytes) -> list[tuple[int, str]]:
                     declared = content_match.group(1)
         if declared:
             declarations.append((tag_start, declared.decode("ascii")))
-        cursor = index + 1
     return declarations
 
 
@@ -144,9 +179,13 @@ def _find_declared_encoding(prefix: bytes) -> str | None:
     """Find the first supported HTML/XML declaration in a byte prefix."""
 
     matches = _find_meta_declared_encodings(prefix)
-    xml_match = _XML_ENCODING_RE.search(prefix)
-    if xml_match is not None:
-        matches.append((xml_match.start(), xml_match.group(1).decode("ascii")))
+    prolog_start = len(prefix) - len(prefix.lstrip(b" \t\r\n"))
+    for tag_start, tag in _markup_tags(prefix):
+        if tag_start != prolog_start or _XML_START_RE.match(tag) is None:
+            continue
+        xml_match = _XML_ENCODING_RE.match(tag)
+        if xml_match is not None:
+            matches.append((tag_start, xml_match.group(1).decode("ascii")))
     if not matches:
         return None
     return min(matches, key=lambda item: item[0])[1]

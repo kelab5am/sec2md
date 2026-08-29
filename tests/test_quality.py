@@ -23,6 +23,20 @@ def test_untraceable_normalized_number_is_reported():
     assert trace_numeric_failures(element, nodes) == ("e1:1234",)
 
 
+def test_sentence_final_integer_is_traced_against_mapped_source():
+    element = Element(id="e1", content="Revenue 123.", kind="paragraph", page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<p>Revenue 999.</p>", "lxml").p]
+
+    assert trace_numeric_failures(element, nodes) == ("e1:123",)
+
+
+def test_sentence_final_decimal_is_traced_without_truncating_integer_part():
+    element = Element(id="e1", content="Margin 12.5.", kind="paragraph", page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<p>Margin 999.5.</p>", "lxml").p]
+
+    assert trace_numeric_failures(element, nodes) == ("e1:12.5",)
+
+
 def test_accounting_format_change_remains_traceable():
     element = Element(id="e1", content="Loss (16,173)", kind="table", page_start=1, page_end=1)
     nodes = [BeautifulSoup("<td>(</td><td>16,173</td><td>)</td>", "lxml").body]

@@ -1,5 +1,6 @@
 import re
 import warnings
+from dataclasses import replace
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -12,7 +13,7 @@ from sec2md.parser import Parser
 from sec2md.quality import ParseQualityError, normalize_numeric_token
 from sec2md.utils import FetchedHtml
 
-from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
+from tests.accuracy.fixtures import FIXTURE_IDS, FixtureContract, load_fixture
 from tests.accuracy.metrics import (
     _financial_row_recall,
     _mapping_and_trace,
@@ -24,6 +25,45 @@ from tests.accuracy.metrics import (
     normalize_numbers,
     normalize_words,
 )
+
+
+def test_audit_document_enforces_requested_quality_policy(monkeypatch):
+    source = b"<html><body><p>Controlled diagnostics input.</p></body></html>"
+    contract = FixtureContract(
+        fixture_id="controlled",
+        filename="",
+        cik="",
+        accession="",
+        form="",
+        report_date="",
+        sec_url="",
+        role="",
+        sha256="",
+        expected_encoding_reason="strict-utf8",
+        min_word_recall=0.0,
+        min_numeric_recall=0.0,
+        min_financial_row_recall=0.0,
+        expected_sections=(),
+        representative_rows=(),
+    )
+    baseline = audit_document(source, contract, quality_policy="off")
+    original_get_pages = Parser.get_pages
+
+    def inject_controlled_diagnostic(self, *args, **kwargs):
+        pages = original_get_pages(self, *args, **kwargs)
+        assert self.diagnostics is not None
+        self.diagnostics = replace(
+            self.diagnostics, warnings=("controlled diagnostics failure",)
+        )
+        return pages
+
+    monkeypatch.setattr(Parser, "get_pages", inject_controlled_diagnostic)
+
+    with pytest.raises(ParseQualityError, match="controlled diagnostics failure"):
+        audit_document(source, contract, quality_policy="strict")
+
+    off_result = audit_document(source, contract, quality_policy="off")
+    assert off_result.markdown_sha256 == baseline.markdown_sha256
 
 
 @pytest.fixture(scope="session")
@@ -58,7 +98,7 @@ def test_rcq_release_contract(all_accuracy_results):
         assert set(contract.expected_sections) <= set(first.sections)
         assert first.representative_row_failures == ()
 
-    legacy_markdown, _, _, _ = _parse_once(load_fixture("nvda-2002-10k")[1])
+    legacy_markdown, _, _, _, _ = _parse_once(load_fixture("nvda-2002-10k")[1])
     legacy_rows = [line for line in legacy_markdown.splitlines() if "16,173" in line]
     assert len(legacy_rows) == 1
     legacy_cells = _markdown_cells(legacy_rows[0])
@@ -67,7 +107,7 @@ def test_rcq_release_contract(all_accuracy_results):
     assert normalize_numeric_token("(16,173)") == "-16173"
 
     eight_k_contract, eight_k_source = load_fixture("nvda-2026-08-26-8k")
-    eight_k_markdown, _, _, _ = _parse_once(eight_k_source)
+    eight_k_markdown, _, _, _, _ = _parse_once(eight_k_source)
     assert {"ITEM 2.02", "ITEM 9.01"} <= set(results_by_id["nvda-2026-08-26-8k"].sections)
     links = re.findall(r"\[[^]]+\]\(([^)]+)\)", eight_k_markdown)
     resolved_links = {urljoin(eight_k_contract.sec_url, link) for link in links}
@@ -149,7 +189,7 @@ def test_legacy_character_normalization_has_no_c1_controls():
 
 def test_legacy_accounting_reconstruction_preserves_sign_and_widths():
     _, source = load_fixture("nvda-2002-10k")
-    markdown, _, _, _ = _parse_once(source)
+    markdown, _, _, _, _ = _parse_once(source)
     from tests.accuracy.metrics import _table_width_errors
 
     expected_width_errors = ()
@@ -183,7 +223,7 @@ def test_legacy_accounting_recovery_rejects_wrong_label():
 
 def test_known_8k_link_defect_is_exactly_bounded():
     contract, source = load_fixture("nvda-2026-08-26-8k")
-    markdown, _, _, _ = _parse_once(source)
+    markdown, _, _, _, _ = _parse_once(source)
     result = audit_document(source, contract, quality_policy="strict")
     links = re.findall(r"\[[^]]+\]\(([^)]+)\)", markdown)
     assert result.exhibit_link_count >= 2
