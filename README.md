@@ -122,6 +122,26 @@ When a source URL is provided, relative links resolve against that document
 URL. With raw HTML and no base URL, relative `href` values remain relative.
 Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
 
+Callers holding exact retained HTML bytes can supply a validated `base_url` for
+link resolution without giving sec2md an acquisition job:
+
+```python
+pages = sec2md.convert_to_markdown(
+    retained_html_bytes,
+    base_url="https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+    return_pages=True,
+    embed_images=False,
+    quality_policy="strict",
+)
+```
+
+`base_url` resolves relative links only. It does not fetch the document or
+attachments, and image embedding is not performed for raw text or bytes even
+when `embed_images=True`. It must be an absolute HTTPS URL with a non-empty
+host and no username, password, or fragment; its path and query are preserved
+for joining. For URL input, an explicitly supplied `base_url` must exactly
+match the source URL or conversion raises `ValueError` before fetching.
+
 ## Complex Table Handling
 
 SEC tables are notoriously complex — rowspans, colspans, merged cells, currency symbols in separate columns. Some filings don't even use `<table>` tags, building tables from absolutely-positioned CSS divs instead.

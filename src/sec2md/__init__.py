@@ -13,7 +13,7 @@ from sec2md.section_extractor import SectionExtractor
 from sec2md.quality import ParseDiagnostics, ParseQualityError
 from sec2md.encoding import DecodeDiagnostics
 
-__version__ = "0.1.22+rcq.1"
+__version__ = "0.1.22+rcq.2"
 __all__ = [
     "convert_to_markdown",
     "parse_filing",

@@ -145,8 +145,8 @@ class TestVersionConsistency:
 
 
 def test_internal_version_matches_distribution():
-    assert version("sec2md") == "0.1.22+rcq.1"
-    assert sec2md.__version__ == "0.1.22+rcq.1"
+    assert version("sec2md") == "0.1.22+rcq.2"
+    assert sec2md.__version__ == "0.1.22+rcq.2"
 
 
 def test_distribution_points_to_maintained_fork():
