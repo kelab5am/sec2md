@@ -72,6 +72,23 @@ class TestBasicTables:
         assert "X" in md
         assert "Y" in md
 
+    def test_multiline_non_link_cell_is_normalized_to_one_markdown_row(self):
+        """Catch non-link cell newlines escaping into physical Markdown rows."""
+        html = """<table>
+        <tr><th>Label</th><th>Value</th></tr>
+        <tr><td>alpha\r\nbeta\ngamma</td><td>1</td></tr>
+        </table>"""
+
+        md = TableParser(_make_table(html)).to_markdown()
+        lines = md.splitlines()
+
+        assert lines == [
+            "| Label | Value |",
+            "| --- | --- |",
+            "| alpha beta gamma | 1 |",
+        ]
+        assert all(line.count("|") == 3 for line in lines)
+
 
 class TestSpanning:
     """Rowspan and colspan handling."""

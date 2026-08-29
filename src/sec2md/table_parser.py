@@ -222,7 +222,13 @@ class TableParser:
                 if td.find("a"):
                     text = render_cell_content(td, base_url=self.base_url)
                 else:
-                    text = td.get_text(separator=" ", strip=True).replace('\xa0', ' ')
+                    text = (
+                        td.get_text(separator=" ", strip=True)
+                        .replace('\xa0', ' ')
+                        .replace('\r\n', ' ')
+                        .replace('\r', ' ')
+                        .replace('\n', ' ')
+                    )
                 if not text:
                     if td.find('img'):
                         text = '●'  # or '•' depending on your BULLETS set
