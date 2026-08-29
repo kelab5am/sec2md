@@ -10,8 +10,12 @@ def convert_to_markdown(
     *,
     user_agent: str | None = None,
     return_pages: bool = False,
+    quality_policy: Literal["strict", "warn", "off"] = "strict",
 ) -> str | List[Page]
 ```
+
+`quality_policy` is keyword-only and defaults to `"strict"`. The same
+keyword-only option is available on `parse_filing()`.
 
 ## Parameters
 
@@ -25,6 +29,15 @@ def convert_to_markdown(
 **`return_pages`** *(bool)*
 : If `True`, returns `List[Page]` instead of markdown string
 : Default: `False`
+
+**`quality_policy`** *(`"strict"` | `"warn"` | `"off"`)*
+: Quality enforcement mode; default: `"strict"`
+: `"strict"` raises `ParseQualityError` on catastrophic loss, replacement or
+  C1 characters, missing source-node mappings, or untraceable normalized
+  numeric values.
+: `"warn"` returns the output and records warnings; `"off"` disables quality
+  enforcement for parser experimentation.
+: Strict failures expose the immutable `ParseQualityError.diagnostics` object.
 
 ## Returns
 
@@ -42,6 +55,16 @@ def convert_to_markdown(
 
 **`requests.RequestException`**
 : If URL fetch fails
+
+The supported input boundary is one supplied HTML document as text or bytes,
+or a URL for one HTML document. Decoding is deterministic: Unicode BOM, then a
+recognized HTTP `charset`, an HTML/XML declaration in the first 8 KiB, strict
+UTF-8, and Windows-1252 fallback. An unrecognized explicit encoding raises an
+input error.
+
+When a source URL is supplied, relative links resolve against that document
+URL. With raw HTML and no base URL, relative `href` values remain relative.
+Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
 
 ## Examples
 

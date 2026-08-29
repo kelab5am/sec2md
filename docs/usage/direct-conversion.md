@@ -14,6 +14,23 @@ md = sec2md.convert_to_markdown(
 )
 ```
 
+### Quality policy and supported input
+
+`convert_to_markdown()` and `parse_filing()` accept one supplied HTML document
+as text or bytes, or a URL for one HTML document. `quality_policy` is
+keyword-only and defaults to `"strict"`; use `"warn"` to return output while
+recording diagnostics, or `"off"` for parser experimentation. Strict failures
+raise `ParseQualityError`, whose `.diagnostics` attribute contains the
+structured quality evidence.
+
+Decoding follows a deterministic precedence: Unicode BOM, recognized HTTP
+`charset`, HTML/XML declaration in the first 8 KiB, strict UTF-8, then
+Windows-1252 fallback. Explicitly unsupported encodings fail. A URL gives
+relative links the document URL as their base; raw HTML without a base URL
+keeps relative `href` values relative.
+
+Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
+
 ## Financial Statements
 
 Financial statements are already well-structured - convert them directly:

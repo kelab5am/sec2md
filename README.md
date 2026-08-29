@@ -99,6 +99,29 @@ sec2md works with any SEC filing served as HTML. For filings with standardized s
 
 All other filing types — S-1, S-3, S-4, F-1, 424B, 6-K, DEF 14A, DEFA14A, 40-F, N-CSR, SC TO-T, and any HTML exhibit or attachment — are parsed as clean Markdown with full traceability.
 
+### Input, quality, and exhibit links
+
+The public `convert_to_markdown()` and `parse_filing()` convenience functions
+accept one supplied HTML document as text or bytes, or a URL for one HTML
+document. They do not acquire a complete accession, fetch exhibits, parse
+PDF/OCR input, or build a filing-wide XBRL inventory.
+
+Both functions expose the keyword-only `quality_policy` argument. It defaults
+to `"strict"`, which raises `ParseQualityError` when catastrophic output loss,
+replacement/C1 characters, missing source mappings, or untraceable normalized
+numbers are detected. `"warn"` returns the output and records quality warnings;
+`"off"` disables quality enforcement for parser experimentation. A strict
+failure exposes the immutable `ParseQualityError.diagnostics` object.
+
+Byte decoding is deterministic: a Unicode BOM wins, followed by a recognized
+HTTP `charset`, an HTML/XML declaration in the first 8 KiB, strict UTF-8, and
+finally Windows-1252 fallback. Unsupported explicit encodings fail rather than
+silently substituting data.
+
+When a source URL is provided, relative links resolve against that document
+URL. With raw HTML and no base URL, relative `href` values remain relative.
+Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
+
 ## Complex Table Handling
 
 SEC tables are notoriously complex — rowspans, colspans, merged cells, currency symbols in separate columns. Some filings don't even use `<table>` tags, building tables from absolutely-positioned CSS divs instead.

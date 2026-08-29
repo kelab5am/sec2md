@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.22+rcq.1 (unreleased)
+## 0.1.22+rcq.1 (2026-08-29)
 
 - Deterministic decoding.
 - Strict quality checks.

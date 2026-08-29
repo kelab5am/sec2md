@@ -1,5 +1,6 @@
 import re
 import warnings
+from pathlib import Path
 from urllib.parse import urljoin
 
 import pytest
@@ -27,6 +28,61 @@ from tests.accuracy.metrics import (
 
 
 _MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+
+
+@pytest.fixture(scope="session")
+def all_accuracy_results():
+    results = []
+    for fixture_id in FIXTURE_IDS:
+        contract, source = load_fixture(fixture_id)
+        first = audit_document(source, contract, quality_policy="strict")
+        second = audit_document(source, contract, quality_policy="strict")
+        results.append((contract, first, second))
+    return tuple(results)
+
+
+def test_rcq_release_contract(all_accuracy_results):
+    assert len(all_accuracy_results) == 7
+    results_by_id = {}
+    for contract, first, second in all_accuracy_results:
+        _, source = load_fixture(contract.fixture_id)
+        results_by_id[contract.fixture_id] = first
+        assert first.markdown_sha256 == second.markdown_sha256
+        assert first.pages_sha256 == second.pages_sha256
+        assert first.annotated_html_sha256 == second.annotated_html_sha256
+        assert first.word_recall >= contract.min_word_recall
+        assert first.numeric_recall >= contract.min_numeric_recall
+        # Task 6's audited row gate intentionally removes Markdown link syntax
+        # and renders split same-destination anchors before comparing rows.
+        assert _link_aware_financial_row_recall(source) >= contract.min_financial_row_recall
+        assert first.inconsistent_table_widths == ()
+        assert first.replacement_characters == 0
+        assert first.c1_control_characters == 0
+        assert first.duplicate_element_ids == ()
+        assert first.missing_element_mappings == ()
+        assert first.trace_numeric_failures == ()
+        assert first.invalid_xbrl_tags == ()
+        assert set(contract.expected_sections) <= set(first.sections)
+        assert first.representative_row_failures == ()
+
+    legacy_markdown, _, _, _ = _parse_once(load_fixture("nvda-2002-10k")[1])
+    legacy_rows = [line for line in legacy_markdown.splitlines() if "16,173" in line]
+    assert len(legacy_rows) == 1
+    legacy_cells = _markdown_cells(legacy_rows[0])
+    assert "(16,173)" in legacy_cells
+    assert ")" not in legacy_cells
+    assert normalize_numeric_token("(16,173)") == "-16173"
+
+    eight_k_contract, eight_k_source = load_fixture("nvda-2026-08-26-8k")
+    eight_k_markdown, _, _, _ = _parse_once(eight_k_source)
+    assert {"ITEM 2.02", "ITEM 9.01"} <= set(results_by_id["nvda-2026-08-26-8k"].sections)
+    links = re.findall(r"\[[^]]+\]\(([^)]+)\)", eight_k_markdown)
+    resolved_links = {urljoin(eight_k_contract.sec_url, link) for link in links}
+    assert load_fixture("nvda-2026-ex99-1")[0].sec_url in resolved_links
+    assert load_fixture("nvda-2026-ex99-2")[0].sec_url in resolved_links
+
+    html_files = list(Path("tests").rglob("*.html"))
+    assert html_files == [Path("tests/fixtures/sec/positioned-issue-4.html")]
 
 
 def _strip_markdown_link_destinations(text: str) -> str:
@@ -115,7 +171,7 @@ def test_multiset_recall_is_duplicate_aware():
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
 def test_audited_document_meets_baseline_contract(fixture_id: str):
     contract, source = load_fixture(fixture_id)
-    result = audit_document(source, contract, quality_policy="off")
+    result = audit_document(source, contract, quality_policy="strict")
 
     assert result.word_recall >= contract.min_word_recall
     assert result.numeric_recall >= contract.min_numeric_recall
@@ -137,7 +193,7 @@ def test_audited_document_meets_baseline_contract(fixture_id: str):
 
 def test_apple_trace_has_no_failures():
     contract, source = load_fixture("aapl-2023-10k")
-    result = audit_document(source, contract, quality_policy="off")
+    result = audit_document(source, contract, quality_policy="strict")
     assert result.trace_failures == ()
 
 
@@ -150,7 +206,7 @@ def test_fixture_encoding_reasons_match_manifest():
 
 def test_legacy_character_normalization_has_no_c1_controls():
     contract, source = load_fixture("nvda-2002-10k")
-    result = audit_document(source, contract, quality_policy="off")
+    result = audit_document(source, contract, quality_policy="strict")
 
     assert result.replacement_characters == 0
     assert result.c1_control_characters == 0
@@ -193,7 +249,7 @@ def test_legacy_accounting_recovery_rejects_wrong_label():
 def test_known_8k_link_defect_is_exactly_bounded():
     contract, source = load_fixture("nvda-2026-08-26-8k")
     markdown, _, _, _ = _parse_once(source)
-    result = audit_document(source, contract, quality_policy="off")
+    result = audit_document(source, contract, quality_policy="strict")
     links = re.findall(r"\[[^]]+\]\(([^)]+)\)", markdown)
     assert result.exhibit_link_count >= 2
     assert _has_audited_exhibit_links(links)
