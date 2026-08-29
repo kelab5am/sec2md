@@ -65,7 +65,7 @@ def test_off_skips_quality_enforcement(monkeypatch):
 
 
 @pytest.mark.parametrize("quality_policy", ["strict", "warn", "off"])
-def test_raw_bytes_base_url_preserves_quality_policy(quality_policy, monkeypatch):
+def test_raw_bytes_base_url_preserves_quality_policy(quality_policy, monkeypatch, caplog):
     source = b"<html><body><p>" + (b"loss sentinel " * 100) + b"</p></body></html>"
     monkeypatch.setattr(Parser, "markdown", lambda self: "")
 
@@ -77,14 +77,19 @@ def test_raw_bytes_base_url_preserves_quality_policy(quality_policy, monkeypatch
                 quality_policy=quality_policy,
             )
     else:
-        assert (
-            convert_to_markdown(
-                source,
-                base_url="https://www.sec.gov/Archives/a.htm",
-                quality_policy=quality_policy,
+        with caplog.at_level("WARNING"):
+            assert (
+                convert_to_markdown(
+                    source,
+                    base_url="https://www.sec.gov/Archives/a.htm",
+                    quality_policy=quality_policy,
+                )
+                == ""
             )
-            == ""
-        )
+        if quality_policy == "warn":
+            assert "substantial source produced empty output" in caplog.text
+        else:
+            assert not caplog.records
 
 
 def test_strict_rejects_catastrophic_output_ratio():
