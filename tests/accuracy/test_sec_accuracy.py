@@ -161,10 +161,7 @@ def test_legacy_accounting_reconstruction_preserves_sign_and_widths():
     markdown, _, _, _ = _parse_once(source)
     from tests.accuracy.metrics import _table_width_errors
 
-    expected_width_errors = (
-        "line 27: expected 2 columns, got 1",
-        "line 1198: expected 4 columns, got 1",
-    )
+    expected_width_errors = ()
     actual_width_errors = _table_width_errors(markdown)
     assert actual_width_errors == expected_width_errors
 
