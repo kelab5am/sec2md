@@ -122,3 +122,39 @@ def test_percentage_underflow_stays_text():
     result = convert_cell(text, role="percent")
     assert result.value == text
     assert result.review_reason
+
+
+@pytest.mark.parametrize(
+    "prefix,suffix,places,expected_value",
+    [
+        ("", "", 249, Decimal("1")),
+        ("$", "", 246, Decimal("1")),
+        ("(", ")", 120, Decimal("-1")),
+        ("($", ")", 117, Decimal("-1")),
+        ("", "%", 252, Decimal("0.01")),
+        ("(", "%)", 123, Decimal("-0.01")),
+    ],
+)
+def test_complete_format_length_boundary(prefix, suffix, places, expected_value):
+    supported = prefix + "1." + "0" * places + suffix
+    result = convert_cell(supported, role="number")
+    assert result.value == expected_value
+    assert result.original == supported
+    assert len(result.number_format) == 255
+    assert result.review_reason is None
+
+    unsupported = prefix + "1." + "0" * (places + 1) + suffix
+    result = convert_cell(unsupported, role="number")
+    assert result.value == unsupported
+    assert result.original == unsupported
+    assert result.number_format == "@"
+    assert result.review_reason
+
+
+@pytest.mark.parametrize("text", ["1." + "0" * 260, "0." + "0" * 306 + "3"])
+def test_in_range_values_with_unsupported_display_precision_stay_text(text):
+    result = convert_cell(text, role="number")
+    assert result.value == text
+    assert result.original == text
+    assert result.number_format == "@"
+    assert result.review_reason

@@ -81,4 +81,11 @@ def convert_cell(text: str, *, role: Literal["text", "number", "percent"]) -> Ce
         number_format = '"$"' + number_format
     if accounting:
         number_format += ";(" + number_format + ")"
+    if len(number_format) > 255:
+        return CellValue(
+            text,
+            "@",
+            text,
+            "Display precision exceeds Excel's 255-character format limit; retain source text.",
+        )
     return CellValue(value, number_format, text)
