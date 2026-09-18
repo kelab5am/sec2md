@@ -6,7 +6,7 @@ from typing import Literal, Mapping, Sequence
 from urllib.parse import unquote, urljoin
 
 from bs4 import Tag
-from bs4.element import NavigableString
+from bs4.element import Comment, Declaration, Doctype, NavigableString, ProcessingInstruction
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 
@@ -50,6 +50,8 @@ def _text_fragments(node: Tag) -> str:
     """Keep inline whitespace until all fragments have been assembled."""
     parts = []
     for child in node.children:
+        if isinstance(child, (Comment, Declaration, Doctype, ProcessingInstruction)):
+            continue
         if isinstance(child, NavigableString):
             parts.append(str(child))
         elif isinstance(child, Tag) and not _hidden(child) and child.name not in {'script', 'style'}:
@@ -84,15 +86,27 @@ def _cell(node, row, column, rowspan, colspan, source_url, native_anchors):
 
 
 def _context(node: Tag, *, before: bool) -> tuple[str, ...]:
+    """Keep nearby blocks in source order, bounded by tables, headings and size."""
     siblings = node.previous_siblings if before else node.next_siblings
+    context = []
+    char_count = 0
+    headings = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}
     for sibling in siblings:
         if isinstance(sibling, Tag) and not _hidden(sibling):
-            if sibling.name == 'table':
+            if sibling.name == 'table' or sibling.find('table') is not None:
+                break
+            is_heading = sibling.name in headings or sibling.get('role') == 'heading'
+            if (is_heading and not before) or sibling.find(list(headings)) is not None:
                 break
             text = _visible_text(sibling)
             if text:
-                return (text,)
-    return ()
+                if char_count + len(text) > 4096:
+                    break
+                context.append(text)
+                char_count += len(text)
+            if is_heading or len(context) >= 12:
+                break
+    return tuple(reversed(context)) if before else tuple(context)
 
 
 def _references(nodes, source_url, note_targets):
@@ -104,11 +118,29 @@ def _references(nodes, source_url, note_targets):
                 continue
             target = note_targets.get(unquote(href[1:]))
             destination = urljoin(source_url or '', href)
-            if target is None:
+            if not target:
                 unresolved.append(destination)
             else:
                 notes.append((destination, target))
     return tuple(dict.fromkeys(notes)), tuple(dict.fromkeys(unresolved))
+
+
+def _note_target_text(node: Tag) -> str:
+    """Resolve empty anchors only within a small, single-target paragraph."""
+    if any(_hidden(parent) for parent in (node, *node.parents) if isinstance(parent, Tag)):
+        return ''
+    text = _visible_text(node)
+    if text:
+        return text
+    paragraph = node.find_parent('p')
+    if paragraph is None:
+        return ''
+    other_targets = [target for target in paragraph.find_all(True)
+                     if target is not node and (target.get('id') or target.get('name'))]
+    if other_targets:
+        return ''
+    text = _visible_text(paragraph)
+    return text if len(text) <= 2048 else ''
 
 
 def native_metadata(soup: Tag):
@@ -118,7 +150,7 @@ def native_metadata(soup: Tag):
         anchors[id(node)] = node.get('id') or node.get('name')
         for key in ('id', 'name'):
             if node.get(key):
-                targets.setdefault(node[key], _visible_text(node))
+                targets.setdefault(node[key], _note_target_text(node))
     return anchors, targets
 
 

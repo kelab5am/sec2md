@@ -143,3 +143,69 @@ def test_inline_whitespace_is_preserved_without_splitting_numeric_tokens():
     parser.get_pages()
     snapshot, = parser.table_snapshots
     assert [c.text for c in snapshot.source_cells[-2:]] == ['Net income', '1,200']
+
+
+def test_nested_malformed_table_recovers_as_source_text_and_continues():
+    # Small malformed span exercises the unsafe path without a large allocation.
+    nested = '<table><tr><td>Outer<table><tr><td rowspan="5">Nested 123</td></tr><tr><td>Tail 456</td></tr></table></td></tr><tr><td>End</td></tr></table>'
+    parser = Parser(nested + TABLE, capture_tables=True)
+    pages = parser.get_pages()
+    bad, good = parser.table_snapshots
+    assert bad.issues and 'Nested 123' in bad.original_text and 'Tail 456' in bad.original_text
+    assert pages[0].content.startswith(bad.original_text + '\n')
+    assert not good.issues and good.source_anchor == 'native'
+
+
+def test_comments_never_enter_captured_visible_text():
+    source = '<table><tr><th>Label<!--internal--></th><th>Amount</th></tr><tr><td><a href="#n">Note<!--internal--></a></td><td>1<!--internal-->200</td></tr></table><p id="n">Note <!--internal-->body</p>'
+    parser = Parser(source, capture_tables=True)
+    parser.get_pages()
+    snapshot, = parser.table_snapshots
+    assert snapshot.source_cells[-1].text == '1200'
+    assert snapshot.source_cells[0].text == 'Label'
+    assert snapshot.source_cells[-2].links == (('Note', '#n'),)
+    assert snapshot.resolved_notes == (('#n', 'Note body'),)
+    assert 'internal' not in snapshot.original_text
+    assert snapshot.context_after == ('Note body',)
+
+
+@pytest.mark.parametrize('anchor', ['<a name="n"></a>', '<span id="n"></span>'])
+def test_empty_note_anchor_resolves_only_bounded_paragraph(anchor):
+    source = '<table><tr><th>Item</th><th>Value</th></tr><tr><td><a href="#n">(1)</a></td><td>100</td></tr></table><p>' + anchor + '(1) Note text.</p><p>Unrelated prose.</p>'
+    parser = Parser(source, capture_tables=True)
+    parser.get_pages()
+    snapshot, = parser.table_snapshots
+    assert snapshot.resolved_notes == (('#n', '(1) Note text.'),)
+    assert not snapshot.unresolved_references
+    parser.get_pages()
+    assert parser.table_snapshots == [snapshot]
+
+
+def test_empty_unbounded_note_anchor_stays_unresolved():
+    source = TABLE.replace('#note', '#n') + '<a name="n"></a><p>Unrelated prose.</p>'
+    parser = Parser(source, capture_tables=True)
+    parser.get_pages()
+    snapshot, = parser.table_snapshots
+    assert not snapshot.resolved_notes
+    assert snapshot.unresolved_references == ('#n',)
+
+
+def test_context_retains_heading_units_and_multiple_notes_in_source_order():
+    source = '<p>Earlier unrelated prose</p><h2>Income statement</h2><p>Amounts in millions</p>' + TABLE + '<p>(1) First note.</p><p>(2) Second note.</p><h2>Next section</h2><p>Unrelated.</p>'
+    parser = Parser(source, capture_tables=True)
+    parser.get_pages()
+    snapshot, = parser.table_snapshots
+    assert snapshot.context_before == ('Income statement', 'Amounts in millions')
+    assert snapshot.context_after == ('(1) First note.', '(2) Second note.')
+
+
+def test_context_stops_at_next_table_and_is_bounded():
+    from sec2md.xlsx_tables import snapshot_html_table
+    source = TABLE + '<p>Nearby note</p>' + TABLE + '<p>Other table note</p>'
+    soup = BeautifulSoup(source, 'lxml')
+    snapshot = snapshot_html_table(soup.table, ordinal=1, page=1, source_url=None)
+    assert snapshot.context_after == ('Nearby note',)
+    soup = BeautifulSoup(TABLE + ''.join(f'<p>Note {i}</p>' for i in range(50)), 'lxml')
+    snapshot = snapshot_html_table(soup.table, ordinal=1, page=1, source_url=None)
+    assert 1 < len(snapshot.context_after) <= 12
+    assert snapshot.context_after[0] == 'Note 0'

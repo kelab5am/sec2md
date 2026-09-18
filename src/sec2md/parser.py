@@ -763,7 +763,9 @@ class Parser:
                 )
                 self.table_snapshots.append(snapshot)
                 self._snapshot_nodes.append((root,))
-                if any('span' in issue.lower() for issue in snapshot.issues):
+                # Every HTML structural issue invalidates legacy grid safety,
+                # including nested descendants outside direct-cell validation.
+                if snapshot.issues:
                     self._unreliable_tables[id(root)] = snapshot
             t = self._process_element(root)
             if t:
