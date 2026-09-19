@@ -261,6 +261,32 @@ def test_numeric_facts_looking_like_years_after_blank_label_stay_data():
     assert table.cell_sources[0][1] == ((1, 1),)
 
 
+def test_blank_label_year_like_amount_after_value_header_stays_data():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Item</th><th>Amount</th></tr>
+    <tr><td></td><td>2026</td></tr><tr><td>Revenue</td><td>150</td></tr></table>''')
+    assert table.headers == ('Item', 'Amount')
+    assert [[c.value for c in row] for row in table.rows] == [[None, Decimal('2026')], ['Revenue', Decimal('150')]]
+    assert table.cell_sources[0][1] == ((1, 1),)
+
+
+def test_body_percentage_label_does_not_supply_global_units():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Item</th><th>2026</th></tr>
+    <tr><td>Revenue</td><td>120</td></tr><tr><td>Percentage of revenue</td><td>15</td></tr></table>''')
+    assert table.units == ''
+    assert [row[1].value for row in table.rows] == [Decimal('120'), Decimal('.15')]
+    assert table.rows[1][0].value == 'Percentage of revenue'
+
+
+def test_percentage_column_heading_does_not_supply_global_units():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Item</th><th>2026</th><th>Percentage of revenue</th></tr>
+    <tr><td>Revenue</td><td>120</td><td>15</td></tr></table>''')
+    assert table.units == ''
+    assert [c.value for c in table.rows[0][1:]] == [Decimal('120'), Decimal('.15')]
+
+
 def test_numeric_year_data_after_duration_headers_stays_data():
     from decimal import Decimal
     table = prepared('''<table><tr><th colspan="2">Three Months Ended</th></tr>

@@ -311,14 +311,16 @@ def _header_count(grid):
                            (re.fullmatch(r'[$(\d+−-][\d,.() $%+−-]*', c.text) and not _PERIOD.fullmatch(c.text))
                            for c in nonempty)
         explicit = bool(nonempty) and all(c.is_header for c in nonempty) and not numeric_body
-        # Bare years are also valid data (Year/Amount, identifiers). A TD
-        # period row needs a blank label slot or a source duration span above it.
-        period_layout = not row[0] or not row[0].text.strip() or any(
+        # A blank label beneath established headers can belong to numeric data.
+        # Only the initial blank-label layout or a duration span supports TD years.
+        blank_label = not row[0] or not row[0].text.strip()
+        period_layout = (count == 0 and blank_label) or any(
             c and c.colspan > 1 and re.search(r'\bended\b', c.text, re.I)
             for c in (grid[index - 1] if index else ()))
         periods = period_layout and not numeric_body and bool(nonempty) and all(
             _PERIOD.fullmatch(c.text.strip()) or _UNITS.search(c.text) for c in nonempty)
-        if not (explicit or periods or not nonempty):
+        unit_row = blank_label and bool(nonempty) and all(_UNIT_DECLARATION.fullmatch(c.text.strip()) for c in nonempty)
+        if not (explicit or periods or unit_row or not nonempty):
             break
         if nonempty:
             count = index + 1
@@ -403,8 +405,6 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     cells = snapshot.source_cells
     title = snapshot.explicit_title or f'Table {snapshot.ordinal}'
     unit_texts = [text for text in snapshot.context_before if _UNIT_DECLARATION.fullmatch(text.strip())]
-    unit_texts.extend(c.text for c in cells if _UNIT_DECLARATION.fullmatch(c.text.strip())
-                      and c.text not in unit_texts)
     units = '\n'.join(unit_texts)
     notes = [f'Context: {text}' for text in (*snapshot.context_before, *snapshot.context_after)
              if text != snapshot.explicit_title and text not in unit_texts]
@@ -433,6 +433,15 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     notes.append('Original text uses source columns and header levels; span-covered positions are blank. '
                  'Source span origins and symbol coordinates are retained in the table snapshot and cell_sources.')
     header_count = _header_count(grid)
+    # Body labels and individual column units retain their local scope. A source
+    # declaration must precede data and span all value columns, including the
+    # common first grouping row (e.g. Inventories: / (In millions)).
+    first_body_row = next((r for r in range(header_count, height) if any(original[r])), height)
+    unit_texts.extend(c.text for c in cells if c.row <= first_body_row
+                      and (c.column == 0 or (grid[c.row][0] and c.column == grid[c.row][0].colspan))
+                      and c.column + c.colspan == width and c.colspan > 1
+                      and _UNIT_DECLARATION.fullmatch(c.text.strip()) and c.text not in unit_texts)
+    units = '\n'.join(unit_texts)
     groups = _column_groups(grid, original, header_count)
     group_origins = [[list(dict.fromkeys(grid[r][col] for col in group
                                         if grid[r][col] and (grid[r][col].row, grid[r][col].column) == (r, col)))
