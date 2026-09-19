@@ -303,6 +303,7 @@ _PERIOD = re.compile(r'^(?:(?:three|six|nine|twelve) months? ended|years? ended|
 
 def _header_count(grid):
     count = 0
+    has_heading = False
     for index, row in enumerate(grid):
         origins = list(dict.fromkeys(c for c in row if c is not None))
         nonempty = [c for c in origins if c.text.strip()]
@@ -312,9 +313,10 @@ def _header_count(grid):
                            for c in nonempty)
         explicit = bool(nonempty) and all(c.is_header for c in nonempty) and not numeric_body
         # A blank label beneath established headers can belong to numeric data.
-        # Only the initial blank-label layout or a duration span supports TD years.
+        # Unit-only rows do not establish value headings. Otherwise only the
+        # initial blank-label layout or a duration span supports TD years.
         blank_label = not row[0] or not row[0].text.strip()
-        period_layout = (count == 0 and blank_label) or any(
+        period_layout = (not has_heading and blank_label) or any(
             c and c.colspan > 1 and re.search(r'\bended\b', c.text, re.I)
             for c in (grid[index - 1] if index else ()))
         periods = period_layout and not numeric_body and bool(nonempty) and all(
@@ -324,6 +326,7 @@ def _header_count(grid):
             break
         if nonempty:
             count = index + 1
+            has_heading |= any(not _UNIT_DECLARATION.fullmatch(c.text.strip()) for c in nonempty)
     # Trailing blank rows belong to the body. Wholly blank tables remain data.
     return count
 

@@ -270,6 +270,17 @@ def test_blank_label_year_like_amount_after_value_header_stays_data():
     assert table.cell_sources[0][1] == ((1, 1),)
 
 
+def test_unit_only_row_before_td_periods_preserves_period_headers():
+    from decimal import Decimal
+    table = prepared('''<table><tr><td></td><td colspan="2">(In millions)</td></tr>
+    <tr><td></td><td>2026</td><td>2025</td></tr>
+    <tr><td>Revenue</td><td>120</td><td>100</td></tr></table>''')
+    assert table.headers == ('Column 1', '2026', '2025')
+    assert [[c.value for c in row] for row in table.rows] == [['Revenue', Decimal('120'), Decimal('100')]]
+    assert table.units == '(In millions)'
+    assert table.cell_sources[0][1:] == (((2, 1),), ((2, 2),))
+
+
 def test_body_percentage_label_does_not_supply_global_units():
     from decimal import Decimal
     table = prepared('''<table><tr><th>Item</th><th>2026</th></tr>
