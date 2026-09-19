@@ -550,3 +550,21 @@ def test_capture_printed_page_requires_bounded_explicit_footer(following, expect
         assert captured.table_snapshots[0].display_page == expected
         captured.get_pages()
         assert captured.table_snapshots[0].display_page == expected
+
+@pytest.mark.parametrize('style', ['page-break-after:always', 'break-after:page'])
+@pytest.mark.parametrize('footer_inside', [False, True])
+def test_printed_footer_does_not_cross_page_ending_ancestor(style, footer_inside):
+    from sec2md.xlsx_tables import snapshot_html_table
+    table = '<table><tr><td>Revenue</td><td>10</td></tr><tr><td>Cost</td><td>2</td></tr></table>'
+    footer = ('<div style="height:45pt;position:relative">'
+              '<div style="position:absolute;bottom:0;text-align:center">7</div></div>')
+    source = (f'<div style="{style}"><section>{table}</section>'
+              + (footer if footer_inside else '') + '</div>'
+              + ('' if footer_inside else footer))
+    expected = 7 if footer_inside else None
+    soup = BeautifulSoup(source, 'lxml')
+    snapshot = snapshot_html_table(soup.table, ordinal=1, page=1, source_url=None)
+    assert snapshot.display_page == expected
+    captured = Parser(source, capture_tables=True)
+    assert captured.get_pages() == Parser(source).get_pages()
+    assert captured.table_snapshots[0].display_page == expected

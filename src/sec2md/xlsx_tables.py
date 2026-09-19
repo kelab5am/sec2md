@@ -89,16 +89,22 @@ def _cell(node, row, column, rowspan, colspan, source_url, native_anchors):
     )
 
 
-def _context_siblings(node: Tag, *, before: bool):
+def _context_siblings(node: Tag, *, before: bool, stop_at_page_end: bool = False):
     """Walk out of presentation wrappers without crossing another table."""
     while isinstance(node, Tag) and node.name not in {'body', 'html', '[document]'}:
+        # A footer can be inside a page-ending wrapper, but never beyond it.
+        if stop_at_page_end and not before:
+            style = ''.join(str(node.get('style', '')).lower().split())
+            if re.search(r'(?:^|;)(?:page-break-after|break-after):'
+                         r'(?:always|page|left|right|recto|verso)(?:!important)?(?:;|$)', style):
+                return
         yield from (node.previous_siblings if before else node.next_siblings)
         node = node.parent
 
 
 def _printed_footer_after(node: Tag) -> int | None:
     """Capture a nearby explicit source footer, never infer from parser pagination."""
-    for index, sibling in enumerate(_context_siblings(node, before=False)):
+    for index, sibling in enumerate(_context_siblings(node, before=False, stop_at_page_end=True)):
         if index >= 64:
             break
         if not isinstance(sibling, Tag) or _hidden(sibling):
