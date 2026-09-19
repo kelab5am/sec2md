@@ -12,9 +12,17 @@ from sec2md.parser import Parser
 from sec2md.section_extractor import SectionExtractor
 from sec2md.quality import ParseDiagnostics, ParseQualityError
 from sec2md.encoding import DecodeDiagnostics
+from sec2md.xlsx import (
+    export_xlsx, XlsxExportResult, XlsxTableResult, XlsxDependencyError, XlsxQualityError,
+)
 
-__version__ = "0.1.22+rcq.1"
+__version__ = "0.1.22+rcq.2"
 __all__ = [
+    "export_xlsx",
+    "XlsxExportResult",
+    "XlsxTableResult",
+    "XlsxDependencyError",
+    "XlsxQualityError",
     "convert_to_markdown",
     "parse_filing",
     "flatten_note",

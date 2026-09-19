@@ -48,6 +48,7 @@ nav:
   - Quickstart: quickstart.md
   - Usage:
       - Direct Conversion: usage/direct-conversion.md
+      - XLSX Export: usage/xlsx-export.md
       - EdgarTools Integration: usage/edgartools.md
       - Section Extraction: usage/sections.md
       - Chunking: usage/chunking.md

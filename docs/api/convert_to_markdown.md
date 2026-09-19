@@ -8,6 +8,7 @@ Convert SEC filing HTML to Markdown.
 def convert_to_markdown(
     source: str | bytes,
     *,
+    base_url: str | None = None,
     user_agent: str | None = None,
     return_pages: bool = False,
     embed_images: bool = False,
@@ -22,6 +23,15 @@ keyword-only option is available on `parse_filing()`.
 
 **`source`** *(str | bytes)*
 : URL or HTML string/bytes to convert
+
+**`base_url`** *(str | None)*
+: Optional link-resolution context for raw HTML text or bytes
+: Must be an absolute HTTPS URL with a non-empty host and no username,
+  password, or fragment; path and query are preserved for URL joining
+: It does not fetch the document or attachments. Raw input does not embed
+  images, even when `embed_images=True`.
+: For URL input, an explicitly supplied value must exactly match the source
+  URL or `ValueError` is raised before fetching
 
 **`user_agent`** *(str | None)*
 : User agent for EDGAR requests (required for `sec.gov` URLs)
@@ -58,6 +68,10 @@ keyword-only option is available on `parse_filing()`.
 **`ValueError`**
 : - If source is PDF content
 : - If EDGAR URL accessed without `user_agent`
+: - If `base_url` is not an absolute HTTPS URL with a non-empty host and no
+  username, password, or fragment
+: - If URL input supplies a `base_url` that does not exactly match the source
+  URL
 
 **`requests.RequestException`**
 : If URL fetch fails
@@ -71,6 +85,21 @@ input error.
 When a source URL is supplied, relative links resolve against that document
 URL. With raw HTML and no base URL, relative `href` values remain relative.
 Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
+
+For exact retained HTML bytes, provide link context without an acquisition
+request:
+
+```python
+pages = sec2md.convert_to_markdown(
+    retained_html_bytes,
+    base_url="https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+    return_pages=True,
+    embed_images=False,
+    quality_policy="strict",
+)
+```
+
+The same keyword-only `base_url` contract is available on `parse_filing()`.
 
 ## Examples
 

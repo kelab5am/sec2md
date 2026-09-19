@@ -60,3 +60,22 @@ Clean Markdown with:
 **Full API docs:**
 
 - [API Reference](api/convert_to_markdown.md) - All function signatures and parameters
+
+
+## Export table worksheets
+
+With this fork installed using `python -m pip install ".[xlsx]"`:
+
+```python
+from pathlib import Path
+from sec2md import export_xlsx
+
+result = export_xlsx(Path("filing.htm").read_bytes(), Path("tables.xlsx"))
+print(result.status)
+```
+
+Open Contents to find each table and its review status. Copy the indicated range,
+including units and full period headers. No rows are frozen; only the label column
+stays fixed. Originals remain visible below the copy grid. The existing destination
+is protected unless you pass `overwrite=True`.
+See [XLSX export](usage/xlsx-export.md) for input, quality and layout limits.

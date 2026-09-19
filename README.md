@@ -1,6 +1,6 @@
 # sec2md
 
-This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin `v0.1.22-rcq.1` together with its resolved commit for reproducible use.
+This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin an independently reviewed commit and require distribution version `0.1.22+rcq.2` for reproducible use.
 
 [![PyPI](https://img.shields.io/pypi/v/sec2md.svg)](https://pypi.org/project/sec2md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -27,6 +27,25 @@ But even the converters that handle the HTML well still throw away **provenance*
 ---
 
 ## Usage
+
+### Export tables to Excel
+
+Install this fork with `python -m pip install ".[xlsx]"`, then export one supplied
+filing to an editable workbook:
+
+```python
+from pathlib import Path
+from sec2md import export_xlsx
+
+result = export_xlsx(Path("filing.htm").read_bytes(), Path("tables.xlsx"))
+print(result.path, result.status)
+```
+
+Contents links to every parser-recognized table, including nonfinancial tables.
+Copy ranges retain complete headers, units and static numeric values; visible
+originals and review notes preserve uncertainty. No rows are frozen (only the
+first label column). Existing files require `overwrite=True`.
+See [XLSX usage and limitations](docs/usage/xlsx-export.md).
 
 ### 1. Convert a Filing to Markdown
 
@@ -121,6 +140,26 @@ silently substituting data.
 When a source URL is provided, relative links resolve against that document
 URL. With raw HTML and no base URL, relative `href` values remain relative.
 Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
+
+Callers holding exact retained HTML bytes can supply a validated `base_url` for
+link resolution without giving sec2md an acquisition job:
+
+```python
+pages = sec2md.convert_to_markdown(
+    retained_html_bytes,
+    base_url="https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+    return_pages=True,
+    embed_images=False,
+    quality_policy="strict",
+)
+```
+
+`base_url` resolves relative links only. It does not fetch the document or
+attachments, and image embedding is not performed for raw text or bytes even
+when `embed_images=True`. It must be an absolute HTTPS URL with a non-empty
+host and no username, password, or fragment; its path and query are preserved
+for joining. For URL input, an explicitly supplied `base_url` must exactly
+match the source URL or conversion raises `ValueError` before fetching.
 
 ## Complex Table Handling
 

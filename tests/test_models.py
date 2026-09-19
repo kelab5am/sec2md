@@ -138,15 +138,18 @@ class TestVersionConsistency:
 
     def test_version_matches_pyproject(self):
         import sec2md
-        import tomllib
+        try:
+            import tomllib
+        except ModuleNotFoundError:  # Python 3.10
+            import tomli as tomllib
         with open("pyproject.toml", "rb") as f:
             pyproject = tomllib.load(f)
         assert sec2md.__version__ == pyproject["project"]["version"]
 
 
 def test_internal_version_matches_distribution():
-    assert version("sec2md") == "0.1.22+rcq.1"
-    assert sec2md.__version__ == "0.1.22+rcq.1"
+    assert version("sec2md") == "0.1.22+rcq.2"
+    assert sec2md.__version__ == "0.1.22+rcq.2"
 
 
 def test_distribution_points_to_maintained_fork():

@@ -4,7 +4,7 @@ import re
 import logging
 from copy import deepcopy
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import List, Dict, Union, Optional, Tuple, Sequence
 
 from bs4 import BeautifulSoup
@@ -14,6 +14,9 @@ from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
 from sec2md.table_parser import TableParser, render_cell_content
 from sec2md.models import Page, Element
+from sec2md.xlsx_tables import (
+    TableSnapshot, native_metadata, snapshot_html_table, snapshot_positioned_table,
+)
 from sec2md.element_builder import (
     build_elements_for_pages,
     augment_html_with_ids,
@@ -54,12 +57,20 @@ class Parser:
         *,
         source_url: str | None = None,
         decode_diagnostics: DecodeDiagnostics | None = None,
+        capture_tables: bool = False,
     ):
         content = normalize_legacy_characters(content)
         self.source_text = content
         self.source_url = source_url
         self.decode_diagnostics = decode_diagnostics
         self.soup = BeautifulSoup(content, "lxml")
+        self.capture_tables = capture_tables
+        self.table_snapshots: list[TableSnapshot] = []
+        self._snapshot_nodes: list[Sequence[Tag]] = []
+        self._unreliable_tables: dict[int, TableSnapshot] = {}
+        self._native_anchors, self._note_targets = (
+            native_metadata(self.soup) if capture_tables else ({}, {})
+        )
         self.includes_table = False
         self.include_images = True
         self.pages: Dict[int, List[str]] = defaultdict(list)
@@ -338,6 +349,9 @@ class Parser:
     def _element_segment_content(self, text: str, source_node: Optional[Tag] = None) -> str:
         """Keep link labels in citation content but exclude non-visible destinations."""
 
+        if source_node is not None and id(source_node) in self._unreliable_tables:
+            return self._unreliable_tables[id(source_node)].original_text
+
         if (
             source_node is not None
             and source_node.name == "table"
@@ -369,6 +383,9 @@ class Parser:
             return ""
 
         if element.name == "table":
+            if id(element) in self._unreliable_tables:
+                self.includes_table = True
+                return self._unreliable_tables[id(element)].original_text
             eff_rows = self._effective_rows(element)
             if len(eff_rows) <= 1:
                 cells = eff_rows[0] if eff_rows else []
@@ -622,6 +639,13 @@ class Parser:
 
             if table_parser.is_table_like():
                 self.includes_table = True
+                if self.capture_tables:
+                    self.table_snapshots.append(snapshot_positioned_table(
+                        group, ordinal=len(self.table_snapshots) + 1, page=page_num,
+                        source_url=self.source_url, native_anchors=self._native_anchors,
+                        note_targets=self._note_targets,
+                    ))
+                    self._snapshot_nodes.append(tuple(group))
                 markdown_table = table_parser.to_markdown()
                 if markdown_table:
                     self._append(
@@ -731,6 +755,18 @@ class Parser:
             self._blankline_before(page_num)
 
         if root.name in {"table", "ul", "ol"}:
+            if self.capture_tables and root.name == 'table' and len(self._effective_rows(root)) > 1:
+                snapshot = snapshot_html_table(
+                    root, ordinal=len(self.table_snapshots) + 1, page=page_num,
+                    source_url=self.source_url, native_anchors=self._native_anchors,
+                    note_targets=self._note_targets,
+                )
+                self.table_snapshots.append(snapshot)
+                self._snapshot_nodes.append((root,))
+                # Every HTML structural issue invalidates legacy grid safety,
+                # including nested descendants outside direct-cell validation.
+                if snapshot.issues:
+                    self._unreliable_tables[id(root)] = snapshot
             t = self._process_element(root)
             if t:
                 self._append(page_num, t, source_node=root)
@@ -900,6 +936,9 @@ class Parser:
         self.includes_table = False
         self.block_nodes_map = {}
         self.trace_numeric_failures = ()
+        self.table_snapshots = []
+        self._snapshot_nodes = []
+        self._unreliable_tables = {}
         root = self.soup.body if self.soup.body else self.soup
         self._stream_pages(root, page_num=1)
 
@@ -937,6 +976,21 @@ class Parser:
                     element, self.block_nodes_map.get(element.id, ())
                 )
             )
+
+        if self.capture_tables:
+            node_elements = {
+                id(node): element_id
+                for element_id, nodes in self.block_nodes_map.items()
+                for node in nodes
+            }
+            display_pages = {page.number: page.display_page for page in result}
+            self.table_snapshots = [
+                replace(snapshot, display_page=(snapshot.display_page if snapshot.display_page is not None
+                                                else display_pages.get(snapshot.page)),
+                        element_id=next((node_elements[id(node)] for node in nodes
+                                         if id(node) in node_elements), None))
+                for snapshot, nodes in zip(self.table_snapshots, self._snapshot_nodes)
+            ]
 
         markdown = "\n\n".join(page.content for page in result if page.content)
         self._last_pages = result

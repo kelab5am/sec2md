@@ -31,6 +31,30 @@ keeps relative `href` values relative.
 
 Exhibit parsing extracts exhibit entries and preserves their links; sec2md does not download those exhibits automatically. Complete accession capture is the caller's responsibility.
 
+### Retained HTML bytes and link context
+
+When an upstream workflow already retained the exact HTML bytes, pass the
+validated item URL as `base_url` to resolve relative links without fetching the
+document or attachments:
+
+```python
+pages = sec2md.convert_to_markdown(
+    retained_html_bytes,
+    base_url="https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+    return_pages=True,
+    embed_images=False,
+    quality_policy="strict",
+)
+```
+
+`base_url` is link-resolution context only. It must be an absolute HTTPS URL
+with a non-empty host and no username, password, or fragment; its path and
+query are preserved for joining. Raw text and bytes never fetch or embed
+images merely because `base_url` is present. For URL input, a supplied
+`base_url` must exactly match the source URL or conversion raises `ValueError`
+before the document is fetched. The same keyword-only option is available on
+`parse_filing()`.
+
 ## Financial Statements
 
 Financial statements are already well-structured - convert them directly:

@@ -4,7 +4,7 @@ import re
 import base64
 import logging
 from typing import overload, List, Literal
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 import requests
 
@@ -109,10 +109,36 @@ def _resolve_source(
     return normalize_legacy_characters(source), None
 
 
+def _validated_base_url(value: str) -> str:
+    parts = urlsplit(value)
+    if (
+        parts.scheme != "https"
+        or not parts.hostname
+        or parts.username is not None
+        or parts.password is not None
+        or parts.fragment
+    ):
+        raise ValueError(
+            "base_url must be an absolute HTTPS URL without credentials or fragment"
+        )
+    return value
+
+
+def _link_resolution_url(source_url: str | None, base_url: str | None) -> str | None:
+    """Return validated parser context without acquiring content."""
+    if base_url is None:
+        return source_url
+    validated = _validated_base_url(base_url)
+    if source_url is not None and validated != source_url:
+        raise ValueError("base_url must match source URL when source is a URL")
+    return validated
+
+
 @overload
 def convert_to_markdown(
     source: str | bytes,
     *,
+    base_url: str | None = None,
     user_agent: str | None = None,
     return_pages: bool = False,
     embed_images: bool = False,
@@ -124,6 +150,7 @@ def convert_to_markdown(
 def convert_to_markdown(
     source: str | bytes,
     *,
+    base_url: str | None = None,
     user_agent: str | None = None,
     return_pages: bool = True,
     embed_images: bool = False,
@@ -134,6 +161,7 @@ def convert_to_markdown(
 def convert_to_markdown(
     source: str | bytes,
     *,
+    base_url: str | None = None,
     user_agent: str | None = None,
     return_pages: bool = False,
     embed_images: bool = False,
@@ -144,6 +172,7 @@ def convert_to_markdown(
 
     Args:
         source: URL or HTML string/bytes
+        base_url: Validated URL context for resolving links in raw HTML
         user_agent: User agent for EDGAR requests (required for sec.gov URLs)
         return_pages: If True, returns List[Page] instead of markdown string
         embed_images: If True, fetch and embed images as base64 data URIs (default: False)
@@ -173,6 +202,7 @@ def convert_to_markdown(
         >>> md = convert_to_markdown(filing.html())
     """
     source_url = source if isinstance(source, str) and is_url(source) else None
+    link_resolution_url = _link_resolution_url(source_url, base_url)
     html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
 
     if embed_images and source_url:
@@ -180,7 +210,7 @@ def convert_to_markdown(
 
     parser = Parser(
         html,
-        source_url=source_url,
+        source_url=link_resolution_url,
         decode_diagnostics=decode_diagnostics,
     )
 
@@ -227,6 +257,7 @@ def convert_to_markdown(
 def parse_filing(
     source: str | bytes,
     *,
+    base_url: str | None = None,
     user_agent: str | None = None,
     include_elements: bool = True,
     embed_images: bool = False,
@@ -240,6 +271,7 @@ def parse_filing(
 
     Args:
         source: URL or HTML string/bytes
+        base_url: Validated URL context for resolving links in raw HTML
         user_agent: User agent for EDGAR requests (required for sec.gov URLs)
         include_elements: If True, extract citable elements (default: True)
         embed_images: If True, fetch and embed images as base64 data URIs (default: False)
@@ -270,6 +302,7 @@ def parse_filing(
         >>> essentials = page.model_dump(include={'number', 'content', 'elements'})
     """
     source_url = source if isinstance(source, str) and is_url(source) else None
+    link_resolution_url = _link_resolution_url(source_url, base_url)
     html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
 
     if embed_images and source_url:
@@ -277,7 +310,7 @@ def parse_filing(
 
     parser = Parser(
         html,
-        source_url=source_url,
+        source_url=link_resolution_url,
         decode_diagnostics=decode_diagnostics,
     )
     pages = parser.get_pages(include_elements=include_elements)
