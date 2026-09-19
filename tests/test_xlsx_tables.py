@@ -1,6 +1,6 @@
 """Source capture must preserve occurrences and provenance before Markdown cleanup."""
 import pytest
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
 from sec2md.parser import Parser
 
@@ -228,6 +228,75 @@ def prepared(source):
     return prepare_table(snapshot_html_table(soup.table, ordinal=1, page=1, source_url='https://example.com/main.htm'))
 
 
+def test_terminal_rowspan_preserves_empty_covered_row():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Item</th><th>Amount</th></tr>
+    <tr><td rowspan="2">Revenue</td><td rowspan="2">120</td></tr><tr></tr></table>''')
+    assert not table.source.issues
+    assert [[c.value for c in row] for row in table.rows] == [['Revenue', Decimal('120')], [None, None]]
+    assert table.original_rows[-1] == ('', '')
+    assert table.cell_sources[0] == (((1, 0),), ((1, 1),))
+
+
+def test_numeric_year_and_amount_rows_are_never_consumed_as_headers():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Year</th><th>Amount</th></tr>
+    <tr><td>2026</td><td>2000</td></tr><tr><td>2025</td><td>150</td></tr></table>''')
+    assert table.headers == ('Year', 'Amount')
+    assert [[c.value for c in row] for row in table.rows] == [['2026', Decimal('2000')], ['2025', Decimal('150')]]
+
+
+def test_all_numeric_td_rows_without_header_evidence_stay_data():
+    table = prepared('<table><tr><td>2026</td><td>2000</td></tr><tr><td>2025</td><td>1999</td></tr></table>')
+    assert table.headers == ('Column 1', 'Column 2')
+    assert [[c.value for c in row] for row in table.rows] == [['2026', '2000'], ['2025', '1999']]
+
+
+def test_numeric_facts_looking_like_years_after_blank_label_stay_data():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Item</th><th>Amount</th></tr>
+    <tr><td></td><td><ix:nonfraction>2026</ix:nonfraction></td></tr></table>''')
+    assert table.headers == ('Item', 'Amount')
+    assert table.rows[0][1].value == Decimal('2026')
+    assert table.cell_sources[0][1] == ((1, 1),)
+
+
+def test_numeric_year_data_after_duration_headers_stays_data():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th colspan="2">Three Months Ended</th></tr>
+    <tr><th>Year</th><th>Amount</th></tr><tr><td>2026</td><td>2000</td></tr>
+    <tr><td>2025</td><td>150</td></tr></table>''')
+    assert [[c.value for c in row] for row in table.rows] == [['2026', Decimal('2000')], ['2025', Decimal('150')]]
+
+
+@pytest.mark.parametrize('prose', [
+    'Earnings per share increased by 20 percent during the year.',
+    'Revenue in millions increased by 20 percent during the year.',
+    'The percentage of revenue increased by 20 percent during the year.',
+])
+def test_narrative_unit_mentions_do_not_scale_values(prose):
+    from decimal import Decimal
+    table = prepared(f'<p>{prose}</p><table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue</td><td>120</td></tr></table>')
+    assert table.units == ''
+    assert table.rows[0][1].value == Decimal('120')
+    assert f'Context: {prose}' in table.notes
+
+
+@pytest.mark.parametrize('header,label,token', [
+    ('Percentage', 'Income per share (dollars)', '2.50'),
+    ('Amount (dollars)', 'Tax rate (%)', '15'),
+    ('Amount (dollars)', 'Revenue', '15%'),
+    ('Percentage', 'Margin', '$15'),
+])
+def test_conflicting_explicit_units_keep_text_for_review(header, label, token):
+    table = prepared(f'<table><tr><th>Item</th><th>{header}</th></tr><tr><td>{label}</td><td>{token}</td></tr></table>')
+    value = table.rows[0][1]
+    assert value.value == token
+    assert value.original == token
+    assert 'conflict' in value.review_reason.lower()
+    assert table.status == 'needs_review'
+
+
 def test_preparation_preserves_first_data_row_ids_blanks_and_repeats():
     table = prepared('<table><tr><td>0012</td><td>2026</td></tr><tr><td>0012</td><td>123</td></tr><tr><td></td><td></td></tr></table>')
     assert table.headers == ('Column 1', 'Column 2')
@@ -398,7 +467,11 @@ def test_retained_source_statement_periods_and_typed_value_counts(fixture_id, ex
     from tests.accuracy.fixtures import load_fixture
     from sec2md.xlsx_tables import prepare_table, snapshot_html_table
     contract, source = load_fixture(fixture_id)  # verifies immutable source hash
-    soup = BeautifulSoup(source, 'lxml')
+    # These immutable SEC XHTML fixtures intentionally use the production HTML
+    # parser; their XML declaration triggers this one known warning.
+    with pytest.warns(XMLParsedAsHTMLWarning, match="using an HTML parser to parse an XML document") as warnings:
+        soup = BeautifulSoup(source, 'lxml')
+    assert len(warnings) == 1
     source_tables = soup.find_all('table')
     for index, width, count in expected:
         table = prepare_table(snapshot_html_table(source_tables[index], ordinal=index + 1,

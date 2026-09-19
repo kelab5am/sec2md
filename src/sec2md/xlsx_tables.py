@@ -289,6 +289,11 @@ class PreparedTable:
 
 _UNITS = re.compile(r'\b(?:in (?:thousands|millions|billions)|per share|percentage of revenue)\b', re.I)
 _UNIT_LINE = re.compile(r'^\(?(?:amounts? )?in (?:thousands|millions|billions)\b', re.I)
+_UNIT_DECLARATION = re.compile(
+    r'\(?(?:(?:amounts? )?in (?:thousands|millions|billions)'
+    r'(?:,? except (?:for )?(?:par value|(?:(?:per[- ]share|share|percent(?:age)?)(?: and |, )?)+(?: data| amounts)?))?'
+    r'|(?:(?:items |amounts )?expressed as a )?percentage of revenue'
+    r'|the following table [^.!?\d]*expressed as a percentage of revenue)\)?\.?', re.I)
 _PERCENT = re.compile(r'%|\bpercent(?:age)?\b', re.I)
 _ROW_UNIT = re.compile(r'\b(?:per[- ]share|dollars|shares|in (?:thousands|millions|billions))\b', re.I)
 _VALUE = re.compile(r'\b(?:amount|value|revenue|income|expense|cost|assets|liabilities|cash|shares|inventory|inventories|earnings|balance|total)\b', re.I)
@@ -306,7 +311,13 @@ def _header_count(grid):
                            (re.fullmatch(r'[$(\d+−-][\d,.() $%+−-]*', c.text) and not _PERIOD.fullmatch(c.text))
                            for c in nonempty)
         explicit = bool(nonempty) and all(c.is_header for c in nonempty) and not numeric_body
-        periods = bool(nonempty) and all(_PERIOD.fullmatch(c.text.strip()) or _UNITS.search(c.text) for c in nonempty)
+        # Bare years are also valid data (Year/Amount, identifiers). A TD
+        # period row needs a blank label slot or a source duration span above it.
+        period_layout = not row[0] or not row[0].text.strip() or any(
+            c and c.colspan > 1 and re.search(r'\bended\b', c.text, re.I)
+            for c in (grid[index - 1] if index else ()))
+        periods = period_layout and not numeric_body and bool(nonempty) and all(
+            _PERIOD.fullmatch(c.text.strip()) or _UNITS.search(c.text) for c in nonempty)
         if not (explicit or periods or not nonempty):
             break
         if nonempty:
@@ -391,8 +402,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     """Build a conservative copy grid from source origins, never Markdown cleanup."""
     cells = snapshot.source_cells
     title = snapshot.explicit_title or f'Table {snapshot.ordinal}'
-    unit_texts = [text for text in snapshot.context_before if _UNITS.search(text)]
-    unit_texts.extend(c.text for c in cells if re.search(r'\bin (?:thousands|millions|billions)\b', c.text, re.I)
+    unit_texts = [text for text in snapshot.context_before if _UNIT_DECLARATION.fullmatch(text.strip())]
+    unit_texts.extend(c.text for c in cells if _UNIT_DECLARATION.fullmatch(c.text.strip())
                       and c.text not in unit_texts)
     units = '\n'.join(unit_texts)
     notes = [f'Context: {text}' for text in (*snapshot.context_before, *snapshot.context_after)
@@ -401,7 +412,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     references = tuple(link for cell in cells for link in cell.links)
     issues = list(snapshot.issues)
     issues.extend(f'Unresolved or ambiguous note target: {href}' for href in snapshot.unresolved_references)
-    height = max((c.row + 1 for c in cells), default=0)
+    height = max((c.row + max(c.rowspan, 1) for c in cells), default=0)
     width = max((c.column + max(c.colspan, 1) for c in cells), default=0)
     # Never allocate a hostile span grid or pretend a capture failure is reliable.
     if snapshot.issues or not cells or height * width > 1_000_000:
@@ -475,7 +486,15 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
             role = 'text' if label_column else _numeric_role(text, headers[index], original[r][0], origins, units, financial)
             value = _convert_prepared(text, role, origins)
-            if role == 'text' and index > 0 and re.search(r'\d', text) and not _IDENTIFIER.search(headers[index]):
+            # Explicit units on either axis (or on the value itself) must agree.
+            # Broader table units can still have specific row/column exceptions.
+            local_units = f'{headers[index]} {original[r][0]} {text}'
+            conflict = (not label_column and bool(re.search(r'\d', text)) and
+                        bool(_PERCENT.search(local_units)) and
+                        bool(_ROW_UNIT.search(local_units) or '$' in local_units))
+            if conflict:
+                value = CellValue(text, '@', text, 'Conflicting explicit units; verify the row, column and displayed value units.')
+            elif role == 'text' and index > 0 and re.search(r'\d', text) and not _IDENTIFIER.search(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
             if value.review_reason:
                 issues.append(f'Source row {r}, column {groups[col][0]}: {value.review_reason}')
