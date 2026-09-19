@@ -521,3 +521,32 @@ def test_retained_source_statement_periods_and_typed_value_counts(fixture_id, ex
             assert table.headers[1:] == (
                 'Three Months Ended — Jul 26, 2026', 'Three Months Ended — Jul 27, 2025',
                 'Six Months Ended — Jul 26, 2026', 'Six Months Ended — Jul 27, 2025')
+
+
+@pytest.mark.parametrize("following, expected", [
+    ('<p>See accompanying Notes.</p><div style="height:45pt;position:relative">'
+     '<div style="position:absolute;bottom:0;width:100%"><div style="text-align:center">'
+     '<span>3</span></div></div></div><a name="next"></a><hr style="page-break-after:always">', 3),
+    ('<p>3</p>', None),
+    ('<div style="height:45pt;position:relative">'
+     '<div style="display:none;position:absolute;bottom:0;text-align:center">3</div></div>', None),
+    ('<hr style="page-break-after:always"><div style="height:45pt;position:relative">'
+     '<div style="position:absolute;bottom:0;text-align:center">3</div></div>', None),
+    ('<table><tr><td>Other</td></tr></table><div style="height:45pt;position:relative">'
+     '<div style="position:absolute;bottom:0;text-align:center">3</div></div>', None),
+    ('<div style="height:45pt;position:relative">'
+     '<div style="position:absolute;bottom:0">3</div></div>', None),
+])
+def test_capture_printed_page_requires_bounded_explicit_footer(following, expected):
+    from sec2md.xlsx_tables import snapshot_html_table
+    source = '<div><table><tr><td>Revenue</td><td>10</td></tr><tr><td>Cost</td><td>2</td></tr></table></div>' + following
+    soup = BeautifulSoup(source, 'lxml')
+    snapshot = snapshot_html_table(soup.table, ordinal=1, page=99, source_url=None)
+    assert snapshot.display_page == expected
+
+    if expected is not None:
+        captured = Parser(source, capture_tables=True)
+        assert captured.get_pages() == Parser(source).get_pages()
+        assert captured.table_snapshots[0].display_page == expected
+        captured.get_pages()
+        assert captured.table_snapshots[0].display_page == expected

@@ -96,6 +96,37 @@ def _context_siblings(node: Tag, *, before: bool):
         node = node.parent
 
 
+def _printed_footer_after(node: Tag) -> int | None:
+    """Capture a nearby explicit source footer, never infer from parser pagination."""
+    for index, sibling in enumerate(_context_siblings(node, before=False)):
+        if index >= 64:
+            break
+        if not isinstance(sibling, Tag) or _hidden(sibling):
+            continue
+        nodes = [sibling, *sibling.find_all(True)]
+        styles = {id(el): ''.join(str(el.get('style', '')).lower().split()) for el in nodes}
+        if any(el.name in {'table', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}
+               or 'page-break-before:' in styles[id(el)] or 'page-break-after:' in styles[id(el)]
+               for el in nodes):
+            break
+        if len(_visible_text(sibling)) > 4096:
+            break
+        for footer in nodes:
+            if any(_hidden(parent) for parent in (footer, *footer.parents) if isinstance(parent, Tag)):
+                continue
+            style = styles[id(footer)]
+            if 'position:absolute' not in style or not re.search(r'(?:^|;)bottom:0(?:pt|px|%)?(?:;|$)', style):
+                continue
+            parent_style = ''.join(str(footer.parent.get('style', '')).lower().split())
+            if 'position:relative' not in parent_style or not re.search(r'(?:^|;)height:[1-9]', parent_style):
+                continue
+            centered = any('text-align:center' in styles[id(el)] for el in [footer, *footer.find_all(True)])
+            text = _visible_text(footer)
+            if centered and re.fullmatch(r'[1-9]\d{0,3}', text) and not 1900 <= int(text) <= 2100:
+                return int(text)
+    return None
+
+
 def _context(node: Tag, *, before: bool) -> tuple[str, ...]:
     """Keep nearby blocks in source order, bounded by tables, headings and size."""
     siblings = _context_siblings(node, before=before)
@@ -233,7 +264,7 @@ def snapshot_html_table(node: Tag, *, ordinal: int, page: int, source_url: str |
     if node.find('table') is not None:
         issues.append('Nested table content requires source-text review.')
     notes, unresolved = _references([node], source_url, note_targets)
-    return TableSnapshot(ordinal, page, None, None, _anchor(node, native_anchors), tuple(cells),
+    return TableSnapshot(ordinal, page, _printed_footer_after(node), None, _anchor(node, native_anchors), tuple(cells),
                          _visible_text(node), 'html', _context(node, before=True),
                          _context(node, before=False), tuple(issues), notes, unresolved, _explicit_title(node))
 

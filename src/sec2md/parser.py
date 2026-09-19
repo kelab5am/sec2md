@@ -985,7 +985,8 @@ class Parser:
             }
             display_pages = {page.number: page.display_page for page in result}
             self.table_snapshots = [
-                replace(snapshot, display_page=display_pages.get(snapshot.page),
+                replace(snapshot, display_page=(snapshot.display_page if snapshot.display_page is not None
+                                                else display_pages.get(snapshot.page)),
                         element_id=next((node_elements[id(node)] for node in nodes
                                          if id(node) in node_elements), None))
                 for snapshot, nodes in zip(self.table_snapshots, self._snapshot_nodes)
