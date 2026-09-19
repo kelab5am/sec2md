@@ -138,7 +138,10 @@ class TestVersionConsistency:
 
     def test_version_matches_pyproject(self):
         import sec2md
-        import tomllib
+        try:
+            import tomllib
+        except ModuleNotFoundError:  # Python 3.10
+            import tomli as tomllib
         with open("pyproject.toml", "rb") as f:
             pyproject = tomllib.load(f)
         assert sec2md.__version__ == pyproject["project"]["version"]

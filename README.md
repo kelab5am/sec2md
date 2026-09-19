@@ -28,6 +28,25 @@ But even the converters that handle the HTML well still throw away **provenance*
 
 ## Usage
 
+### Export tables to Excel
+
+Install this fork with `python -m pip install ".[xlsx]"`, then export one supplied
+filing to an editable workbook:
+
+```python
+from pathlib import Path
+from sec2md import export_xlsx
+
+result = export_xlsx(Path("filing.htm").read_bytes(), Path("tables.xlsx"))
+print(result.path, result.status)
+```
+
+Contents links to every parser-recognized table, including nonfinancial tables.
+Copy ranges retain complete headers, units and static numeric values; visible
+originals and review notes preserve uncertainty. No rows are frozen (only the
+first label column). Existing files require `overwrite=True`.
+See [XLSX usage and limitations](docs/usage/xlsx-export.md).
+
 ### 1. Convert a Filing to Markdown
 
 ```python

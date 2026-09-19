@@ -38,12 +38,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+xlsx = ["openpyxl>=3.1.5,<4"]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
     "build>=1.2",
+    "tomli>=2.0.1; python_version < '3.11'",
 ]
 
 [project.urls]
