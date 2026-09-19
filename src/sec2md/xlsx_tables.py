@@ -1,7 +1,8 @@
 """Source table records captured before Markdown grid cleanup (no XLSX dependency)."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+import re
 from typing import Literal, Mapping, Sequence
 from urllib.parse import unquote, urljoin
 
@@ -9,6 +10,8 @@ from bs4 import Tag
 from bs4.element import Comment, Declaration, Doctype, NavigableString, ProcessingInstruction
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
+from sec2md.table_parser import Cell, GridCell, TableParser
+from sec2md.xlsx_values import CellValue, convert_cell
 
 
 @dataclass(frozen=True)
@@ -39,6 +42,7 @@ class TableSnapshot:
     issues: tuple[str, ...]
     resolved_notes: tuple[tuple[str, str], ...] = ()
     unresolved_references: tuple[str, ...] = ()
+    explicit_title: str | None = None
 
 
 def _hidden(node: Tag) -> bool:
@@ -85,9 +89,16 @@ def _cell(node, row, column, rowspan, colspan, source_url, native_anchors):
     )
 
 
+def _context_siblings(node: Tag, *, before: bool):
+    """Walk out of presentation wrappers without crossing another table."""
+    while isinstance(node, Tag) and node.name not in {'body', 'html', '[document]'}:
+        yield from (node.previous_siblings if before else node.next_siblings)
+        node = node.parent
+
+
 def _context(node: Tag, *, before: bool) -> tuple[str, ...]:
     """Keep nearby blocks in source order, bounded by tables, headings and size."""
-    siblings = node.previous_siblings if before else node.next_siblings
+    siblings = _context_siblings(node, before=before)
     context = []
     char_count = 0
     headings = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}
@@ -116,6 +127,8 @@ def _references(nodes, source_url, note_targets):
             href = anchor.get('href', '')
             if not href.startswith('#'):
                 continue
+            if re.search(r'\b(?:accompanying|financial.statement) notes\b', _visible_text(anchor), re.I):
+                continue  # A broad notes reference is not an individual note payload.
             target = note_targets.get(unquote(href[1:]))
             destination = urljoin(source_url or '', href)
             if not target:
@@ -125,13 +138,30 @@ def _references(nodes, source_url, note_targets):
     return tuple(dict.fromkeys(notes)), tuple(dict.fromkeys(unresolved))
 
 
+def _explicit_title(node: Tag) -> str | None:
+    caption = node.find('caption', recursive=False)
+    if caption is not None:
+        return _visible_text(caption)
+    context = _context(node, before=True)
+    for sibling in _context_siblings(node, before=True):
+        if not isinstance(sibling, Tag) or _hidden(sibling):
+            continue
+        if sibling.name == 'table' or sibling.find('table') is not None:
+            break
+        if _visible_text(sibling) and _visible_text(sibling) not in context:
+            break
+        if sibling.name in {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'} or sibling.get('role') == 'heading':
+            return _visible_text(sibling)
+    return None
+
+
 def _note_target_text(node: Tag) -> str:
     """Resolve empty anchors only within a small, single-target paragraph."""
     if any(_hidden(parent) for parent in (node, *node.parents) if isinstance(parent, Tag)):
         return ''
     text = _visible_text(node)
     if text:
-        return text
+        return text if len(text) <= 2048 and node.find(['table', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']) is None else ''
     paragraph = node.find_parent('p')
     if paragraph is None:
         return ''
@@ -148,9 +178,8 @@ def native_metadata(soup: Tag):
     anchors, targets = {}, {}
     for node in soup.find_all(True):
         anchors[id(node)] = node.get('id') or node.get('name')
-        for key in ('id', 'name'):
-            if node.get(key):
-                targets.setdefault(node[key], _note_target_text(node))
+        for target in set(filter(None, (node.get('id'), node.get('name')))):
+            targets[target] = '' if target in targets else _note_target_text(node)
     return anchors, targets
 
 
@@ -206,7 +235,7 @@ def snapshot_html_table(node: Tag, *, ordinal: int, page: int, source_url: str |
     notes, unresolved = _references([node], source_url, note_targets)
     return TableSnapshot(ordinal, page, None, None, _anchor(node, native_anchors), tuple(cells),
                          _visible_text(node), 'html', _context(node, before=True),
-                         _context(node, before=False), tuple(issues), notes, unresolved)
+                         _context(node, before=False), tuple(issues), notes, unresolved, _explicit_title(node))
 
 
 def snapshot_positioned_table(nodes: Sequence[Tag], *, ordinal: int, page: int,
@@ -241,3 +270,220 @@ def snapshot_positioned_table(nodes: Sequence[Tag], *, ordinal: int, page: int,
                          _context(nodes[0], before=True) if nodes else (),
                          _context(nodes[-1], before=False) if nodes else (),
                          tuple(dict.fromkeys(issues)), notes, unresolved)
+
+
+@dataclass(frozen=True)
+class PreparedTable:
+    source: TableSnapshot
+    title: str
+    units: str
+    headers: tuple[str, ...]
+    rows: tuple[tuple[CellValue, ...], ...]
+    cell_sources: tuple[tuple[tuple[tuple[int, int], ...], ...], ...]
+    original_rows: tuple[tuple[str, ...], ...]
+    notes: tuple[str, ...]
+    references: tuple[tuple[str, str], ...]
+    issues: tuple[str, ...]
+    status: Literal['exported', 'needs_review', 'source_text_only']
+
+
+_UNITS = re.compile(r'\b(?:in (?:thousands|millions|billions)|per share|percentage of revenue)\b', re.I)
+_UNIT_LINE = re.compile(r'^\(?(?:amounts? )?in (?:thousands|millions|billions)\b', re.I)
+_PERCENT = re.compile(r'%|\bpercent(?:age)?\b', re.I)
+_ROW_UNIT = re.compile(r'\b(?:per[- ]share|dollars|shares|in (?:thousands|millions|billions))\b', re.I)
+_VALUE = re.compile(r'\b(?:amount|value|revenue|income|expense|cost|assets|liabilities|cash|shares|inventory|inventories|earnings|balance|total)\b', re.I)
+_IDENTIFIER = re.compile(r'\b(?:id|identifier|code|number|date|year|exhibit|section|zip|cusip)\b', re.I)
+_PERIOD = re.compile(r'^(?:(?:three|six|nine|twelve) months? ended|years? ended|(?:19|20)\d{2}|(?:Jan\w*|Feb\w*|Mar\w*|Apr\w*|May|Jun\w*|Jul\w*|Aug\w*|Sep\w*|Oct\w*|Nov\w*|Dec\w*)\.? \d{1,2},? (?:19|20)\d{2})$', re.I)
+
+
+def _header_count(grid):
+    count = 0
+    for index, row in enumerate(grid):
+        origins = list(dict.fromkeys(c for c in row if c is not None))
+        nonempty = [c for c in origins if c.text.strip()]
+        # TH evidence must describe the row, not merely a body row's label.
+        numeric_body = any(c.is_numeric_fact or
+                           (re.fullmatch(r'[$(\d+−-][\d,.() $%+−-]*', c.text) and not _PERIOD.fullmatch(c.text))
+                           for c in nonempty)
+        explicit = bool(nonempty) and all(c.is_header for c in nonempty) and not numeric_body
+        periods = bool(nonempty) and all(_PERIOD.fullmatch(c.text.strip()) or _UNITS.search(c.text) for c in nonempty)
+        if not (explicit or periods or not nonempty):
+            break
+        if nonempty:
+            count = index + 1
+    # Trailing blank rows belong to the body. Wholly blank tables remain data.
+    return count
+
+
+def _numeric_role(text, header, label, cells, units, financial):
+    period_header = all(_PERIOD.fullmatch(part) for part in header.split(' — '))
+    if _IDENTIFIER.search(header) and not period_header:
+        return 'text'
+    if _PERCENT.search(header) or _PERCENT.search(label):
+        return 'percent'
+    # Specific currency/count headings override a table-wide percent description.
+    if _VALUE.search(header) or _ROW_UNIT.search(header) or _ROW_UNIT.search(label):
+        return 'number'
+    if _PERCENT.search(units):
+        return 'percent'
+    if any(c.is_numeric_fact for c in cells) or '$' in text or '%' in text:
+        return 'number'
+    if units or _VALUE.search(label) or financial:
+        return 'number'
+    return 'text'
+
+
+def _joined(cells):
+    """Only standalone structural fragments may be joined without a space."""
+    parts = [c.text for c in cells if c.text]
+    values = [i for i, part in enumerate(parts) if part not in {'$', '(', ')', '%'}]
+    if len(values) == 1:
+        i = values[0]
+        return TableParser._join_structural_text(parts[:i], parts[i], parts[i + 1:])
+    return ' '.join(parts)
+
+
+def _convert_prepared(text, role, origins):
+    # The Markdown structural join produces '$ (120)'. Relocate only a proven
+    # standalone dollar fragment for the strict converter, preserving the display.
+    token = text
+    if role != 'text' and text.startswith('$ (') and text.endswith(')') and any(c.text == '$' for c in origins):
+        token = '($ ' + text[3:]
+    return replace(convert_cell(token, role=role), original=text)
+
+
+def _column_groups(grid, original, header_count):
+    """Consolidate a leaf header's source span only when it contains one value.
+
+    Financial HTML often alternates '$' + value with a value spanning the same
+    two positions. A leaf span establishes their common column, while a duration
+    spanning several leaf dates does not. Independent values veto consolidation.
+    """
+    width = len(grid[0])
+    active = {col for col in range(width) if any(row[col] for row in original)}
+    if not active:
+        active = set(range(width))
+    groups = []
+    for col in sorted(active):
+        if any(col in group for group in groups):
+            continue
+        leaf = next((grid[r][col] for r in reversed(range(header_count))
+                     if grid[r][col] and grid[r][col].text and not _UNIT_LINE.search(grid[r][col].text)), None)
+        candidates = tuple(c for c in sorted(active) if leaf and leaf.column <= c < leaf.column + leaf.colspan)
+        safe = len(candidates) > 1 and all(
+            next((grid[r][c] for r in reversed(range(header_count))
+                  if grid[r][c] and grid[r][c].text and not _UNIT_LINE.search(grid[r][c].text)), None) is leaf for c in candidates)
+        evidence = False
+        for r in range(header_count, len(grid)):
+            origins = list(dict.fromkeys(grid[r][c] for c in candidates if grid[r][c] and original[r][c]))
+            nonmarkers = [c for c in origins if c.text not in {'$', '(', ')', '%'}]
+            if len(nonmarkers) > 1:
+                safe = False
+            text = _joined(origins)
+            if any(c.text in {'$', '(', ')', '%'} for c in origins) and _convert_prepared(text, 'number', origins).review_reason:
+                safe = False
+            evidence |= bool(nonmarkers and re.search(r'\d', nonmarkers[0].text))
+        groups.append(candidates if safe and evidence else (col,))
+    return groups
+
+
+def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
+    """Build a conservative copy grid from source origins, never Markdown cleanup."""
+    cells = snapshot.source_cells
+    title = snapshot.explicit_title or f'Table {snapshot.ordinal}'
+    unit_texts = [text for text in snapshot.context_before if _UNITS.search(text)]
+    unit_texts.extend(c.text for c in cells if re.search(r'\bin (?:thousands|millions|billions)\b', c.text, re.I)
+                      and c.text not in unit_texts)
+    units = '\n'.join(unit_texts)
+    notes = [f'Context: {text}' for text in (*snapshot.context_before, *snapshot.context_after)
+             if text != snapshot.explicit_title and text not in unit_texts]
+    notes.extend(f'Linked note ({href}): {text}' for href, text in snapshot.resolved_notes)
+    references = tuple(link for cell in cells for link in cell.links)
+    issues = list(snapshot.issues)
+    issues.extend(f'Unresolved or ambiguous note target: {href}' for href in snapshot.unresolved_references)
+    height = max((c.row + 1 for c in cells), default=0)
+    width = max((c.column + max(c.colspan, 1) for c in cells), default=0)
+    # Never allocate a hostile span grid or pretend a capture failure is reliable.
+    if snapshot.issues or not cells or height * width > 1_000_000:
+        original = tuple((f'({c.row}, {c.column}) span {c.rowspan}x{c.colspan}', c.text) for c in cells)
+        if not original:
+            original = ((snapshot.original_text,),)
+        if not issues:
+            issues.append('Source grid unavailable or too large; review source text.')
+        return PreparedTable(snapshot, title, units, (), (), (), original, tuple(notes), references,
+                             tuple(issues), 'source_text_only')
+    grid = [[None for _ in range(width)] for _ in range(height)]
+    for cell in cells:
+        for row in range(cell.row, cell.row + cell.rowspan):
+            for col in range(cell.column, cell.column + cell.colspan):
+                grid[row][col] = cell
+    original = tuple(tuple(c.text if c and (c.row, c.column) == (r, col) else ''
+                           for col, c in enumerate(row)) for r, row in enumerate(grid))
+    notes.append('Original text uses source columns and header levels; span-covered positions are blank. '
+                 'Source span origins and symbol coordinates are retained in the table snapshot and cell_sources.')
+    header_count = _header_count(grid)
+    groups = _column_groups(grid, original, header_count)
+    group_origins = [[list(dict.fromkeys(grid[r][col] for col in group
+                                        if grid[r][col] and (grid[r][col].row, grid[r][col].column) == (r, col)))
+                      for group in groups] for r in range(height)]
+    raw = [[GridCell(Cell(_joined(origins))) for origins in row] for row in group_origins]
+    # A numeric cell spanning independently headed values cannot be assigned to
+    # its left edge. Keep the entire original table rather than duplicate it.
+    for cell in cells:
+        if cell.row < header_count or not re.search(r'\d', cell.text):
+            continue
+        crossed = [group for group in groups if any(cell.column <= col < cell.column + cell.colspan for col in group)]
+        if len(crossed) > 1 and (cell.is_numeric_fact or re.fullmatch(r'[\d,.() $%+−-]+', cell.text)):
+            issues.append(f'Unresolved value span at ({cell.row}, {cell.column}); review column alignment.')
+            return PreparedTable(snapshot, title, units, (), (), (), original, tuple(notes), references,
+                                 tuple(issues), 'source_text_only')
+    # The existing validated structural rules operate on body rows after a sentinel
+    # header, so their legacy header heuristic cannot consume the first data row.
+    structural_grid = [[GridCell(Cell('')) for _ in groups], *raw[header_count:]]
+    parser = object.__new__(TableParser)
+    actions = parser._safe_structural_actions(structural_grid)
+    # A marker column carrying independent header text must remain visible.
+    actions = {col: moves for col, moves in actions.items()
+               if all(not grid[r][groups[col][0]] or not grid[r][groups[col][0]].text or
+                      any(grid[r][groups[target][0]] is grid[r][groups[col][0]] for target in moves.values())
+                      for r in range(header_count))}
+    # Revalidate after the header veto: removing one part must not leave an
+    # accounting fragment whose original successful validation used that part.
+    actions = parser._validated_structural_actions(structural_grid, actions)
+    kept = [col for col in range(len(groups)) if col not in actions]
+    headers = []
+    for index, col in enumerate(kept):
+        header_cells = list(dict.fromkeys(grid[r][groups[col][0]] for r in range(header_count)))
+        labels = [c.text for c in header_cells if c and c.text and not _UNIT_LINE.search(c.text)]
+        headers.append(' — '.join(labels) or f'Column {index + 1}')
+        if not labels:
+            notes.append(f'Column {index + 1} is an exporter-generated positional header.')
+            if index > 0 and header_count:
+                issues.append(f'Missing source header for Column {index + 1}; verify its meaning.')
+    if not header_count:
+        issues.append('No explicit headers; positional column names generated and every source row retained.')
+    rows, sources = [], []
+    financial = sum(bool(_VALUE.search(row[0])) for row in original[header_count:] if row) >= 2
+    for r in range(header_count, height):
+        row_values, row_sources = [], []
+        for index, col in enumerate(kept):
+            contributors = [col] + [src for src, moves in actions.items() if moves.get(r - header_count + 1) == col]
+            contributors.sort()
+            origins = list(dict.fromkeys(c for src in contributors for c in group_origins[r][src]))
+            text = _joined(origins)
+            # Labels are never promoted merely because they look numeric.
+            label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
+            role = 'text' if label_column else _numeric_role(text, headers[index], original[r][0], origins, units, financial)
+            value = _convert_prepared(text, role, origins)
+            if role == 'text' and index > 0 and re.search(r'\d', text) and not _IDENTIFIER.search(headers[index]):
+                value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
+            if value.review_reason:
+                issues.append(f'Source row {r}, column {groups[col][0]}: {value.review_reason}')
+            if role == 'percent' and '%' not in text and value.value is not None and not isinstance(value.value, str):
+                notes.append(f'Source ({r}, {groups[col][0]}): percentage meaning comes from the displayed heading or units.')
+            row_values.append(value)
+            row_sources.append(tuple((c.row, c.column) for c in origins))
+        rows.append(tuple(row_values))
+        sources.append(tuple(row_sources))
+    return PreparedTable(snapshot, title, units, tuple(headers), tuple(rows), tuple(sources), original,
+                         tuple(notes), references, tuple(issues), 'needs_review' if issues else 'exported')

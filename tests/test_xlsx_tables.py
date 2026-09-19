@@ -209,3 +209,205 @@ def test_context_stops_at_next_table_and_is_bounded():
     snapshot = snapshot_html_table(soup.table, ordinal=1, page=1, source_url=None)
     assert 1 < len(snapshot.context_after) <= 12
     assert snapshot.context_after[0] == 'Note 0'
+
+
+def test_comparative_column_keeps_its_duration():
+    from sec2md.xlsx_tables import prepare_table
+    source = '''<table><tr><th></th><th colspan="2">Three Months Ended</th></tr>
+    <tr><th>Item</th><th>Jul 26, 2026</th><th>Jul 27, 2025</th></tr>
+    <tr><td>Revenue</td><td>96,221</td><td>46,743</td></tr></table>'''
+    parser = Parser(source, capture_tables=True)
+    parser.get_pages()
+    table = prepare_table(parser.table_snapshots[0])
+    assert table.headers[1:] == ('Three Months Ended — Jul 26, 2026', 'Three Months Ended — Jul 27, 2025')
+
+
+def prepared(source):
+    from sec2md.xlsx_tables import prepare_table, snapshot_html_table
+    soup = BeautifulSoup(source, 'lxml')
+    return prepare_table(snapshot_html_table(soup.table, ordinal=1, page=1, source_url='https://example.com/main.htm'))
+
+
+def test_preparation_preserves_first_data_row_ids_blanks_and_repeats():
+    table = prepared('<table><tr><td>0012</td><td>2026</td></tr><tr><td>0012</td><td>123</td></tr><tr><td></td><td></td></tr></table>')
+    assert table.headers == ('Column 1', 'Column 2')
+    assert [[c.value for c in r] for r in table.rows] == [['0012', '2026'], ['0012', '123'], [None, None]]
+    assert table.rows[0][1].review_reason
+    assert table.source.display_page is None
+
+
+def test_preparation_mixed_units_groups_and_numeric_facts_keep_display():
+    from decimal import Decimal
+    table = prepared('''<h2>Results</h2><p>In millions, except per share data</p><table>
+    <tr><th>Item</th><th>2026</th><th>Margin (%)</th></tr>
+    <tr><td>Revenue</td><td><ix:nonfraction scale="6" sign="-">1,200</ix:nonfraction></td><td>25</td></tr>
+    <tr><td>Per share</td><td>2.50</td><td></td></tr>
+    <tr><td>Group</td><td></td><td></td></tr>
+    <tr><td>Tax rate (%)</td><td>15</td><td>—</td></tr></table>''')
+    assert table.title == 'Results'
+    assert table.units == 'In millions, except per share data'
+    assert [[c.value for c in r] for r in table.rows] == [
+        ['Revenue', Decimal('1200'), Decimal('.25')], ['Per share', Decimal('2.50'), None],
+        ['Group', None, None], ['Tax rate (%)', Decimal('.15'), '—']]
+    assert table.original_rows[1][1] == '1,200'
+
+
+def test_percent_context_and_td_duration_headers_are_supported():
+    from decimal import Decimal
+    table = prepared('''<p>Items expressed as a percentage of revenue</p><table>
+    <tr><td></td><td colspan="2">Three Months Ended</td><td colspan="2">Six Months Ended</td></tr>
+    <tr><td></td><td>July 26, 2026</td><td>July 27, 2025</td><td>July 26, 2026</td><td>July 27, 2025</td></tr>
+    <tr><td>Revenue</td><td>100</td><td>100</td><td>100</td><td>100</td></tr></table>''')
+    assert table.headers[2] == 'Three Months Ended — July 27, 2025'
+    assert table.headers[4] == 'Six Months Ended — July 27, 2025'
+    assert [c.value for c in table.rows[0][1:]] == [Decimal('1')] * 4
+
+
+def test_safe_symbol_compaction_retains_all_origins_and_wider_original():
+    from decimal import Decimal
+    table = prepared('''<table><tr><th>Item</th><th colspan="3">Amount</th></tr>
+    <tr><td>Income</td><td>$</td><td>(120</td><td>)</td></tr>
+    <tr><td>Income</td><td>$</td><td>(30</td><td>)</td></tr></table>''')
+    assert table.headers == ('Item', 'Amount')
+    assert table.rows[0][1].value == Decimal('-120')
+    assert table.cell_sources[0][1] == ((1, 1), (1, 2), (1, 3))
+    assert table.original_rows[1] == ('Income', '$', '(120', ')')
+    assert any('source' in n.lower() and 'span' in n.lower() for n in table.notes)
+
+
+def test_preparation_notes_links_and_context_are_visible_and_bounded():
+    table = prepared('''<h2>Inventory</h2><p>Nearby prose</p><table><caption>Inventory detail</caption>
+    <tr><th>Item</th><th>Amount</th></tr><tr><td>Total (1)<a href="#n">[1]</a><a href="#missing">[2]</a><a href="other.htm">detail</a></td><td>120</td></tr></table>
+    <p id="n">(1) Provision.</p><p>See accompanying Notes.</p><h2>Next</h2><p>Not local.</p>''')
+    assert table.title == 'Inventory detail'
+    assert table.references == (('[1]', 'https://example.com/main.htm#n'), ('[2]', 'https://example.com/main.htm#missing'), ('detail', 'https://example.com/other.htm'))
+    assert any('Provision' in n for n in table.notes)
+    assert any(n.startswith('Context:') and 'Nearby prose' in n for n in table.notes)
+    assert any('See accompanying Notes' in n for n in table.notes)
+    assert not any('Not local' in n for n in table.notes)
+    assert any('missing' in n for n in table.issues)
+    assert 'Total (1)' in table.rows[0][0].value
+
+
+def test_unreliable_table_keeps_original_text_only():
+    table = prepared('<table><tr><td rowspan="99">Label</td><td>123</td></tr><tr><td>Tail</td></tr></table>')
+    assert table.status == 'source_text_only'
+    assert table.rows == ()
+    assert '123' in table.source.original_text
+    assert table.original_rows
+
+
+def test_numeric_looking_identifier_column_stays_text_despite_units():
+    table = prepared('<p>Amounts in millions</p><table><tr><th>Code</th><th>Identifier</th><th>Amount</th></tr><tr><td>123</td><td>456</td><td>10</td></tr></table>')
+    assert table.rows[0][0].value == '123'
+    assert table.rows[0][1].value == '456'
+
+
+def test_variable_value_spans_align_under_their_source_period():
+    from decimal import Decimal
+    table = prepared('''<p>In millions</p><div><table>
+    <tr><td></td><td colspan="3">2026</td><td colspan="3">2025</td></tr>
+    <tr><td>Revenue</td><td>$</td><td>120</td><td></td><td>$</td><td>90</td><td></td></tr>
+    <tr><td>Cost</td><td colspan="2">(30</td><td>)</td><td colspan="2">(20</td><td>)</td></tr>
+    <tr><td>Total</td><td colspan="2">90</td><td></td><td colspan="2">70</td><td></td></tr>
+    </table></div>''')
+    assert table.headers == ('Column 1', '2026', '2025')
+    assert [[v.value for v in r] for r in table.rows] == [
+        ['Revenue', Decimal('120'), Decimal('90')],
+        ['Cost', Decimal('-30'), Decimal('-20')], ['Total', Decimal('90'), Decimal('70')]]
+    assert (2, 1) in table.cell_sources[1][1] and (2, 3) in table.cell_sources[1][1]
+    assert table.units == 'In millions'
+
+
+def test_wrapped_table_percent_context_and_local_unit_exception():
+    from decimal import Decimal
+    table = prepared('''<h2>Margins</h2><p>Expressed as a percentage of revenue</p><div><table>
+    <tr><th>Item</th><th>2026</th></tr><tr><td>Gross margin</td><td>25</td></tr>
+    <tr><td>Income per share</td><td>2.50</td></tr></table></div><h2>Next</h2><p>Unrelated</p>''')
+    assert table.rows[0][1].value == Decimal('.25')
+    assert table.rows[1][1].value == Decimal('2.50')
+    assert table.title == 'Margins'
+    assert not any('Unrelated' in note for note in table.notes)
+
+
+def test_numeric_body_ths_are_not_discarded_as_headers():
+    table = prepared('<table><tr><th>Item</th><th>Amount</th></tr><tr><th>Revenue</th><th>120</th></tr></table>')
+    assert len(table.rows) == 1 and table.rows[0][0].value == 'Revenue'
+
+
+def test_duplicate_note_targets_are_ambiguous_and_broad_note_links_stay_references():
+    table = prepared('''<table><tr><th>Item</th><th>Amount</th></tr>
+    <tr><td><a href="#n">(1)</a><a href="#notes">See accompanying Notes</a></td><td>10</td></tr></table>
+    <p id="n">First</p><p id="n">Second</p><div id="notes"><h2>Notes</h2><p>Whole notes section</p></div>''')
+    assert any('#n' in issue for issue in table.issues)
+    assert not any('Linked note' in note and ('First' in note or 'Whole notes' in note) for note in table.notes)
+    assert any('accompanying' in label for label, _ in table.references)
+
+
+def test_conflicting_body_value_span_requires_source_review():
+    table = prepared('''<table><tr><th>Item</th><th>2026</th><th>2025</th></tr>
+    <tr><td>Revenue</td><td colspan="2">120</td></tr></table>''')
+    assert table.status == 'source_text_only'
+    assert '120' in table.source.original_text
+
+
+def test_first_column_with_explicit_value_heading_can_be_numeric():
+    from decimal import Decimal
+    table = prepared('<table><tr><th>Percentage</th><th>Amount</th></tr><tr><td>25</td><td>120</td></tr></table>')
+    assert [c.value for c in table.rows[0]] == [Decimal('.25'), Decimal('120')]
+
+
+def test_uncertain_prose_does_not_supply_percentage_units():
+    from decimal import Decimal
+    table = prepared('<p>Revenue increased by 20% during the year.</p><table><tr><th>Item</th><th>Amount</th></tr><tr><td>Revenue</td><td>120</td></tr></table>')
+    assert table.units == ''
+    assert table.rows[0][1].value == Decimal('120')
+
+
+def test_partial_blank_header_and_unresolved_fragments_are_flagged():
+    table = prepared('<table><tr><th>Item</th><th></th><th>Amount</th></tr><tr><td>Revenue</td><td>(20</td><td>100</td></tr></table>')
+    assert table.headers[1] == 'Column 2'
+    assert table.status == 'needs_review'
+    assert table.rows[0][1].value == '(20'
+
+
+def test_blank_body_row_immediately_after_headers_stays_in_copy_grid():
+    table = prepared('<table><tr><th>Item</th><th>Amount</th></tr><tr><td></td><td></td></tr><tr><td>Revenue</td><td>10</td></tr></table>')
+    assert len(table.rows) == 2
+    assert [c.value for c in table.rows[0]] == [None, None]
+
+
+def test_spanning_unit_row_does_not_replace_leaf_period_membership():
+    from decimal import Decimal
+    table = prepared('''<table><tr><td></td><td colspan="2">2026</td><td colspan="2">2025</td></tr>
+    <tr><td></td><td colspan="4">(In millions)</td></tr>
+    <tr><td>Revenue</td><td>$</td><td>120</td><td>$</td><td>90</td></tr>
+    <tr><td>Cost</td><td colspan="2">30</td><td colspan="2">20</td></tr></table>''')
+    assert table.headers == ('Column 1', '2026', '2025')
+    assert [c.value for c in table.rows[-1]] == ['Cost', Decimal('30'), Decimal('20')]
+    assert table.units == '(In millions)'
+
+
+@pytest.mark.parametrize('fixture_id, expected', [
+    ('nvda-2026-10k', [(10, 3, 28), (20, 4, 54), (22, 3, 55), (24, 4, 100), (37, 3, 8)]),
+    ('nvda-2026-q2-10q', [(7, 5, 60), (9, 3, 58), (12, 3, 62), (21, 3, 8), (40, 5, 44)]),
+])
+def test_retained_source_statement_periods_and_typed_value_counts(fixture_id, expected):
+    """Counts/indices independently checked in retained source evidence, not output."""
+    from decimal import Decimal
+    from tests.accuracy.fixtures import load_fixture
+    from sec2md.xlsx_tables import prepare_table, snapshot_html_table
+    contract, source = load_fixture(fixture_id)  # verifies immutable source hash
+    soup = BeautifulSoup(source, 'lxml')
+    source_tables = soup.find_all('table')
+    for index, width, count in expected:
+        table = prepare_table(snapshot_html_table(source_tables[index], ordinal=index + 1,
+                                                  page=1, source_url=contract.sec_url))
+        assert table.status == 'exported', table.issues
+        assert len(table.headers) == width
+        assert sum(isinstance(c.value, Decimal) for row in table.rows for c in row) == count
+        assert table.units
+        if fixture_id == 'nvda-2026-q2-10q' and index in {7, 40}:
+            assert table.headers[1:] == (
+                'Three Months Ended — Jul 26, 2026', 'Three Months Ended — Jul 27, 2025',
+                'Six Months Ended — Jul 26, 2026', 'Six Months Ended — Jul 27, 2025')
