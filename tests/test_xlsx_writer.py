@@ -196,3 +196,21 @@ def test_supplied_title_and_printed_page_are_retained():
     assert sheet['A1'].value == table.title
     assert 'Parser page 3 | Printed page 17' in values(sheet)
     assert 17 in values(wb['Contents'])
+
+
+def test_encoding_warning_preserves_source_text_only_status_everywhere():
+    table = replace(sample(), title='Invalid\x01 title', status='source_text_only',
+                    rows=(), issues=('Unreliable source grid',))
+    wb, records = render([table])
+    record, = records
+    assert record.status == 'source_text_only'
+    assert record.copy_range is None
+    assert any('XML' in issue for issue in record.issues)
+    sheet = wb[record.worksheet_name]
+    assert 'Status: source_text_only' in values(sheet)
+    assert 'Status: needs_review' not in values(sheet)
+    assert any('Copy grid unavailable' in str(value) for value in values(sheet))
+    contents = wb['Contents']
+    table_row = next(row for row in contents if row[0].hyperlink)
+    assert table_row[4].value == 'source_text_only'
+    assert table_row[5].value == len(record.issues)

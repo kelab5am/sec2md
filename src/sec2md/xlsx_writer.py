@@ -263,7 +263,10 @@ def render_workbook(tables: Sequence[PreparedTable], *, source_url: str | None,
                     r = block(ws, r, f'Body row {ri}, column {ci}: {origins}')
         issues.extend(sorted(writer_issues.get(name, ())))
         if writer_issues.get(name):
-            status = 'source_text_only' if r >= MAX_ROWS else 'needs_review'
+            if r >= MAX_ROWS:
+                status = 'source_text_only'
+            elif status == 'exported':
+                status = 'needs_review'
             for issue in sorted(writer_issues[name]):
                 r = block(ws, r, issue)
         put(ws, status_row, 1, f'Status: {status}')
