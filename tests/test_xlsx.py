@@ -24,6 +24,68 @@ def values(workbook):
             if cell.value is not None]
 
 
+@pytest.mark.parametrize('amount', [
+    '120<sup>1</sup>', '120<a href="#n">1</a>',
+    '<ix:nonfraction>120</ix:nonfraction><sup>1</sup>',
+])
+def test_numeric_footnote_boundaries_are_reviewed_before_publication(tmp_path, amount):
+    from sec2md.xlsx_tables import prepare_table, snapshot_html_table
+    from bs4 import BeautifulSoup
+    html = ('<table><tr><th>Item</th><th>Amount</th></tr>'
+            f'<tr><td>Revenue</td><td>{amount}</td></tr></table>'
+            '<p id="n">1 Includes sales.</p>')
+    snapshot = snapshot_html_table(BeautifulSoup(html, 'html.parser').table,
+                                   ordinal=1, page=1, source_url=None)
+    assert snapshot.source_cells[-1].text == '120 1'
+    prepared = prepare_table(snapshot)
+    assert prepared.rows[0][1].value == '120 1'
+    assert 'marker' in prepared.rows[0][1].review_reason.lower()
+    assert prepared.original_rows[-1][-1] == '120 1'
+    result = sec2md.export_xlsx(html, tmp_path / 'warn.xlsx')
+    assert result.status == 'needs_review'
+    wb = load_workbook(result.path)
+    assert wb.worksheets[1]['B9'].value == '120 1'
+    assert wb.worksheets[1]['B9'].data_type == 's'
+    if 'href' in amount:
+        assert any('Includes sales' in str(v) for v in values(wb))
+    wb.close()
+    with pytest.raises(sec2md.XlsxQualityError):
+        sec2md.export_xlsx(html, tmp_path / 'strict.xlsx', quality_policy='strict')
+    assert not (tmp_path / 'strict.xlsx').exists()
+
+
+@pytest.mark.parametrize('heading,tokens', [('Note', ('(1)', '(2)')),
+                                         ('Reference', ('123', '456'))])
+def test_reference_columns_defeat_financial_roles_in_saved_workbook(tmp_path, heading, tokens):
+    html = (f'<table><tr><th>Item</th><th>{heading}</th><th>Amount</th></tr>'
+            f'<tr><td>Revenue</td><td>{tokens[0]}</td><td>120</td></tr>'
+            f'<tr><td>Cost</td><td>{tokens[1]}</td><td>90</td></tr></table>')
+    result = sec2md.export_xlsx(html, tmp_path / 'refs.xlsx', quality_policy='strict')
+    wb = load_workbook(result.path)
+    sheet = wb.worksheets[1]
+    assert [sheet[f'B{r}'].value for r in (9, 10)] == list(tokens)
+    assert all(sheet[f'B{r}'].data_type == 's' for r in (9, 10))
+    assert [sheet[f'C{r}'].value for r in (9, 10)] == [120, 90]
+    wb.close()
+
+
+@pytest.mark.parametrize('label', ['Income taxes at federal statutory rate (21%)',
+                                  'Income taxes at federal statutory rate (21 percent)'])
+def test_descriptive_percentage_does_not_scale_amount_in_saved_workbook(tmp_path, label):
+    html = ('<p>In millions</p><table><tr><th>Item</th><th>2026</th></tr>'
+            f'<tr><td>{label}</td><td>120</td></tr>'
+            '<tr><td>Percentage of revenue</td><td>15</td></tr>'
+            '<tr><td>Tax rate (%)</td><td>21</td></tr>'
+            '<tr><td>Margin</td><td>12.3%</td></tr></table>')
+    result = sec2md.export_xlsx(html, tmp_path / 'tax.xlsx', quality_policy='strict')
+    wb = load_workbook(result.path)
+    sheet = wb.worksheets[1]
+    assert [sheet[f'B{r}'].value for r in range(9, 13)] == [120, .15, .21, .123]
+    assert '%' not in sheet['B9'].number_format
+    assert all('%' in sheet[f'B{r}'].number_format for r in range(10, 13))
+    wb.close()
+
+
 def test_public_api_is_available():
     assert hasattr(sec2md, 'export_xlsx')
     for name in ('XlsxExportResult', 'XlsxTableResult', 'XlsxQualityError',

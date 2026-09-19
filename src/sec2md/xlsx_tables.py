@@ -25,6 +25,7 @@ class SourceCell:
     is_header: bool
     is_numeric_fact: bool
     source_anchor: str | None = None
+    numeric_markers: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -60,13 +61,20 @@ def _text_fragments(node: Tag) -> str:
             parts.append(str(child))
         elif isinstance(child, Tag) and not _hidden(child) and child.name not in {'script', 'style'}:
             text = _text_fragments(child)
-            parts.append(f' {text} ' if child.name in {'br', 'p', 'div', 'tr', 'td', 'th', 'table', 'li'} else text)
+            boundary = child.name in {'br', 'p', 'div', 'tr', 'td', 'th', 'table', 'li'} or _numeric_marker(child)
+            parts.append(f' {text} ' if boundary else text)
     return ''.join(parts)
 
 
 def _visible_text(node: Tag) -> str:
     """Keep inline token fragments together, separating only structural boundaries."""
     return ' '.join(_text_fragments(node).split())
+
+
+def _numeric_marker(node: Tag) -> bool:
+    """Preserve numeric superscript/local-link boundaries, not ordinary spans."""
+    return (node.name == 'sup' or (node.name == 'a' and str(node.get('href', '')).startswith('#'))) and bool(
+        re.fullmatch(r'\d+', node.get_text().strip()))
 
 
 def _visible_nodes(node: Tag, names):
@@ -86,6 +94,7 @@ def _cell(node, row, column, rowspan, colspan, source_url, native_anchors):
               for a in _visible_nodes(node, 'a') if a.has_attr('href')),
         node.name == 'th', any(_visible_nodes(node, ['ix:nonfraction', 'ix:fraction', 'nonfraction', 'fraction'])),
         _anchor(node, native_anchors),
+        tuple(_visible_text(marker) for marker in _visible_nodes(node, ['sup', 'a']) if _numeric_marker(marker)),
     )
 
 
@@ -332,9 +341,12 @@ _UNIT_DECLARATION = re.compile(
     r'|(?:(?:items |amounts )?expressed as a )?percentage of revenue'
     r'|the following table [^.!?\d]*expressed as a percentage of revenue)\)?\.?', re.I)
 _PERCENT = re.compile(r'%|\bpercent(?:age)?\b', re.I)
+_PERCENT_UNIT = re.compile(
+    r'(?:%|percent(?:age)?|(?:expressed as (?:a )?)?percent(?:age)? of revenue|'
+    r'[^\d%]+\(\s*(?:%|percent(?:age)?)\s*\))', re.I)
 _ROW_UNIT = re.compile(r'\b(?:per[- ]share|dollars|shares|in (?:thousands|millions|billions))\b', re.I)
 _VALUE = re.compile(r'\b(?:amount|value|revenue|income|expense|cost|assets|liabilities|cash|shares|inventory|inventories|earnings|balance|total)\b', re.I)
-_IDENTIFIER = re.compile(r'\b(?:id|identifier|code|number|date|year|exhibit|section|zip|cusip)\b', re.I)
+_IDENTIFIER = re.compile(r'\b(?:id|identifier|code|number|date|year|exhibit|section|zip|cusip|notes?|references?|refs?)\b', re.I)
 _PERIOD = re.compile(r'^(?:(?:three|six|nine|twelve) months? ended|years? ended|(?:19|20)\d{2}|(?:Jan\w*|Feb\w*|Mar\w*|Apr\w*|May|Jun\w*|Jul\w*|Aug\w*|Sep\w*|Oct\w*|Nov\w*|Dec\w*)\.? \d{1,2},? (?:19|20)\d{2})$', re.I)
 
 
@@ -372,7 +384,7 @@ def _numeric_role(text, header, label, cells, units, financial):
     period_header = all(_PERIOD.fullmatch(part) for part in header.split(' — '))
     if _IDENTIFIER.search(header) and not period_header:
         return 'text'
-    if _PERCENT.search(header) or _PERCENT.search(label):
+    if _PERCENT_UNIT.fullmatch(header.strip()) or _PERCENT_UNIT.fullmatch(label.strip()):
         return 'percent'
     # Specific currency/count headings override a table-wide percent description.
     if _VALUE.search(header) or _ROW_UNIT.search(header) or _ROW_UNIT.search(label):
@@ -397,6 +409,8 @@ def _joined(cells):
 
 
 def _convert_prepared(text, role, origins):
+    if role != 'text' and any(c.numeric_markers for c in origins):
+        return CellValue(text, '@', text, 'Numeric footnote marker retained; verify the source amount and marker before conversion.')
     # The Markdown structural join produces '$ (120)'. Relocate only a proven
     # standalone dollar fragment for the strict converter, preserving the display.
     token = text
@@ -539,7 +553,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             # Broader table units can still have specific row/column exceptions.
             local_units = f'{headers[index]} {original[r][0]} {text}'
             conflict = (not label_column and bool(re.search(r'\d', text)) and
-                        bool(_PERCENT.search(local_units)) and
+                        bool(_PERCENT_UNIT.fullmatch(headers[index].strip()) or
+                             _PERCENT_UNIT.fullmatch(original[r][0].strip()) or _PERCENT.search(text)) and
                         bool(_ROW_UNIT.search(local_units) or '$' in local_units))
             if conflict:
                 value = CellValue(text, '@', text, 'Conflicting explicit units; verify the row, column and displayed value units.')
