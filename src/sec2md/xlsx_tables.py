@@ -380,11 +380,11 @@ def _header_count(grid):
     return count
 
 
-def _numeric_role(text, header, label, cells, units, financial):
+def _numeric_role(text, header, label, cells, units, financial, percent_header):
     period_header = all(_PERIOD.fullmatch(part) for part in header.split(' — '))
     if _IDENTIFIER.search(header) and not period_header:
         return 'text'
-    if _PERCENT_UNIT.fullmatch(header.strip()) or _PERCENT_UNIT.fullmatch(label.strip()):
+    if percent_header or _PERCENT_UNIT.fullmatch(label.strip()):
         return 'percent'
     # Specific currency/count headings override a table-wide percent description.
     if _VALUE.search(header) or _ROW_UNIT.search(header) or _ROW_UNIT.search(label):
@@ -525,10 +525,13 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     # accounting fragment whose original successful validation used that part.
     actions = parser._validated_structural_actions(structural_grid, actions)
     kept = [col for col in range(len(groups)) if col not in actions]
-    headers = []
+    headers, percent_headers = [], []
     for index, col in enumerate(kept):
         header_cells = list(dict.fromkeys(grid[r][groups[col][0]] for r in range(header_count)))
         labels = [c.text for c in header_cells if c and c.text and not _UNIT_LINE.search(c.text)]
+        # Unit declarations belong to source components and their spans, not
+        # the flattened display label (which can also contain period headings).
+        percent_headers.append(any(_PERCENT_UNIT.fullmatch(label.strip()) for label in labels))
         headers.append(' — '.join(labels) or f'Column {index + 1}')
         if not labels:
             notes.append(f'Column {index + 1} is an exporter-generated positional header.')
@@ -547,13 +550,14 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             text = _joined(origins)
             # Labels are never promoted merely because they look numeric.
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
-            role = 'text' if label_column else _numeric_role(text, headers[index], original[r][0], origins, units, financial)
+            role = 'text' if label_column else _numeric_role(
+                text, headers[index], original[r][0], origins, units, financial, percent_headers[index])
             value = _convert_prepared(text, role, origins)
             # Explicit units on either axis (or on the value itself) must agree.
             # Broader table units can still have specific row/column exceptions.
             local_units = f'{headers[index]} {original[r][0]} {text}'
             conflict = (not label_column and bool(re.search(r'\d', text)) and
-                        bool(_PERCENT_UNIT.fullmatch(headers[index].strip()) or
+                        bool(percent_headers[index] or
                              _PERCENT_UNIT.fullmatch(original[r][0].strip()) or _PERCENT.search(text)) and
                         bool(_ROW_UNIT.search(local_units) or '$' in local_units))
             if conflict:

@@ -86,6 +86,47 @@ def test_descriptive_percentage_does_not_scale_amount_in_saved_workbook(tmp_path
     wb.close()
 
 
+def test_layered_percentage_headers_scale_only_their_source_span(tmp_path):
+    html = ('<table><tr><th rowspan="2">Item</th><th colspan="2">Margin (%)</th>'
+            '<th rowspan="2">Amount</th></tr><tr><th>2026</th><th>2025</th></tr>'
+            '<tr><td>Revenue</td><td>15</td><td>12</td><td>120</td></tr>'
+            '<tr><td>Cost</td><td>10</td><td>9</td><td>90</td></tr></table>')
+    result = sec2md.export_xlsx(html, tmp_path / 'layered.xlsx', quality_policy='strict')
+    assert result.status == 'complete'
+    assert result.diagnostics == ()
+    wb = load_workbook(result.path)
+    sheet = wb.worksheets[1]
+    assert [sheet[f'{col}8'].value for col in 'BCD'] == ['Margin (%) — 2026', 'Margin (%) — 2025', 'Amount']
+    assert [[sheet.cell(r, c).value for c in (2, 3, 4)] for r in (9, 10)] == [
+        [.15, .12, 120], [.10, .09, 90]]
+    assert all(sheet.cell(r, c).data_type == 'n' and sheet.cell(r, c).number_format == '0%'
+               for r in (9, 10) for c in (2, 3))
+    assert '%' not in sheet['D9'].number_format
+    wb.close()
+
+
+@pytest.mark.parametrize('unit_axis', ['column', 'row', 'value'])
+def test_layered_percentage_conflicting_units_are_reviewed(tmp_path, unit_axis):
+    period = '2026 (dollars)' if unit_axis == 'column' else '2026'
+    label = 'Revenue (dollars)' if unit_axis == 'row' else 'Revenue'
+    amount = '$15' if unit_axis == 'value' else '15'
+    html = ('<table><tr><th rowspan="2">Item</th><th colspan="2">Margin (%)</th></tr>'
+            f'<tr><th>{period}</th><th>2025</th></tr>'
+            f'<tr><td>{label}</td><td>{amount}</td><td>12</td></tr>'
+            '<tr><td>Cost</td><td>10</td><td>9</td></tr></table>')
+    result = sec2md.export_xlsx(html, tmp_path / 'warn.xlsx')
+    assert result.status == 'needs_review'
+    assert any('Conflicting explicit units' in issue for issue in result.tables[0].issues)
+    wb = load_workbook(result.path)
+    cell = wb.worksheets[1]['B9']
+    assert (cell.value, cell.data_type, cell.number_format) == (amount, 's', '@')
+    wb.close()
+    with pytest.raises(sec2md.XlsxQualityError) as caught:
+        sec2md.export_xlsx(html, tmp_path / 'strict.xlsx', quality_policy='strict')
+    assert any('Conflicting explicit units' in issue for issue in caught.value.issues)
+    assert not (tmp_path / 'strict.xlsx').exists()
+
+
 def test_public_api_is_available():
     assert hasattr(sec2md, 'export_xlsx')
     for name in ('XlsxExportResult', 'XlsxTableResult', 'XlsxQualityError',
