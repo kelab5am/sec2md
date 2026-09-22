@@ -45,7 +45,7 @@ Each `XlsxTableResult` contains `ordinal`, `sheet_name`, `status` and `issues`.
 Overall status is `complete`, `needs_review`, or `no_tables`; table status is
 `exported`, `needs_review`, or `source_text_only`.
 
-- `warn` (default): preserve recoverable problems as visible review items.
+- `warn` (default): retain recoverable issues in the API/CLI report.
 - `strict`: reject parser-quality failures (`ParseQualityError`) or table/writer
   reliability failures (`XlsxQualityError`, with `.issues`) before publication.
 - `off`: bypass parser-quality enforcement while retaining diagnostics and all
@@ -57,23 +57,32 @@ Existing Markdown defaults are unchanged.
 
 ## Workbook contents and copying
 
-Contents links to every table worksheet in source traversal order, including
-nonfinancial disclosures, exhibits and trading plans. Separate continuation
-fragments remain separate sheets. The inventory follows the existing parser's
-recognized tabular content: a single-row layout table emitted as prose is outside
-this inventory. It does not promise a sheet for every raw HTML `table` node.
+Contents lists table titles and pages with links to the worksheets. Filing front
+matter is excluded only when a contents table is positively identified from its
+heading and linked index rows. Without that evidence, early tables are retained.
+This filter applies only to Excel; Markdown output is unchanged.
 
-Each worksheet shows source information, units, a labeled copy range, notes and
-review items, and visible originals with source coordinates and spans. Copy the
-stated range to include units and complete period headings. Copy grids contain no
-merged cells or audit columns. All cells are static values: no formulas, filters,
-calculations or cross-filing links are generated.
+Titles come from captions, nearby headings (including bold/italic SEC text blocks),
+or a short subject extracted from introductory text. A descriptive source row label
+is the fallback, followed by a numbered name only when no useful source label exists.
+Full titles remain in Contents and at the top of each sheet; tab names respect
+Excel's 31-character limit and receive suffixes when needed.
 
-**No rows are frozen.** Table sheets freeze only the first label column (`B1`);
-Contents has no frozen panes. Source identity and headers scroll away normally.
-Parser pages and detected printed pages are shown separately. Printed pages are
-omitted when source evidence is unavailable; generated element IDs are local
-references, not fabricated SEC URL anchors.
+Each worksheet contains the title, reported units, headers and values, followed by
+an original table reference. When numeric columns cannot be safely consolidated,
+only the source grid is shown, preserving source spans and text. Notes, nearby
+prose, review sections, cell-coordinate ledgers and extracted-text dumps are omitted.
+They remain available in internal extraction records and API/CLI diagnostics.
+
+**No rows or columns are frozen.** Prepared copy grids are unmerged; original
+references preserve source merges. Local named ranges `CopyTable` and `OriginalTable`
+identify the available areas without visible instructions. Cells contain static
+values, with no generated formulas, filters, calculations or cross-filing links.
+
+The inventory follows the parser's recognized tabular content; single-row layout
+tables emitted as prose do not get worksheets. Separate continuation fragments
+remain separate sheets. Page numbers use detected printed pages when available,
+otherwise parser pages.
 
 ## Numbers, originals and uncertainty
 
@@ -85,29 +94,25 @@ stays zero, blank stays blank, and a reported dash stays the exact text dash.
 
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding
-Excel's reliable precision stay text with review items. Source strings beginning
+Excel's reliable precision stay text with issues in the export report. Source strings beginning
 with formula characters are stored as text. A table with an unreliable mapping
-receives a source-text worksheet and explicit status instead of disappearing.
+uses its original grid when source geometry is valid. Unsupported source geometry
+raises `ValueError` before publication, leaving any existing destination intact.
 
-Original source cell strings, structural symbols, header levels, spans and
-references remain visible. Whitespace normalization applies; this is not a pixel
-reproduction of the filing. Long strings may be shown in labeled chunks and
-require concatenation without separators. Excel limit violations receive an
-explicit fallback or unavailable-in-full warning. Retained HTML remains the
-ultimate source for visual layout.
+Original source cell strings, structural symbols, header levels, spans and cell
+links remain in the original grid. Whitespace normalization applies; this is not
+a pixel reproduction of the filing. Long strings stay in their cells; values over
+Excel's 32,767-character limit or tables exceeding its dimensions cause an explicit
+error before publication rather than truncation or diagnostic text chunks.
 
-Notes are retained from explicit targets and bounded nearby context. Nearby prose
-is labeled as context, not asserted to resolve an accounting footnote. Missing or
-ambiguous linked targets are flagged. Full financial-statement note sections are
-not automatically expanded. External references remain links.
-
-Contents records a SHA-256 and its scope: exact bytes for byte input, supplied
-UTF-8 text for strings, or normalized HTML UTF-8 for URL input.
+Contents retains hidden source-identity rows for folder-export duplicate detection:
+SHA-256 of exact bytes for byte input, supplied UTF-8 text for strings, or normalized
+HTML UTF-8 for URL input. These rows are not part of the visible Contents list.
 
 ## Validation scope
 
 Offline acceptance covers the retained NVIDIA annual and quarterly filings:
-61/48 table worksheets plus Contents, six primary statements (162 source rows,
+58/45 post-contents table worksheets plus Contents, six primary statements (162 source rows,
 389 displayed numbers), 477 sampled numbers, 16 dash positions and two blanks,
 plus inventories, percentage tables, exhibits, trading plans, source notes and
 links. Expectations are independently reviewed source evidence stored with tests.

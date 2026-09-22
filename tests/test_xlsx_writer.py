@@ -38,7 +38,7 @@ def test_grouped_headers_saved_values_navigation_and_no_frozen_rows():
     assert record.ordinal == 1 and record.status == table.status
     assert wb.worksheets[0].title == 'Contents'
     assert wb.worksheets[0].freeze_panes is None
-    assert sheet.freeze_panes == 'B1'
+    assert sheet.freeze_panes is None
     assert 96221 in values(sheet)
     assert '96,221' in values(sheet)
     for heading in table.headers[1:]:
@@ -47,12 +47,12 @@ def test_grouped_headers_saved_values_navigation_and_no_frozen_rows():
     assert any(c.hyperlink and c.hyperlink.target == 'https://example.com/filing.htm#native'
                for row in sheet for c in row)
     links = [c.hyperlink.location for row in wb['Contents'] for c in row if c.hyperlink]
-    assert len(links) == 2
+    assert len(links) == 1
     assert all(record.worksheet_name in link for link in links)
     for ws in wb:
         assert not ws.auto_filter.ref
         assert not any(c.data_type == 'f' for row in ws for c in row)
-    assert not sheet.merged_cells.ranges
+    assert sheet.merged_cells.ranges  # Source reference preserves source spans.
 
 
 @pytest.mark.parametrize('text', ['=1+1', '+SUM(A1)', '-1+2', '@SUM(A1)', '#N/A'])
@@ -81,30 +81,22 @@ def test_names_order_fallback_and_native_anchor_only():
     assert all(len(n) <= 31 and not any(c in n for c in '[]:*?/\\') for n in names)
     for name in names:
         sheet = wb[name]
-        assert any('Copy grid unavailable' in str(v) for v in values(sheet))
-        assert 'Bad geometry' in values(sheet)
+        assert '96,221' in values(sheet)
+        assert 'Bad geometry' not in values(sheet)
+        assert 'Bad geometry' in records[names.index(name)].issues
         assert not any(c.hyperlink and 'sec2md-generated' in str(c.hyperlink.target)
                        for row in sheet for c in row)
 
 
-def test_long_text_chunks_reconstruct_and_report_review():
-    text = '=start' + 'abcdef ' * 10000
-    table = sample()
-    cell = replace(table.source.source_cells[0], text=text)
-    table = replace(table, source=replace(table.source, source_cells=(cell,), original_text=text),
-                    rows=((CellValue(text, '@', text),),), headers=('Text',))
+def test_long_text_stays_in_its_cell_and_overlong_text_is_rejected():
+    text = '=start' + 'abcdef ' * 100
+    table = replace(sample(), rows=((CellValue(text, '@', text),),), headers=('Text',))
     wb, records = render([table])
-    sheet = wb[records[0].worksheet_name]
-    assert records[0].issues and records[0].status == 'needs_review'
-    assert all(len(v) <= 32767 for v in values(sheet) if isinstance(v, str))
-    # Original extracted text is a labeled, consecutive sequence of exact chunks.
-    start = next(c.row for row in sheet for c in row if c.value == 'Original extracted text (chunks; concatenate without separators)')
-    chunks = []
-    for row in sheet.iter_rows(min_row=start + 1):
-        if row[0].value is None:
-            break
-        chunks.append(row[0].value)
-    assert ''.join(chunks) == text
+    assert wb[records[0].worksheet_name]['A4'].value == text
+    assert wb[records[0].worksheet_name]['A4'].data_type == 's'
+    table = replace(table, rows=((CellValue('x' * 32768, '@', ''),),))
+    with pytest.raises(ValueError, match='character limit'):
+        render([table])
 
 
 def test_empty_workbook_has_honest_hash_and_document_diagnostics():
@@ -112,28 +104,28 @@ def test_empty_workbook_has_honest_hash_and_document_diagnostics():
     assert not records and wb.sheetnames == ['Contents']
     assert 'utf8_text' in values(wb['Contents'])
     assert 'abc123' in values(wb['Contents'])
-    assert 'Parse warning' in values(wb['Contents'])
+    assert 'Parse warning' not in values(wb['Contents'])
+    assert all(wb['Contents'].row_dimensions[r].hidden for r in range(1, 7))
     assert any('No tables' in str(v) for v in values(wb['Contents']))
 
 
-def test_dimension_limit_retains_text_and_reports_writer_issue(monkeypatch):
+def test_dimension_limit_rejects_instead_of_truncating(monkeypatch):
     import sec2md.xlsx_writer as writer
     monkeypatch.setattr(writer, 'MAX_COLUMNS', 2)
-    wb, records = render([sample()])
-    assert records[0].status == 'source_text_only'
-    assert any('dimension' in issue.lower() for issue in records[0].issues)
-    assert any('96,221' in str(v) for v in values(wb[records[0].worksheet_name]))
+    with pytest.raises(ValueError, match='dimension limit'):
+        render([sample()])
 
 
 def test_original_grid_and_span_ledger_are_visible():
     table = sample()
     wb, records = render([table])
     sheet = wb[records[0].worksheet_name]
-    assert any('Original cell grid' in str(v) for v in values(sheet))
+    assert 'Original table' in values(sheet)
     numeric_original = next(c for row in sheet for c in row if c.value == '96,221')
     assert numeric_original.column == 2
     assert numeric_original.data_type == 's'
-    assert any('rowspan 1, colspan 2' in str(v) for v in values(sheet))
+    assert not any('rowspan' in str(v) for v in values(sheet))
+    assert any(r.max_col - r.min_col == 1 for r in sheet.merged_cells.ranges)
 
 
 def test_formats_blank_dash_zero_and_original_provenance():
@@ -148,7 +140,7 @@ def test_formats_blank_dash_zero_and_original_provenance():
     row = next(row for row in sheet if row[0].value == 'Example')
     assert [c.value for c in row[:5]] == ['Example', 0, .123, None, '—']
     assert row[2].number_format == '0.0%'
-    assert any('Body row 0, column 1:' in str(v) for v in values(sheet))
+    assert not any('Body row' in str(v) for v in values(sheet))
 
 
 def test_xml_incompatible_text_is_reversibly_escaped_and_reported():
@@ -159,24 +151,21 @@ def test_xml_incompatible_text_is_reversibly_escaped_and_reported():
     assert any('\\u0001' in str(v) for v in values(wb[records[0].worksheet_name]))
 
 
-def test_row_limit_degrades_to_explicit_unavailable_in_full(monkeypatch):
+def test_row_limit_rejects_instead_of_truncating(monkeypatch):
     import sec2md.xlsx_writer as writer
     monkeypatch.setattr(writer, 'MAX_ROWS', 40)
-    table = replace(sample(), notes=('Long note ' * 2000,))
-    wb, records = render([table])
-    sheet = wb[records[0].worksheet_name]
-    assert sheet.max_row <= 40
-    assert any('UNAVAILABLE IN FULL' in str(v) for v in values(sheet))
-    assert records[0].status == 'source_text_only'
-    assert any('unavailable in full' in issue.lower() for issue in records[0].issues)
+    table = replace(sample(), rows=sample().rows * 50)
+    with pytest.raises(ValueError, match='dimension limit'):
+        render([table])
 
 
-def test_table_has_original_navigation_and_normalization_disclosure():
+def test_table_ranges_are_available_without_instruction_prose():
     wb, records = render([sample()])
     sheet = wb[records[0].worksheet_name]
-    assert any(c.hyperlink and c.hyperlink.location and records[0].worksheet_name in c.hyperlink.location
-               for row in sheet for c in row)
-    assert any('whitespace' in str(v).lower() for v in values(sheet))
+    assert sheet['A1'].hyperlink.location == "'Contents'!A8"
+    assert list(sheet.defined_names['CopyTable'].destinations)[0][1] == records[0].copy_range
+    assert list(sheet.defined_names['OriginalTable'].destinations)[0][1] == records[0].original_range
+    assert not any('whitespace' in str(v).lower() for v in values(sheet))
 
 
 def test_writer_import_does_not_load_optional_dependency():
@@ -194,11 +183,11 @@ def test_supplied_title_and_printed_page_are_retained():
     wb, records = render([table])
     sheet = wb[records[0].worksheet_name]
     assert sheet['A1'].value == table.title
-    assert 'Parser page 3 | Printed page 17' in values(sheet)
+    assert not any('Parser page' in str(v) for v in values(sheet))
     assert 17 in values(wb['Contents'])
 
 
-def test_encoding_warning_preserves_source_text_only_status_everywhere():
+def test_encoding_warning_preserves_source_text_only_status_in_report():
     table = replace(sample(), title='Invalid\x01 title', status='source_text_only',
                     rows=(), issues=('Unreliable source grid',))
     wb, records = render([table])
@@ -207,10 +196,5 @@ def test_encoding_warning_preserves_source_text_only_status_everywhere():
     assert record.copy_range is None
     assert any('XML' in issue for issue in record.issues)
     sheet = wb[record.worksheet_name]
-    assert 'Status: source_text_only' in values(sheet)
-    assert 'Status: needs_review' not in values(sheet)
-    assert any('Copy grid unavailable' in str(value) for value in values(sheet))
-    contents = wb['Contents']
-    table_row = next(row for row in contents if row[0].hyperlink)
-    assert table_row[4].value == 'source_text_only'
-    assert table_row[5].value == len(record.issues)
+    assert not any('Status:' in str(v) for v in values(sheet))
+    assert '96,221' in values(sheet)
