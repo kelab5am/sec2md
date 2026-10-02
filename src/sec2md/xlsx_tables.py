@@ -184,21 +184,71 @@ def _references(nodes, source_url, note_targets):
     return tuple(dict.fromkeys(notes)), tuple(dict.fromkeys(unresolved))
 
 
+def _intro_title(text: str) -> str:
+    """Trim conventional introductory prose, keeping the source's subject words."""
+    text = re.sub(r'^\(\d+\)\s*', '', text.strip())
+    text = re.sub(r'^the following table (?:represents|presents|sets forth|summarizes) (?:our |the )?',
+                  '', text, flags=re.I)
+    text = re.sub(r'^includes\s+', '', text, flags=re.I)
+    text = re.split(r'\s+(?:is|are|consisted of|consists of)\s+', text, maxsplit=1, flags=re.I)[0]
+    text = re.sub(r'\s+(?:as follows|were as follows)\s*:?$', '', text, flags=re.I).rstrip(':')
+    return text[:1].upper() + text[1:]
+
+
 def _explicit_title(node: Tag) -> str | None:
     caption = node.find('caption', recursive=False)
     if caption is not None:
         return _visible_text(caption)
     context = _context(node, before=True)
+    intro = None
     for sibling in _context_siblings(node, before=True):
         if not isinstance(sibling, Tag) or _hidden(sibling):
             continue
         if sibling.name == 'table' or sibling.find('table') is not None:
             break
-        if _visible_text(sibling) and _visible_text(sibling) not in context:
+        text = _visible_text(sibling)
+        if text and text not in context:
             break
         if sibling.name in {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'} or sibling.get('role') == 'heading':
-            return _visible_text(sibling)
-    return None
+            return text
+        if intro is None and len(text) <= 600 and re.search(r'\bfollowing\b.*:\s*$|\bas follows\s*:', text, re.I):
+            intro = _intro_title(text)
+        if not text or len(text) > 240 or any(_visible_text(a) for a in sibling.find_all('a', href=True)):
+            continue
+        if re.fullmatch(r'\(?unaudited\)?|\(?continued\)?', text, re.I) or re.match(
+                r'^\(?(?:amounts? )?in (?:dollars|thousands|millions|billions)\b', text, re.I):
+            continue
+        # SEC filings commonly use bold spans inside DIVs instead of headings.
+        # Require the whole block to be styled, not one emphasized word in prose.
+        styled = [el for el in (sibling, *sibling.find_all(True))
+                  if el.name in {'b', 'strong', 'i', 'em'} or re.search(
+                      r'font-weight\s*:\s*(?:bold|[6-9]00)\b|font-style\s*:\s*italic\b',
+                      el.get('style', ''), re.I)]
+        if any(_visible_text(el) == text for el in styled):
+            return text
+    return intro
+
+
+def select_export_tables(snapshots: Sequence[TableSnapshot]) -> tuple[TableSnapshot, ...]:
+    """Skip front matter only with a positively identified filing contents table.
+
+    Repeated 'Table of Contents' navigation links alone are not a boundary.
+    Without a confirmed index, retain early tables rather than guess a page count.
+    """
+    boundary = None
+    for index, table in enumerate(snapshots):
+        links = {href for cell in table.source_cells for _, href in cell.links if '#' in href}
+        labels = [cell.text for cell in table.source_cells]
+        index_rows = sum(bool(re.search(r'\b(?:item\s+\d|part\s+[ivx]+|financial statements)\b',
+                                       text, re.I)) for text in labels)
+        titled = any(re.fullmatch(r'(?:table of )?contents', text, re.I)
+                     for text in (table.explicit_title or '', *labels))
+        continuation = boundary is not None and index == boundary + 1
+        if (titled or continuation) and len(links) >= 3 and index_rows >= 2:
+            boundary = index
+        elif boundary is not None:
+            break
+    return tuple(snapshots[boundary + 1:] if boundary is not None else snapshots)
 
 
 def _note_target_text(node: Tag) -> str:
@@ -457,7 +507,10 @@ def _column_groups(grid, original, header_count):
 def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     """Build a conservative copy grid from source origins, never Markdown cleanup."""
     cells = snapshot.source_cells
-    title = snapshot.explicit_title or f'Table {snapshot.ordinal}'
+    label = next((c.text.rstrip(':') for c in cells if c.column == 0 and not c.is_header
+                  and 3 < len(c.text) <= 160 and re.search(r'[A-Za-z]{3}', c.text)
+                  and not _PERIOD.fullmatch(c.text) and not _UNIT_DECLARATION.fullmatch(c.text)), None)
+    title = snapshot.explicit_title or label or f'Table {snapshot.ordinal}'
     unit_texts = [text for text in snapshot.context_before if _UNIT_DECLARATION.fullmatch(text.strip())]
     units = '\n'.join(unit_texts)
     notes = [f'Context: {text}' for text in (*snapshot.context_before, *snapshot.context_after)

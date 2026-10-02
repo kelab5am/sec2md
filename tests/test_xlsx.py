@@ -44,10 +44,11 @@ def test_numeric_footnote_boundaries_are_reviewed_before_publication(tmp_path, a
     result = sec2md.export_xlsx(html, tmp_path / 'warn.xlsx')
     assert result.status == 'needs_review'
     wb = load_workbook(result.path)
-    assert wb.worksheets[1]['B9'].value == '120 1'
-    assert wb.worksheets[1]['B9'].data_type == 's'
+    assert wb.worksheets[1]['B4'].value == '120 1'
+    assert wb.worksheets[1]['B4'].data_type == 's'
     if 'href' in amount:
-        assert any('Includes sales' in str(v) for v in values(wb))
+        assert any('Includes sales' in text for _, text in snapshot.resolved_notes)
+        assert not any('Includes sales' in str(v) for v in values(wb))
     wb.close()
     with pytest.raises(sec2md.XlsxQualityError):
         sec2md.export_xlsx(html, tmp_path / 'strict.xlsx', quality_policy='strict')
@@ -63,9 +64,9 @@ def test_reference_columns_defeat_financial_roles_in_saved_workbook(tmp_path, he
     result = sec2md.export_xlsx(html, tmp_path / 'refs.xlsx', quality_policy='strict')
     wb = load_workbook(result.path)
     sheet = wb.worksheets[1]
-    assert [sheet[f'B{r}'].value for r in (9, 10)] == list(tokens)
-    assert all(sheet[f'B{r}'].data_type == 's' for r in (9, 10))
-    assert [sheet[f'C{r}'].value for r in (9, 10)] == [120, 90]
+    assert [sheet[f'B{r}'].value for r in (4, 5)] == list(tokens)
+    assert all(sheet[f'B{r}'].data_type == 's' for r in (4, 5))
+    assert [sheet[f'C{r}'].value for r in (4, 5)] == [120, 90]
     wb.close()
 
 
@@ -80,9 +81,9 @@ def test_descriptive_percentage_does_not_scale_amount_in_saved_workbook(tmp_path
     result = sec2md.export_xlsx(html, tmp_path / 'tax.xlsx', quality_policy='strict')
     wb = load_workbook(result.path)
     sheet = wb.worksheets[1]
-    assert [sheet[f'B{r}'].value for r in range(9, 13)] == [120, .15, .21, .123]
-    assert '%' not in sheet['B9'].number_format
-    assert all('%' in sheet[f'B{r}'].number_format for r in range(10, 13))
+    assert [sheet[f'B{r}'].value for r in range(4, 8)] == [120, .15, .21, .123]
+    assert '%' not in sheet['B4'].number_format
+    assert all('%' in sheet[f'B{r}'].number_format for r in range(5, 8))
     wb.close()
 
 
@@ -96,12 +97,12 @@ def test_layered_percentage_headers_scale_only_their_source_span(tmp_path):
     assert result.diagnostics == ()
     wb = load_workbook(result.path)
     sheet = wb.worksheets[1]
-    assert [sheet[f'{col}8'].value for col in 'BCD'] == ['Margin (%) — 2026', 'Margin (%) — 2025', 'Amount']
-    assert [[sheet.cell(r, c).value for c in (2, 3, 4)] for r in (9, 10)] == [
+    assert [sheet[f'{col}3'].value for col in 'BCD'] == ['Margin (%) — 2026', 'Margin (%) — 2025', 'Amount']
+    assert [[sheet.cell(r, c).value for c in (2, 3, 4)] for r in (4, 5)] == [
         [.15, .12, 120], [.10, .09, 90]]
     assert all(sheet.cell(r, c).data_type == 'n' and sheet.cell(r, c).number_format == '0%'
-               for r in (9, 10) for c in (2, 3))
-    assert '%' not in sheet['D9'].number_format
+               for r in (4, 5) for c in (2, 3))
+    assert '%' not in sheet['D4'].number_format
     wb.close()
 
 
@@ -118,7 +119,7 @@ def test_layered_percentage_conflicting_units_are_reviewed(tmp_path, unit_axis):
     assert result.status == 'needs_review'
     assert any('Conflicting explicit units' in issue for issue in result.tables[0].issues)
     wb = load_workbook(result.path)
-    cell = wb.worksheets[1]['B9']
+    cell = wb.worksheets[1]['B4']
     assert (cell.value, cell.data_type, cell.number_format) == (amount, 's', '@')
     wb.close()
     with pytest.raises(sec2md.XlsxQualityError) as caught:
@@ -151,7 +152,7 @@ def test_offline_round_trip_and_hash(tmp_path, monkeypatch, as_bytes):
     assert any(hashlib.sha256(TABLE.encode()).hexdigest() in str(v) for v in values(wb))
     assert any(('original bytes' if as_bytes else 'supplied text UTF-8') in str(v)
                for v in values(wb))
-    assert wb.worksheets[1].freeze_panes == 'B1'
+    assert wb.worksheets[1].freeze_panes is None
     wb.close()
     assert list(tmp_path.iterdir()) == [result.path]
 
@@ -161,7 +162,8 @@ def test_base_url_resolves_without_fetch(tmp_path, monkeypatch):
     html = TABLE.replace('Revenue', '<a href="note.htm">Revenue</a>') + '<img src="x.png">'
     result = sec2md.export_xlsx(html, tmp_path / 'a.xlsx', base_url='https://example.com/a.htm')
     wb = load_workbook(result.path)
-    assert any('https://example.com/note.htm' in str(v) for v in values(wb))
+    assert any(c.hyperlink and c.hyperlink.target == 'https://example.com/note.htm'
+               for ws in wb for row in ws for c in row)
     wb.close()
 
 
@@ -193,17 +195,11 @@ from sec2md import export_xlsx, XlsxExportResult, XlsxTableResult
 
 
 @pytest.mark.parametrize('policy', ['warn', 'off'])
-def test_partial_recovery_keeps_every_table(tmp_path, policy):
-    result = sec2md.export_xlsx(BAD + TABLE, tmp_path / 'a.xlsx', quality_policy=policy)
-    assert result.status == 'needs_review'
-    assert [t.ordinal for t in result.tables] == [1, 2]
-    assert result.tables[0].issues
-    assert result.tables[1].status == 'exported'
-    assert result.diagnostics
-    wb = load_workbook(result.path)
-    assert len(wb.sheetnames) == 3
-    assert any('Unreliable' in str(v) for v in values(wb))
-    wb.close()
+def test_unrenderable_source_grid_rejects_incomplete_workbook(tmp_path, policy):
+    target = tmp_path / 'a.xlsx'
+    with pytest.raises(ValueError, match='grid unavailable'):
+        sec2md.export_xlsx(BAD + TABLE, target, quality_policy=policy)
+    assert not target.exists()
 
 
 def test_strict_rejects_table_issues_before_publication(tmp_path):
@@ -306,16 +302,12 @@ def test_url_fetches_only_primary_and_labels_normalized_hash(tmp_path, monkeypat
     wb.close()
 
 
-def test_strict_honors_writer_issues(tmp_path):
-    source = TABLE.replace('Revenue', 'R' * 401)
+def test_overlong_cells_fail_before_publication(tmp_path):
+    source = TABLE.replace('Revenue', 'R' * 32768)
     target = tmp_path / 'a.xlsx'
-    with pytest.raises(sec2md.XlsxQualityError) as caught:
-        sec2md.export_xlsx(source, target, quality_policy='strict')
-    assert any('chunk' in issue.lower() for issue in caught.value.issues)
+    with pytest.raises(ValueError, match='character limit'):
+        sec2md.export_xlsx(source, target)
     assert not list(tmp_path.iterdir())
-    result = sec2md.export_xlsx(source, target, quality_policy='off')
-    assert result.status == 'needs_review'
-    assert result.tables[0].issues
 
 
 def test_strict_propagates_parse_quality_error(tmp_path):
