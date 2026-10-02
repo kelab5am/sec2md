@@ -44,7 +44,7 @@ test_sec2md.ipynb
 .coverage
 htmlcov/
 tests/.cache/
-
+outputs/
 # Distribution
 *.whl
 
