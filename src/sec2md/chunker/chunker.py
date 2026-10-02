@@ -3,7 +3,10 @@ import re
 from typing import Union, Tuple, List, Dict, Any, Optional
 
 from sec2md.chunker.chunk import Chunk
-from sec2md.chunker.blocks import BaseBlock, TextBlock, TableBlock, HeaderBlock, estimate_tokens
+from sec2md.chunker.blocks import (
+    BaseBlock, TextBlock, TableBlock, HeaderBlock, estimate_tokens,
+    is_separator_row, separator_cell_count,
+)
 
 # Rebuild Chunk after Element is defined
 from sec2md.models import Element
@@ -110,13 +113,20 @@ class Chunker:
             block = TableBlock(content=content, page=page_number, element_ids=[elem.id])
             return [(elem, block)]
 
-        header_line = lines[0]
-        separator_line = lines[1] if len(lines) > 1 else ""
-        data_rows = lines[2:]
-
-        # Build ellipsis row matching column count
-        header_cells = [cell.strip() for cell in header_line.strip().split('|') if cell.strip()]
-        num_cols = max(1, len(header_cells))
+        # Everything up to the separator row (captions, units, header rows) is
+        # repeated in every part so continuation parts keep their column labels.
+        separator_idx = next((i for i, line in enumerate(lines) if is_separator_row(line)), None)
+        if separator_idx is not None and separator_idx + 1 < len(lines):
+            prefix_lines = lines[:separator_idx]
+            separator_line = lines[separator_idx]
+            data_rows = lines[separator_idx + 1:]
+            num_cols = separator_cell_count(separator_line)
+        else:
+            prefix_lines = [lines[0]]
+            separator_line = lines[1] if len(lines) > 1 else ""
+            data_rows = lines[2:]
+            header_cells = [cell.strip() for cell in lines[0].strip().split('|') if cell.strip()]
+            num_cols = max(1, len(header_cells))
         ellipsis_row = "|" + "|".join(["..."] * num_cols) + "|"
         if not separator_line:
             separator_line = "|" + "|".join(["---"] * num_cols) + "|"
@@ -126,7 +136,7 @@ class Chunker:
         part_idx = 0
 
         while row_idx < len(data_rows):
-            base_lines = [header_line, separator_line]
+            base_lines = prefix_lines + [separator_line]
             if row_idx > 0:
                 base_lines.append(ellipsis_row)
 
@@ -520,6 +530,9 @@ class Chunker:
                     else:
                         sentences.insert(0, sentence)
                         overlap_tokens += sentence.tokens
+
+                # The whole block fit; keep it so the overlap stays contiguous.
+                overlap_blocks.insert(0, block)
 
             else:
                 if overlap_tokens + block.tokens > self.chunk_overlap:

@@ -36,7 +36,7 @@ Thank you for considering contributing to `sec2md`! This document provides guide
 
 ## Reporting Issues
 
-- Use the [GitHub issue tracker](https://github.com/lucasastorian/sec2md/issues)
+- Use the [GitHub issue tracker](https://github.com/kelab5am/sec2md/issues)
 - Provide a clear description of the issue
 - Include steps to reproduce if reporting a bug
 - Include your Python version and operating system

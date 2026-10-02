@@ -533,3 +533,47 @@ class TestItem13DEnum:
     def test_13g_values(self):
         assert Item13G.SECURITY_AND_ISSUER.value == "1"
         assert Item13G.CERTIFICATION.value == "10"
+
+
+# ---------------------------------------------------------------------------
+# Audit regressions (2026-10-02)
+# ---------------------------------------------------------------------------
+
+def test_get_section_accepts_item8k_enum():
+    from sec2md.models import Item8K
+    pages = [
+        Page(number=1, content="Cover page"),
+        Page(number=2, content="**Item 2.02 Results of Operations and Financial Condition**\n\nThe company announced results."),
+    ]
+    sections = extract_sections(pages, filing_type="8-K")
+    section = get_section(sections, Item8K.RESULTS_OF_OPERATIONS, filing_type="8-K")
+    assert section is not None
+    assert section.item == "ITEM 2.02"
+
+
+def test_get_section_item8k_requires_8k_filing_type():
+    from sec2md.models import Item8K
+    with pytest.raises(ValueError):
+        get_section([], Item8K.RESULTS_OF_OPERATIONS, filing_type="10-K")
+
+
+@pytest.mark.parametrize('heading', ['PART I—FINANCIAL INFORMATION', 'PART I–FINANCIAL INFORMATION', 'PART I: FINANCIAL INFORMATION'])
+def test_part_heading_joined_by_dash_or_colon_is_detected(heading):
+    match = PART_PATTERN.match(f'**{heading}**')
+    assert match is not None and match.group(1) == 'PART I'
+
+
+def test_10q_with_em_dash_part_headings_keeps_its_items():
+    """META 10-Q layout: '**PART I—FINANCIAL INFORMATION**' with no spaces around the dash."""
+    pages = [
+        Page(number=1, content="Cover page"),
+        Page(number=2, content="**PART I—FINANCIAL INFORMATION**\n\n**Item 1. Financial Statements**\n\nStatement text."),
+        Page(number=3, content="**PART II—OTHER INFORMATION**\n\n**Item 1. Legal Proceedings**\n\nLegal text."),
+    ]
+    sections = extract_sections(pages, filing_type="10-Q")
+    assert [(s.part, s.item) for s in sections] == [("PART I", "ITEM 1"), ("PART II", "ITEM 1")]
+
+
+def test_part_pattern_still_rejects_words_starting_with_part():
+    assert PART_PATTERN.match("Particularly in the second quarter") is None
+    assert PART_PATTERN.match("PART IVORY") is None

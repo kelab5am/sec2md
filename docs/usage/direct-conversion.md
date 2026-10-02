@@ -60,8 +60,10 @@ before the document is fetched. The same keyword-only option is available on
 Financial statements are already well-structured - convert them directly:
 
 ```python
-# Balance sheet, income statement, cash flow
-statement_html = open("balance_sheet.html").read()
+from pathlib import Path
+
+# Balance sheet, income statement, cash flow (read as bytes so encoding is detected)
+statement_html = Path("balance_sheet.html").read_bytes()
 md = sec2md.convert_to_markdown(statement_html)
 ```
 
@@ -83,7 +85,8 @@ Notes are wrapped in outer table elements. Use `flatten_note()` to unwrap:
 import sec2md
 
 # Notes need flattening first
-note_html = open("revenue_note.html").read()
+# flatten_note() takes text, so name the file's encoding explicitly
+note_html = open("revenue_note.html", encoding="utf-8").read()
 flattened = sec2md.flatten_note(note_html)
 md = sec2md.convert_to_markdown(flattened)
 ```
@@ -92,7 +95,7 @@ md = sec2md.convert_to_markdown(flattened)
 
 ```python
 # 8-K press releases convert directly
-press_release_html = open("earnings_release.html").read()
+press_release_html = Path("earnings_release.html").read_bytes()
 md = sec2md.convert_to_markdown(press_release_html)
 ```
 
@@ -102,7 +105,7 @@ Merger agreements, contracts, and other exhibits:
 
 ```python
 # Exhibits (contracts, agreements, etc.)
-exhibit_html = open("merger_agreement.html").read()
+exhibit_html = Path("merger_agreement.html").read_bytes()
 md = sec2md.convert_to_markdown(exhibit_html)
 ```
 

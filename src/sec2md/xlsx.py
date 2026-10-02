@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import logging
 import os
 from pathlib import Path
-import tempfile
+import secrets
 from typing import Literal
 
 from sec2md.core import _link_resolution_url, _resolve_source
@@ -14,6 +15,8 @@ from sec2md.quality import build_diagnostics, enforce_quality
 from sec2md.utils import is_url
 from sec2md.xlsx_tables import prepare_table, select_export_tables
 from sec2md.xlsx_writer import render_workbook
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -44,15 +47,50 @@ class XlsxQualityError(ValueError):
         super().__init__('; '.join(issues))
 
 
+_STAGING_ATTEMPTS = 10
+
+
+def _create_staging_file(destination: Path) -> tuple[int, Path]:
+    """Exclusively create a sibling staging file, failing fast when it cannot be created.
+
+    tempfile retries PermissionError up to TMP_MAX (about 2**31) times on Windows
+    whenever os.access reports the directory writable, which it does despite a
+    denying ACL; that made exports to unwritable folders appear to hang.
+    """
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_BINARY', 0)
+    last_error: OSError | None = None
+    for _ in range(_STAGING_ATTEMPTS):
+        candidate = destination.parent / f'.{destination.name}.{secrets.token_hex(4)}.xlsx'
+        try:
+            return os.open(candidate, flags, 0o600), candidate
+        except (FileExistsError, PermissionError) as exc:
+            # Windows also reports a name collision as PermissionError, so retry
+            # a few fresh names before treating the directory as unwritable.
+            last_error = exc
+    raise last_error
+
+
+def _remove_staging_file(path: Path) -> None:
+    try:
+        path.unlink(missing_ok=True)
+    except OSError as exc:
+        # Another process (an indexer or sync client) may still hold the file.
+        # Never let cleanup replace a completed publish or the original error.
+        logger.warning('Could not remove XLSX staging file %s: %s', path, exc)
+
+
+def _check_destination_writable(destination: Path) -> None:
+    """Fail before parsing when no staging file can be created beside the destination."""
+    descriptor, probe = _create_staging_file(destination)
+    os.close(descriptor)
+    _remove_staging_file(probe)
+
+
 def _publish(payload: bytes, destination: Path, *, overwrite: bool, load_workbook) -> None:
     """Validate a sibling staging file, then link without clobber or replace."""
-    temp_path = None
+    descriptor, temp_path = _create_staging_file(destination)
     try:
-        with tempfile.NamedTemporaryFile(
-            mode='wb', dir=destination.parent, prefix=f'.{destination.name}.',
-            suffix='.xlsx', delete=False,
-        ) as staged:
-            temp_path = Path(staged.name)
+        with os.fdopen(descriptor, 'wb') as staged:
             staged.write(payload)
         # Load all worksheets rather than merely opening the ZIP container.
         with temp_path.open('rb') as saved:
@@ -65,8 +103,7 @@ def _publish(payload: bytes, destination: Path, *, overwrite: bool, load_workboo
             # Unsupported filesystems fail explicitly; there is no copy fallback.
             os.link(temp_path, destination)
     finally:
-        if temp_path is not None:
-            temp_path.unlink(missing_ok=True)
+        _remove_staging_file(temp_path)
 
 
 def export_xlsx(
@@ -103,6 +140,7 @@ def export_xlsx(
         raise NotADirectoryError(f'XLSX destination parent is not a directory: {path.parent}')
     if not overwrite and os.path.lexists(path):
         raise FileExistsError(f'XLSX destination already exists: {path}')
+    _check_destination_writable(path)
 
     html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
     parser = Parser(html, source_url=link_url, decode_diagnostics=decode_diagnostics,

@@ -27,6 +27,9 @@ _MARKDOWN_LINK_RE = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 _MARKDOWN_REFERENCE_RE = re.compile(r"!?\[([^\]]+)\]\[[^\]]*\]")
 _MARKDOWN_CODE_RE = re.compile(r"(`{1,3})(.*?)\1", re.DOTALL)
 _TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
+# "1. " markers the parser generates for <ol> items; they have no source text.
+_ORDERED_LIST_MARKER_RE = re.compile(r"(?m)^[ \t]*\d+\.(?=[ \t])")
+_QUALITY_POLICIES = frozenset({"strict", "warn", "off"})
 
 
 def normalize_numeric_token(value: str) -> str | None:
@@ -71,7 +74,10 @@ def _normalized_numbers(text: str) -> tuple[str, ...]:
 def trace_numeric_failures(element: Element, nodes: Sequence[Tag]) -> tuple[str, ...]:
     """Report each expected normalized number missing from mapped source nodes."""
 
-    expected = Counter(_normalized_numbers(element.content))
+    content = element.content
+    if any(_is_or_has_ordered_list(node) for node in nodes if isinstance(node, Tag)):
+        content = _ORDERED_LIST_MARKER_RE.sub("", content)
+    expected = Counter(_normalized_numbers(content))
     available = Counter(
         _normalized_numbers(
             " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
@@ -101,12 +107,28 @@ class ParseDiagnostics:
     warnings: tuple[str, ...]
 
 
+def _is_or_has_ordered_list(node: Tag) -> bool:
+    return node.name in {"ol", "li"} or node.find("ol") is not None or node.find_parent("ol") is not None
+
+
 class ParseQualityError(ValueError):
     """Raised when strict quality enforcement detects possible parse loss."""
 
     def __init__(self, diagnostics: ParseDiagnostics):
         self.diagnostics = diagnostics
         super().__init__("; ".join(diagnostics.warnings))
+
+    def __reduce__(self):
+        # Rebuild from diagnostics so the error crosses process boundaries
+        # (multiprocessing, concurrent.futures) intact.
+        return (type(self), (self.diagnostics,))
+
+
+def validate_quality_policy(policy: object) -> None:
+    """Raise ValueError unless policy is ``strict``, ``warn`` or ``off``."""
+
+    if not isinstance(policy, str) or policy not in _QUALITY_POLICIES:
+        raise ValueError(f"invalid quality_policy: {policy}")
 
 
 def _is_hidden_tag(tag) -> bool:
@@ -243,8 +265,7 @@ def build_diagnostics(
 def enforce_quality(diagnostics: ParseDiagnostics, policy: QualityPolicy) -> ParseDiagnostics:
     """Apply strict, warning-only, or disabled quality enforcement."""
 
-    if not isinstance(policy, str) or policy not in {"strict", "warn", "off"}:
-        raise ValueError(f"invalid quality_policy: {policy}")
+    validate_quality_policy(policy)
     if policy == "off":
         return diagnostics
     if policy == "warn":

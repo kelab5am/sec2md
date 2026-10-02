@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sec2md"
-version = "0.1.22+rcq.2"
+version = "0.1.22+rcq.3"
 description = "Convert SEC EDGAR filings to LLM-ready Markdown for AI agents and agentic RAG"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
@@ -75,6 +75,8 @@ ignore = ["E402", "E741", "F401"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Import this checkout's src, even when another sec2md install is on the path.
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 markers = [
     "integration: hits EDGAR (deselected by default, run with: pytest -m integration)",

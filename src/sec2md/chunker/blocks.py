@@ -27,6 +27,19 @@ def estimate_tokens(text: str) -> int:
         return max(1, len(text) // 4)
 
 
+_SEPARATOR_ROW = re.compile(r'^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)*\|?\s*$')
+
+
+def is_separator_row(line: str) -> bool:
+    """Return whether a line is a Markdown table header separator such as ``| --- | --- |``."""
+    return bool(_SEPARATOR_ROW.match(line))
+
+
+def separator_cell_count(line: str) -> int:
+    """Number of columns declared by a separator row."""
+    return len(line.strip().strip('|').split('|'))
+
+
 def split_sentences(text: str) -> List[str]:
     """Simple regex-based sentence splitter"""
     # Split on .!? followed by whitespace and capital letter or end of string
@@ -91,20 +104,17 @@ class TableBlock(BaseBlock):
         lines = content.split('\n')
         cleaned_lines = []
 
-        for i, line in enumerate(lines):
+        for line in lines:
             if not line.strip():
+                continue
+
+            if is_separator_row(line):
+                cleaned_lines.append('|' + '|'.join(['---'] * separator_cell_count(line)) + '|')
                 continue
 
             parts = line.split('|')
             cleaned_parts = [re.sub(r'\s+', ' ', part.strip()) for part in parts]
-            cleaned_line = '|'.join(cleaned_parts)
-
-            if i == 1:
-                num_cols = len(cleaned_parts) - 1
-                separator = '|' + '|'.join(['---'] * num_cols) + '|'
-                cleaned_lines.append(separator)
-            else:
-                cleaned_lines.append(cleaned_line)
+            cleaned_lines.append('|'.join(cleaned_parts))
 
         return '\n'.join(cleaned_lines)
 

@@ -56,6 +56,8 @@ class Item10K(str, Enum):
     CHANGES_IN_ACCOUNTING = "9"
     CONTROLS_AND_PROCEDURES = "9A"
     OTHER_INFORMATION = "9B"
+    FOREIGN_JURISDICTION_INSPECTIONS = "9C"  # Disclosure Regarding Foreign Jurisdictions that Prevent Inspections
+    # Deprecated alias: Item 9C is not cybersecurity (that is CYBERSECURITY, Item 1C).
     CYBERSECURITY_DISCLOSURES = "9C"
 
     # Part III
@@ -191,7 +193,7 @@ ITEM_10K_MAPPING: dict[Item10K, Tuple[str, str]] = {
     Item10K.CHANGES_IN_ACCOUNTING: ("PART II", "ITEM 9"),
     Item10K.CONTROLS_AND_PROCEDURES: ("PART II", "ITEM 9A"),
     Item10K.OTHER_INFORMATION: ("PART II", "ITEM 9B"),
-    Item10K.CYBERSECURITY_DISCLOSURES: ("PART II", "ITEM 9C"),
+    Item10K.FOREIGN_JURISDICTION_INSPECTIONS: ("PART II", "ITEM 9C"),
 
     # Part III
     Item10K.DIRECTORS_AND_OFFICERS: ("PART III", "ITEM 10"),

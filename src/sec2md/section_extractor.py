@@ -6,7 +6,9 @@ from typing import List, Optional, Literal, Any
 LEAD_WRAP = r'(?:\*\*|__)?\s*(?:</?[^>]+>\s*)*'
 
 PART_PATTERN = re.compile(
-    rf'^\s*{LEAD_WRAP}(PART\s+[IVXLC]+)\.?(?:\*\*|__)?(?:\s*$|\s+)',
+    # The numeral may be followed by a dash or colon with no space, as in
+    # "PART I—FINANCIAL INFORMATION" (META 10-Qs).
+    rf'^\s*{LEAD_WRAP}(PART\s+[IVXLC]+)\b\.?(?:\*\*|__)?(?:\s*$|\s+|\s*[—–:-]\s*)',
     re.IGNORECASE | re.MULTILINE
 )
 ITEM_PATTERN = re.compile(
@@ -537,11 +539,44 @@ class SectionExtractor:
     def get_sections(self) -> List[Any]:
         """Get sections from the filing."""
         if self.filing_type == "8-K":
-            return self._get_8k_sections()
+            sections = self._get_8k_sections()
         elif self.filing_type in ("SC 13D", "SC 13G"):
-            return self._get_13d_sections()
+            sections = self._get_13d_sections()
         else:
-            return self._get_standard_sections()
+            sections = self._get_standard_sections()
+        return self._scope_elements_to_slices(sections)
+
+    def _scope_elements_to_slices(self, sections: List[Any]) -> List[Any]:
+        """Give each section page only the elements whose text lies inside it.
+
+        Section pages are slices of a filing page but are built with the whole
+        page's element list, and the chunker prefers elements over slice text.
+        Without scoping, a section that shares a page with its neighbours
+        would chunk their content, element IDs and tags as well.
+        """
+        from sec2md.models import Page
+
+        originals = {page.number: page for page in self.pages}
+        located: dict[int, tuple[str, list]] = {}
+
+        for section in sections:
+            for index, page in enumerate(section.pages):
+                original = originals.get(page.number)
+                if original is None or not original.elements or not page.elements:
+                    continue
+                if [e.id for e in page.elements] != [e.id for e in original.elements]:
+                    continue  # already scoped by the caller
+                if page.number not in located:
+                    located[page.number] = _locate_elements(original)
+                page_text, element_spans = located[page.number]
+                section.pages[index] = Page(
+                    number=page.number,
+                    content=page.content,
+                    elements=_elements_in_slice(page.content, page_text, element_spans, original.elements),
+                    text_blocks=page.text_blocks,
+                    display_page=page.display_page,
+                )
+        return sections
 
     def _get_standard_sections(self) -> List[Any]:
         """Extract 10-K/10-Q/20-F sections."""
@@ -798,3 +833,133 @@ class SectionExtractor:
                 if item_normalized is None or section.item == item_normalized:
                     return section
         return None
+
+
+# ---------------------------------------------------------------------------
+# Scoping page elements to section slices
+#
+# Slice text and element text are compared in a normalized form (lowercase
+# letters and digits only), which ignores the Markdown markers, whitespace and
+# removed breadcrumb lines that differ between a page, its elements and the
+# cleaned section slices.
+# ---------------------------------------------------------------------------
+
+_NON_ALNUM_RE = re.compile(r'[^0-9a-z]+')
+_ANCHOR_CHARS = 32
+# A slice keeps its elements only if they account for this share of its text;
+# otherwise it is chunked from its own text, without element IDs.
+_MIN_ELEMENT_COVERAGE = 0.8
+# A slice this close to the whole page keeps the page's elements as before.
+_WHOLE_PAGE_SHARE = 0.95
+# Ignore straddling overlaps shorter than this many normalized characters.
+_MIN_PARTIAL_CHARS = 16
+
+
+def _normalize_for_match(text: str) -> str:
+    return _NON_ALNUM_RE.sub('', text.lower())
+
+
+def _find_span(needle: str, haystack: str, start: int = 0) -> Optional[tuple[int, int, bool]]:
+    """Locate normalized text exactly, else by its leading and trailing anchors.
+
+    Returns ``(begin, end, exact)``; ``exact`` is False for an anchored match,
+    whose length need not equal the needle's.
+    """
+    if not needle:
+        return None
+    exact = haystack.find(needle, start)
+    if exact != -1:
+        return exact, exact + len(needle), True
+    if len(needle) <= 2 * _ANCHOR_CHARS:
+        return None
+    head, tail = needle[:_ANCHOR_CHARS], needle[-_ANCHOR_CHARS:]
+    begin = haystack.find(head, start)
+    if begin == -1:
+        return None
+    end = haystack.find(tail, begin + len(head))
+    if end == -1 or end + len(tail) - begin > 2 * len(needle) + 2 * _ANCHOR_CHARS:
+        return None
+    return begin, end + len(tail), False
+
+
+def _locate_elements(page: Any) -> tuple[str, list[Optional[tuple[int, int, bool]]]]:
+    """Normalized page text and each element's span in it, in document order."""
+    page_text = _normalize_for_match(page.content)
+    spans: list[Optional[tuple[int, int, bool]]] = []
+    cursor = 0
+    for element in page.elements:
+        span = _find_span(_normalize_for_match(element.content), page_text, cursor)
+        spans.append(span)
+        if span is not None:
+            cursor = span[1]
+    return page_text, spans
+
+
+def _trim_element(element: Any, begin: int, end: int) -> Optional[Any]:
+    """Copy of an element cut to normalized characters ``begin:end`` of its content.
+
+    The cut widens to whole lines when only Markdown markers lie outside it, so a
+    heading such as ``**Item 13. ...**`` keeps its emphasis.
+    """
+    raw = element.content
+    positions = [i for i, ch in enumerate(raw) for low in ch.lower() if low.isascii() and low.isalnum()]
+    if begin >= end or end > len(positions):
+        return None
+    raw_start, raw_end = positions[begin], positions[end - 1] + 1
+
+    line_start = raw.rfind('\n', 0, raw_start) + 1
+    if not _NON_ALNUM_RE.sub('', raw[line_start:raw_start].lower()):
+        raw_start = line_start
+    line_end = raw.find('\n', raw_end)
+    line_end = len(raw) if line_end == -1 else line_end
+    if not _NON_ALNUM_RE.sub('', raw[raw_end:line_end].lower()):
+        raw_end = line_end
+
+    update = {'content': raw[raw_start:raw_end].strip()}
+    if element.content_start_offset is not None:
+        update['content_start_offset'] = element.content_start_offset + raw_start
+        update['content_end_offset'] = element.content_start_offset + raw_end
+    return element.model_copy(update=update)
+
+
+def _elements_in_slice(slice_content: str, page_text: str,
+                       spans: list[Optional[tuple[int, int, bool]]], elements: list) -> list:
+    """The elements, or the parts of elements, that lie inside one section slice."""
+    slice_text = _normalize_for_match(slice_content)
+    if not slice_text:
+        return []
+    slice_span = _find_span(slice_text, page_text)
+    if slice_span is None:
+        return []
+    slice_start, slice_end, _ = slice_span
+
+    selected, covered = [], 0
+    for element, span in zip(elements, spans):
+        if span is None:
+            continue
+        begin, end, exact = span
+        overlap_start, overlap_end = max(begin, slice_start), min(end, slice_end)
+        overlap = overlap_end - overlap_start
+        if overlap <= 0:
+            continue
+        if overlap == end - begin:
+            selected.append(element)
+        elif exact:
+            # An element straddling a section boundary contributes only its own part.
+            if overlap < min(_MIN_PARTIAL_CHARS, end - begin):
+                continue
+            trimmed = _trim_element(element, overlap_start - begin, overlap_end - begin)
+            if trimmed is None:
+                continue
+            selected.append(trimmed)
+        elif 2 * overlap > end - begin:
+            selected.append(element)
+        else:
+            continue
+        covered += overlap
+
+    if covered >= _MIN_ELEMENT_COVERAGE * len(slice_text):
+        return selected
+    if len(slice_text) >= _WHOLE_PAGE_SHARE * len(page_text):
+        return list(elements)
+    return []

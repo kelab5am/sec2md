@@ -12,7 +12,7 @@ from sec2md.encoding import DecodeDiagnostics, decode_html, normalize_legacy_cha
 from sec2md.utils import is_url, fetch
 from sec2md.parser import Parser
 from sec2md.models import Page
-from sec2md.quality import QualityPolicy, build_diagnostics, enforce_quality
+from sec2md.quality import QualityPolicy, build_diagnostics, enforce_quality, validate_quality_policy
 
 logger = logging.getLogger(__name__)
 
@@ -201,6 +201,7 @@ def convert_to_markdown(
         >>> filing = company.get_filings(form="10-K").latest()
         >>> md = convert_to_markdown(filing.html())
     """
+    validate_quality_policy(quality_policy)
     source_url = source if isinstance(source, str) and is_url(source) else None
     link_resolution_url = _link_resolution_url(source_url, base_url)
     html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
@@ -301,6 +302,7 @@ def parse_filing(
         >>> page_dict = page.model_dump()  # Full serialization
         >>> essentials = page.model_dump(include={'number', 'content', 'elements'})
     """
+    validate_quality_policy(quality_policy)
     source_url = source if isinstance(source, str) and is_url(source) else None
     link_resolution_url = _link_resolution_url(source_url, base_url)
     html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)

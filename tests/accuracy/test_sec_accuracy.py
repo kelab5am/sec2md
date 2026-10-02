@@ -114,8 +114,14 @@ def test_rcq_release_contract(all_accuracy_results):
     assert load_fixture("nvda-2026-ex99-1")[0].sec_url in resolved_links
     assert load_fixture("nvda-2026-ex99-2")[0].sec_url in resolved_links
 
-    html_files = list(Path("tests").rglob("*.html"))
-    assert html_files == [Path("tests/fixtures/sec/positioned-issue-4.html")]
+    # Fixtures stay gzipped; the gitignored golden-download cache is not a fixture.
+    tests_dir = Path(__file__).resolve().parents[1]
+    html_files = sorted(
+        path.relative_to(tests_dir).as_posix()
+        for path in tests_dir.rglob("*.html")
+        if ".cache" not in path.relative_to(tests_dir).parts
+    )
+    assert html_files == ["fixtures/sec/positioned-issue-4.html"]
 
 
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
