@@ -568,3 +568,20 @@ def test_printed_footer_does_not_cross_page_ending_ancestor(style, footer_inside
     captured = Parser(source, capture_tables=True)
     assert captured.get_pages() == Parser(source).get_pages()
     assert captured.table_snapshots[0].display_page == expected
+
+
+@pytest.mark.parametrize('duration', [
+    'Three Months Ended March 31,', 'Six Months Ended June 30,', 'Year Ended December 31,',
+])
+def test_duration_with_month_and_day_supports_td_year_headers(duration):
+    """META/RDDT statement layout: '<duration> <Month> <day>,' above a TD year row."""
+    from decimal import Decimal
+    table = prepared(f'''<table>
+    <tr><td></td><td colspan="4">{duration}</td></tr>
+    <tr><td></td><td colspan="2">2026</td><td colspan="2">2025</td></tr>
+    <tr><td>Revenue</td><td>$</td><td>56,311</td><td>$</td><td>42,314</td></tr>
+    <tr><td>Cost of revenue</td><td></td><td>9,975</td><td></td><td>7,623</td></tr></table>''')
+    assert not any('Unresolved value span' in issue for issue in table.issues)
+    assert table.headers[1:] == (f'{duration} — 2026', f'{duration} — 2025')
+    assert [[c.value for c in row[1:]] for row in table.rows] == [
+        [Decimal('56311'), Decimal('42314')], [Decimal('9975'), Decimal('7623')]]

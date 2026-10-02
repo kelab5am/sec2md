@@ -228,3 +228,53 @@ def test_strict_rejects_element_with_empty_source_node_mapping(monkeypatch):
     with pytest.raises(ParseQualityError, match="element lacks a source-node mapping") as exc:
         convert_to_markdown(source, return_pages=True)
     assert exc.value.diagnostics.mapped_elements == 0
+
+
+# ---------------------------------------------------------------------------
+# Audit regressions (2026-10-02)
+# ---------------------------------------------------------------------------
+
+def test_parse_quality_error_survives_pickling():
+    import pickle
+
+    with pytest.raises(ParseQualityError) as caught:
+        convert_to_markdown("<p>The Company&#65533;s revenue grew strongly this year.</p>")
+    restored = pickle.loads(pickle.dumps(caught.value))
+
+    assert type(restored) is ParseQualityError
+    assert restored.diagnostics == caught.value.diagnostics
+    assert str(restored) == str(caught.value)
+
+
+def test_ordered_list_passes_strict_quality():
+    html = "<p>Our principal risks are listed below.</p><ol><li>Supply chain risk</li><li>Competition risk</li></ol>"
+    markdown = convert_to_markdown(html, quality_policy="strict")
+    assert "1. Supply chain risk\n2. Competition risk" in markdown
+
+
+def test_ordered_list_marker_does_not_hide_real_untraceable_numbers():
+    element = Element(id="e1", content="1. Revenue $1,234", kind="list", page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<ol><li>Revenue 999</li></ol>", "lxml").ol]
+    assert trace_numeric_failures(element, nodes) == ("e1:1234",)
+
+
+def test_line_start_number_outside_ordered_list_is_still_traced():
+    element = Element(id="e1", content="2023. Revenue grew", kind="paragraph", page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<p>Revenue grew</p>", "lxml").p]
+    assert trace_numeric_failures(element, nodes) == ("e1:2023",)
+
+
+@pytest.mark.parametrize("function", [convert_to_markdown, parse_filing])
+def test_invalid_quality_policy_is_rejected_before_fetching(monkeypatch, function):
+    import sec2md.core
+
+    def fail_fetch(*args, **kwargs):
+        raise AssertionError("source was fetched before quality_policy validation")
+
+    monkeypatch.setattr(sec2md.core, "_resolve_source", fail_fetch)
+    with pytest.raises(ValueError, match="invalid quality_policy"):
+        function(
+            "https://www.sec.gov/Archives/edgar/data/1/2/primary.htm",
+            user_agent="Test User test@example.com",
+            quality_policy="STRICT",
+        )

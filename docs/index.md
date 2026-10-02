@@ -17,8 +17,12 @@
 ## Installation
 
 ```bash
-pip install sec2md
+pip install "sec2md[xlsx] @ git+https://github.com/kelab5am/sec2md@<reviewed-commit>"
 ```
+
+This fork is not published to PyPI: `pip install sec2md` installs the upstream
+package, which lacks `quality_policy`, `base_url` and XLSX export. Drop `[xlsx]`
+if you do not need Excel export.
 
 ## Quick Example
 

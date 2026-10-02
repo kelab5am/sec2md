@@ -397,7 +397,11 @@ _PERCENT_UNIT = re.compile(
 _ROW_UNIT = re.compile(r'\b(?:per[- ]share|dollars|shares|in (?:thousands|millions|billions))\b', re.I)
 _VALUE = re.compile(r'\b(?:amount|value|revenue|income|expense|cost|assets|liabilities|cash|shares|inventory|inventories|earnings|balance|total)\b', re.I)
 _IDENTIFIER = re.compile(r'\b(?:id|identifier|code|number|date|year|exhibit|section|zip|cusip|notes?|references?|refs?)\b', re.I)
-_PERIOD = re.compile(r'^(?:(?:three|six|nine|twelve) months? ended|years? ended|(?:19|20)\d{2}|(?:Jan\w*|Feb\w*|Mar\w*|Apr\w*|May|Jun\w*|Jul\w*|Aug\w*|Sep\w*|Oct\w*|Nov\w*|Dec\w*)\.? \d{1,2},? (?:19|20)\d{2})$', re.I)
+_MONTH = r'(?:Jan\w*|Feb\w*|Mar\w*|Apr\w*|May|Jun\w*|Jul\w*|Aug\w*|Sep\w*|Oct\w*|Nov\w*|Dec\w*)\.?'
+# A duration may name its end month and day with the year on the next header
+# row ("Three Months Ended March 31," over "2026 | 2025"), the usual 10-Q layout.
+_PERIOD = re.compile(rf'^(?:(?:(?:three|six|nine|twelve) months?|years?) ended(?: {_MONTH} \d{{1,2}},?)?'
+                     rf'|(?:19|20)\d{{2}}|{_MONTH} \d{{1,2}},? (?:19|20)\d{{2}})$', re.I)
 
 
 def _header_count(grid):

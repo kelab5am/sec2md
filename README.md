@@ -1,6 +1,6 @@
 # sec2md
 
-This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin an independently reviewed commit and require distribution version `0.1.22+rcq.2` for reproducible use.
+This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin an independently reviewed commit and require distribution version `0.1.22+rcq.3` for reproducible use.
 
 [![PyPI](https://img.shields.io/pypi/v/sec2md.svg)](https://pypi.org/project/sec2md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -246,8 +246,12 @@ On a real Apple 10-K: 76 of 293 elements carry XBRL tags across 330 distinct con
 ## Installation
 
 ```bash
-pip install sec2md
+pip install "sec2md[xlsx] @ git+https://github.com/kelab5am/sec2md@<reviewed-commit>"
 ```
+
+This fork is not published to PyPI: `pip install sec2md` installs the upstream
+package, which lacks `quality_policy`, `base_url` and XLSX export. Drop `[xlsx]`
+if you do not need Excel export.
 
 ## Getting Started
 
