@@ -1,0 +1,53 @@
+== R1-1 prose repeats the lost value
+   normal : table 1 (snapshot 1) enforced={'body': 1} [('9943', 'body')] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={'body': 1} [('9943', 'body')] reported={} order=[]
+== R1-2a inline-split number
+   normal : table 1 (snapshot 1) enforced={'body': 1} [('1234', 'body')] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={'body': 1} [('1234', 'body')] reported={} order=[]
+== R1-2b hidden descendant
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]
+== R1-2c euro and pound values
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]
+== R1-3 lost single-digit $9
+   normal : table 1 (snapshot 1) enforced={'body': 1} [('9', 'body')] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={'body': 1} [('9', 'body')] reported={} order=[]
+== R1-3b sup footnote marker
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]
+== R1-4a/R2-4 nested table
+   normal : table 1 (snapshot 1) enforced={'body': 1} [('12', 'body')] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]
+== R1-4b one-row table before a multi-row table
+   normal : table 1 (snapshot None) enforced={} [] reported={} order=[]
+   normal : table 2 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot None) enforced={} [] reported={} order=[]
+   capture: table 2 (snapshot 1) enforced={} [] reported={} order=[]
+== R1-5 numeric cells reversed
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=['source row 1: values out of order within the row', 'source row 2: values out of order within the row']
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=['source row 1: values out of order within the row', 'source row 2: values out of order within the row']
+== R2-1 'Note 1 Revenue' row loses its amount
+   normal : table 1 (snapshot 1) enforced={'body': 1} [('9943', 'body')] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={'body': 1} [('9943', 'body')] reported={} order=[]
+== R2-2a split negative preserved
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]
+== R2-2b split negative deleted
+   normal : table 1 (snapshot 1) enforced={'body': 1} [('-29', 'body')] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={'body': 1} [('-29', 'body')] reported={} order=[]
+== R2-3a body rows swapped
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=['source row 2: appears before an earlier source row (rows out of order)']
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=['source row 2: appears before an earlier source row (rows out of order)']
+== R2-3b values moved between rows
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=['source row 1: values present but split across output rows', 'source row 2: values present but split across output rows']
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=['source row 1: values present but split across output rows', 'source row 2: values present but split across output rows']
+== R3 signature date lost (reported only)
+   normal : table 1 (snapshot 1) enforced={} [] reported={'reference': 2} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={'reference': 2} order=[]
+== R3 stacked statement with repeated section headers (must not be reported)
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]
+== R2-3c fused multi-row header (must not be reported)
+   normal : table 1 (snapshot 1) enforced={} [] reported={} order=[]
+   capture: table 1 (snapshot 1) enforced={} [] reported={} order=[]

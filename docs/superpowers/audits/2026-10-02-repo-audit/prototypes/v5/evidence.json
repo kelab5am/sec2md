@@ -1,0 +1,3148 @@
+{
+ "normal/aapl-2023-10k": {
+  "summary": {
+   "tables": 66,
+   "tables_with_numbers": 57,
+   "missing_ambiguous": 0,
+   "flagged": 4,
+   "missing_body": 4
+  },
+  "missing": [
+   [
+    13,
+    5,
+    [
+     [
+      "-1",
+      "body"
+     ]
+    ]
+   ],
+   [
+    32,
+    24,
+    [
+     [
+      "74427",
+      "body"
+     ]
+    ]
+   ],
+   [
+    49,
+    41,
+    [
+     [
+      "9943",
+      "body"
+     ]
+    ]
+   ],
+   [
+    53,
+    45,
+    [
+     [
+      "4258",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/nvda-2026-10k": {
+  "summary": {
+   "tables": 64,
+   "tables_with_numbers": 62,
+   "missing_ambiguous": 0
+  },
+  "missing": [],
+  "order": []
+ },
+ "normal/nvda-2002-10k": {
+  "summary": {
+   "tables": 172,
+   "tables_with_numbers": 97,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 4
+  },
+  "missing": [
+   [
+    19,
+    7,
+    [
+     [
+      "1997",
+      "body"
+     ],
+     [
+      "1998",
+      "body"
+     ],
+     [
+      "31",
+      "body"
+     ],
+     [
+      "31",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/nvda-2026-q2-10q": {
+  "summary": {
+   "tables": 52,
+   "tables_with_numbers": 49,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1
+  },
+  "missing": [
+   [
+    31,
+    27,
+    [
+     [
+      "3.5",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/nvda-2026-08-26-8k": {
+  "summary": {
+   "tables": 5,
+   "tables_with_numbers": 4,
+   "missing_ambiguous": 0,
+   "reported_reference": 1
+  },
+  "missing": [],
+  "order": []
+ },
+ "normal/nvda-2026-ex99-1": {
+  "summary": {
+   "tables": 11,
+   "tables_with_numbers": 10,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 5
+  },
+  "missing": [
+   [
+    9,
+    9,
+    [
+     [
+      "15365",
+      "body"
+     ],
+     [
+      "24077",
+      "body"
+     ],
+     [
+      "42779",
+      "body"
+     ],
+     [
+      "50344",
+      "body"
+     ],
+     [
+      "74421",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/nvda-2026-ex99-2": {
+  "summary": {
+   "tables": 12,
+   "tables_with_numbers": 11,
+   "missing_ambiguous": 0,
+   "flagged": 2,
+   "missing_body": 6
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "3.5",
+      "body"
+     ]
+    ]
+   ],
+   [
+    10,
+    10,
+    [
+     [
+      "15365",
+      "body"
+     ],
+     [
+      "24077",
+      "body"
+     ],
+     [
+      "42779",
+      "body"
+     ],
+     [
+      "50344",
+      "body"
+     ],
+     [
+      "74421",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "TOTAL normal fixtures": {
+  "tables": 382,
+  "tables_with_numbers": 290,
+  "missing_ambiguous": 0,
+  "flagged": 9,
+  "missing_body": 20,
+  "reported_reference": 1,
+  "documents_with_flags": 5
+ },
+ "normal/META__10-Q__2024-Q1__c-lvg": {
+  "summary": {
+   "tables": 47,
+   "tables_with_numbers": 46,
+   "missing_ambiguous": 0,
+   "flagged": 18,
+   "missing_header": 17,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    12,
+    12,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    13,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    16,
+    16,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    24,
+    24,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    27,
+    27,
+    [
+     [
+      "10563",
+      "body"
+     ]
+    ]
+   ],
+   [
+    28,
+    28,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    30,
+    30,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    34,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    35,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    36,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    37,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    38,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    39,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    40,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    41,
+    39,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    42,
+    40,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    43,
+    41,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-Q__2024-Q2__c-2no": {
+  "summary": {
+   "tables": 49,
+   "tables_with_numbers": 48,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    29,
+    29,
+    [
+     [
+      "14452",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-Q__2024-Q3__c-hv5": {
+  "summary": {
+   "tables": 51,
+   "tables_with_numbers": 50,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    31,
+    31,
+    [
+     [
+      "11321",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-K__2024-FY__c-gt2": {
+  "summary": {
+   "tables": 71,
+   "tables_with_numbers": 67,
+   "missing_ambiguous": 0,
+   "flagged": 3,
+   "missing_body": 8,
+   "reported_reference": 3
+  },
+  "missing": [
+   [
+    9,
+    6,
+    [
+     [
+      "10.68",
+      "body"
+     ],
+     [
+      "10.93",
+      "body"
+     ],
+     [
+      "11.89",
+      "body"
+     ],
+     [
+      "12.29",
+      "body"
+     ],
+     [
+      "14.25",
+      "body"
+     ],
+     [
+      "9.47",
+      "body"
+     ]
+    ]
+   ],
+   [
+    50,
+    47,
+    [
+     [
+      "205",
+      "body"
+     ]
+    ]
+   ],
+   [
+    54,
+    51,
+    [
+     [
+      "26335",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-Q__2025-Q1__c-3qf": {
+  "summary": {
+   "tables": 42,
+   "tables_with_numbers": 41,
+   "missing_ambiguous": 0,
+   "flagged": 17,
+   "missing_header": 17,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    8,
+    8,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    12,
+    12,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    13,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    14,
+    14,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    23,
+    23,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    25,
+    25,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    29,
+    27,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    30,
+    28,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    31,
+    29,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    32,
+    30,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    33,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    34,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    35,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    36,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    37,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    38,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-Q__2025-Q2__c-3xx": {
+  "summary": {
+   "tables": 42,
+   "tables_with_numbers": 41,
+   "missing_ambiguous": 0,
+   "reported_reference": 1
+  },
+  "missing": [],
+  "order": []
+ },
+ "normal/META__10-Q__2025-Q3__c-atq": {
+  "summary": {
+   "tables": 45,
+   "tables_with_numbers": 44,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    24,
+    24,
+    [
+     [
+      "257",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-K__2025-FY__c-24u": {
+  "summary": {
+   "tables": 73,
+   "tables_with_numbers": 69,
+   "missing_ambiguous": 0,
+   "flagged": 3,
+   "missing_body": 2,
+   "missing_header": 1,
+   "reported_reference": 3
+  },
+  "missing": [
+   [
+    49,
+    45,
+    [
+     [
+      "1259",
+      "body"
+     ]
+    ]
+   ],
+   [
+    53,
+    49,
+    [
+     [
+      "30634",
+      "body"
+     ]
+    ]
+   ],
+   [
+    61,
+    57,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-Q__2026-Q1__c-zkg": {
+  "summary": {
+   "tables": 40,
+   "tables_with_numbers": 39,
+   "missing_ambiguous": 0,
+   "flagged": 17,
+   "missing_header": 17,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    8,
+    8,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    12,
+    12,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    13,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    14,
+    14,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    22,
+    22,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    24,
+    24,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    28,
+    26,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    29,
+    27,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    30,
+    28,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    31,
+    29,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    32,
+    30,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    33,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    34,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    35,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    36,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    37,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/META__10-Q__2026-Q2__c-wcy": {
+  "summary": {
+   "tables": 43,
+   "tables_with_numbers": 42,
+   "missing_ambiguous": 0,
+   "reported_reference": 1
+  },
+  "missing": [],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2024-Q1__c-rpp": {
+  "summary": {
+   "tables": 55,
+   "tables_with_numbers": 52,
+   "missing_ambiguous": 0,
+   "flagged": 8,
+   "missing_header": 8,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    37,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    38,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    39,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    40,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    41,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    42,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    43,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    51,
+    46,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2024-Q2__c-63x": {
+  "summary": {
+   "tables": 53,
+   "tables_with_numbers": 50,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    51,
+    46,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2024-Q3__c-y2v": {
+  "summary": {
+   "tables": 53,
+   "tables_with_numbers": 50,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    51,
+    46,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-K__2024-FY__c-jiz": {
+  "summary": {
+   "tables": 72,
+   "tables_with_numbers": 69,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 6
+  },
+  "missing": [
+   [
+    36,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2025-Q1__c-ere": {
+  "summary": {
+   "tables": 55,
+   "tables_with_numbers": 52,
+   "missing_ambiguous": 0,
+   "flagged": 20,
+   "missing_header": 20,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    10,
+    6,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    11,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    9,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    14,
+    10,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    15,
+    11,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    39,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    40,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    41,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    42,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    43,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    44,
+    39,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    45,
+    40,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    46,
+    41,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    47,
+    42,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    48,
+    43,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    49,
+    44,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    50,
+    45,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    51,
+    46,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    52,
+    47,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    53,
+    48,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2025-Q2__c-n5u": {
+  "summary": {
+   "tables": 56,
+   "tables_with_numbers": 53,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    54,
+    49,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2025-Q3__c-652": {
+  "summary": {
+   "tables": 56,
+   "tables_with_numbers": 53,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    54,
+    49,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-K__2025-FY__c-xec": {
+  "summary": {
+   "tables": 71,
+   "tables_with_numbers": 68,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    36,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2026-Q1__c-ns7": {
+  "summary": {
+   "tables": 54,
+   "tables_with_numbers": 51,
+   "missing_ambiguous": 0,
+   "flagged": 9,
+   "missing_header": 9,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    11,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    44,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    45,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    46,
+    39,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    47,
+    40,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    48,
+    41,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    49,
+    42,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    50,
+    43,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    51,
+    44,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "normal/RDDT__10-Q__2026-Q2__c-ltt": {
+  "summary": {
+   "tables": 55,
+   "tables_with_numbers": 52,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    52,
+    45,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "TOTAL normal rcq": {
+  "tables": 1083,
+  "tables_with_numbers": 1037,
+  "missing_ambiguous": 0,
+  "flagged": 105,
+  "missing_header": 96,
+  "missing_body": 14,
+  "reported_reference": 38,
+  "documents_with_flags": 18
+ },
+ "capture/aapl-2023-10k": {
+  "summary": {
+   "tables": 66,
+   "tables_with_numbers": 57,
+   "missing_ambiguous": 0,
+   "flagged": 4,
+   "missing_body": 4
+  },
+  "missing": [
+   [
+    13,
+    5,
+    [
+     [
+      "-1",
+      "body"
+     ]
+    ]
+   ],
+   [
+    32,
+    24,
+    [
+     [
+      "74427",
+      "body"
+     ]
+    ]
+   ],
+   [
+    49,
+    41,
+    [
+     [
+      "9943",
+      "body"
+     ]
+    ]
+   ],
+   [
+    53,
+    45,
+    [
+     [
+      "4258",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/nvda-2026-10k": {
+  "summary": {
+   "tables": 64,
+   "tables_with_numbers": 62,
+   "missing_ambiguous": 0
+  },
+  "missing": [],
+  "order": []
+ },
+ "capture/nvda-2002-10k": {
+  "summary": {
+   "tables": 172,
+   "tables_with_numbers": 97,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 4
+  },
+  "missing": [
+   [
+    19,
+    7,
+    [
+     [
+      "1997",
+      "body"
+     ],
+     [
+      "1998",
+      "body"
+     ],
+     [
+      "31",
+      "body"
+     ],
+     [
+      "31",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/nvda-2026-q2-10q": {
+  "summary": {
+   "tables": 52,
+   "tables_with_numbers": 49,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1
+  },
+  "missing": [
+   [
+    31,
+    27,
+    [
+     [
+      "3.5",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/nvda-2026-08-26-8k": {
+  "summary": {
+   "tables": 5,
+   "tables_with_numbers": 4,
+   "missing_ambiguous": 0,
+   "reported_reference": 1
+  },
+  "missing": [],
+  "order": []
+ },
+ "capture/nvda-2026-ex99-1": {
+  "summary": {
+   "tables": 11,
+   "tables_with_numbers": 10,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 5
+  },
+  "missing": [
+   [
+    9,
+    9,
+    [
+     [
+      "15365",
+      "body"
+     ],
+     [
+      "24077",
+      "body"
+     ],
+     [
+      "42779",
+      "body"
+     ],
+     [
+      "50344",
+      "body"
+     ],
+     [
+      "74421",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/nvda-2026-ex99-2": {
+  "summary": {
+   "tables": 12,
+   "tables_with_numbers": 11,
+   "missing_ambiguous": 0,
+   "flagged": 2,
+   "missing_body": 6
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "3.5",
+      "body"
+     ]
+    ]
+   ],
+   [
+    10,
+    10,
+    [
+     [
+      "15365",
+      "body"
+     ],
+     [
+      "24077",
+      "body"
+     ],
+     [
+      "42779",
+      "body"
+     ],
+     [
+      "50344",
+      "body"
+     ],
+     [
+      "74421",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "TOTAL capture fixtures": {
+  "tables": 382,
+  "tables_with_numbers": 290,
+  "missing_ambiguous": 0,
+  "flagged": 9,
+  "missing_body": 20,
+  "reported_reference": 1,
+  "documents_with_flags": 5
+ },
+ "capture/META__10-Q__2024-Q1__c-lvg": {
+  "summary": {
+   "tables": 47,
+   "tables_with_numbers": 46,
+   "missing_ambiguous": 0,
+   "flagged": 18,
+   "missing_header": 17,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    12,
+    12,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    13,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    16,
+    16,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    24,
+    24,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    27,
+    27,
+    [
+     [
+      "10563",
+      "body"
+     ]
+    ]
+   ],
+   [
+    28,
+    28,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    30,
+    30,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    34,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    35,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    36,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    37,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    38,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    39,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    40,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    41,
+    39,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    42,
+    40,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    43,
+    41,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-Q__2024-Q2__c-2no": {
+  "summary": {
+   "tables": 49,
+   "tables_with_numbers": 48,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    29,
+    29,
+    [
+     [
+      "14452",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-Q__2024-Q3__c-hv5": {
+  "summary": {
+   "tables": 51,
+   "tables_with_numbers": 50,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    31,
+    31,
+    [
+     [
+      "11321",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-K__2024-FY__c-gt2": {
+  "summary": {
+   "tables": 71,
+   "tables_with_numbers": 67,
+   "missing_ambiguous": 0,
+   "flagged": 3,
+   "missing_body": 8,
+   "reported_reference": 3
+  },
+  "missing": [
+   [
+    9,
+    6,
+    [
+     [
+      "10.68",
+      "body"
+     ],
+     [
+      "10.93",
+      "body"
+     ],
+     [
+      "11.89",
+      "body"
+     ],
+     [
+      "12.29",
+      "body"
+     ],
+     [
+      "14.25",
+      "body"
+     ],
+     [
+      "9.47",
+      "body"
+     ]
+    ]
+   ],
+   [
+    50,
+    47,
+    [
+     [
+      "205",
+      "body"
+     ]
+    ]
+   ],
+   [
+    54,
+    51,
+    [
+     [
+      "26335",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-Q__2025-Q1__c-3qf": {
+  "summary": {
+   "tables": 42,
+   "tables_with_numbers": 41,
+   "missing_ambiguous": 0,
+   "flagged": 17,
+   "missing_header": 17,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    8,
+    8,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    12,
+    12,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    13,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    14,
+    14,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    23,
+    23,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    25,
+    25,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    29,
+    27,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    30,
+    28,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    31,
+    29,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    32,
+    30,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    33,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    34,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    35,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    36,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    37,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    38,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-Q__2025-Q2__c-3xx": {
+  "summary": {
+   "tables": 42,
+   "tables_with_numbers": 41,
+   "missing_ambiguous": 0,
+   "reported_reference": 1
+  },
+  "missing": [],
+  "order": []
+ },
+ "capture/META__10-Q__2025-Q3__c-atq": {
+  "summary": {
+   "tables": 45,
+   "tables_with_numbers": 44,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_body": 1,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    24,
+    24,
+    [
+     [
+      "257",
+      "body"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-K__2025-FY__c-24u": {
+  "summary": {
+   "tables": 73,
+   "tables_with_numbers": 69,
+   "missing_ambiguous": 0,
+   "flagged": 3,
+   "missing_body": 2,
+   "missing_header": 1,
+   "reported_reference": 3
+  },
+  "missing": [
+   [
+    49,
+    45,
+    [
+     [
+      "1259",
+      "body"
+     ]
+    ]
+   ],
+   [
+    53,
+    49,
+    [
+     [
+      "30634",
+      "body"
+     ]
+    ]
+   ],
+   [
+    61,
+    57,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-Q__2026-Q1__c-zkg": {
+  "summary": {
+   "tables": 40,
+   "tables_with_numbers": 39,
+   "missing_ambiguous": 0,
+   "flagged": 17,
+   "missing_header": 17,
+   "reported_reference": 1
+  },
+  "missing": [
+   [
+    7,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    8,
+    8,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    12,
+    12,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    13,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    14,
+    14,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    22,
+    22,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    24,
+    24,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    28,
+    26,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    29,
+    27,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    30,
+    28,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    31,
+    29,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    32,
+    30,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    33,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    34,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    35,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    36,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    37,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/META__10-Q__2026-Q2__c-wcy": {
+  "summary": {
+   "tables": 43,
+   "tables_with_numbers": 42,
+   "missing_ambiguous": 0,
+   "reported_reference": 1
+  },
+  "missing": [],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2024-Q1__c-rpp": {
+  "summary": {
+   "tables": 55,
+   "tables_with_numbers": 52,
+   "missing_ambiguous": 0,
+   "flagged": 8,
+   "missing_header": 8,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    37,
+    32,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    38,
+    33,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    39,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    40,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    41,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    42,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    43,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    51,
+    46,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2024-Q2__c-63x": {
+  "summary": {
+   "tables": 53,
+   "tables_with_numbers": 50,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    51,
+    46,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2024-Q3__c-y2v": {
+  "summary": {
+   "tables": 53,
+   "tables_with_numbers": 50,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    51,
+    46,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-K__2024-FY__c-jiz": {
+  "summary": {
+   "tables": 72,
+   "tables_with_numbers": 69,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 6
+  },
+  "missing": [
+   [
+    36,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2025-Q1__c-ere": {
+  "summary": {
+   "tables": 55,
+   "tables_with_numbers": 52,
+   "missing_ambiguous": 0,
+   "flagged": 20,
+   "missing_header": 20,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    10,
+    6,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    11,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    13,
+    9,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    14,
+    10,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    15,
+    11,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    39,
+    34,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    40,
+    35,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    41,
+    36,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    42,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    43,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    44,
+    39,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    45,
+    40,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    46,
+    41,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    47,
+    42,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    48,
+    43,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    49,
+    44,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    50,
+    45,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    51,
+    46,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    52,
+    47,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    53,
+    48,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2025-Q2__c-n5u": {
+  "summary": {
+   "tables": 56,
+   "tables_with_numbers": 53,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    54,
+    49,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2025-Q3__c-652": {
+  "summary": {
+   "tables": 56,
+   "tables_with_numbers": 53,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    54,
+    49,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-K__2025-FY__c-xec": {
+  "summary": {
+   "tables": 71,
+   "tables_with_numbers": 68,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    36,
+    31,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2026-Q1__c-ns7": {
+  "summary": {
+   "tables": 54,
+   "tables_with_numbers": 51,
+   "missing_ambiguous": 0,
+   "flagged": 9,
+   "missing_header": 9,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    11,
+    7,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    44,
+    37,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    45,
+    38,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    46,
+    39,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    47,
+    40,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    48,
+    41,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    49,
+    42,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    50,
+    43,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ],
+   [
+    51,
+    44,
+    [
+     [
+      "31",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "capture/RDDT__10-Q__2026-Q2__c-ltt": {
+  "summary": {
+   "tables": 55,
+   "tables_with_numbers": 52,
+   "missing_ambiguous": 0,
+   "flagged": 1,
+   "missing_header": 1,
+   "reported_reference": 2
+  },
+  "missing": [
+   [
+    52,
+    45,
+    [
+     [
+      "30",
+      "header"
+     ]
+    ]
+   ]
+  ],
+  "order": []
+ },
+ "TOTAL capture rcq": {
+  "tables": 1083,
+  "tables_with_numbers": 1037,
+  "missing_ambiguous": 0,
+  "flagged": 105,
+  "missing_header": 96,
+  "missing_body": 14,
+  "reported_reference": 38,
+  "documents_with_flags": 18
+ },
+ "mutations (AAPL, normal mode)": {
+  "blank_tableparser": {
+   "tables": 66,
+   "tables_with_numbers": 57,
+   "missing_ambiguous": 0,
+   "flagged": 50,
+   "missing_body": 1054,
+   "missing_label": 157,
+   "reported_reference": 677,
+   "missing_header": 89
+  },
+  "reversed_cells": {
+   "tables": 66,
+   "tables_with_numbers": 57,
+   "missing_ambiguous": 0,
+   "order_tables": 50,
+   "order_within_row": 396,
+   "flagged": 4,
+   "missing_body": 4
+  },
+  "swapped_first_body_rows": {
+   "tables": 66,
+   "tables_with_numbers": 57,
+   "missing_ambiguous": 0,
+   "order_tables": 48,
+   "order_rows_out_of_order": 48,
+   "flagged": 4,
+   "missing_body": 4
+  }
+ }
+}

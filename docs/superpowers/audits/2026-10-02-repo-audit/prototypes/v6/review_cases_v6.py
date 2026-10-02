@@ -1,0 +1,116 @@
+"""Every review case from rounds 1 and 2, checked in normal and capture rendering modes."""
+import sys
+import warnings
+
+warnings.filterwarnings("ignore")
+sys.path.insert(0, sys.argv[1])  # this folder
+import completeness_v6 as v3
+
+MERGE_LOSS = ("<table><tr><td>2024</td><td>$</td><td>9,943</td></tr>"
+              "<tr><td>2025</td><td></td><td>10,775</td></tr><tr><td>Total</td><td>$</td><td>20,718</td></tr></table>")
+TWO_BY_TWO = ("<table><tr><th>Item</th><th>2026</th><th>2025</th></tr>"
+              "<tr><td>Revenue</td><td>120</td><td>100</td></tr><tr><td>Cost</td><td>50</td><td>40</td></tr></table>")
+SPLIT_NEGATIVE = ("<table><tr><th>Item</th><th colspan=\"2\">2026</th></tr>"
+                  "<tr><td>Revenue</td><td>120</td><td></td></tr><tr><td>Loss</td><td>(29</td><td>)</td></tr></table>")
+
+
+NOTE9 = ("<table><tr><th>Item</th><th>2026</th></tr>"
+         "<tr><td>Note 9 Impairment</td><td>$</td><td>9</td></tr><tr><td>Other</td><td></td><td>12</td></tr></table>")
+SUP9 = ("<table><tr><th>Item</th><th>2026</th></tr>"
+        "<tr><td>Impairment<sup>9</sup></td><td>$</td><td>9</td></tr><tr><td>Other</td><td></td><td>12</td></tr></table>")
+YEARS = ("<table><tr><th>Item</th><th>2026</th><th>2025</th></tr>"
+         "<tr><td>Revenue</td><td>2000</td><td>1900</td></tr><tr><td>Cost</td><td>500</td><td>400</td></tr></table>")
+
+
+STANDALONE_MARKER = ("<table><tr><th>Item</th><th>Amount</th></tr>"
+                     "<tr><td>Impairment</td><td>9</td></tr><tr><td>Footnote</td><td><sup>9</sup></td></tr></table>")
+UNLABELLED_MARKER = ("<table><tr><th>Item</th><th>Amount</th></tr>"
+                     "<tr><td></td><td>9</td></tr><tr><td></td><td><sup>9</sup></td></tr></table>")
+
+
+NOTES = ("<table><tr><th>Item</th><th>Amount</th></tr>"
+         "<tr><td>Note 1</td><td>9</td></tr><tr><td>Note 2</td><td><sup>9</sup></td></tr></table>")
+TOTALS = ("<table><tr><th>Item</th><th>Amount</th></tr>"
+          "<tr><td>Total</td><td>9</td></tr><tr><td>Total</td><td><sup>9</sup></td></tr></table>")
+
+
+def drop_line(prefix):
+    """Delete the first output line starting with prefix (a whole rendered row)."""
+    def mutate(segment):
+        lines = segment.split("\n")
+        index = next((i for i, line in enumerate(lines) if line.startswith(prefix)), None)
+        if index is not None:
+            del lines[index]
+        return "\n".join(lines)
+    return mutate
+
+
+def delete_amount_9(segment):
+    """Remove the amount cell's 9 while keeping the 9 in the label cell."""
+    return segment.replace("| $ 9 |", "| $ |")
+
+
+def swap_body_rows(segment):
+    lines = segment.split("\n")
+    lines[2], lines[3] = lines[3], lines[2]
+    return "\n".join(lines)
+
+
+def move_values_between_rows(segment):
+    return segment.replace("| 100 |", "| @ |").replace("| 40 |", "| 100 |").replace("| @ |", "| 40 |")
+
+
+def reverse_numeric_cells(segment):
+    import re
+    out = []
+    for line in segment.split("\n"):
+        cells = line.split("|")
+        idx = [i for i, c in enumerate(cells) if re.search(r"\d", c)]
+        for i, value in zip(idx, [cells[i] for i in idx][::-1]):
+            cells[i] = value
+        out.append("|".join(cells))
+    return "\n".join(out)
+
+
+CASES = [
+    ("R1-1 prose repeats the lost value", "<p>Commitments include $9,943 million due in 2024.</p>" + MERGE_LOSS, None),
+    ("R1-2a inline-split number", "<table><tr><td>Item</td><td>2026</td></tr><tr><td>Revenue</td><td>1,2<span>34</span></td></tr></table>", None),
+    ("R1-2b hidden descendant", "<table><tr><td>Item</td><td>2026</td></tr><tr><td>Revenue</td><td>100<span style=\"display:none\">999</span></td></tr></table>", None),
+    ("R1-2c euro and pound values", "<table><tr><td>Item</td><td>2026</td></tr><tr><td>Revenue</td><td>€123</td></tr><tr><td>Cost</td><td>£456</td></tr></table>", None),
+    ("R1-3 lost single-digit $9", "<table><tr><td>Impairment</td><td>$</td><td>9</td></tr><tr><td>Other</td><td></td><td>12</td></tr><tr><td>Total</td><td>$</td><td>21</td></tr></table>", None),
+    ("R1-3b sup footnote marker", "<table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue<sup>(1)</sup></td><td>120</td></tr></table>", None),
+    ("R1-4a/R2-4 nested table", "<table><tr><td>Outer<table><tr><td>Inner</td><td>77</td></tr><tr><td>B</td><td>88</td></tr></table></td><td>12</td></tr><tr><td>Outer B</td><td>34</td></tr></table>", None),
+    ("R1-4b one-row table before a multi-row table", "<table><tr><td>ITEM 8.</td><td>FINANCIAL STATEMENTS</td></tr></table><table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue</td><td>120</td></tr></table>", None),
+    ("R1-5 numeric cells reversed", TWO_BY_TWO, reverse_numeric_cells),
+    ("R2-1 'Note 1 Revenue' row loses its amount", "<table><tr><td>Note 1 Revenue</td><td>$</td><td>9,943</td></tr><tr><td>Other</td><td></td><td>12</td></tr><tr><td>Total</td><td>$</td><td>9,955</td></tr></table>", None),
+    ("R2-2a split negative preserved", SPLIT_NEGATIVE, None),
+    ("R2-2b split negative deleted", SPLIT_NEGATIVE, lambda s: s.replace("(29", "")),
+    ("R2-3a body rows swapped", TWO_BY_TWO, swap_body_rows),
+    ("R2-3b values moved between rows", TWO_BY_TWO, move_values_between_rows),
+    ("R3 signature date lost (reported only)", "<table><tr><td>Date:</td><td>January 29, 2025</td><td>/s/ Jane Doe</td></tr><tr><td></td><td></td><td>Jane Doe, Chief Financial Officer</td></tr></table>", lambda s: s.replace("January 29, 2025", "")),
+    ("R3 stacked statement with repeated section headers (must not be reported)", "<table><tr><td></td><td>Three Months Ended June 30, 2025</td><td>Three Months Ended June 30, 2024</td></tr><tr><td>Balance at beginning</td><td>2,523</td><td>2,537</td></tr><tr><td>Net income</td><td>18,337</td><td>13,465</td></tr><tr><td></td><td>Six Months Ended June 30, 2025</td><td>Six Months Ended June 30, 2024</td></tr><tr><td>Balance at beginning</td><td>2,534</td><td>2,561</td></tr><tr><td>Net income</td><td>34,981</td><td>25,834</td></tr></table>", None),
+    ("R4-1a 'Note 9' kept, amount 9 deleted", NOTE9, delete_amount_9),
+    ("R4-1b <sup>9</sup> kept, amount 9 deleted", SUP9, delete_amount_9),
+    ("R4-1c amount kept, 'Note 9' identifier lost (reference only)", NOTE9, lambda s: s.replace("Note 9 Impairment", "Impairment")),
+    ("R4-1d amount kept, <sup>9</sup> marker lost (marker only)", SUP9, lambda s: s.replace("Impairment 9", "Impairment")),
+    ("R4-1e marker glued to the amount in the output (must not be reported)", "<table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue</td><td>1,234<sup>(1)</sup></td></tr><tr><td>Cost</td><td>500</td></tr></table>", None),
+    ("R4-2 'Revenue | 2000 | 1900' swapped", YEARS, lambda s: s.replace("| 2000 | 1900 |", "| 1900 | 2000 |")),
+    ("R4-2b year-only header row stays out of check 2", "<table><tr><td></td><td>2023</td><td>2022</td></tr><tr><td>Revenue</td><td>2,000</td><td>1,900</td></tr><tr><td>Cost</td><td>500</td><td>400</td></tr></table>", None),
+    ("R5-1a standalone <sup>9</sup> cell, output unchanged (must not be reported)", STANDALONE_MARKER, None),
+    ("R5-1b standalone <sup>9</sup> cell kept, amount deleted", STANDALONE_MARKER, lambda s: s.replace("| Impairment | 9 |", "| Impairment |  |")),
+    ("R5-1c amount kept, standalone <sup>9</sup> deleted (marker only)", STANDALONE_MARKER, lambda s: s.replace("| Footnote | 9 |", "| Footnote |  |")),
+    ("R5-1d unlabelled rows, amount deleted (no row provenance: ambiguous)", UNLABELLED_MARKER, lambda s: s.replace("| 9 |\n| 9 |", "|  |\n| 9 |", 1)),
+    ("R6-1a 'Note 1' / 'Note 2' rows, output unchanged (must not be reported)", NOTES, None),
+    ("R6-1b 'Note 1' row deleted (value 9 lost, definite)", NOTES, drop_line("| Note 1 |")),
+    ("R6-1c 'Note 2' footnote row deleted (reference and marker only)", NOTES, drop_line("| Note 2 |")),
+    ("R6-2a repeated 'Total' rows, output unchanged (must not be reported)", TOTALS, None),
+    ("R6-2b first 'Total' row deleted (value 9 lost, ambiguous)", TOTALS, drop_line("| Total |")),
+    ("R2-3c fused multi-row header (must not be reported)", "<table><tr><td></td><td colspan=\"2\">Year ended December 31,</td><td colspan=\"2\">2024 vs. 2023</td></tr><tr><td></td><td>2024</td><td>2023</td><td>$ Change</td><td>% Change</td></tr><tr><td>Revenue</td><td>1,300</td><td>804</td><td>496</td><td>62%</td></tr><tr><td>Cost</td><td>300</td><td>200</td><td>100</td><td>50%</td></tr></table>", None),
+]
+
+for name, html, mutate in CASES:
+    print(f"== {name}")
+    for capture in (False, True):
+        for r in v3.analyze(html, capture=capture, mutate=mutate):
+            print(f"   {'capture' if capture else 'normal '}: table {r.ordinal} (snapshot {r.snapshot_ordinal}) "
+                  f"enforced={dict(r.missing)} {r.missing_tokens} reported={dict(r.reported)} order={r.order}")
