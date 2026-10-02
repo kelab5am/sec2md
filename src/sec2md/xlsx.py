@@ -12,7 +12,7 @@ from sec2md.core import _link_resolution_url, _resolve_source
 from sec2md.parser import Parser
 from sec2md.quality import build_diagnostics, enforce_quality
 from sec2md.utils import is_url
-from sec2md.xlsx_tables import prepare_table
+from sec2md.xlsx_tables import prepare_table, select_export_tables
 from sec2md.xlsx_writer import render_workbook
 
 
@@ -116,7 +116,11 @@ def export_xlsx(
             trace_failures=parser.trace_numeric_failures, enforce_mappings=True,
         )
     enforce_quality(diagnostics, quality_policy)
-    tables = tuple(prepare_table(snapshot) for snapshot in parser.table_snapshots)
+    tables = tuple(prepare_table(snapshot) for snapshot in select_export_tables(parser.table_snapshots))
+    if quality_policy == 'strict':
+        table_issues = tuple(f'Table {table.source.ordinal}: {issue}' for table in tables for issue in table.issues)
+        if table_issues:
+            raise XlsxQualityError(table_issues)
     messages = list(diagnostics.warnings)
     if not tables:
         messages.append('No tables were emitted by the document parser.')

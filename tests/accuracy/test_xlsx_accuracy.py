@@ -64,11 +64,7 @@ def signature(cells):
 
 
 def copy_bounds(sheet):
-    instructions = [cell.value for row in sheet for cell in row
-                    if isinstance(cell.value, str) and re.fullmatch(
-                        r'Copy [A-Z]+\d+:[A-Z]+\d+, including units and complete headers\.', cell.value)]
-    assert len(instructions) == 1
-    return range_boundaries(instructions[0].split()[1].rstrip(','))
+    return range_boundaries(list(sheet.defined_names['CopyTable'].destinations)[0][1])
 
 
 def visible(sheet):
@@ -103,7 +99,10 @@ def audit_export(fixture_id, directory):
     parser.get_pages(include_images=False)
     snapshots = parser.table_snapshots
     assert len(raw) == EXPECTED['inventory'][fixture_id]['raw']
-    assert len(snapshots) == len(result.tables) == EXPECTED['inventory'][fixture_id]['exported']
+    assert len(snapshots) == EXPECTED['inventory'][fixture_id]['exported']
+    # Independently inspected raw indexes 5/6 are the filing contents tables.
+    assert len(result.tables) == len(snapshots) - 3
+    snapshots = snapshots[3:]
     assert len(workbook.worksheets) == len(result.tables) + 1
     raw_signatures = [signature(source_cells(node)) for node in raw]
     tables, reconciliation, selected = {}, [], []
@@ -113,9 +112,9 @@ def audit_export(fixture_id, directory):
         assert len(matches) == 1, (fixture_id, snapshot.ordinal, matches)
         index, = matches
         assert index not in tables
-        assert exported.ordinal == snapshot.ordinal == len(selected) + 1
+        assert exported.ordinal == snapshot.ordinal == len(selected) + 4
         sheet = workbook[exported.sheet_name]
-        assert sheet is workbook.worksheets[snapshot.ordinal]
+        assert sheet is workbook.worksheets[len(selected) + 1]
         prepared = prepare_table(snapshot)
         tables[index] = (prepared, exported, sheet)
         selected.append(index)
@@ -124,8 +123,8 @@ def audit_export(fixture_id, directory):
                                'issues': list(exported.issues)})
     assert selected == sorted(selected)
     omitted = tuple(i for i in range(len(raw)) if i not in tables)
-    assert omitted == PROSE_TABLES[fixture_id]
-    for index in omitted:
+    assert omitted == tuple(range(6 if fixture_id == 'nvda-2026-10k' else 7))
+    for index in PROSE_TABLES[fixture_id]:
         cells = source_cells(raw[index])
         visible_rows = {r for r, _, _, _, text in cells if text.strip()}
         assert len(visible_rows) == (0 if fixture_id == "nvda-2026-q2-10q" and index == 0 else 1)
@@ -150,13 +149,11 @@ def test_all_occurrences_navigation_originals_and_no_frozen_rows(audit):
     assert audit.contract.sha256 in visible(contents)
     assert 'original bytes' in visible(contents)
     for _, exported, sheet in audit.tables.values():
-        assert sheet.freeze_panes == 'B1'
-        assert f'Status: {exported.status}' in visible(sheet)
+        assert sheet.freeze_panes is None
+        assert 'Status:' not in visible(sheet)
         assert exported.status in {'exported', 'needs_review', 'source_text_only'}
         links = [cell.hyperlink for row in contents for cell in row if cell.hyperlink]
         assert any(link.location and sheet.title in link.location for link in links)
-        assert any(cell.hyperlink and cell.hyperlink.target == audit.contract.sec_url
-                   for row in sheet for cell in row)
         assert not any(cell.data_type == 'f' for row in sheet for cell in row)
         assert not sheet.auto_filter.ref
     with ZipFile(audit.result.path) as archive:
@@ -164,7 +161,7 @@ def test_all_occurrences_navigation_originals_and_no_frozen_rows(audit):
             if name.startswith('xl/worksheets/sheet') and name.endswith('.xml'):
                 xml = ElementTree.fromstring(archive.read(name))
                 for pane in xml.iter('{http://schemas.openxmlformats.org/spreadsheetml/2006/main}pane'):
-                    assert float(pane.get('ySplit', 0)) == 0
+                    assert float(pane.get('ySplit', 0)) == float(pane.get('xSplit', 0)) == 0
 
 
 def body_row(prepared, source_row):
@@ -184,10 +181,7 @@ def copy_cell(prepared, sheet, source_row, period):
 
 
 def original_grid(sheet):
-    matches = [cell.row for row in sheet for cell in row
-               if cell.value == 'Original cell grid — source spans recorded below']
-    assert len(matches) == 1
-    return matches[0] + 1
+    return range_boundaries(list(sheet.defined_names['OriginalTable'].destinations)[0][1])[1]
 
 
 def check_financial_table(audit, expectation):
@@ -195,7 +189,8 @@ def check_financial_table(audit, expectation):
     assert exported.status == prepared.status == 'exported', exported.issues
     assert prepared.headers[1:] == tuple(expectation['headers'][1:])
     assert prepared.source.display_page == expectation['printedPage']
-    assert f'Printed page {expectation["printedPage"]}' in visible(sheet)
+    assert any(row[1].value == expectation['printedPage'] for row in audit.workbook['Contents']
+               if row[0].hyperlink and sheet.title.replace("'", "''") in row[0].hyperlink.location)
     left, top, right, bottom = copy_bounds(sheet)
     assert right - left + 1 == len(expectation['headers'])
     assert [sheet.cell(top + 1, c).value for c in range(left + 1, right + 1)] == expectation['headers'][1:]
@@ -236,7 +231,7 @@ def check_financial_table(audit, expectation):
                   and sheet.cell(top + 2 + row, c).value is not None]
         assert actual == [Decimal(value) for value in expected['values']]
     if expectation['kind'] in {'income', 'balance', 'cashflow'}:
-        assert 'See accompanying Notes' in visible(sheet)
+        assert 'See accompanying Notes' not in visible(sheet)
     return proof
 
 
@@ -335,7 +330,7 @@ def test_source_notes_and_marker_context_retained(audit):
         if expected['filing'] != audit.fixture:
             continue
         prepared, _, sheet = audit.tables[expected['source_table']]
-        text = compact(visible(sheet))
+        text = compact(' '.join(prepared.notes))
         assert compact(expected['text']) in text
         if 'source_row' in expected:
             ri = body_row(prepared, expected['source_row'])
@@ -373,6 +368,7 @@ def test_positioned_source_and_genuinely_absent_note_have_honest_status(tmp_path
     assert positioned.cell(top + 2, left).value == 'Label 0'
     assert positioned.cell(top + 2, left + 2).value == 2000
     notes = workbook[result.tables[1].sheet_name]
-    assert 'Unresolved or ambiguous note target: #absent' in visible(notes)
+    assert 'Unresolved or ambiguous note target: #absent' in result.tables[1].issues
+    assert 'Unresolved or ambiguous note target: #absent' not in visible(notes)
     assert 'Linked note (#absent)' not in visible(notes)
     workbook.close()

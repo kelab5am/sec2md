@@ -13,8 +13,6 @@ from sec2md.xlsx_tables import PreparedTable
 
 MAX_ROWS = 1048576
 MAX_COLUMNS = 16384
-# Small visible chunks also avoid Excel's maximum row height clipping long text.
-TEXT_CHUNK = 400
 INVALID_XML = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]')
 
 
@@ -29,9 +27,8 @@ class WorksheetResult:
 
 
 def _sheet_name(table, used):
-    prefix = f'{table.source.ordinal:03d}_p{table.source.page:03d}_'
     title = re.sub(r'[\x00-\x1f\[\]:*?/\\]', '', INVALID_XML.sub('', table.title)).strip(" '") or 'Table'
-    base = (prefix + title)[:31].rstrip("'")
+    base = title[:31].rstrip("'")
     name, index = base, 2
     while name.lower() in used or name.lower() in {'contents', 'history'}:
         suffix = f'_{index}'
@@ -68,12 +65,6 @@ def render_workbook(tables: Sequence[PreparedTable], *, source_url: str | None,
         return text
 
     def put(ws, row, col, value, *, heading=False, title=False, number_format='@'):
-        if row >= MAX_ROWS:
-            writer_issues.setdefault(ws.title, set()).add(
-                'Content unavailable in full because Excel row limit was exceeded.')
-            row, col = MAX_ROWS, 1
-            value = 'UNAVAILABLE IN FULL: Excel row limit reached. Consult supplied source.'
-            heading, title, number_format = True, False, '@'
         cell = ws.cell(row, col)
         if isinstance(value, str):
             # Force type after assignment: source formulas and error tokens stay text.
@@ -97,15 +88,6 @@ def render_workbook(tables: Sequence[PreparedTable], *, source_url: str | None,
         ws.row_dimensions[row].height = max(ws.row_dimensions[row].height or 0, height)
         return cell
 
-    def block(ws, row, text, *, heading=False, title=False):
-        text = safe_text(ws, text)
-        for part in (text[i:i+TEXT_CHUNK] for i in range(0, len(text), TEXT_CHUNK)):
-            put(ws, row, 1, part, heading=heading, title=title)
-            if row >= MAX_ROWS:
-                return MAX_ROWS
-            row += 1
-        return row
-
     def link(cell, *, target=None, location=None):
         cell.hyperlink = Hyperlink(ref=cell.coordinate, target=target, location=location)
         cell.font = Font(name='Arial', size=11, color='0563C1', underline='single')
@@ -119,178 +101,113 @@ def render_workbook(tables: Sequence[PreparedTable], *, source_url: str | None,
         for col in range(2, columns + 1):
             ws.column_dimensions[get_column_letter(col)].width = 25
 
-    setup(contents, 8)
-    row = block(contents, 1, 'Filing tables', title=True)
-    for label, text in [('Source', source_url or 'Supplied document'), ('SHA-256 kind', hash_kind),
-                        ('SHA-256', source_hash), ('sec2md version', version('sec2md')),
-                        ('Export schema', '1')]:
+    # Retain source identity in hidden rows for existing folder deduplication.
+    # No technical metadata is shown in the normal workbook view.
+    setup(contents, 2)
+    for row, (label, value) in enumerate([
+        ('Source', source_url or 'Supplied document'), ('SHA-256 kind', hash_kind),
+        ('SHA-256', source_hash), ('sec2md version', version('sec2md')),
+        ('Export schema', '1'), ('Layout', 'tables-only')], 1):
         put(contents, row, 1, label)
-        # Arbitrary source metadata can be long as well.
-        for part in (text[i:i+TEXT_CHUNK] for i in range(0, len(text), TEXT_CHUNK)):
-            put(contents, row, 2, part)
-            row += 1
-    for diagnostic in document_diagnostics:
-        row = block(contents, row, diagnostic)
-    summary_row = row
-    row += 2
-    for col, text in enumerate(('Table / copy area', 'Originals', 'Parser page', 'Printed page',
-                                'Status', 'Review count'), 1):
-        put(contents, row, col, text, heading=True)
-    row += 1
+        put(contents, row, 2, value)
+        contents.row_dimensions[row].hidden = True
+    put(contents, 8, 1, 'Filing tables', title=True)
+    put(contents, 10, 1, 'Table', heading=True)
+    put(contents, 10, 2, 'Page', heading=True)
+    contents.sheet_view.topLeftCell = 'A8'
     records = []
-    for table in tables:
+
+    def checked_put(ws, row, col, value, **kwargs):
+        # Excel silently truncates long cells; reject instead of losing source text
+        # or moving it into the diagnostic sections this workbook intentionally omits.
+        if isinstance(value, str) and len(safe_text(ws, value)) > 32767:
+            raise ValueError('Table cell exceeds Excel character limit (32767); export not published.')
+        if row > MAX_ROWS or col > MAX_COLUMNS:
+            raise ValueError('Table exceeds Excel dimension limit; export not published.')
+        return put(ws, row, col, value, **kwargs)
+
+    def named_range(ws, label, area):
+        from openpyxl.workbook.defined_name import DefinedName
+        ws.defined_names.add(DefinedName(label, attr_text=internal(ws.title, area)))
+
+    for index, table in enumerate(tables, 11):
         name = _sheet_name(table, used)
         ws = wb.create_sheet(name)
-        ws.freeze_panes = 'B1'
-        issues = list(table.issues)
         width = max(len(table.headers), max((len(r) for r in table.rows), default=0))
         original_width = max((len(r) for r in table.original_rows), default=0)
-        # Conservative estimate includes originals, context, provenance and expansion.
-        strings = [table.title, table.units, table.source.original_text, *table.headers,
-                   *table.notes, *table.issues, *table.source.context_before,
-                   *table.source.context_after, *(c.text for c in table.source.source_cells),
-                   *(str(c.value or '') for r in table.rows for c in r)]
-        estimate = 100 + len(table.rows) + len(table.original_rows) + len(table.source.source_cells) * 3 + sum(
-            math.ceil(len(s) / TEXT_CHUNK) + 1 for s in strings)
-        estimate += sum(len(r) for r in table.cell_sources)
-        oversized = max(width, original_width) > MAX_COLUMNS or estimate > MAX_ROWS
-        if oversized:
-            issues.append('Excel dimension limit: copy grid unavailable; original text retained when space permits.')
-        chunked = any(len(s) > TEXT_CHUNK for s in (*table.headers,
-                      *(str(c.value or '') for body in table.rows for c in body)))
-        if chunked:
-            issues.append('Long text is retained in labeled chunks; concatenate without separators.')
-        status = 'source_text_only' if oversized else table.status
-        if issues and status == 'exported':
-            status = 'needs_review'
-        setup(ws, max(3, min(max(width, original_width), MAX_COLUMNS)) if not oversized else 3)
-        r = block(ws, 1, table.title or 'Table', title=True)
-        put(ws, r, 1, 'Back to Contents')
-        link(ws.cell(r, 1), location="'Contents'!A1")
-        r += 1
-        if source_url:
-            r = block(ws, r, source_url)
-            destination = source_url
-            if table.source.source_anchor:
-                destination = urldefrag(source_url)[0] + '#' + quote(table.source.source_anchor, safe='')
-            link(ws.cell(r-1, 1), target=destination)
-        pages = f'Parser page {table.source.page}'
-        if table.source.display_page is not None:
-            pages += f' | Printed page {table.source.display_page}'
-        r = block(ws, r, pages)
-        if table.source.element_id:
-            r = block(ws, r, f'Local element: {table.source.element_id}')
-        status_row = r
-        r = block(ws, r, f'Status: {status}')
-        instruction = r
-        r += 1
-        copy_start = r
-        r = block(ws, r, table.units or 'Units not established')
+        if max(width, original_width) > MAX_COLUMNS:
+            raise ValueError('Table exceeds Excel dimension limit; export not published.')
+        setup(ws, max(width, original_width, 2))
+        checked_put(ws, 1, 1, table.title, title=True)
+        # The title itself provides navigation without another instruction row.
+        link(ws.cell(1, 1), location="'Contents'!A8")
+        ws.cell(1, 1).font = Font(name='Arial', size=17, bold=True, color=navy)
+        checked_put(ws, 2, 1, table.units or '')
+        r = 3
         copy_range = None
-        long_copy = []
-        if status != 'source_text_only':
+        if table.status != 'source_text_only':
             for col, header in enumerate(table.headers, 1):
-                text = header if len(header) <= TEXT_CHUNK else f'Long header: see notes ({get_column_letter(col)}{r})'
-                put(ws, r, col, text, heading=True)
-                if len(header) > TEXT_CHUNK:
-                    long_copy.append((f'Header {get_column_letter(col)}{r}', header))
+                # Positional labels are exporter scaffolding, not source headers.
+                value = '' if header == f'Column {col}' else header
+                checked_put(ws, r, col, value, heading=True)
             r += 1
             for body in table.rows:
                 for col, item in enumerate(body, 1):
-                    value = item.value
-                    if isinstance(value, str) and len(value) > TEXT_CHUNK:
-                        long_copy.append((f'Copy cell {get_column_letter(col)}{r}', value))
-                        value = 'Long text: see notes / original text'
-                    put(ws, r, col, value, number_format=item.number_format)
-                    if item.review_reason:
-                        long_copy.append((f'Review {get_column_letter(col)}{r}', item.review_reason))
+                    checked_put(ws, r, col, item.value, number_format=item.number_format)
                 r += 1
-            copy_range = f'A{copy_start}:{get_column_letter(max(1,width))}{r-1}'
-            put(ws, instruction, 1, f'Copy {copy_range}, including units and complete headers.')
-        else:
-            put(ws, instruction, 1, 'Copy grid unavailable — source text only', heading=True)
-        r += 1
-        r = block(ws, r, 'Notes and review', heading=True)
-        originals_link_row = r
-        r = block(ws, r, 'Go to original text')
-        r = block(ws, r, 'Originals retain extracted text and source spans. Parser whitespace normalization applies; consult retained HTML for exact visual appearance.')
-        for note in (*issues, *table.notes):
-            r = block(ws, r, note)
-        for label, text in long_copy:
-            r = block(ws, r, label + ' (chunks; concatenate without separators)')
-            r = block(ws, r, text)
-        for context in (*table.source.context_before, *table.source.context_after):
-            r = block(ws, r, 'Nearby source context')
-            r = block(ws, r, context)
-        for label, target in table.references:
-            r = block(ws, r, label)
-            r = block(ws, r, target)
-            if target:
-                link(ws.cell(r-1, 1), target=target)
-        original_start = min(r + 1, MAX_ROWS)
-        link(ws.cell(min(originals_link_row, MAX_ROWS), 1), location=internal(name, f'A{original_start}'))
-        if not oversized:
-            r = block(ws, original_start, 'Original cell grid — source spans recorded below', heading=True)
-            for original_row in table.original_rows:
-                for col, text in enumerate(original_row, 1):
-                    put(ws, r, col, text if len(text) <= TEXT_CHUNK else 'Long text: see source-cell chunks below')
-                r += 1
+            copy_range = f'A2:{get_column_letter(max(1, width))}{r-1}'
+            named_range(ws, 'CopyTable', copy_range)
+            r += 2
+            checked_put(ws, r, 1, 'Original table', heading=True)
+            if source_url:
+                destination = urldefrag(source_url)[0] + '#' + quote(table.source.source_anchor, safe='') if table.source.source_anchor else source_url
+                link(ws.cell(r, 1), target=destination)
             r += 1
+        original_start = r
+        original_range = None
+        cells = table.source.source_cells
+        valid_grid = bool(cells) and not table.source.issues and max(
+            (c.row + max(1, c.rowspan) for c in cells), default=0) * max(
+            (c.column + max(1, c.colspan) for c in cells), default=0) <= 1_000_000
+        if valid_grid:
+            for body in table.original_rows:
+                for col, value in enumerate(body, 1):
+                    checked_put(ws, r, col, value)
+                r += 1
+            for cell in cells:
+                saved = ws.cell(original_start + cell.row, cell.column + 1)
+                if cell.links and cell.links[0][1]:
+                    link(saved, target=cell.links[0][1])
+                if cell.is_header:
+                    saved.font = Font(name='Arial', size=11, bold=True, color=navy)
+                if cell.rowspan > 1 or cell.colspan > 1:
+                    ws.merge_cells(start_row=original_start + cell.row, start_column=cell.column + 1,
+                                   end_row=original_start + cell.row + cell.rowspan - 1,
+                                   end_column=cell.column + cell.colspan)
+            original_range = f'A{original_start}:{get_column_letter(max(1, original_width))}{r-1}'
+            named_range(ws, 'OriginalTable', original_range)
+            if table.status == 'source_text_only':
+                # Match source geometry; narrow empty gutters instead of making
+                # each currency/spacing fragment a full-width value column.
+                for col in range(original_width):
+                    texts = [c.text for c in cells if c.column == col and c.text]
+                    ws.column_dimensions[get_column_letter(col + 1)].width = (
+                        65 if col == 0 else 3 if not texts or all(t in {'$', '(', ')', '%'} for t in texts)
+                        else 16)
         else:
-            r = original_start
-        r = block(ws, r, 'Original extracted text (chunks; concatenate without separators)', heading=True)
-        text = table.source.original_text
-        if r + math.ceil(len(text) / TEXT_CHUNK) + 3 > MAX_ROWS:
-            r = block(ws, r, 'UNAVAILABLE IN FULL: original text exceeds Excel row limits. Consult supplied source.')
-            issues.append('Original text unavailable in full because Excel row limit was exceeded.')
-        else:
-            r = block(ws, r, text)
-        r += 1
-        # A lossless source-cell ledger explicitly retains coordinates and spans.
-        if not oversized:
-            r = block(ws, r, 'Original source cells — zero-based row/column and spans', heading=True)
-            for cell in table.source.source_cells:
-                r = block(ws, r, f'row {cell.row}, column {cell.column}; rowspan {cell.rowspan}, colspan {cell.colspan}')
-                r = block(ws, r, cell.text)
-                for label, target in cell.links:
-                    r = block(ws, r, f'Reference: {label}')
-                    r = block(ws, r, target)
-                    if target:
-                        link(ws.cell(r-1, 1), target=target)
-            r = block(ws, r, 'Copy cell source origins (zero-based row, column)', heading=True)
-            for ri, source_row in enumerate(table.cell_sources):
-                for ci, origins in enumerate(source_row):
-                    r = block(ws, r, f'Body row {ri}, column {ci}: {origins}')
-        issues.extend(sorted(writer_issues.get(name, ())))
-        if writer_issues.get(name):
-            if r >= MAX_ROWS:
-                status = 'source_text_only'
-            elif status == 'exported':
-                status = 'needs_review'
-            for issue in sorted(writer_issues[name]):
-                r = block(ws, r, issue)
-        put(ws, status_row, 1, f'Status: {status}')
-        original_end = get_column_letter(max(1, original_width)) if not oversized else 'A'
-        original_range = f'A{original_start}:{original_end}{min(r-1, MAX_ROWS)}'
-        record = WorksheetResult(table.source.ordinal, name, status, tuple(dict.fromkeys(issues)),
-                                 copy_range, original_range)
-        records.append(record)
-        # Titles are retained in full on the table sheet, even for long Contents labels.
-        put(contents, row, 1, table.title if len(table.title) <= TEXT_CHUNK else name)
-        link(contents.cell(row, 1), location=internal(name, f'A{copy_start}'))
-        put(contents, row, 2, 'Original text')
-        link(contents.cell(row, 2), location=internal(name, f'A{original_start}'))
-        put(contents, row, 3, table.source.page, number_format='0')
-        put(contents, row, 4, table.source.display_page, number_format='0')
-        put(contents, row, 5, status)
-        put(contents, row, 6, len(record.issues), number_format='0')
-        row += 1
-    summary = 'No tables detected' if not records else f'{len(records)} tables: ' + ', '.join(
-        f'{sum(r.status == state for r in records)} {state}'
-        for state in ('exported', 'needs_review', 'source_text_only'))
-    if document_diagnostics:
-        summary += ' | Document diagnostics require review'
-    put(contents, summary_row, 1, summary)
+            raise ValueError(f'Table {table.source.ordinal}: source grid unavailable; export not published.')
+        issues = tuple(dict.fromkeys((*table.issues, *sorted(writer_issues.get(name, ())))))
+        status = table.status
+        if issues and status == 'exported':
+            status = 'needs_review'
+        records.append(WorksheetResult(table.source.ordinal, name, status, issues,
+                                       copy_range, original_range))
+        checked_put(contents, index, 1, table.title)
+        link(contents.cell(index, 1), location=internal(name, 'A1'))
+        put(contents, index, 2, table.source.display_page if table.source.display_page is not None
+            else table.source.page, number_format='0')
+    if not records:
+        put(contents, 11, 1, 'No tables detected')
     output = BytesIO()
     wb.save(output)
     return output.getvalue(), tuple(records)
