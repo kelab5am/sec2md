@@ -39,6 +39,9 @@ argument:
 | `python <this folder>/review_cases_v6.py <this folder>` | Runs every review case from rounds 1–5 in normal and capture rendering modes. The last run is saved in `review_cases_output.txt`. |
 | `python <this folder>/corpus_v6.py <this folder> <out.json>` | Runs the 7 fixtures and the 20 RCQ filings in `E:\RCQWealth`, in both modes, plus three AAPL mutations. The spec's figures are in `evidence.json`. |
 | `python <this folder>/inspect_v6.py <this folder> <fixture or RCQ name prefix> <table ordinals>` | Shows one table's source data rows and output segment. |
+| `python <this folder>/parity_impl.py <this folder> [--fixtures-only]` | Run from an implementation checkout. Compares its `Parser.table_report` with this prototype on every table, in both modes. Also checks its snapshot-free header-row counts against real snapshots. Expect `finding mismatches 0, header-row mismatches 0`. |
+| `python <this folder>/overhead_vs_main.py --baseline <main checkout> --candidate <implementation checkout>` | Times `Parser(html).get_pages()` on the 7 fixtures, in separate processes for the unchanged baseline and the implementation, and prints the overhead per fixture and in total. |
+| `python <this folder>/accuracy_vs_main.py --baseline <main checkout> --candidate <implementation checkout>` | Runs the accuracy suite on the 7 fixtures on both sides. Prints word, numeric and financial-row recall, and whether the Markdown and page hashes match. Exits 1 if anything changed. |
 
 The prototype gets snapshot metadata from a second, capture-mode parse. That
 keeps the checked rendering unchanged, but it makes the prototype's timing
