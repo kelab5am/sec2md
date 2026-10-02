@@ -374,3 +374,124 @@ class TestChunkTextBlock:
         tb = ModelTextBlock(name="us-gaap:DebtTextBlock", title="Debt", elements=elems)
         chunks = chunk_text_block(tb, chunk_size=512)
         assert len(chunks) >= 1
+
+
+# ---------------------------------------------------------------------------
+# Audit regressions (2026-10-02)
+# ---------------------------------------------------------------------------
+
+class TestTableBlockSeparatorRow:
+    def test_separator_has_header_column_count(self):
+        block = TableBlock(content="| a | b |\n| --- | --- |\n| 1 | 2 |", page=1)
+        assert block.content.split("\n") == ["|a|b|", "|---|---|", "|1|2|"]
+
+    def test_minification_is_idempotent(self):
+        once = TableBlock(content="| a | b |\n| --- | --- |\n| 1 | 2 |", page=1).content
+        assert TableBlock(content=once, page=1).content == once
+
+    def test_caption_line_is_not_replaced_by_separator(self):
+        content = (
+            "**Apple Inc.**\n"
+            "**CONSOLIDATED BALANCE SHEETS**\n"
+            "| | 2023 | 2022 |\n"
+            "| --- | --- | --- |\n"
+            "| Cash | 1 | 2 |"
+        )
+        lines = TableBlock(content=content, page=1).content.split("\n")
+        assert lines == [
+            "**Apple Inc.**",
+            "**CONSOLIDATED BALANCE SHEETS**",
+            "||2023|2022|",
+            "|---|---|---|",
+            "|Cash|1|2|",
+        ]
+
+
+class TestTableSplitKeepsHeader:
+    def test_every_part_repeats_caption_units_and_header_row(self):
+        prefix = ["**Statement of Operations**", "(In millions)", "| Item | 2023 | 2022 |", "| --- | --- | --- |"]
+        data = [f"| Row {i} | {i} | {i + 1} |" for i in range(80)]
+        elem = Element(id="t", content="\n".join(prefix + data), kind="table", page_start=1, page_end=1)
+        parts = Chunker(chunk_size=64, chunk_overlap=0, max_table_tokens=64)._split_table_element(elem, 1)
+
+        assert len(parts) > 1
+        for part, _ in parts:
+            assert part.content.split("\n")[:4] == prefix
+        emitted = [line for part, _ in parts for line in part.content.split("\n") if line.startswith("| Row ")]
+        assert emitted == data
+
+
+class TestChunkOverlapContiguity:
+    def test_each_chunk_is_a_contiguous_run_of_source_sentences(self):
+        alpha = [f"Alpha sentence number {i} talks about revenue growth in the quarter." for i in range(6)]
+        bravo = ["Bravo is short."]
+        charlie = [f"Charlie sentence number {i} talks about operating expenses this year." for i in range(10)]
+        content = "\n\n".join([" ".join(alpha), " ".join(bravo), " ".join(charlie)])
+        source = alpha + bravo + charlie
+
+        chunks = Chunker(chunk_size=100, chunk_overlap=40).split(pages=[Page(number=1, content=content)])
+
+        assert len(chunks) > 2
+        for chunk in chunks:
+            got = split_sentences(" ".join(chunk.content.split()))
+            start = source.index(got[0])
+            assert got == source[start:start + len(got)]
+
+
+class TestChunkTagsOrder:
+    def test_tags_are_distinct_in_first_seen_order(self):
+        tags = [f"us-gaap:Concept{i}" for i in (7, 3, 9, 1, 5, 8, 2, 6, 4, 0)]
+        e1 = Element(id="e1", content="x", kind="paragraph", page_start=1, page_end=1, tags=tags[:6])
+        e2 = Element(id="e2", content="y", kind="paragraph", page_start=1, page_end=1, tags=tags[3:] + tags[:2])
+        chunk = Chunk(blocks=[TextBlock(content="x y", page=1)], elements=[e1, e2])
+        assert chunk.tags == tags
+
+
+_ONE_PAGE_10K = """<html><body>
+<p>Cover page text for the annual report.</p>
+<div style="page-break-after:always"></div>
+<p><b>PART I</b></p>
+<p><b>Item 1A. Risk Factors</b></p>
+<p>Alpha risk paragraph describes supply chain exposure in detail.</p>
+<p><b>Item 1B. Unresolved Staff Comments</b></p>
+<p>None.</p>
+<p><b>Item 1C. Cybersecurity</b></p>
+<p>Charlie cyber paragraph describes the security program.</p>
+</body></html>"""
+
+
+@pytest.fixture(scope="module")
+def sections():
+    import sec2md
+    pages = sec2md.convert_to_markdown(_ONE_PAGE_10K, return_pages=True)
+    found = sec2md.extract_sections(pages, filing_type="10-K")
+    return {section.item: section for section in found}
+
+
+class TestChunkSectionIsolation:
+    """Sections sharing a page must not chunk each other's content."""
+
+    def test_chunks_contain_only_their_own_section(self, sections):
+        text = {item: " ".join(c.content for c in chunk_section(s)) for item, s in sections.items()}
+        assert "None." in text["ITEM 1B"]
+        assert "Alpha risk" not in text["ITEM 1B"]
+        assert "Charlie cyber" not in text["ITEM 1B"]
+        assert "Charlie cyber" not in text["ITEM 1A"]
+        assert "Alpha risk" not in text["ITEM 1C"]
+
+    def test_chunks_keep_element_ids_from_their_own_section(self, sections):
+        ids = {item: [i for c in chunk_section(s) for i in c.element_ids] for item, s in sections.items()}
+        assert ids["ITEM 1A"] and ids["ITEM 1B"] and ids["ITEM 1C"]
+        assert not set(ids["ITEM 1A"]) & set(ids["ITEM 1B"])
+        assert not set(ids["ITEM 1B"]) & set(ids["ITEM 1C"])
+
+    def test_real_filing_item_1b_chunks_match_section_text(self):
+        import gzip
+        from pathlib import Path
+        import sec2md
+        html = gzip.decompress((Path(__file__).parent / "fixtures" / "sec" / "aapl-2023-10k.html.gz").read_bytes())
+        pages = sec2md.convert_to_markdown(html, return_pages=True)
+        section = sec2md.get_section(sec2md.extract_sections(pages, filing_type="10-K"), "ITEM 1B")
+        chunked = " ".join(c.content for c in chunk_section(section))
+        assert "None." in chunked
+        assert len(chunked) < 200

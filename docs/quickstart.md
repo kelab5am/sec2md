@@ -5,8 +5,12 @@ Get started with `sec2md` in under 3 minutes.
 ## Installation
 
 ```bash
-pip install sec2md
+pip install "sec2md[xlsx] @ git+https://github.com/kelab5am/sec2md@<reviewed-commit>"
 ```
+
+This fork is not published to PyPI: `pip install sec2md` installs the upstream
+package, which lacks `quality_policy`, `base_url` and XLSX export. Drop `[xlsx]`
+if you do not need Excel export.
 
 ## Basic Conversion
 
@@ -22,8 +26,11 @@ md = sec2md.convert_to_markdown(
 )
 
 # From HTML file
-with open("10k.html") as f:
-    html = f.read()
+from pathlib import Path
+
+# Pass bytes so sec2md detects the encoding; text mode uses the OS locale
+# (cp1252 on most Windows machines) and can silently garble the filing.
+html = Path("10k.html").read_bytes()
 
 md = sec2md.convert_to_markdown(html)
 print(md)

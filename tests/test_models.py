@@ -1,5 +1,6 @@
 """Tests for data models (models.py)."""
 
+from pathlib import Path
 from importlib.metadata import metadata, version
 from unittest.mock import patch, MagicMock
 
@@ -142,17 +143,25 @@ class TestVersionConsistency:
             import tomllib
         except ModuleNotFoundError:  # Python 3.10
             import tomli as tomllib
-        with open("pyproject.toml", "rb") as f:
+        with open(Path(__file__).resolve().parents[1] / "pyproject.toml", "rb") as f:
             pyproject = tomllib.load(f)
         assert sec2md.__version__ == pyproject["project"]["version"]
 
 
 def test_internal_version_matches_distribution():
-    assert version("sec2md") == "0.1.22+rcq.2"
-    assert sec2md.__version__ == "0.1.22+rcq.2"
+    assert version("sec2md") == "0.1.22+rcq.3"
+    assert sec2md.__version__ == "0.1.22+rcq.3"
 
 
 def test_distribution_points_to_maintained_fork():
     project_urls = metadata("sec2md").get_all("Project-URL") or []
     assert "Repository, https://github.com/kelab5am/sec2md" in project_urls
     assert "Upstream, https://github.com/lucasastorian/sec2md" in project_urls
+
+
+def test_item_9c_has_its_regulation_sk_name():
+    from sec2md.models import Item10K
+    assert Item10K.FOREIGN_JURISDICTION_INSPECTIONS.value == "9C"
+    # Deprecated misnomer kept as an alias so existing callers keep working.
+    assert Item10K.CYBERSECURITY_DISCLOSURES is Item10K.FOREIGN_JURISDICTION_INSPECTIONS
+    assert Item10K.CYBERSECURITY.value == "1C"

@@ -1,6 +1,8 @@
 # Proposed sec2md XLSX export design
 
-Status: **Sample output approved for implementation planning on 2026-09-19, with the navigation correction below. Exporter implementation has not started.**
+Status: **Implemented, then partly superseded by pull request #2 ("Simplify Excel exports to titled tables after filing contents").** Where this spec and `docs/usage/xlsx-export.md` disagree, the usage doc describes current behavior. Known divergences, pending an owner decision: tables before the filing's contents table are dropped; one unrenderable table fails the whole export instead of falling back per table; review state and missing-unit notes are not shown in the workbook; no `B1` freeze or numbered tab prefixes.
+
+Original status: Sample output approved for implementation planning on 2026-09-19, with the navigation correction below.
 
 User review correction: do not freeze the first 11 rows. Production workbooks must have **no frozen rows**. Only the first label column may remain fixed for horizontal scrolling (`freeze_panes="B1"`); Contents has no frozen panes. The accepted prototype files remain unchanged as review evidence. The implementation plan is at `../plans/2026-09-19-sec2md-xlsx-export.md` relative to this document's directory.
 

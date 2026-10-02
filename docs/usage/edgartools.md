@@ -5,7 +5,7 @@
 ## Setup
 
 ```bash
-pip install sec2md edgartools
+pip install "sec2md @ git+https://github.com/kelab5am/sec2md@<reviewed-commit>" edgartools
 ```
 
 ## Basic Integration

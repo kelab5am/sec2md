@@ -333,12 +333,10 @@ def test_prepublication_failures_preserve_existing_file(tmp_path, monkeypatch, f
     elif failure == 'reopen':
         monkeypatch.setattr('openpyxl.load_workbook', fail)
     else:
-        import tempfile
-        create = tempfile.NamedTemporaryFile
+        open_descriptor = os.fdopen
         class FailingFile:
             def __init__(self, file):
                 self.file = file
-                self.name = file.name
             def __enter__(self):
                 return self
             def __exit__(self, *args):
@@ -346,8 +344,9 @@ def test_prepublication_failures_preserve_existing_file(tmp_path, monkeypatch, f
             def write(self, content):
                 self.file.write(content[:10])
                 raise RuntimeError('unexpected fault')
-        monkeypatch.setattr('sec2md.xlsx.tempfile.NamedTemporaryFile',
-                            lambda **kwargs: FailingFile(create(**kwargs)))
+        monkeypatch.setattr(os, 'fdopen', lambda fd, mode='r', *args, **kwargs: (
+            FailingFile(open_descriptor(fd, mode, *args, **kwargs)) if mode == 'wb'
+            else open_descriptor(fd, mode, *args, **kwargs)))
     with pytest.raises(RuntimeError, match='unexpected fault'):
         sec2md.export_xlsx(TABLE, target, overwrite=True)
     assert target.read_bytes() == b'old'
@@ -402,3 +401,63 @@ def test_original_bytes_hash_precedes_decoding(tmp_path):
     assert any(hashlib.sha256(source).hexdigest() in str(v) for v in values(wb))
     assert 'Café' in values(wb)
     wb.close()
+
+
+# ---------------------------------------------------------------------------
+# Audit regressions (2026-10-02)
+# ---------------------------------------------------------------------------
+
+def _deny_os_open(monkeypatch):
+    """Make every os.open fail like a Windows ACL-denied directory, with a hang guard."""
+    calls = []
+
+    def denied(*args, **kwargs):
+        calls.append(args[0] if args else None)
+        if len(calls) > 1000:
+            raise RuntimeError("staging-file creation retried without bound")
+        raise PermissionError(13, "Permission denied", args[0] if args else None)
+
+    monkeypatch.setattr(os, "open", denied)
+    return calls
+
+
+def test_publish_fails_fast_when_directory_is_not_writable(tmp_path, monkeypatch):
+    from sec2md.xlsx import _publish
+
+    calls = _deny_os_open(monkeypatch)
+    with pytest.raises(PermissionError):
+        _publish(b"payload", tmp_path / "out.xlsx", overwrite=False, load_workbook=load_workbook)
+    assert len(calls) <= 10
+
+
+def test_export_checks_writability_before_parsing(tmp_path, monkeypatch):
+    import sec2md.xlsx
+
+    def fail_parser(*args, **kwargs):
+        raise AssertionError("document was parsed before the destination was checked")
+
+    monkeypatch.setattr(sec2md.xlsx, "Parser", fail_parser)
+    _deny_os_open(monkeypatch)
+    with pytest.raises(PermissionError):
+        sec2md.export_xlsx(b"<table><tr><td>Revenue</td><td>1</td></tr></table>", tmp_path / "out.xlsx")
+
+
+def test_staging_cleanup_failure_does_not_fail_a_completed_publish(tmp_path, monkeypatch):
+    from pathlib import Path
+    from openpyxl import Workbook
+    from sec2md.xlsx import _publish
+    import io
+
+    buffer = io.BytesIO()
+    Workbook().save(buffer)
+    original_unlink = Path.unlink
+
+    def locked_unlink(self, *args, **kwargs):
+        if self.name.startswith(".out.xlsx."):
+            raise PermissionError(32, "The process cannot access the file", str(self))
+        return original_unlink(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "unlink", locked_unlink)
+    destination = tmp_path / "out.xlsx"
+    _publish(buffer.getvalue(), destination, overwrite=False, load_workbook=load_workbook)
+    assert destination.exists()

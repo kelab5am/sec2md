@@ -149,8 +149,8 @@ class Chunk(BaseModel):
     @computed_field
     @property
     def tags(self) -> List[str]:
-        """Distinct XBRL concept tags across all elements in this chunk."""
-        return list({t for e in self.elements if e.tags for t in e.tags})
+        """Distinct XBRL concept tags across all elements in this chunk, in first-seen order."""
+        return list(dict.fromkeys(t for e in self.elements if e.tags for t in e.tags))
 
     @computed_field
     @property
