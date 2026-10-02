@@ -1,0 +1,1201 @@
+[
+ {
+  "doc": "META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 46,
+  "tables_flagged": 16,
+  "missing_material": 16,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 7,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 12,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 13,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 24,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 27,
+    "missing": [
+     "10563"
+    ],
+    "mapped": true,
+    "source_row": [
+     "The remainder of 2024",
+     "$",
+     "10,563"
+    ]
+   },
+   {
+    "table": 30,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 48,
+  "tables_flagged": 1,
+  "missing_material": 1,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 29,
+    "missing": [
+     "14452"
+    ],
+    "mapped": true,
+    "source_row": [
+     "The remainder of 2024",
+     "$",
+     "14,452"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 50,
+  "tables_flagged": 1,
+  "missing_material": 1,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 31,
+    "missing": [
+     "11321"
+    ],
+    "mapped": true,
+    "source_row": [
+     "The remainder of 2024",
+     "$",
+     "11,321"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017",
+  "form": "10-K",
+  "sections": 23,
+  "chunk_ratio_top": [
+   [
+    1.04,
+    "ITEM 7",
+    50384,
+    52483
+   ],
+   [
+    1.02,
+    "ITEM 8",
+    101589,
+    103685
+   ],
+   [
+    1.01,
+    "ITEM 16",
+    2402,
+    2417
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 67,
+  "tables_flagged": 4,
+  "missing_material": 9,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 9,
+    "missing": [
+     "10.68",
+     "10.93",
+     "11.89",
+     "12.29",
+     "14.25",
+     "9.47"
+    ],
+    "mapped": true,
+    "source_row": [
+     "ARPP:",
+     "$10.68",
+     "$9.47",
+     "$10.42",
+     "$10.93",
+     "$12.33",
+     "$11.20",
+     "$11.89"
+    ]
+   },
+   {
+    "table": 50,
+    "missing": [
+     "205"
+    ],
+    "mapped": true,
+    "source_row": [
+     "2025",
+     "$",
+     "205"
+    ]
+   },
+   {
+    "table": 54,
+    "missing": [
+     "26335"
+    ],
+    "mapped": true,
+    "source_row": [
+     "2025",
+     "$",
+     "26,335"
+    ]
+   },
+   {
+    "table": 69,
+    "missing": [
+     "29"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Date:",
+     "January 29, 2025",
+     "/s/\u00a0Susan Li"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 41,
+  "tables_flagged": 15,
+  "missing_material": 15,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 7,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 8,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 12,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 13,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 25,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 29,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 41,
+  "tables_flagged": 0,
+  "missing_material": 0,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": []
+ },
+ {
+  "doc": "META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 44,
+  "tables_flagged": 1,
+  "missing_material": 1,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 24,
+    "missing": [
+     "257"
+    ],
+    "mapped": true,
+    "source_row": [
+     "The remainder of 2025",
+     "$",
+     "257"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942",
+  "form": "10-K",
+  "sections": 23,
+  "chunk_ratio_top": [
+   [
+    1.05,
+    "ITEM 7",
+    49725,
+    52341
+   ],
+   [
+    1.02,
+    "ITEM 8",
+    115892,
+    118167
+   ],
+   [
+    1.01,
+    "ITEM 16",
+    2389,
+    2404
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 69,
+  "tables_flagged": 4,
+  "missing_material": 4,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 49,
+    "missing": [
+     "1259"
+    ],
+    "mapped": true,
+    "source_row": [
+     "2026",
+     "$",
+     "1,259"
+    ]
+   },
+   {
+    "table": 53,
+    "missing": [
+     "30634"
+    ],
+    "mapped": true,
+    "source_row": [
+     "2026",
+     "$",
+     "30,634"
+    ]
+   },
+   {
+    "table": 61,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Year Ended December\u00a031,"
+    ]
+   },
+   {
+    "table": 71,
+    "missing": [
+     "28"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Date:",
+     "January 28, 2026",
+     "/s/\u00a0Susan Li"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 39,
+  "tables_flagged": 16,
+  "missing_material": 16,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 7,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 8,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 12,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 13,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 22,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   },
+   {
+    "table": 24,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three Months Ended March 31,"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705",
+  "form": "10-Q",
+  "sections": 0,
+  "chunk_ratio_top": [],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 42,
+  "tables_flagged": 0,
+  "missing_material": 0,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": []
+ },
+ {
+  "doc": "RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.19,
+    "ITEM 2",
+    30764,
+    36598
+   ],
+   [
+    1.08,
+    "ITEM 1",
+    36719,
+    39773
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    230,
+    230
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 52,
+  "tables_flagged": 9,
+  "missing_material": 9,
+  "missing_minor": 1,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 37,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 38,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 39,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 40,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 41,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 42,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.09,
+    "ITEM 1",
+    39070,
+    42560
+   ],
+   [
+    1.08,
+    "ITEM 2",
+    33464,
+    36129
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    3069,
+    3069
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 50,
+  "tables_flagged": 2,
+  "missing_material": 2,
+  "missing_minor": 1,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 51,
+    "missing": [
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Six months ended June 30,"
+    ]
+   },
+   {
+    "table": 53,
+    "missing": [
+     "2024",
+     "6"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: August 6, 2024",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.09,
+    "ITEM 1",
+    40913,
+    44543
+   ],
+   [
+    1.08,
+    "ITEM 2",
+    34131,
+    36796
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    295,
+    295
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 50,
+  "tables_flagged": 2,
+  "missing_material": 3,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 51,
+    "missing": [
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Nine months ended September 30,"
+    ]
+   },
+   {
+    "table": 53,
+    "missing": [
+     "2024",
+     "29"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: October 29, 2024",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018",
+  "form": "10-K",
+  "sections": 23,
+  "chunk_ratio_top": [
+   [
+    1.05,
+    "ITEM 8",
+    84751,
+    88764
+   ],
+   [
+    1.04,
+    "ITEM 7",
+    40185,
+    41711
+   ],
+   [
+    1.01,
+    "ITEM 16",
+    1959,
+    1974
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 69,
+  "tables_flagged": 3,
+  "missing_material": 5,
+  "missing_minor": 2,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 36,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Year ended December 31,"
+    ]
+   },
+   {
+    "table": 70,
+    "missing": [
+     "10",
+     "2024",
+     "5",
+     "7"
+    ],
+    "mapped": true,
+    "source_row": [
+     "99.2",
+     "Voting Agreement, dated as of March 19, 2024, by and between the Registrant, Tencent Cloud Europe B.V., Jojoba Investment Limited, and the Proxyholder (as defined therein)",
+     "10-Q",
+     "5/7/2024",
+     "99.2"
+    ]
+   },
+   {
+    "table": 71,
+    "missing": [
+     "12",
+     "2025"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: February 12, 2025",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.16,
+    "ITEM 1",
+    30149,
+    35045
+   ],
+   [
+    1.04,
+    "ITEM 2",
+    30563,
+    31770
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    1227,
+    1227
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 52,
+  "tables_flagged": 16,
+  "missing_material": 16,
+  "missing_minor": 1,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 10,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 11,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 13,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 14,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 15,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 39,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.07,
+    "ITEM 1",
+    35409,
+    37954
+   ],
+   [
+    1.06,
+    "ITEM 2",
+    33988,
+    36092
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    1894,
+    1894
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 53,
+  "tables_flagged": 2,
+  "missing_material": 3,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 54,
+    "missing": [
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Six months ended June 30,"
+    ]
+   },
+   {
+    "table": 56,
+    "missing": [
+     "2025",
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: July\u00a031, 2025",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.1,
+    "ITEM 2",
+    34328,
+    37659
+   ],
+   [
+    1.07,
+    "ITEM 1",
+    36798,
+    39263
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    1801,
+    1801
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 53,
+  "tables_flagged": 2,
+  "missing_material": 3,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 54,
+    "missing": [
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Nine months ended September 30,"
+    ]
+   },
+   {
+    "table": 56,
+    "missing": [
+     "2025",
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: October\u00a030, 2025",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022",
+  "form": "10-K",
+  "sections": 23,
+  "chunk_ratio_top": [
+   [
+    1.07,
+    "ITEM 7",
+    36049,
+    38403
+   ],
+   [
+    1.03,
+    "ITEM 8",
+    75049,
+    77031
+   ],
+   [
+    1.01,
+    "ITEM 16",
+    1949,
+    1964
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 68,
+  "tables_flagged": 2,
+  "missing_material": 2,
+  "missing_minor": 1,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 36,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Year ended December 31,"
+    ]
+   },
+   {
+    "table": 70,
+    "missing": [
+     "2026",
+     "5"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: February 5, 2026",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.09,
+    "ITEM 1",
+    30643,
+    33475
+   ],
+   [
+    1.07,
+    "ITEM 2",
+    33440,
+    35866
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    798,
+    798
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 51,
+  "tables_flagged": 5,
+  "missing_material": 6,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 11,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 45,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 47,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 51,
+    "missing": [
+     "31"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Three months ended March 31,"
+    ]
+   },
+   {
+    "table": 54,
+    "missing": [
+     "2026",
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: April\u00a030, 2026",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ },
+ {
+  "doc": "RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100",
+  "form": "10-Q",
+  "sections": 11,
+  "chunk_ratio_top": [
+   [
+    1.06,
+    "ITEM 1",
+    33479,
+    35550
+   ],
+   [
+    1.03,
+    "ITEM 2",
+    35288,
+    36294
+   ],
+   [
+    1.0,
+    "ITEM 5",
+    930,
+    930
+   ]
+  ],
+  "sections_over_1_5x": 0,
+  "strict": "pass",
+  "tables_checked": 52,
+  "tables_flagged": 2,
+  "missing_material": 3,
+  "missing_minor": 0,
+  "order_diffs": 0,
+  "examples": [
+   {
+    "table": 52,
+    "missing": [
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Six months ended June 30,"
+    ]
+   },
+   {
+    "table": 55,
+    "missing": [
+     "2026",
+     "30"
+    ],
+    "mapped": true,
+    "source_row": [
+     "Dated: July\u00a030, 2026",
+     "By:",
+     "/s/ Andrew Vollero"
+    ]
+   }
+  ]
+ }
+]
