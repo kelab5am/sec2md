@@ -1,0 +1,1722 @@
+{
+  "sec2md": "C:\\Users\\einstein\\kelab5am\\sec2md\\src\\sec2md\\__init__.py",
+  "openpyxl": "3.1.5",
+  "dry_run": false,
+  "reextract": false,
+  "counts": {
+    "review": 15,
+    "created": 3
+  },
+  "results": [
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-45jhkpqyj3ilctlu.htm",
+      "sha256": "e33edb5e1670d0e174bf66bcdac1a1cc8bc407a11f104667f62444bfb630f024",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-ascogzvebus2zfam.html",
+      "sha256": "88c60b18c305b48ebeee1d62150594f6adf65b87617c7233155e6f9b2d1a89c3",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-azmh6rygwndyedcs.htm",
+      "sha256": "550ef74ae19509e7a55b04988a20225fc9b64d99dd9fd8527422e0e61d2a6364",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-cruju3gdz3qhropu.htm",
+      "sha256": "7dd971826bb490c89aacd26bb9c9131b4b21f038254ba2babaaa1c6cd636f487",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-pwy6yd25sct2mn27.htm",
+      "sha256": "88b8c465b881a3169e014d314e2700186e7d98acfc94a72ec17991c6e0239ddf",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-qeqjnl5gzlcl76co.htm",
+      "sha256": "905f2c0c40e5d6316c95d393629ab4cf9cf636f4bdb8a8d997a2e6b92655ff94",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.assets\\a-wpd2bbtxnokoo4lh.htm",
+      "sha256": "435bdbf843400a44c4de311df517c87bfa8965d749eba8454812fb5237cbea67",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm",
+      "sha256": "b74ba19ffac9a748552804d74ff9a0da1967f2a3016e772b11c7a0ccdb2780ae",
+      "form": "10-Q",
+      "workbook": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.xlsx",
+      "status": "created",
+      "quality": "needs_review",
+      "tables": 50,
+      "table_statuses": {
+        "needs_review": 14,
+        "exported": 7,
+        "source_text_only": 29
+      },
+      "review_tables": [
+        {
+          "sheet": "001_p001_Table 1",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 3: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 3: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "002_p001_Table 2",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "003_p002_Table 3",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "004_p003_Table 4",
+          "status": "needs_review",
+          "issues": [
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1341",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1099511629125",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_7",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_13",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_19",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_22",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_25",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_28",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_31",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_34",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_100",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_148",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_151",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_154",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_157",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_160",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_181",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_184",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_187",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_190",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_193",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_196",
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 2, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 3, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 5, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 6, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 7, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 8, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 9, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 10, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 11, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 12, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 13, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 14, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 16, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 17, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 18, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 19, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 20, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 21, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 22, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion."
+          ]
+        },
+        {
+          "sheet": "006_p008_Table 6",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "007_p009_Table 7",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "008_p010_Table 8",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 42); review column alignment."
+          ]
+        },
+        {
+          "sheet": "009_p011_Table 9",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "010_p014_Table 10",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "011_p014_Table 11",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "012_p015_Table 12",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (7, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "013_p015_Table 13",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (7, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "016_p016_Table 16",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (7, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "017_p017_Table 17",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (6, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "021_p018_Table 21",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "022_p018_Table 22",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "024_p021_Table 24",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "025_p021_Table 25",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "026_p022_Table 26",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "027_p024_Table 27",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "028_p024_Table 28",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 3: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "029_p025_Table 29",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "030_p027_Table 30",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 12: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 24: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "031_p027_Table 31",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 12: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 24: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 42: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 54: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "032_p028_Table 32",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "033_p028_Table 33",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "034_p028_Table 34",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "035_p029_Table 35",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "036_p029_Table 36",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "037_p031_Table 37",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "038_p031_Table 38",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "039_p032_Table 39",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "040_p032_Table 40",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "041_p032_Table 41",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "042_p032_Table 42",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "043_p032_Table 43",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "044_p033_Table 44",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "045_p033_Table 45",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "046_p034_Table 46",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "047_p080_Table 47",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 2, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 2, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 2, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 18: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "048_p086_Table 48",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 3, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 5, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 9, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 10, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 10, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 10, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 10, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 11, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 11, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 11, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 11, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 12, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 12, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 12, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 12, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 13, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 13, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 13, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 13, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 14, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 14, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 14, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 14, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 15, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 15, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 15, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 15, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 16, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 16, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 16, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 17, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 17, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 17, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 18, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 18, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 18, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 19, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 19, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 19, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 20, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 20, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 20, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 21, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 21, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 21, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 22, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 22, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 22, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 23, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 23, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 23, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 24, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 25, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 26, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 27, column 6: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "049_p087_Table 49",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 2, column 6: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "050_p088_Table 50",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        }
+      ],
+      "diagnostics": [
+        "Table 1: No explicit headers; positional column names generated and every source row retained.",
+        "Table 1: Source row 1, column 3: Numeric role unresolved; verify the column heading and units.",
+        "Table 1: Source row 4, column 3: Numeric role unresolved; verify the column heading and units.",
+        "Table 2: No explicit headers; positional column names generated and every source row retained.",
+        "Table 3: No explicit headers; positional column names generated and every source row retained.",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1341",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1099511629125",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_7",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_13",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_19",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_22",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_25",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_28",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_31",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_34",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_100",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_148",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_151",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_154",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_157",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_160",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_181",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_184",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_187",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_190",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_193",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_196",
+        "Table 4: No explicit headers; positional column names generated and every source row retained.",
+        "Table 4: Source row 2, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 3, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 5, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 6, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 7, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 8, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 9, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 10, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 11, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 12, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 13, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 14, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 16, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 17, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 18, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 19, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 20, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 21, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 22, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 6: Unresolved value span at (2, 3); review column alignment.",
+        "Table 7: Unresolved value span at (2, 3); review column alignment.",
+        "Table 8: Unresolved value span at (5, 42); review column alignment.",
+        "Table 9: Unresolved value span at (2, 3); review column alignment.",
+        "Table 10: Unresolved value span at (2, 3); review column alignment.",
+        "Table 11: Unresolved value span at (2, 3); review column alignment.",
+        "Table 12: Unresolved value span at (7, 3); review column alignment.",
+        "Table 13: Unresolved value span at (7, 3); review column alignment.",
+        "Table 16: Unresolved value span at (7, 9); review column alignment.",
+        "Table 17: Unresolved value span at (6, 9); review column alignment.",
+        "Table 21: Unresolved value span at (5, 3); review column alignment.",
+        "Table 22: Unresolved value span at (5, 3); review column alignment.",
+        "Table 24: No explicit headers; positional column names generated and every source row retained.",
+        "Table 25: Unresolved value span at (5, 9); review column alignment.",
+        "Table 26: Unresolved value span at (2, 3); review column alignment.",
+        "Table 27: No explicit headers; positional column names generated and every source row retained.",
+        "Table 28: No explicit headers; positional column names generated and every source row retained.",
+        "Table 28: Source row 1, column 3: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 29: No explicit headers; positional column names generated and every source row retained.",
+        "Table 30: No explicit headers; positional column names generated and every source row retained.",
+        "Table 30: Source row 1, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 30: Source row 2, column 12: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 30: Source row 2, column 24: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: No explicit headers; positional column names generated and every source row retained.",
+        "Table 31: Source row 1, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 12: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 24: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 42: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 54: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 32: Unresolved value span at (2, 3); review column alignment.",
+        "Table 33: Unresolved value span at (2, 3); review column alignment.",
+        "Table 34: Unresolved value span at (2, 3); review column alignment.",
+        "Table 35: Unresolved value span at (2, 3); review column alignment.",
+        "Table 36: Unresolved value span at (2, 3); review column alignment.",
+        "Table 37: Unresolved value span at (2, 3); review column alignment.",
+        "Table 38: Unresolved value span at (2, 3); review column alignment.",
+        "Table 39: Unresolved value span at (2, 3); review column alignment.",
+        "Table 40: Unresolved value span at (2, 3); review column alignment.",
+        "Table 41: Unresolved value span at (2, 3); review column alignment.",
+        "Table 42: Unresolved value span at (2, 3); review column alignment.",
+        "Table 43: Unresolved value span at (2, 3); review column alignment.",
+        "Table 44: Unresolved value span at (2, 3); review column alignment.",
+        "Table 45: Unresolved value span at (2, 3); review column alignment.",
+        "Table 46: Unresolved value span at (2, 3); review column alignment.",
+        "Table 47: No explicit headers; positional column names generated and every source row retained.",
+        "Table 47: Source row 1, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 2, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 2, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 2, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 3, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: No explicit headers; positional column names generated and every source row retained.",
+        "Table 48: Source row 3, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 3, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 4, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 4, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 4, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 5, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 6, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 6, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 6, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 7, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 7, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 7, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 8, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 8, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 8, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 8, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 9, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 10, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 10, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 10, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 10, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 11, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 11, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 11, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 11, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 12, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 12, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 12, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 12, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 13, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 13, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 13, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 13, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 14, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 14, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 14, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 14, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 15, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 15, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 15, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 15, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 16, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 16, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 16, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 17, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 17, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 17, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 18, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 18, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 18, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 19, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 19, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 19, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 20, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 20, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 20, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 21, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 21, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 21, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 22, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 22, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 22, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 23, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 23, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 23, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 24, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 25, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 26, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: Source row 27, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 49: No explicit headers; positional column names generated and every source row retained.",
+        "Table 49: Source row 2, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 50: No explicit headers; positional column names generated and every source row retained."
+      ]
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.assets\\a-2hcntojlf3giqwqa.htm",
+      "sha256": "b87895930725d258f1f11a6dc23b7211a5aad403e7b47d57e7be64a6c14b2348",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.assets\\a-aw45edaatlwrpkm4.html",
+      "sha256": "ce1afbd84ce9f2e1a0352b6f5e3d39c43bc6dcbee47a78c24d286490e17e05b9",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.assets\\a-cg3zdrxbkafm7ss4.htm",
+      "sha256": "a0099305c6df1cfe16adc87cd5e7e7698cc546fc465fd90efad282633c2c7530",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.assets\\a-mhtbkiru526wjfla.htm",
+      "sha256": "b4d4c7708ea12b98b0f459d7ba81dd59d1d7eaede82e1a927528fb458c88ff0d",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+      "sha256": "fe784425e526c51b2827c40f5bf2b8816c966514305ae8d9ba63acfa94b68ff1",
+      "form": "10-Q",
+      "workbook": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.xlsx",
+      "status": "created",
+      "quality": "needs_review",
+      "tables": 48,
+      "table_statuses": {
+        "needs_review": 13,
+        "exported": 7,
+        "source_text_only": 28
+      },
+      "review_tables": [
+        {
+          "sheet": "001_p001_Table 1",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 3: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 3: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "002_p001_Table 2",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "003_p002_Table 3",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "004_p003_Table 4",
+          "status": "needs_review",
+          "issues": [
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1341",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1099511629125",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_7",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_13",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_19",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_22",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_25",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_28",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_31",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_34",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_100",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_148",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_151",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_154",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_157",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_160",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_181",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_184",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_187",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_190",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_193",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_196",
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 2, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 3, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 5, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 6, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 7, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 8, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 9, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 10, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 11, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 12, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 13, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 14, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 16, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 17, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 18, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 19, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 20, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 21, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 22, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion."
+          ]
+        },
+        {
+          "sheet": "006_p008_Table 6",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "007_p009_Table 7",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "008_p010_Table 8",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 3: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 14, column 3: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "009_p011_Table 9",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (6, 42); review column alignment."
+          ]
+        },
+        {
+          "sheet": "010_p012_Table 10",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "011_p015_Table 11",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "012_p015_Table 12",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "013_p016_Table 13",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "016_p017_Table 16",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (7, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "017_p018_Table 17",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (6, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "021_p019_Table 21",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "022_p019_Table 22",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "024_p022_Table 24",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "025_p022_Table 25",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "026_p023_Table 26",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "027_p025_Table 27",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "028_p025_Table 28",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "029_p026_Table 29",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "030_p028_Table 30",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 9: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 21: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "031_p028_Table 31",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 1, column 24: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 9: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 39: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 51: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "032_p029_Table 32",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "033_p029_Table 33",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "034_p029_Table 34",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "035_p030_Table 35",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "036_p030_Table 36",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "037_p032_Table 37",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "038_p032_Table 38",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "039_p033_Table 39",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "040_p033_Table 40",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "041_p033_Table 41",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "042_p033_Table 42",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "043_p034_Table 43",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "044_p034_Table 44",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "045_p034_Table 45",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "046_p035_Table 46",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "047_p085_Table 47",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 3, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 5, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 9, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 10, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 11, column 6: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "048_p086_Table 48",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        }
+      ],
+      "diagnostics": [
+        "Table 1: No explicit headers; positional column names generated and every source row retained.",
+        "Table 1: Source row 1, column 3: Numeric role unresolved; verify the column heading and units.",
+        "Table 1: Source row 4, column 3: Numeric role unresolved; verify the column heading and units.",
+        "Table 2: No explicit headers; positional column names generated and every source row retained.",
+        "Table 3: No explicit headers; positional column names generated and every source row retained.",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1341",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1099511629125",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_7",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_13",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_19",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_22",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_25",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_28",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_31",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_34",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_100",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_148",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_151",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_154",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_157",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_160",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_181",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_184",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_187",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_190",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_193",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_196",
+        "Table 4: No explicit headers; positional column names generated and every source row retained.",
+        "Table 4: Source row 2, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 3, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 5, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 6, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 7, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 8, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 9, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 10, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 11, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 12, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 13, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 14, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 16, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 17, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 18, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 19, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 20, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 21, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 22, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 6: Unresolved value span at (2, 3); review column alignment.",
+        "Table 7: Unresolved value span at (2, 3); review column alignment.",
+        "Table 8: No explicit headers; positional column names generated and every source row retained.",
+        "Table 8: Source row 1, column 3: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 8: Source row 14, column 3: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 9: Unresolved value span at (6, 42); review column alignment.",
+        "Table 10: Unresolved value span at (2, 3); review column alignment.",
+        "Table 11: Unresolved value span at (2, 3); review column alignment.",
+        "Table 12: Unresolved value span at (2, 3); review column alignment.",
+        "Table 13: Unresolved value span at (2, 3); review column alignment.",
+        "Table 16: Unresolved value span at (7, 9); review column alignment.",
+        "Table 17: Unresolved value span at (6, 9); review column alignment.",
+        "Table 21: Unresolved value span at (5, 3); review column alignment.",
+        "Table 22: Unresolved value span at (5, 3); review column alignment.",
+        "Table 24: No explicit headers; positional column names generated and every source row retained.",
+        "Table 25: Unresolved value span at (5, 9); review column alignment.",
+        "Table 26: Unresolved value span at (2, 3); review column alignment.",
+        "Table 27: No explicit headers; positional column names generated and every source row retained.",
+        "Table 28: No explicit headers; positional column names generated and every source row retained.",
+        "Table 29: No explicit headers; positional column names generated and every source row retained.",
+        "Table 30: No explicit headers; positional column names generated and every source row retained.",
+        "Table 30: Source row 1, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 30: Source row 2, column 9: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 30: Source row 2, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: No explicit headers; positional column names generated and every source row retained.",
+        "Table 31: Source row 1, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 1, column 24: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 9: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 39: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 51: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 32: Unresolved value span at (2, 3); review column alignment.",
+        "Table 33: Unresolved value span at (2, 3); review column alignment.",
+        "Table 34: Unresolved value span at (2, 3); review column alignment.",
+        "Table 35: Unresolved value span at (2, 3); review column alignment.",
+        "Table 36: Unresolved value span at (2, 3); review column alignment.",
+        "Table 37: Unresolved value span at (2, 3); review column alignment.",
+        "Table 38: Unresolved value span at (2, 3); review column alignment.",
+        "Table 39: Unresolved value span at (2, 3); review column alignment.",
+        "Table 40: Unresolved value span at (2, 3); review column alignment.",
+        "Table 41: Unresolved value span at (2, 3); review column alignment.",
+        "Table 42: Unresolved value span at (2, 3); review column alignment.",
+        "Table 43: Unresolved value span at (2, 3); review column alignment.",
+        "Table 44: Unresolved value span at (2, 3); review column alignment.",
+        "Table 45: Unresolved value span at (2, 3); review column alignment.",
+        "Table 46: Unresolved value span at (2, 3); review column alignment.",
+        "Table 47: No explicit headers; positional column names generated and every source row retained.",
+        "Table 47: Source row 3, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 3, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 4, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 4, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 4, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 5, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 6, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 6, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 6, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 7, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 7, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 7, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 9, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 10, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 11, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: No explicit headers; positional column names generated and every source row retained."
+      ]
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.assets\\a-73nl2miaxoagw336.htm",
+      "sha256": "fafefa6b617ce5a7b999dc93b4f9d80353b5d8788d3eb15f828b4f6f0d1bc9b7",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.assets\\a-agwbft6zgtsjfsed.html",
+      "sha256": "83902766eefb914379efb2ef92c03f63da3981ffef67540fc97eb8b2b13829e9",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.assets\\a-daf4mqqp72ltplb5.htm",
+      "sha256": "ceed26f9c9ef897ff1882377bf96c36d7e97c6f3c5267888d7f6153e5a9193d5",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.assets\\a-yxyu47e2bavdwbts.htm",
+      "sha256": "aea57f55a7b1a6edcf0a9ce426eeaad823da094b4638990f5481dc12ceadf7b9",
+      "status": "review",
+      "reason": "Missing or conflicting inline XBRL DEI DocumentType; not exported"
+    },
+    {
+      "source": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm",
+      "sha256": "f5f60584f6de2d1058f9cd91304cf8c7fb41e19e80241d6a6a6780af98d36b0b",
+      "form": "10-Q",
+      "workbook": "E:\\RCQWealth\\RDDT\\Originals\\SEC\\2024\\RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.xlsx",
+      "status": "created",
+      "quality": "needs_review",
+      "tables": 48,
+      "table_statuses": {
+        "needs_review": 12,
+        "exported": 5,
+        "source_text_only": 31
+      },
+      "review_tables": [
+        {
+          "sheet": "001_p001_Table 1",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 3: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 3: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "002_p001_Table 2",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "003_p002_Table 3",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "004_p003_Table 4",
+          "status": "needs_review",
+          "issues": [
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1341",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1099511629125",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_7",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_13",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_19",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_22",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_25",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_28",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_31",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_34",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_100",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_148",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_151",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_154",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_157",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_160",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_181",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_184",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_187",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_190",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_193",
+            "Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_196",
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 2, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 3, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 5, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 6, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 7, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 8, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 9, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 10, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 11, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 12, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 13, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 14, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 16, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 17, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 18, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 19, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 20, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 21, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+            "Source row 22, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion."
+          ]
+        },
+        {
+          "sheet": "006_p008_Table 6",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "007_p009_Table 7",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "008_p010_Table 8",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (6, 42); review column alignment."
+          ]
+        },
+        {
+          "sheet": "009_p011_Table 9",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (6, 42); review column alignment."
+          ]
+        },
+        {
+          "sheet": "010_p012_Table 10",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "011_p015_Table 11",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "012_p015_Table 12",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "013_p016_Table 13",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "014_p017_Table 14",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "015_p017_Table 15",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (7, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "016_p018_Table 16",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (6, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "020_p019_Table 20",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (4, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "021_p019_Table 21",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "022_p020_Table 22",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "024_p022_Table 24",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "025_p022_Table 25",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (5, 9); review column alignment."
+          ]
+        },
+        {
+          "sheet": "026_p023_Table 26",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "027_p025_Table 27",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "028_p025_Table 28",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "029_p026_Table 29",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        },
+        {
+          "sheet": "030_p028_Table 30",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 15: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 6: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 18: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "031_p028_Table 31",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 1, column 15: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 1, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 6: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 36: Not a complete supported US numeric token; verify the source value and markers.",
+            "Source row 2, column 48: Not a complete supported US numeric token; verify the source value and markers."
+          ]
+        },
+        {
+          "sheet": "032_p029_Table 32",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "033_p029_Table 33",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "034_p029_Table 34",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "035_p030_Table 35",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "036_p030_Table 36",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "037_p032_Table 37",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "038_p032_Table 38",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "039_p033_Table 39",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "040_p033_Table 40",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "041_p033_Table 41",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "042_p033_Table 42",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "043_p034_Table 43",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "044_p034_Table 44",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "045_p034_Table 45",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "046_p035_Table 46",
+          "status": "source_text_only",
+          "issues": [
+            "Unresolved value span at (2, 3); review column alignment."
+          ]
+        },
+        {
+          "sheet": "047_p084_Table 47",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained.",
+            "Source row 3, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 3, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 4, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 5, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 6, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 7, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 12: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 18: Numeric role unresolved; verify the column heading and units.",
+            "Source row 8, column 24: Numeric role unresolved; verify the column heading and units.",
+            "Source row 9, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 10, column 6: Numeric role unresolved; verify the column heading and units.",
+            "Source row 11, column 6: Numeric role unresolved; verify the column heading and units."
+          ]
+        },
+        {
+          "sheet": "048_p085_Table 48",
+          "status": "needs_review",
+          "issues": [
+            "No explicit headers; positional column names generated and every source row retained."
+          ]
+        }
+      ],
+      "diagnostics": [
+        "Table 1: No explicit headers; positional column names generated and every source row retained.",
+        "Table 1: Source row 1, column 3: Numeric role unresolved; verify the column heading and units.",
+        "Table 1: Source row 4, column 3: Numeric role unresolved; verify the column heading and units.",
+        "Table 2: No explicit headers; positional column names generated and every source row retained.",
+        "Table 3: No explicit headers; positional column names generated and every source row retained.",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1341",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_1099511629125",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_7",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_13",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_19",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_22",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_25",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_28",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_31",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_34",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_100",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_148",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_151",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_154",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_157",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_160",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_181",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_184",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_187",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_190",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_193",
+        "Table 4: Unresolved or ambiguous note target: #i57d391c0f56146dea8046dfb4a2f453f_196",
+        "Table 4: No explicit headers; positional column names generated and every source row retained.",
+        "Table 4: Source row 2, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 3, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 5, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 6, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 7, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 8, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 9, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 10, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 11, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 12, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 13, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 14, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 16, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 17, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 18, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 19, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 20, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 21, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 4: Source row 22, column 3: Numeric footnote marker retained; verify the source amount and marker before conversion.",
+        "Table 6: Unresolved value span at (2, 3); review column alignment.",
+        "Table 7: Unresolved value span at (2, 3); review column alignment.",
+        "Table 8: Unresolved value span at (6, 42); review column alignment.",
+        "Table 9: Unresolved value span at (6, 42); review column alignment.",
+        "Table 10: Unresolved value span at (2, 3); review column alignment.",
+        "Table 11: Unresolved value span at (2, 3); review column alignment.",
+        "Table 12: Unresolved value span at (2, 3); review column alignment.",
+        "Table 13: Unresolved value span at (2, 3); review column alignment.",
+        "Table 14: Unresolved value span at (2, 3); review column alignment.",
+        "Table 15: Unresolved value span at (7, 9); review column alignment.",
+        "Table 16: Unresolved value span at (6, 9); review column alignment.",
+        "Table 20: Unresolved value span at (4, 3); review column alignment.",
+        "Table 21: Unresolved value span at (5, 3); review column alignment.",
+        "Table 22: Unresolved value span at (5, 3); review column alignment.",
+        "Table 24: No explicit headers; positional column names generated and every source row retained.",
+        "Table 25: Unresolved value span at (5, 9); review column alignment.",
+        "Table 26: Unresolved value span at (2, 3); review column alignment.",
+        "Table 27: No explicit headers; positional column names generated and every source row retained.",
+        "Table 28: No explicit headers; positional column names generated and every source row retained.",
+        "Table 29: No explicit headers; positional column names generated and every source row retained.",
+        "Table 30: No explicit headers; positional column names generated and every source row retained.",
+        "Table 30: Source row 1, column 15: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 30: Source row 2, column 6: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 30: Source row 2, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: No explicit headers; positional column names generated and every source row retained.",
+        "Table 31: Source row 1, column 15: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 1, column 21: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 6: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 18: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 36: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 31: Source row 2, column 48: Not a complete supported US numeric token; verify the source value and markers.",
+        "Table 32: Unresolved value span at (2, 3); review column alignment.",
+        "Table 33: Unresolved value span at (2, 3); review column alignment.",
+        "Table 34: Unresolved value span at (2, 3); review column alignment.",
+        "Table 35: Unresolved value span at (2, 3); review column alignment.",
+        "Table 36: Unresolved value span at (2, 3); review column alignment.",
+        "Table 37: Unresolved value span at (2, 3); review column alignment.",
+        "Table 38: Unresolved value span at (2, 3); review column alignment.",
+        "Table 39: Unresolved value span at (2, 3); review column alignment.",
+        "Table 40: Unresolved value span at (2, 3); review column alignment.",
+        "Table 41: Unresolved value span at (2, 3); review column alignment.",
+        "Table 42: Unresolved value span at (2, 3); review column alignment.",
+        "Table 43: Unresolved value span at (2, 3); review column alignment.",
+        "Table 44: Unresolved value span at (2, 3); review column alignment.",
+        "Table 45: Unresolved value span at (2, 3); review column alignment.",
+        "Table 46: Unresolved value span at (2, 3); review column alignment.",
+        "Table 47: No explicit headers; positional column names generated and every source row retained.",
+        "Table 47: Source row 3, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 3, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 3, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 4, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 4, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 4, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 5, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 6, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 6, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 6, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 7, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 7, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 7, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 12: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 18: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 8, column 24: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 9, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 10, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 47: Source row 11, column 6: Numeric role unresolved; verify the column heading and units.",
+        "Table 48: No explicit headers; positional column names generated and every source row retained."
+      ]
+    }
+  ]
+}
