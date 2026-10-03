@@ -240,3 +240,39 @@ class TestParseFiling:
         pages = parse_filing(html, include_elements=False)
         assert isinstance(pages, list)
         assert pages[0].elements is None
+
+
+TABLE_HTML = ("<p>Results for the year.</p><table><tr><th>Item</th><th>2026</th></tr>"
+              "<tr><td>Revenue</td><td>9,943</td></tr><tr><td>Cost</td><td>1,200</td></tr></table>")
+
+
+def test_convert_with_diagnostics_returns_the_same_output_and_its_diagnostics():
+    from sec2md import convert_with_diagnostics
+
+    markdown, diagnostics = convert_with_diagnostics(TABLE_HTML)
+    assert markdown == convert_to_markdown(TABLE_HTML)
+    assert diagnostics.tables_checked == 1
+    assert diagnostics.table_completeness_failures == ()
+    assert diagnostics.numeric_recall == 1.0
+
+
+def test_convert_with_diagnostics_returns_pages():
+    from sec2md import convert_with_diagnostics
+
+    pages, diagnostics = convert_with_diagnostics(TABLE_HTML, return_pages=True)
+    expected = convert_to_markdown(TABLE_HTML, return_pages=True)
+    assert [page.content for page in pages] == [page.content for page in expected]
+    assert diagnostics.pages == len(pages)
+
+
+def test_convert_with_diagnostics_validates_policy_like_convert_to_markdown():
+    from sec2md import convert_with_diagnostics
+
+    with pytest.raises(ValueError):
+        convert_with_diagnostics(TABLE_HTML, quality_policy="strictish")
+
+
+def test_convert_with_diagnostics_is_public():
+    import sec2md
+
+    assert "convert_with_diagnostics" in sec2md.__all__
