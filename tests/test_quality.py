@@ -278,3 +278,16 @@ def test_invalid_quality_policy_is_rejected_before_fetching(monkeypatch, functio
             user_agent="Test User test@example.com",
             quality_policy="STRICT",
         )
+
+
+# --- table completeness: normalizer, diagnostics fields, recall and logging --------------
+
+def test_normalize_numeric_token_strips_euro_and_pound():
+    assert normalize_numeric_token("€123") == "123"
+    assert normalize_numeric_token("£ (456)") == "-456"
+
+
+def test_normalized_numbers_reads_euro_and_pound_values():
+    from sec2md.quality import _normalized_numbers
+
+    assert _normalized_numbers("€1,234 and £5") == ("1234", "5")

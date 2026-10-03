@@ -30,6 +30,9 @@ _TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?
 # "1. " markers the parser generates for <ol> items; they have no source text.
 _ORDERED_LIST_MARKER_RE = re.compile(r"(?m)^[ \t]*\d+\.(?=[ \t])")
 _QUALITY_POLICIES = frozenset({"strict", "warn", "off"})
+_MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+_NUMBER_TOKEN_RE = re.compile(r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)")
+_CURRENCY_SYMBOLS = str.maketrans({"$": None, "\u20ac": None, "\u00a3": None})
 
 
 def normalize_numeric_token(value: str) -> str | None:
@@ -46,7 +49,7 @@ def normalize_numeric_token(value: str) -> str | None:
     if emphasis:
         cleaned = emphasis.group("body").strip()
 
-    cleaned = cleaned.replace(",", "").replace("$", "").replace("%", "").strip()
+    cleaned = cleaned.translate(_CURRENCY_SYMBOLS).replace(",", "").replace("%", "").strip()
     accounting = cleaned.startswith("(") and cleaned.endswith(")")
     if cleaned.startswith("(") != cleaned.endswith(")"):
         return None
@@ -61,10 +64,9 @@ def normalize_numeric_token(value: str) -> str | None:
 def _normalized_numbers(text: str) -> tuple[str, ...]:
     """Extract normalized numeric tokens in source order."""
 
-    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
+    text = _MARKDOWN_IMAGE_RE.sub("", text)
     normalized: list[str] = []
-    pattern = r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)"
-    for match in re.finditer(pattern, text):
+    for match in _NUMBER_TOKEN_RE.finditer(text):
         token = normalize_numeric_token(match.group(0))
         if token is not None:
             normalized.append(token)
