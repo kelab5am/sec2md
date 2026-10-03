@@ -188,3 +188,91 @@ def cell_text(cell: Tag, hidden: set[int]) -> tuple[str, str]:
     value = _SPACES.sub(" ", "".join(" " if m else t for t, m in pieces)).strip()
     marks = _SPACES.sub(" ", " ".join(t for t, m in pieces if m)).strip()
     return value, marks
+
+
+# --- classes and positions -----------------------------------------------------------
+
+def _value_kind(text: str) -> str:
+    return "value_text" if _LETTER.search(text) else "value_numeric"
+
+
+def classify_cell(text: str, signature_row: bool = False) -> list[tuple[str, str]]:
+    """(token, kind) for one source cell, in left-to-right order."""
+    if _SIGNATURE_CELL.search(text) or (signature_row and _DATE_CELL.match(text)):
+        return [(t, "reference") for t in numbers(text)]
+    kind = _value_kind(text)
+    tokens, last = [], 0
+    for m in _IDENTIFIER.finditer(text):
+        tokens += [(t, kind) for t in numbers(text[last:m.start()])]
+        tokens += [(t, "reference") for t in numbers(m.group(0))]
+        last = m.end()
+    return tokens + [(t, kind) for t in numbers(text[last:])]
+
+
+def label_key(text: str) -> str:
+    """Letters of a row label plus its identifier numbers ("Note 1" -> "note#1")."""
+    identifiers = [t for m in _IDENTIFIER.finditer(text) for t in numbers(m.group(0))]
+    letters = _NOT_LETTER.sub("", text.lower())
+    return letters + ("#" + ",".join(identifiers) if identifiers else "")
+
+
+def is_period_row(cells: list[str], before_header_end: bool) -> bool:
+    """Header or period row, decided by context, never by the shape of its numbers."""
+    if before_header_end:
+        return True
+    texts = [c for c in cells if c]
+    if not texts or not all(_PERIOD_TEXT.search(c) or _BARE_YEAR.match(c) for c in texts):
+        return False
+    return any(_PERIOD_TEXT.search(c) for c in texts) or all(_BARE_YEAR.match(c) for c in texts)
+
+
+def is_data_row(cells: list[str], before_header_end: bool) -> bool:
+    return not is_period_row(cells, before_header_end) and any(_STANDALONE_AMOUNT.match(c) for c in cells)
+
+
+def _output_cell_positions(cell: str, signature_row: bool) -> list[tuple[str, str]]:
+    if _SIGNATURE_CELL.search(cell) or (signature_row and _DATE_CELL.match(cell.strip())):
+        return [(t, "reference") for t in numbers(cell)]
+    position = "text_cell" if _LETTER.search(cell) else "numeric_cell"
+    occurrences = [(t, "reference") for m in _IDENTIFIER.finditer(cell) for t in numbers(m.group(0))]
+    cell = _IDENTIFIER.sub(" ", cell)
+    suffix = _MARKER_SUFFIX.search(cell)
+    # A trailing "(1)" is a marker only when a number remains ("1,234 (1)"); "$ (96)" is a negative.
+    if suffix and _DIGIT.search(cell, 0, suffix.start()):
+        core, tail = cell[:suffix.start()], cell[suffix.start():]
+    else:
+        core, tail = cell, ""
+    occurrences += [(t, position) for t in numbers(core)]
+    occurrences += [(t, "text_cell") for t in numbers(tail.replace("(", " (").replace(")", ") "))]
+    return occurrences
+
+
+def output_positions(segment: str, exhibit_index: bool) -> tuple[list[tuple[str, Counter]], Counter]:
+    """(body lines as (label key, positioned tokens), header-line and text-rendering tokens)."""
+    lines = segment.split("\n")
+    separator = next((i for i, line in enumerate(lines) if is_separator_row(line)), None)
+    body, other = [], Counter()
+    for i, line in enumerate(lines):
+        if separator is None:
+            last = 0
+            for m in _IDENTIFIER.finditer(line):
+                other.update((t, "text_rendering") for t in numbers(line[last:m.start()]))
+                other.update((t, "reference") for t in numbers(m.group(0)))
+                last = m.end()
+            other.update((t, "text_rendering") for t in numbers(line[last:]))
+            continue
+        if i == separator:
+            continue
+        cells = merge_split_negatives(line.split("|"))
+        if i < separator:
+            other.update((t, "header_line") for cell in cells for t in numbers(cell))
+            continue
+        signature_row = any(_SIGNATURE_ROW_MARK.search(c) for c in cells)
+        found: Counter = Counter()
+        for cell in cells:
+            if exhibit_index:
+                found.update((t, "reference") for t in numbers(cell))
+            else:
+                found.update(_output_cell_positions(cell, signature_row))
+        body.append((label_key(cells[0]) if cells else "", found))
+    return body, other
