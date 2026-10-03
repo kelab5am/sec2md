@@ -231,3 +231,110 @@ def test_header_row_count_matches_snapshots_on_a_fixture():
         assert header_row_count(table, unit_rows(table), grid_hidden) == snapshot_header_rows(table)
         checked += 1
     assert checked > 50
+
+
+# --- task 5: matching, row structure and the report --------------------------------------
+
+from sec2md.table_completeness import (  # noqa: E402
+    TableCompletenessReport,
+    TableFinding,
+    check_tables,
+    match_occurrences,
+    row_structure,
+)
+
+
+def occurrences(*items):
+    return Counter({item: 1 for item in items})
+
+
+def test_match_occurrences_claims_within_proven_row_pairs():
+    rows = [("impairment", occurrences(("9", "value_numeric", "body"))),
+            ("footnote", occurrences(("9", "standalone_marker", "body")))]
+    body = [("impairment", Counter()), ("footnote", Counter({("9", "numeric_cell"): 1}))]
+    values, reported = match_occurrences(rows, body, Counter())
+    assert values == [("9", "body", False)]
+    assert reported == []
+
+
+def test_match_occurrences_marks_shared_provenance_ambiguous():
+    rows = [("total", occurrences(("9", "value_numeric", "body"))),
+            ("total", occurrences(("9", "standalone_marker", "body")))]
+    body = [("total", Counter({("9", "numeric_cell"): 1}))]
+    values, reported = match_occurrences(rows, body, Counter())
+    assert values == [("9", "body", True)]
+    assert reported == []
+
+
+def test_match_occurrences_reports_lost_references_without_failing():
+    rows = [("noteimpairment#9", occurrences(("9", "reference", "label"), ("9", "value_numeric", "body")))]
+    body = [("impairment", Counter({("9", "numeric_cell"): 1}))]
+    assert match_occurrences(rows, body, Counter()) == ([], [("9", "reference")])
+
+
+SEGMENT = "| Item | 2026 | 2025 |\n| --- | --- | --- |\n| Revenue | 120 | 100 |\n| Cost | 50 | 40 |"
+
+
+@pytest.mark.parametrize("segment, expected", [
+    (SEGMENT, []),
+    (SEGMENT.replace("| 120 | 100 |", "| 100 | 120 |"), ["source row 1: values out of order within the row"]),
+    ("| Item | 2026 | 2025 |\n| --- | --- | --- |\n| Cost | 50 | 40 |\n| Revenue | 120 | 100 |",
+     ["source row 2: appears before an earlier source row"]),
+    (SEGMENT.replace("| 100 |", "| 40 |", 1).replace("| 50 | 40 |", "| 50 | 100 |"),
+     ["source row 1: values present but split across output rows",
+      "source row 2: values present but split across output rows"]),
+    ("Revenue 120 100 Cost 50 40", []),
+])
+def test_row_structure(segment, expected):
+    assert row_structure([("120", "100"), ("50", "40")], segment) == expected
+
+
+def test_finding_messages():
+    finding = TableFinding(2, 1, 3, missing_values=(("9943", "body", False), ("9", "label", True)),
+                           missing_reported=(("1", "reference"),),
+                           structure=("source row 1: values out of order within the row",))
+    assert finding.value_message() == "table 2 (snapshot 1, page 3): missing 9943 x1 [body], 9 x1 [label, ambiguous] (total 2)"
+    assert finding.reported_message() == "table 2 (snapshot 1, page 3): missing 1 x1 [reference] (total 1)"
+    assert finding.structure_messages() == ("table 2 (snapshot 1, page 3): source row 1: values out of order within the row",)
+    assert finding.messages() == ((finding.value_message(), finding.reported_message()) + finding.structure_messages())
+    empty = TableFinding(1, None, None, missing_values=(("12", "body", False),) * 3, produced_output=False)
+    assert empty.value_message() == "table 1 produced no output (3 numbers)"
+    report = TableCompletenessReport(4, (finding, empty))
+    assert report.failures == (finding.value_message(), empty.value_message())
+    assert report.reported == (finding.reported_message(),)
+    assert report.structure == finding.structure_messages()
+
+
+MERGE_LOSS = ("<table><tr><td>2024</td><td>$</td><td>9,943</td></tr>"
+              "<tr><td>2025</td><td></td><td>10,775</td></tr><tr><td>Total</td><td>$</td><td>20,718</td></tr></table>")
+
+
+def test_check_tables_compares_each_table_with_its_own_output():
+    soup = soup_of("<p>Commitments include $9,943 million due in 2024.</p>" + MERGE_LOSS)
+    table = soup.find("table")
+    output = "| 2024 | $ |\n| --- | --- |\n| 2025 | 10,775 |\n| Total | $ 20,718 |"
+    report = check_tables(soup, {id(table): output}, {id(table): 1}, {id(table): 1})
+    assert report.tables_checked == 1
+    assert report.failures == ("table 1 (snapshot 1, page 1): missing 9943 x1 [body] (total 1)",)
+
+
+def test_check_tables_excludes_header_rows_from_row_structure():
+    soup = soup_of("<table><tr><th>Denomination</th><th>€1</th><th>€2</th></tr>"
+                   "<tr><td>Issued</td><td>2</td><td>1</td></tr></table>")
+    table = soup.find("table")
+    output = "| Denomination | €1 | €2 |\n| --- | --- | --- |\n| Issued | 2 | 1 |"
+    report = check_tables(soup, {id(table): output}, {}, {})
+    assert report == TableCompletenessReport(1, ())
+
+
+def test_check_tables_reports_tables_without_output():
+    soup = soup_of(MERGE_LOSS)
+    report = check_tables(soup, {}, {}, {})
+    assert report.failures == ("table 1 produced no output (5 numbers)",)
+
+
+def test_check_tables_skips_hidden_and_token_free_tables():
+    soup = soup_of('<div style="display:none">' + MERGE_LOSS + "</div>"
+                   "<table><tr><td>Name</td><td>Title</td></tr><tr><td>Jane</td><td>CFO</td></tr></table>")
+    report = check_tables(soup, {}, {}, {})
+    assert report == TableCompletenessReport(0, ())

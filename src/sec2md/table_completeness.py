@@ -389,3 +389,203 @@ def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int
             for k in range(c.column, c.column + c.colspan):
                 grid[r][k] = c
     return _header_count(grid)
+
+
+# --- matching ------------------------------------------------------------------------
+
+def _claim(occurrences: Counter, pool: Counter, shared: dict | None) -> Counter:
+    left: Counter = Counter()
+    for kind in _CLAIM_ORDER:
+        for (token, k, role), count in sorted(occurrences.items()):
+            if k != kind:
+                continue
+            for _ in range(count):
+                position = next((p for p in _COMPATIBLE[kind] if pool[(token, p)] > 0), None)
+                if position is None:
+                    left[(token, k, role)] += 1
+                    continue
+                pool[(token, position)] -= 1
+                if shared is not None and not kind.startswith("value"):
+                    shared.setdefault(token, set()).add(position)
+    return left
+
+
+def match_occurrences(rows: list[tuple[str, Counter]], body: list[tuple[str, Counter]], other: Counter):
+    """Check 1 matching: proven row pairs first, then a table-wide pass.
+
+    Returns (missing values as (token, role, ambiguous), missing reported as (token, class)),
+    where class is "reference", "marker" or "standalone_marker".
+    """
+    pools = [Counter(found) for _, found in body]
+    source_counts = Counter(key for key, _ in rows if key)
+    output_counts = Counter(key for key, _ in body if key)
+    line_of = {key: i for i, (key, _) in enumerate(body) if key and output_counts[key] == 1}
+    unclaimed: Counter = Counter()
+    for key, occurrences in rows:
+        line = line_of.get(key) if key and source_counts[key] == 1 else None
+        unclaimed.update(occurrences if line is None else _claim(occurrences, pools[line], None))
+    remaining = Counter(other)
+    for pool in pools:
+        remaining.update(+pool)
+    shared: dict[str, set] = {}
+    final = _claim(unclaimed, remaining, shared)
+    missing_values, missing_reported = [], []
+    for (token, kind, role), count in sorted(final.items()):
+        for _ in range(count):
+            if kind.startswith("value"):
+                missing_values.append((token, role, bool(shared.get(token, set()) & set(_COMPATIBLE[kind]))))
+            else:
+                missing_reported.append((token, kind))
+    return missing_values, missing_reported
+
+
+def row_structure(source_rows: list[tuple[str, ...]], segment: str) -> list[str]:
+    """Check 2 over body lines: within-row order, rows out of order, values split across rows."""
+    lines = segment.split("\n")
+    separator = next((i for i, line in enumerate(lines) if is_separator_row(line)), None)
+    if separator is None:
+        return []
+    body = [output_line_numbers(line) for line in lines[separator + 1:]]
+    body_all = Counter(t for line in body for t in line)
+    findings, pointer = [], 0
+    for number, row in enumerate(source_rows, 1):
+        need = Counter(row)
+        hit = next((k for k in range(pointer, len(body)) if not need - Counter(body[k])), None)
+        if hit is not None:
+            left, projected = Counter(need), []
+            for token in body[hit]:
+                if left[token]:
+                    projected.append(token)
+                    left[token] -= 1
+            if tuple(projected) != row:
+                findings.append(f"source row {number}: values out of order within the row")
+            pointer = hit
+        elif any(not need - Counter(body[k]) for k in range(pointer)):
+            findings.append(f"source row {number}: appears before an earlier source row")
+        elif not need - body_all:
+            findings.append(f"source row {number}: values present but split across output rows")
+    return findings
+
+
+# --- report ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class TableFinding:
+    """Check 1 and check 2 results for one table unit."""
+
+    ordinal: int
+    snapshot_ordinal: int | None
+    page: int | None
+    missing_values: tuple[tuple[str, str, bool], ...] = ()
+    missing_reported: tuple[tuple[str, str], ...] = ()
+    structure: tuple[str, ...] = ()
+    produced_output: bool = True
+
+    def _where(self) -> str:
+        parts = [f"snapshot {self.snapshot_ordinal}" if self.snapshot_ordinal else "", f"page {self.page}" if self.page else ""]
+        detail = ", ".join(p for p in parts if p)
+        return f"table {self.ordinal}" + (f" ({detail})" if detail else "")
+
+    def value_message(self) -> str | None:
+        if not self.missing_values:
+            return None
+        if not self.produced_output:
+            return f"{self._where()} produced no output ({len(self.missing_values)} numbers)"
+        counts = Counter(self.missing_values)
+        listed = ", ".join(f"{token} x{n} [{role}{', ambiguous' if ambiguous else ''}]"
+                           for (token, role, ambiguous), n in list(counts.items())[:10])
+        return f"{self._where()}: missing {listed} (total {len(self.missing_values)})"
+
+    def reported_message(self) -> str | None:
+        if not self.missing_reported:
+            return None
+        counts = Counter(self.missing_reported)
+        listed = ", ".join(f"{token} x{n} [{cls}]" for (token, cls), n in list(counts.items())[:10])
+        return f"{self._where()}: missing {listed} (total {len(self.missing_reported)})"
+
+    def structure_messages(self) -> tuple[str, ...]:
+        return tuple(f"{self._where()}: {s}" for s in self.structure)
+
+    def messages(self) -> tuple[str, ...]:
+        """Every message for this table: value failures, reported tokens, then row structure."""
+        return tuple(m for m in (self.value_message(), self.reported_message()) if m) + self.structure_messages()
+
+
+@dataclass(frozen=True)
+class TableCompletenessReport:
+    tables_checked: int
+    findings: tuple[TableFinding, ...]
+
+    @property
+    def failures(self) -> tuple[str, ...]:
+        return tuple(m for f in self.findings if (m := f.value_message()))
+
+    @property
+    def reported(self) -> tuple[str, ...]:
+        return tuple(m for f in self.findings if (m := f.reported_message()))
+
+    @property
+    def structure(self) -> tuple[str, ...]:
+        return tuple(m for f in self.findings for m in f.structure_messages())
+
+
+def _direct_cells(tr: Tag) -> list[Tag]:
+    return [c for c in tr.children if isinstance(c, Tag) and c.name in ("td", "th")]
+
+
+def check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[int, int],
+                 snapshot_ordinals: Mapping[int, int]) -> TableCompletenessReport:
+    """Run checks 1 and 2 over every visible outermost table of a parsed document."""
+    numbers.cache_clear()  # the token cache is per document
+    outermost, hidden, grid_hidden = hidden_sets(soup)
+    units = [t for t in outermost if id(t) not in hidden]
+    findings, checked = [], 0
+    for ordinal, table in enumerate(units, 1):
+        all_rows = unit_rows(table)
+        rows = [row for row in all_rows if id(row.tr) not in hidden]
+        own_rows = [row for row in rows if row.own]
+        own_index = {id(row.tr): i for i, row in enumerate(own_rows)}
+        texts_by_row = [[cell_text(c, hidden) for c in _direct_cells(row.tr) if id(c) not in hidden] for row in rows]
+        if not any(_DIGIT.search(value) or _DIGIT.search(marks) for texts in texts_by_row for value, marks in texts):
+            continue  # no source tokens
+        leading = [value for row, texts in zip(rows, texts_by_row) if row.own and own_index[id(row.tr)] < 3
+                   for value, _ in texts]
+        exhibit_index = (any(_EXHIBIT_HEADING.match(v) for v in leading)
+                         and any(_DESCRIPTION_HEADING.search(v) for v in leading))
+        raw = table_outputs.get(id(table), "")
+        segment = _MARKDOWN_LINK_RE.sub(lambda m: m.group(1), raw)
+        body, other = output_positions(segment, exhibit_index)
+
+        # Header rows are never data rows (check 2) and label value findings "header".
+        header_rows = header_row_count(table, all_rows, grid_hidden)
+        row_occurrences, source_rows, total = [], [], 0
+        for row, texts in zip(rows, texts_by_row):
+            row_index = own_index[id(row.tr)] if row.own else -1
+            row_role = "header" if row.own and row_index < header_rows else (None if row.own else "nested")
+            values = merge_split_negatives([v for v, _ in texts])
+            signature_row = any(_SIGNATURE_ROW_MARK.search(v) for v in values)
+            occurrences: Counter = Counter()
+            row_tokens = []
+            for position, text in enumerate(values):
+                role = row_role or ("label" if position == 0 else "body")
+                for token, kind in classify_cell(text, signature_row):
+                    occurrences[(token, "reference" if exhibit_index else kind, role)] += 1
+                    row_tokens.append(token)
+            for value, marks in texts:
+                marker_kind = "marker" if _ALPHANUMERIC.search(value) else "standalone_marker"
+                for token in numbers(marks.replace("(", " (").replace(")", ") ")):
+                    occurrences[(token, marker_kind, row_role or "body")] += 1
+            if row.own and len(row_tokens) >= 2 and is_data_row(values, row_index < header_rows):
+                source_rows.append(tuple(row_tokens))
+            total += sum(occurrences.values())
+            row_occurrences.append((label_key(next((v for v, _ in texts if v), "")) if row.own else "", occurrences))
+        if not total:
+            continue
+        missing_values, missing_reported = match_occurrences(row_occurrences, body, other)
+        structure = row_structure(source_rows, segment)
+        checked += 1
+        if missing_values or missing_reported or structure:
+            findings.append(TableFinding(ordinal, snapshot_ordinals.get(id(table)), table_pages.get(id(table)),
+                                         tuple(missing_values), tuple(missing_reported), tuple(structure),
+                                         produced_output=bool(raw.strip())))
+    return TableCompletenessReport(checked, tuple(findings))
