@@ -23,6 +23,7 @@ from sec2md.element_builder import (
     ordered_unique_nodes,
 )
 from sec2md.encoding import DecodeDiagnostics, normalize_legacy_characters
+from sec2md.table_completeness import TableCompletenessReport, check_tables
 from sec2md.quality import (
     ParseDiagnostics,
     build_diagnostics,
@@ -58,6 +59,7 @@ class Parser:
         source_url: str | None = None,
         decode_diagnostics: DecodeDiagnostics | None = None,
         capture_tables: bool = False,
+        table_checks: bool = True,
     ):
         content = normalize_legacy_characters(content)
         self.source_text = content
@@ -65,6 +67,14 @@ class Parser:
         self.decode_diagnostics = decode_diagnostics
         self.soup = BeautifulSoup(content, "lxml")
         self.capture_tables = capture_tables
+        self.table_checks = table_checks
+        # Table completeness inputs, recorded during rendering without changing it.
+        self.table_outputs: dict[int, str] = {}
+        self._table_pages: dict[int, int] = {}
+        self._snapshot_ordinals: dict[int, int] = {}
+        self._snapshot_ordinal = 0
+        self._root_table_rows: dict[int, list[list[Tag]]] = {}
+        self.table_report: TableCompletenessReport | None = None
         self.table_snapshots: list[TableSnapshot] = []
         self._snapshot_nodes: list[Sequence[Tag]] = []
         self._unreliable_tables: dict[int, TableSnapshot] = {}
@@ -373,6 +383,21 @@ class Parser:
             return ""
         return f"![{alt}]({src})"
 
+    def _render_table(self, element: Tag) -> str:
+        # A stream-root table's rows were already computed for its snapshot ordinal.
+        eff_rows = self._root_table_rows.pop(id(element), None)
+        if id(element) in self._unreliable_tables:
+            self.includes_table = True
+            return self._unreliable_tables[id(element)].original_text
+        if eff_rows is None:
+            eff_rows = self._effective_rows(element)
+        if len(eff_rows) <= 1:
+            cells = eff_rows[0] if eff_rows else []
+            return self._one_row_table_to_text(cells)
+
+        self.includes_table = True
+        return TableParser(element, base_url=self.source_url).md().strip()
+
     def _process_element(self, element: Union[Tag, NavigableString]) -> str:
         if isinstance(element, NavigableString):
             return self._process_text_node(element)
@@ -383,16 +408,10 @@ class Parser:
             return ""
 
         if element.name == "table":
-            if id(element) in self._unreliable_tables:
-                self.includes_table = True
-                return self._unreliable_tables[id(element)].original_text
-            eff_rows = self._effective_rows(element)
-            if len(eff_rows) <= 1:
-                cells = eff_rows[0] if eff_rows else []
-                return self._one_row_table_to_text(cells)
-
-            self.includes_table = True
-            return TableParser(element, base_url=self.source_url).md().strip()
+            rendered = self._render_table(element)
+            if self.table_checks and element.find_parent("table") is None:
+                self.table_outputs[id(element)] = rendered
+            return rendered
 
         if element.name in {"ul", "ol"}:
             items = []
@@ -639,9 +658,10 @@ class Parser:
 
             if table_parser.is_table_like():
                 self.includes_table = True
+                self._snapshot_ordinal += 1
                 if self.capture_tables:
                     self.table_snapshots.append(snapshot_positioned_table(
-                        group, ordinal=len(self.table_snapshots) + 1, page=page_num,
+                        group, ordinal=self._snapshot_ordinal, page=page_num,
                         source_url=self.source_url, native_anchors=self._native_anchors,
                         note_targets=self._note_targets,
                     ))
@@ -755,9 +775,20 @@ class Parser:
             self._blankline_before(page_num)
 
         if root.name in {"table", "ul", "ol"}:
-            if self.capture_tables and root.name == 'table' and len(self._effective_rows(root)) > 1:
+            # Ordinals count the tables that get a snapshot in capture mode, in every
+            # mode, so table-completeness findings name the same snapshot either way.
+            snapshot_ordinal = None
+            if root.name == 'table' and (self.capture_tables or self.table_checks):
+                self._table_pages.setdefault(id(root), page_num)
+                rows = self._effective_rows(root)
+                self._root_table_rows[id(root)] = rows
+                if len(rows) > 1:
+                    self._snapshot_ordinal += 1
+                    snapshot_ordinal = self._snapshot_ordinal
+                    self._snapshot_ordinals[id(root)] = snapshot_ordinal
+            if self.capture_tables and snapshot_ordinal is not None:
                 snapshot = snapshot_html_table(
-                    root, ordinal=len(self.table_snapshots) + 1, page=page_num,
+                    root, ordinal=snapshot_ordinal, page=page_num,
                     source_url=self.source_url, native_anchors=self._native_anchors,
                     note_targets=self._note_targets,
                 )
@@ -939,6 +970,12 @@ class Parser:
         self.table_snapshots = []
         self._snapshot_nodes = []
         self._unreliable_tables = {}
+        self.table_outputs = {}
+        self._table_pages = {}
+        self._snapshot_ordinals = {}
+        self._snapshot_ordinal = 0
+        self._root_table_rows = {}
+        self.table_report = None
         root = self.soup.body if self.soup.body else self.soup
         self._stream_pages(root, page_num=1)
 
@@ -991,6 +1028,11 @@ class Parser:
                                          if id(node) in node_elements), None))
                 for snapshot, nodes in zip(self.table_snapshots, self._snapshot_nodes)
             ]
+
+        if self.table_checks:
+            self.table_report = check_tables(
+                self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals
+            )
 
         markdown = "\n\n".join(page.content for page in result if page.content)
         self._last_pages = result
