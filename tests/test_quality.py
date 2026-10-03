@@ -291,3 +291,79 @@ def test_normalized_numbers_reads_euro_and_pound_values():
     from sec2md.quality import _normalized_numbers
 
     assert _normalized_numbers("€1,234 and £5") == ("1234", "5")
+
+
+LOSSY_TABLE = ("<p>" + "Revenue grew this year. " * 50 + "</p>"
+               "<table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue</td><td>9,943</td></tr>"
+               "<tr><td>Cost</td><td>1,200</td></tr></table>")
+LOSS_MESSAGE = "table 1 (snapshot 1, page 1): missing 9943 x1 [body] (total 1)"
+
+
+@pytest.fixture
+def lossy_renderer(monkeypatch):
+    """Render tables without 9,943, as a column-merge defect would."""
+    original = Parser._render_table
+    monkeypatch.setattr(Parser, "_render_table", lambda self, element: original(self, element).replace("9,943", ""))
+
+
+def test_parse_diagnostics_positional_construction_keeps_working():
+    from sec2md.quality import ParseDiagnostics
+
+    diagnostics = ParseDiagnostics(10, 10, 1.0, 0, 0, 1, 0, 0, (), ())
+    assert diagnostics.table_completeness_failures == ()
+    assert diagnostics.table_completeness_reported == ()
+    assert diagnostics.table_structure_differences == ()
+    assert diagnostics.tables_checked == 0
+    assert diagnostics.numeric_recall is None
+
+
+def test_diagnostics_with_table_findings_survive_pickling(lossy_renderer):
+    import pickle
+
+    parser = Parser(LOSSY_TABLE)
+    parser.get_pages()
+    assert parser.diagnostics.table_completeness_failures == (LOSS_MESSAGE,)
+    assert pickle.loads(pickle.dumps(parser.diagnostics)) == parser.diagnostics
+
+
+def test_build_diagnostics_records_table_report_and_numeric_recall():
+    from sec2md.table_completeness import TableCompletenessReport, TableFinding
+
+    finding = TableFinding(1, 1, 1, missing_values=(("50", "body", False),),
+                           missing_reported=(("1", "reference"),),
+                           structure=("source row 1: values out of order within the row",))
+    diagnostics = build_diagnostics(
+        "<p>Revenue 120 and cost 50.</p>", "Revenue 120 and cost.", [],
+        mapped_element_ids=(), trace_failures=(), enforce_mappings=False,
+        table_report=TableCompletenessReport(3, (finding,)),
+    )
+    assert diagnostics.table_completeness_failures == (finding.value_message(),)
+    assert diagnostics.table_completeness_reported == (finding.reported_message(),)
+    assert diagnostics.table_structure_differences == finding.structure_messages()
+    assert diagnostics.tables_checked == 3
+    assert diagnostics.numeric_recall == 0.5
+
+
+def test_build_diagnostics_without_table_report_skips_all_three_checks():
+    diagnostics = build_diagnostics(
+        "<p>Revenue 120.</p>", "Revenue.", [],
+        mapped_element_ids=(), trace_failures=(), enforce_mappings=False,
+    )
+    assert diagnostics.tables_checked == 0
+    assert diagnostics.numeric_recall is None
+
+
+@pytest.mark.parametrize("policy", ["strict", "warn"])
+def test_table_failures_are_logged_but_never_enforced(policy, lossy_renderer, caplog):
+    with caplog.at_level("WARNING"):
+        output = convert_to_markdown(LOSSY_TABLE, quality_policy=policy)
+    assert "9,943" not in output
+    assert f"sec2md table completeness: {LOSS_MESSAGE}" in caplog.text
+
+
+def test_off_policy_skips_table_checks(monkeypatch, caplog):
+    monkeypatch.setattr("sec2md.parser.check_tables", lambda *a, **k: pytest.fail("checks ran"))
+    with caplog.at_level("WARNING"):
+        convert_to_markdown(LOSSY_TABLE, quality_policy="off")
+        parse_filing(LOSSY_TABLE, quality_policy="off")
+    assert "table completeness" not in caplog.text

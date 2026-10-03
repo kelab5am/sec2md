@@ -6,12 +6,15 @@ import logging
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Collection, Literal, Sequence
+from typing import TYPE_CHECKING, Collection, Literal, Sequence
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from sec2md.models import Element, Page
+
+if TYPE_CHECKING:
+    from sec2md.table_completeness import TableCompletenessReport
 
 
 logger = logging.getLogger(__name__)
@@ -107,6 +110,13 @@ class ParseDiagnostics:
     mapped_elements: int
     trace_numeric_failures: tuple[str, ...]
     warnings: tuple[str, ...]
+    # Table completeness (Phase A: reported, never enforced). Defaults keep existing
+    # positional construction working.
+    table_completeness_failures: tuple[str, ...] = ()
+    table_completeness_reported: tuple[str, ...] = ()
+    table_structure_differences: tuple[str, ...] = ()
+    tables_checked: int = 0
+    numeric_recall: float | None = None
 
 
 def _is_or_has_ordered_list(node: Tag) -> bool:
@@ -225,11 +235,14 @@ def build_diagnostics(
     mapped_element_ids: Collection[str],
     trace_failures: Sequence[str],
     enforce_mappings: bool,
+    table_report: "TableCompletenessReport | None" = None,
 ) -> ParseDiagnostics:
     """Build immutable diagnostics for one source/output pair."""
 
-    source_chars = len(_visible_source_text(source_text))
-    output_chars = len(_visible_markdown_text(output))
+    source_visible = _visible_source_text(source_text)
+    output_visible = _visible_markdown_text(output)
+    source_chars = len(source_visible)
+    output_chars = len(output_visible)
     replacement_count = output.count("\ufffd")
     c1_count = len(_C1_CONTROL_RE.findall(output))
 
@@ -261,7 +274,24 @@ def build_diagnostics(
         mapped_elements=mapped_count,
         trace_numeric_failures=normalized_trace_failures,
         warnings=warnings,
+        table_completeness_failures=table_report.failures if table_report else (),
+        table_completeness_reported=table_report.reported if table_report else (),
+        table_structure_differences=table_report.structure if table_report else (),
+        tables_checked=table_report.tables_checked if table_report else 0,
+        # Checks 1-3 run together: Parser skips them all under quality_policy="off".
+        numeric_recall=_numeric_recall(source_visible, output_visible) if table_report is not None else None,
     )
+
+
+def _numeric_recall(source_visible: str, output_visible: str) -> float | None:
+    """Share of visible source numbers present in the visible output (check 3, diagnostic only)."""
+
+    expected = Counter(_normalized_numbers(source_visible))
+    if not expected:
+        return None
+    available = Counter(_normalized_numbers(output_visible))
+    matched = sum(min(count, available[token]) for token, count in expected.items())
+    return matched / sum(expected.values())
 
 
 def enforce_quality(diagnostics: ParseDiagnostics, policy: QualityPolicy) -> ParseDiagnostics:
@@ -270,6 +300,9 @@ def enforce_quality(diagnostics: ParseDiagnostics, policy: QualityPolicy) -> Par
     validate_quality_policy(policy)
     if policy == "off":
         return diagnostics
+    # Phase A: table completeness findings are reported, never enforced.
+    for finding in diagnostics.table_completeness_failures:
+        logger.warning("sec2md table completeness: %s", finding)
     if policy == "warn":
         for warning in diagnostics.warnings:
             logger.warning("sec2md quality: %s", warning)

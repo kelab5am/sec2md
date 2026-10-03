@@ -1047,6 +1047,7 @@ class Parser:
             ),
             trace_failures=self.trace_numeric_failures,
             enforce_mappings=include_elements,
+            table_report=self.table_report,
         )
 
         return result

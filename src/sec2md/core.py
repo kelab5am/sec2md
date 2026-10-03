@@ -213,6 +213,7 @@ def convert_to_markdown(
         html,
         source_url=link_resolution_url,
         decode_diagnostics=decode_diagnostics,
+        table_checks=quality_policy != "off",
     )
 
     if return_pages:
@@ -230,6 +231,7 @@ def convert_to_markdown(
                 ),
                 trace_failures=parser.trace_numeric_failures,
                 enforce_mappings=True,
+                table_report=parser.table_report,
             )
         enforce_quality(diagnostics, quality_policy)
         return pages
@@ -250,6 +252,7 @@ def convert_to_markdown(
             ),
             trace_failures=parser.trace_numeric_failures,
             enforce_mappings=True,
+            table_report=parser.table_report,
         )
     enforce_quality(diagnostics, quality_policy)
     return output
@@ -314,6 +317,7 @@ def parse_filing(
         html,
         source_url=link_resolution_url,
         decode_diagnostics=decode_diagnostics,
+        table_checks=quality_policy != "off",
     )
     pages = parser.get_pages(include_elements=include_elements)
     diagnostics = parser.diagnostics
@@ -329,6 +333,7 @@ def parse_filing(
             ),
             trace_failures=parser.trace_numeric_failures,
             enforce_mappings=include_elements,
+            table_report=parser.table_report,
         )
     enforce_quality(diagnostics, quality_policy)
     return pages
