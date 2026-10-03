@@ -276,3 +276,116 @@ def output_positions(segment: str, exhibit_index: bool) -> tuple[list[tuple[str,
                 found.update(_output_cell_positions(cell, signature_row))
         body.append((label_key(cells[0]) if cells else "", found))
     return body, other
+
+
+# --- header rows without building snapshots ----------------------------------------
+
+class _GridCell:
+    """A placed cell. _header_count reads only the rows it examines, so the text and
+    numeric-fact flag are computed on first read rather than for every cell."""
+
+    __slots__ = ("td", "grid_hidden", "row", "column", "rowspan", "colspan", "is_header", "_text", "_numeric")
+
+    def __init__(self, td, grid_hidden, row, column, rowspan, colspan):
+        self.td, self.grid_hidden = td, grid_hidden
+        self.row, self.column, self.rowspan, self.colspan = row, column, rowspan, colspan
+        self.is_header = td.name == "th"
+        self._text = self._numeric = None
+
+    @property
+    def text(self) -> str:
+        if self._text is None:
+            self._text = _visible_text(self.td)
+        return self._text
+
+    @property
+    def is_numeric_fact(self) -> bool:
+        if self._numeric is None:
+            self._numeric = any(isinstance(d, Tag) and d.name in _NUMERIC_FACT_NAMES and id(d) not in self.grid_hidden
+                                for d in self.td.descendants)
+        return self._numeric
+
+
+class _Row:
+    """A tr of a table unit: whether the unit owns it, and the cells whose nearest tr it is."""
+
+    __slots__ = ("tr", "own", "cells")
+
+    def __init__(self, tr: Tag, own: bool):
+        self.tr, self.own, self.cells = tr, own, []
+
+
+def unit_rows(table: Tag) -> list[_Row]:
+    """Every tr inside a table unit, in document order, from one traversal.
+
+    Avoids per-row and per-cell BeautifulSoup searches, which dominate the cost otherwise.
+    """
+    rows: list[_Row] = []
+    stack = [(child, table, None) for child in reversed(list(table.children)) if isinstance(child, Tag)]
+    while stack:
+        node, owner, row = stack.pop()
+        if node.name == "table":
+            owner, row = node, None
+        elif node.name == "tr":
+            row = _Row(node, owner is table)
+            rows.append(row)
+        elif node.name in ("td", "th") and row is not None:
+            row.cells.append(node)
+        stack.extend((child, owner, row) for child in reversed(list(node.children)) if isinstance(child, Tag))
+    return rows
+
+
+_NUMERIC_FACT_NAMES = {"ix:nonfraction", "ix:fraction", "nonfraction", "fraction"}
+
+
+def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int:
+    """xlsx_tables._header_count over the grid a snapshot would build; 0 where a snapshot is unreliable."""
+    if table.find("table") is not None:
+        return 0
+    rows = [row for row in rows if row.own and id(row.tr) not in grid_hidden]
+    # The snapshot builder's placement rules, with occupied spans kept per row so each
+    # lookup only scans its own row (the builder compares every cell with every other).
+    taken: list[list[tuple[int, int]]] = [[] for _ in rows]
+    cells, row_widths = [], [0] * len(rows)
+    for r, row in enumerate(rows):
+        column = 0
+        for td in row.cells:
+            if id(td) in grid_hidden:
+                continue
+            while True:
+                covering = [end for start, end in taken[r] if start <= column < end]
+                if not covering:
+                    break
+                column = max(covering)
+            spans = []
+            for attr, limit in (("rowspan", 65534), ("colspan", 1000)):
+                try:
+                    value = int(td.get(attr, "1"))
+                except (TypeError, ValueError):
+                    return 0
+                if value <= 0 or value > limit:
+                    return 0
+                spans.append(value)
+            rowspan, colspan = spans
+            bottom, end = r + rowspan, column + colspan
+            if bottom > len(rows) or any(start < end and finish > column
+                                         for rr in range(r, bottom) for start, finish in taken[rr]):
+                return 0
+            cells.append(_GridCell(td, grid_hidden, r, column, rowspan, colspan))
+            for rr in range(r, bottom):
+                taken[rr].append((column, end))
+            row_widths[r] += colspan
+            column = end
+    if not cells:
+        return 0
+    flat_width = max(row_widths)
+    height = max(c.row + c.rowspan for c in cells)
+    width = max(c.column + c.colspan for c in cells)
+    if width > flat_width or height * width > 1_000_000:
+        return 0
+    grid = [[None] * width for _ in range(height)]
+    for c in cells:
+        for r in range(c.row, c.row + c.rowspan):
+            for k in range(c.column, c.column + c.colspan):
+                grid[r][k] = c
+    return _header_count(grid)

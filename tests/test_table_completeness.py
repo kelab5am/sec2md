@@ -158,3 +158,76 @@ def test_output_positions_exhibit_index_body_is_all_references():
     segment = "| Exhibit | Description |\n| --- | --- |\n| 3.1 | Restated Certificate, filed 2020 |"
     body, _ = output_positions(segment, exhibit_index=True)
     assert body == [("", Counter({("3.1", "reference"): 1, ("2020", "reference"): 1}))]
+
+
+# --- task 4: header rows without building snapshots --------------------------------------
+
+from sec2md.table_completeness import header_row_count, unit_rows  # noqa: E402
+from sec2md.xlsx_tables import _header_count, snapshot_html_table  # noqa: E402
+
+
+def snapshot_header_rows(table):
+    """Header rows as the XLSX snapshot grid counts them (the reference implementation)."""
+    snap = snapshot_html_table(table, ordinal=1, page=1, source_url=None)
+    if not snap.source_cells or snap.issues:
+        return 0
+    height = max(c.row + max(c.rowspan, 1) for c in snap.source_cells)
+    width = max(c.column + max(c.colspan, 1) for c in snap.source_cells)
+    grid = [[None] * width for _ in range(height)]
+    for c in snap.source_cells:
+        for r in range(c.row, c.row + c.rowspan):
+            for k in range(c.column, c.column + c.colspan):
+                grid[r][k] = c
+    return _header_count(grid)
+
+
+HEADER_TABLES = [
+    "<table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue</td><td>120</td></tr></table>",
+    "<table><tr><td></td><td>2023</td><td>2022</td></tr><tr><td>Revenue</td><td>2,000</td><td>1,900</td></tr></table>",
+    ('<table><tr><td></td><td colspan="2">Year ended December 31,</td></tr>'
+     "<tr><td></td><td>2024</td><td>2023</td></tr><tr><td>Revenue</td><td>1,300</td><td>804</td></tr></table>"),
+    ('<table><tr><td rowspan="2">Item</td><td>2026</td></tr><tr><td>120</td></tr>'
+     "<tr><td>Cost</td><td>50</td></tr></table>"),
+    '<table><tr><td colspan="bad">Unreliable</td><td>123</td></tr><tr><td>Tail</td><td>456</td></tr></table>',
+    '<table><tr><td rowspan="5">Too tall</td><td>1</td></tr><tr><td>2</td></tr></table>',
+    ('<table><tr><th>Item</th><th>2026</th></tr><tr style="display:none"><td>Hidden</td><td>1</td></tr>'
+     "<tr><td>Revenue</td><td>120</td></tr></table>"),
+]
+
+
+@pytest.mark.parametrize("html", HEADER_TABLES)
+def test_header_row_count_matches_snapshot_grid(html):
+    soup = soup_of(html)
+    table = soup.find("table")
+    _, _, grid_hidden = hidden_sets(soup)
+    assert header_row_count(table, unit_rows(table), grid_hidden) == snapshot_header_rows(table)
+
+
+def test_header_row_count_is_zero_for_nested_tables():
+    soup = soup_of("<table><tr><th>Item</th><th>2026</th></tr><tr><td>A<table><tr><td>1</td></tr></table></td>"
+                   "<td>120</td></tr></table>")
+    table = soup.find("table")
+    _, _, grid_hidden = hidden_sets(soup)
+    assert header_row_count(table, unit_rows(table), grid_hidden) == 0
+
+
+def test_unit_rows_marks_rows_of_nested_tables():
+    soup = soup_of("<table><tr><td>A<table><tr><td>1</td></tr></table></td><td>2</td></tr></table>")
+    rows = unit_rows(soup.find("table"))
+    assert [(row.own, len(row.cells)) for row in rows] == [(True, 2), (False, 1)]
+
+
+def test_header_row_count_matches_snapshots_on_a_fixture():
+    from tests.accuracy.fixtures import load_fixture
+    from sec2md.encoding import decode_html
+    from sec2md.parser import Parser
+
+    soup = Parser(decode_html(load_fixture("nvda-2026-q2-10q")[1])[0]).soup
+    outermost, hidden, grid_hidden = hidden_sets(soup)
+    checked = 0
+    for table in outermost:
+        if id(table) in hidden or len(table.find_all("tr")) < 2:
+            continue
+        assert header_row_count(table, unit_rows(table), grid_hidden) == snapshot_header_rows(table)
+        checked += 1
+    assert checked > 50
