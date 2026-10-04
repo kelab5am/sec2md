@@ -2740,7 +2740,7 @@ In the main checkout, add a section "Phase A corpus run" to the spec, after "Evi
 - **The D3 measurement** and a recommendation. That decision then goes to Astra and the user.
 - **The overhead decision:** Phase A accepts up to +25% parse time against unchanged `main` on the fixtures, by the user's decision of 2026-10-03, and the 10% target moves to Phase B. Change the "Where it runs" target and the matching acceptance criterion to match.
 
-- [ ] **Step 7: Commit on `main`, after asking**
+- [x] **Step 7: Commit on `main`, after asking**
 
 These files belong on `main`, not on the feature branch. Ask the user before committing, then:
 

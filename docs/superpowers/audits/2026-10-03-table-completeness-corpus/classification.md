@@ -89,6 +89,7 @@ EDGAR documents, 214 tables) and Part C1 (offline, 27 tables).
   otherwise.
 - **v6:** every false positive was run through the v6 prototype (`completeness_v6.analyze`). v6 reports the same
   finding in every case, so each one is a definition case.
+  Corrected in Round 6 (2026-10-04): see the correction under "Implementation defects".
 
 **Cause keys.** Genuine losses:
 
@@ -108,7 +109,8 @@ EDGAR documents, 214 tables) and Part C1 (offline, 27 tables).
 - **G5, one-row PART normalization.** The `PART_HEADER_CELL_RE` branch of `parser.py:_one_row_table_to_text`
   returns only "PART III" and drops the other cells. This is deliberate parser behaviour.
 
-False positives, all definition cases where v6 agrees:
+False positives, all definition cases where v6 agrees (corrected in Round 6, 2026-10-04: see the correction under
+"Implementation defects"):
 
 - **F1, unrecognized superscript glued.** A relative-positioned superscript is not a marker under the spec. In cell
   text it joins the digits or letters next to it ("Statement 11", "20341", "equivalents1,2"). TableParser renders it
@@ -253,6 +255,12 @@ Table counts here include the mixed BABA 75, so Part B shows 196 tables with a g
 ### Implementation defects
 
 None.
+
+**Correction (Round 6, 2026-10-04).** "None" means only that the implementation shows no observed drift from the v6
+prototype. It is not zero defects against the spec. F4's identifier asymmetry and the spec's note (b) marker joining
+are contract defects shared with v6, and F5 combines that asymmetry with incomplete identifier syntax. The spec's
+note (c) also breaks the value-protection rule. Round 6 does not accept the "v6 agrees, so a definition case"
+triage as a correctness proof. See the spec's "False positives" and Round 6 finding 5.
 
 ### Notes for the spec owner
 

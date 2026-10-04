@@ -1,8 +1,11 @@
 # sec2md Table Completeness Check Design
 
-Date: 2026-10-02 (revision 6, same day; Phase A corpus run recorded 2026-10-04)
+Date: 2026-10-02 (revision 6, same day; Phase A corpus run and Round 6 rulings
+recorded 2026-10-04)
 
-Status: Proposed, for review
+Status: Phase A implemented (PR #4) and reviewed in Round 6 (2026-10-04) as a
+report-only milestone. Phase B enforcement is gated on the prerequisites in
+"Phase A corpus run > Round 6 rulings".
 
 Review record: `../reviews/2026-10-02-sec2md-table-completeness-check-review.md`
 
@@ -19,12 +22,28 @@ This spec covers the Markdown/page output of `convert_to_markdown()` and
 value-rules spec will reuse. It does not change how tables are parsed. Fixing the
 losses it reveals belongs to the table-merge and header-rules spec.
 
+**Exception: euro and pound** (accepted in Round 6, 2026-10-04; implementation
+note (a)). Treating `€` and `£` like `$` goes into `normalize_numeric_token` (see
+Numeric tokens), which rendering and strict's numeric trace also use. That has
+two narrow effects beyond the checks:
+
+- **Rendering.** Split euro and pound negatives merge as `$` ones already did:
+  `(€567` + `)` renders as one cell, `(€567)`.
+- **Strict's numeric trace.** A euro or pound sign in its own cell (`€ | 1,234`)
+  no longer fails strict falsely. Rare split layouts that already fail for `$`
+  now fail for `€` and `£` too, such as `(€567 | )` with the `)` under its own
+  `<th>`.
+
+Rendering with the checks on and off stays byte-identical, because the
+normalizer applies either way.
+
 ## Review history
 
-Review rounds 1–5 are recorded in full, with reproductions, in the review
+Review rounds 1–6 are recorded in full, with reproductions, in the review
 record. The Phase A corpus run is recorded in this spec and in
 `../audits/2026-10-03-table-completeness-corpus/classification.md`, not in the
-review record.
+review record. Round 6 reviewed that corpus record; its rulings are summarised
+in "Phase A corpus run > Round 6 rulings".
 
 **Round 1** (revision 1 → 2):
 
@@ -65,17 +84,34 @@ review record.
 |---|---|
 | 1. Row labels were reduced to letters, so `Note 1` and `Note 2` both became `note`, and two `Total` rows shared a key. Deleting the `Note 1` row paired its amount `9` with the surviving `Note 2` footnote. Deleting one `Total` row hid the loss. | Label keys keep identifier numbers (`note#1`, `note#2`). A pairing is proven only when its key is unique among both the source rows and the output body lines. Duplicate or uncertain labels go to the table-wide pass, where a value shortfall competing with a marker or reference is labelled *ambiguous*. Deleting the `Note 1` row now reports the value `9` missing. Deleting one of two `Total` rows reports it missing and ambiguous. |
 
-**Phase A corpus run** (2026-10-04; definitions unchanged; awaits Astra's review):
+**Phase A corpus run** (2026-10-04; definitions unchanged; reviewed in Round 6):
 
 | Recorded | Section |
 |---|---|
 | Corpus of 109 documents and 55 filings, with summary figures for the offline and EDGAR parts | Phase A corpus run |
-| Every false positive: 21 tables (20 false positive, 1 mixed), all definition cases; 0 implementation defects | Phase A corpus run |
+| Every false positive: 21 tables (20 false positive, 1 mixed), with no observed drift from the v6 prototype. First recorded as "all definition cases; 0 implementation defects"; Round 6 found contract defects shared with v6 among them (see False positives) | Phase A corpus run |
 | Definition questions (page header and footer tables, CAT 7) and a detection gap (the BABA/TSM header shift) | Phase A corpus run |
 | D3 measurement (40% noise) and a recommendation | Phase A corpus run |
 | Overhead: Phase A accepts up to +25% on the fixtures in total; the 10% target moves to Phase B | Phase A corpus run, Evidence > Overhead, "Where it runs", Acceptance criteria |
 | Implementation review notes (a)–(g) for decision | Phase A corpus run |
 | Pointers to the record | Evidence (check 2 note), Policy and rollout, D1, D3 |
+
+**Round 6** (Phase A corpus record, 2026-10-04; reviewed `main` at `8bf0c1e`):
+Phase A is complete as a report-only milestone, but this is not approval to
+enable Phase B enforcement. The review record holds the findings, from
+"# Round 6 (Phase A corpus record)". This revision reconciles the spec the same
+day and changes no recorded figure.
+
+| Finding | Change |
+|---|---|
+| 1. A marker after a short negative can conceal a deleted amount | Note (c), and note (b)'s marker joining, are code fixes before Phase B |
+| 2. Source tokenization leaves some quantities unchecked (`Nbps`, `RMB8,400`, `due 2029)`) | A code fix before Phase B; named as blind spots in False positives |
+| 3. Passing strict and both checks does not establish header alignment | Regressions and a report-only alignment diagnostic in the table-merge and header work; the caveat stays |
+| 4. A checker failure must not become a successful Phase B gate | Phase A behaviour documented in Diagnostics and API; Phase B must tell disabled, zero-table and failed checks apart |
+| 5. Prototype parity does not resolve the identifier contract violation | "Implementation defects: 0" narrowed to no observed drift from v6; the shared contract defects are named |
+| 6. Check 2 reuses rows and mistakes a promoted data row for a loss | F6, F7 and note (d) in the Phase B diagnostic revision; check 2 stays report-only |
+| 7. Documentation overstates logging and error propagation | In this spec: logging scope, checker failure, the euro/pound exception, the check-3 normalizer and recall limit, and the metadata wording corrected. README, the usage documents and the CHANGELOG are addressed on branch `docs/table-completeness-round6` (`aaca4f2`, `1a3f1dc`, `095888f`, `ef0e727`), pending merge |
+| Decisions 1–9 | Phase A corpus run > Round 6 rulings; outcomes beside D1–D5 |
 
 ## Background
 
@@ -317,10 +353,22 @@ see. Text-rendered tables (no separator) are not checked.
 
 ### 3. Document numeric recall (diagnostic only)
 
-Compute numeric recall over visible source text, the same way as the accuracy
-suite's `normalize_numbers`. Record it in diagnostics and never enforce it. Its
-job is to show losses outside tables to whoever reads the diagnostics. Making it
-a pass/fail gate is the threshold the 2026-08-29 design rejected.
+Compute numeric recall with `quality._normalized_numbers()` over the visible
+source text and the visible Markdown text that `build_diagnostics()` already
+computes (wording decided in Round 6, note (g)). Recall is the share of source
+tokens, counted with multiplicity, that the output also contains. Record it in
+diagnostics and never enforce it. Its job is to show losses outside tables to
+whoever reads the diagnostics. Making it a pass/fail gate is the threshold the
+2026-08-29 design rejected.
+
+**Known limitation** (Round 6, note (f)). `_visible_markdown_text` strips a
+number shaped like an ordered-list marker at the start of an output line. For
+`2. ` the source side keeps that number, so recall can read low. (`2) ` is
+stripped too, but the source tokenizer also drops `2)`, so it does not lower
+recall.) Astra reproduced a lossless
+`2. Summary of 100 and 200 and 300` giving 0.75. The Phase B follow-up tells
+real source numbering apart from generated Markdown list syntax, rather than
+counting every list bullet as a source number. Recall stays diagnostic only.
 
 ## Evidence (revision 6 definitions)
 
@@ -448,8 +496,11 @@ accepts up to +25% against unchanged `main` (see Phase A corpus run, Overhead).
 ## Phase A corpus run
 
 Recorded 2026-10-04 from plan Task 11, on the implementation (branch
-`feat/table-completeness`, `f3639c0`). It awaits Astra's review, and Phase A is
-complete only after that review.
+`feat/table-completeness`, `f3639c0`). Phase A was to be complete only after
+Astra's review. Round 6 (2026-10-04) completes that review for a report-only
+release; it does not approve Phase B enforcement. Its rulings and corrections
+are dated 2026-10-04 and sit beside the figures, which stay as recorded. They
+are summarised in "Round 6 rulings" at the end of this section.
 
 - **Detail:** the per-table verdicts, the reported-only scan and the D3 sample
   are in `../audits/2026-10-03-table-completeness-corpus/classification.md`.
@@ -550,11 +601,35 @@ SPCX, and CAT 33's first-row U.S. GAAP figures.
 
 ### False positives
 
-**Implementation defects: 0.** For every false positive, the v6 prototype
-reports the same finding. Across all 82 documents, v6 agrees with the
+**No observed drift from the v6 prototype.** For every false positive, the v6
+prototype reports the same finding. Across all 82 documents, v6 agrees with the
 implementation on every finding. The one difference is a row-role label on TSM
-487, a genuine loss, where v6's row indexing is wrong. Every false positive is
-therefore a definition case, awaiting decision.
+487, a genuine loss, where v6's row indexing is wrong.
+
+**Correction (Round 6, 2026-10-04).** This record first read that agreement as
+"Implementation defects: 0", with every false positive a definition case
+awaiting decision. Agreement with v6 proves only that the implementation did
+not drift from that prototype. It is not zero defects against this spec. The
+implementation followed the plan's triage, but Round 6 does not accept that
+triage as a correctness proof. These contract defects are shared by the code
+and v6:
+
+- **F4, identifier asymmetry.** Source cells have their identifiers extracted
+  (`classify_cell()`), but output exhibit-index cells, header lines and check-2
+  lines are tokenized by whole cell, against Definitions' symmetric rule.
+- **Note (b), marker joining.** `<sup>1<span>0</span></sup>` gives markers `1`
+  and `0`, not `10`.
+- **F5, incomplete multipart identifier syntax.** On top of F4's asymmetry,
+  `Exhibit 10.11.2` is recognized only as `10.11`, leaving `2` enforceable.
+- **Note (c), a marker after a short negative** (Round 6 finding 1). In
+  `(96) (1)` the marker stays a numeric `-1`, so it can conceal a deleted
+  amount `-1`, against the value-protection rule.
+
+Round 6 also requires fixing, before Phase B, source-tokenization blind spots
+that the current definitions themselves produce (finding 2): glued unit
+suffixes and currency codes (`1,097bps`, `RMB8,400`) and a number before an
+unmatched ")" (`due 2029)`). See "Glued text" and "Tokenizer blind spot" below.
+A quantity that never enters the source tokens cannot be protected by check 1.
 
 Each subset was compared by running `completeness_v6.analyze(html,
 capture=False)` on the whole document and comparing every table that either
@@ -605,6 +680,13 @@ one. The cases differ by the kind of boundary, so they need separate decisions.
     which is a review case.
   - The same mechanism also hides values: 12 of JPM 367's 15 "Nbps" cells
     yield no source token at all, so those values are never checked.
+  - **Decided (Round 6):** separate a letter and a digit where an
+    inline-element boundary divides them, on both sides, for F2, F8 and these 4
+    F1 tokens. Kerned digit joins and sign and decimal boundaries stay intact.
+    A narrow supported-unit tokenizer may supplement it for F8; a generic
+    "digits inside any word" rule is not approved. A code fix before Phase B,
+    tested on the full quantities (8400, 1097, 2717 and the twelve unchecked
+    cells), not just on the old false positives disappearing.
 - **Raised digits** (the other 10 superscript tokens). These join a digit or a
   comma to a digit, so the candidates above do not apply.
   - The cases: KO 50 ("31," + "1" gives `311`), KO 59 ("2098" + "2"), KO 63
@@ -622,6 +704,13 @@ one. The cases differ by the kind of boundary, so they need separate decisions.
     - (c) read them literally as genuine losses, since the fused source token
       (`20341`) is absent from the output. classification.md calls this "Two
       readings".
+  - **Decided (Round 6): (a)**, only for a relative-positioned, marker-like
+    digit span with a genuinely negative `top`. Ordinary relative positioning
+    stays insufficient. Astra checked all 38 NVDA documents in the corpus: none
+    of their 793 relative-positioned digit spans has a negative `top`. (b) is
+    rejected as the permanent remedy, and so is (c)'s reading of `20341` as a
+    genuine loss. Pin the raised cases and no-`top` kerning controls, including
+    loss of the real adjacent year or amount, before enforcement relies on it.
 - **Glued dash** (F3, UNH 68). In
   "par value -`<ix:nonfraction>10</ix:nonfraction>`" the dash ends one text
   node and the number sits in the next element. Cell text reads -10, but the
@@ -633,22 +722,42 @@ one. The cases differ by the kind of boundary, so they need separate decisions.
       then read as positive.
     - (b) accept it as a known false positive (1 token in the corpus);
     - (c) read it literally as a genuine loss of `-10`.
+  - **Decided (Round 6): (b).** UNH 68's single `-10` stays a documented known
+    false positive, the only check-1 false positive Round 6 accepts as
+    permanent. Phase B strict rejects it unless a separately reviewed narrow
+    exception is approved. (a) is rejected, because a genuine minus sign may sit
+    outside its XBRL element, and so is (c). DOM text-node boundaries do not
+    decide sign.
 - **Identifier wording.** Definitions say the identifier rule "applies on the
   source and output sides". The implementation and v6 do not apply it to
   exhibit-index output cells, header lines or check-2 lines. Either the wording
   or the definition should change.
+  - **Decided (Round 6):** keep the symmetric wording and fix the code (F4,
+    F5). Apply the same identifier extraction in every mode, output context and
+    check-2 line, recognize complete dotted identifiers, and keep identifier
+    occurrences unavailable to values. Protect genuine values in the same cell
+    or row and the earlier Note 1 / Note 2 regressions, and include adjacent
+    genuine amounts in the deletion tests. Excusing the asymmetry in the
+    wording is rejected. A code fix before Phase B.
 - **Reported references.** 61 of the 101 reported references are also false
   positives, from the same identifier asymmetry. 33 of them are the reported
   tokens in the F4/F5 rows above. They are reported only. None of the 115
   reported tokens is a real value in a reported class.
+  - **Round 6:** these need correcting too. Their report-only class does not
+    justify asymmetric extraction.
 - **Tokenizer blind spot.** A number followed by an unmatched ")" ("due 2029)")
   is dropped on both sides, so its loss goes undetected.
+  - **Round 6 (finding 2):** a code fix before Phase B. Recognize unmatched
+    closing prose punctuation without dropping the number before it or turning
+    balanced accounting negatives positive. Any shared-normalizer change needs
+    numeric-trace and rendering regressions, as the euro change showed.
 
 ### Definition questions from deliberate parser behaviour
 
-These recommendations are for Astra and the user. Each one says where it comes
+These recommendations were for Astra and the user. Each one says where it comes
 from. Part B of the classification raised both questions without proposing
-options. Parts A and C also raised question 1, with options.
+options. Parts A and C also raised question 1, with options. Round 6 decided
+both on 2026-10-04; each recommendation below is kept, marked with its outcome.
 
 **1. Page header and footer tables.** All 573 tables without output are page
 furniture that the parser removes on purpose.
@@ -686,6 +795,17 @@ number from it.
   - Whether the parser should keep footer text is a parser question for a
     separate spec. A footer `<div>` without a table loses the same text and
     produces no finding (an NVDA exhibit shows this).
+- **Decided (Round 6): (c)**, keyed on the parser's actual discard.
+  - Classify as report-only page furniture only the tokens in the subtree the
+    parser actually discards, recorded from its `_is_footer_element` decision.
+    Do not infer the class from an empty output, and do not reclassify a
+    similarly styled ancestor the parser did not discard.
+  - Keep the units, ordinals and missing-token and no-output visibility,
+    including the NVDA effective and updated dates. Other unexplained
+    no-output tables stay value failures.
+  - Moving exactly the 573 tables / 1,208 tokens to the new class leaves 307
+    check-1 value tables / 463 tokens, before other fixes. The new counts go in
+    a later run; the figures here stay as recorded.
 
 **2. CAT 7, a one-row PART table.** The PART branch of
 `_one_row_table_to_text` renders "Part III | 2025 Annual Meeting Proxy Statement
@@ -700,6 +820,10 @@ branch keeps its title.
 - **Recommendation: (a).** This is the record writer's synthesis. The dropped
   cell says where Part III's information comes from. One table in 109 documents
   can sit on the expected-failure list until the parser change lands.
+- **Decided (Round 6): (a).** The missing `2025` and `120` are genuine losses.
+  Fix the PART branch in the table-merge and header work; do not exclude
+  one-row PART tables. The loss stays on the development expected-failure list
+  until fixed, which does not exempt it from strict.
 
 ### A detection gap: the BABA/TSM header shift
 
@@ -731,6 +855,17 @@ left of their values.
   - Until then, passing check 1 and check 2 is not proof that a value sits
     under its correct period. `README.md` and `docs/usage/direct-conversion.md`,
     where they describe what strict does not check, should say so.
+- **Decided (Round 6): (a) plus (b).** (c) alone is rejected: the caveat is
+  needed now and must remain, but it is not the remedy.
+  - BABA 24, TSM 79 and 312, and a separate-currency layout (euro and amount
+    cells under spanning 2025/2024 headers) become regression cases in the
+    table-merge and header work. They assert each amount's period and currency,
+    not just token presence or a passing strict conversion.
+  - That work also defines the report-only alignment diagnostic, from
+    source-to-output column provenance, allowing legitimate span and
+    currency-column merges.
+  - Numeric completeness and correct period attribution stay separate claims.
+    The rough 66-table count is not an enforcement rule.
 
 ### D3 measurement
 
@@ -772,6 +907,19 @@ left of their values.
   - Fixing the column-merge and empty-column rules in the table-merge spec
     removes most genuine word losses. The measure then serves mainly as a
     regression net.
+- **Decided (Round 6, decision 5):** no enforced word check. The 40% figure
+  stands; the recorded 30 tables match `word_only_tables[3::7]`, and the Wilson
+  range is descriptive for this issuer-clustered sample.
+  - The filtered report-only diagnostic is a Phase B candidate. The filters are
+    approved with limits: join only proven fragments of one source word and
+    tokenize Unicode letters, and ignore a header only when its entire source
+    column span has no nonempty body content (zero and X marks count as
+    content). Do not globally remove whitespace or join arbitrary adjacent
+    words. Spanning titles and nonempty "Filed Herewith" columns must survive.
+  - Re-measure after the filters and the page-furniture and renderer changes,
+    with preserved and deleted header controls and newly sampled residuals.
+    It is adopted, as report-only, only below 10% noise. The projected
+    elimination of 11–12 noise cases is not measured acceptance evidence.
 
 ### Overhead
 
@@ -789,10 +937,20 @@ left of their values.
   off, not unchanged `main`, so this is not the acceptance measure.
 - **Fixtures.** Plan Task 12 measures the overhead against unchanged `main` on
   the fixtures and reports it in the PR.
+- **Confirmed (Round 6, decision 7).** Up to +25% in total for Phase A, with
+  the 10% target from Phase B. Round 6 checked the measurement PR #4 records,
+  about +20.5% in total, but did not rerun a benchmark. Phase B measures
+  against an identified unchanged pre-feature baseline again, not against
+  Phase A, includes any adopted new diagnostics, and records per-fixture and
+  total figures. Still open: correct the timing helper's stale docstring when
+  it is next updated.
 
 ### Implementation review notes for decision
 
-These come from the per-task code reviews and are recorded for Astra.
+These come from the per-task code reviews and are recorded for Astra. Round 6
+decided each one; its ruling and timing follow each note. Following the plan
+and matching v6 show no drift; they do not make (b) or (c) correct (see False
+positives).
 
 - **The plan's code.** In each case the implementation is the plan's code as
   written, so it follows the plan.
@@ -828,34 +986,135 @@ The notes:
     tables are parsed."
   - The acceptance criterion on identical rendering with the checks on and off
     is unaffected, because the normalizer applies either way.
+  - **Round 6:** both side effects accepted. Wording now: the Purpose and the
+    acceptance criteria state the narrow exception (done 2026-10-04). The
+    checks-on/off rendering criterion stays unchanged. The strict currency
+    test's output-content assertions are addressed on branch
+    `docs/table-completeness-round6` (`0787eb1`, `11707e3`), pending merge.
+    Header alignment, with its alignment assertions, is fixed in the
+    prerequisite parser work; do not revert currency support to hide the gap.
 - **(b) Footnote markers that span inline nodes.** `<sup>1<span>0</span></sup>`
   yields the marker tokens `1` and `0`, not `10`, because marker pieces are
   joined with a space. The spec says text nodes are concatenated.
   - Marker tokens are report-only. In rare cases a split digit could claim a
     position a value needed.
   - None of the corpus false positives comes from it.
+  - **Round 6 timing: code fix before Phase B** (finding 1). Keep the
+    concatenation rule: join inline pieces within one marker, keep boundaries
+    between distinct markers, and never let invented marker digits consume a
+    genuine amount's occurrence.
 - **(c) A trailing marker after a short negative.** In `(96) (1)` the marker
   is not split off, so `(1)` stays a numeric `-1`; `(196) (1)` splits correctly.
   A surviving marker is then reported missing, and its `-1` can cover a lost
   value `-1` in pass 2.
+  - **Round 6 timing: code fix before Phase B** (finding 1, reproduced in both
+    modes). Keep the initial accounting negative and split off later markers
+    whatever their digit count. Deletion tests must prove a surviving marker
+    cannot satisfy the missing amount. Pin the unchanged, amount-deleted and
+    marker-deleted variants in both modes, including duplicate or unpaired
+    labels and split accounting cells. No wording relaxation.
 - **(d) Check-2 row numbers.** "source row <i>" counts data rows, not source
   rows as Definitions has it: JPM 367's data rows 9 and 29 are table rows 12
   and 35. Either the spec wording or the numbering should change.
+  - **Round 6 timing: Phase B code.** Keep "source row" as documented and
+    number actual one-based source rows within the unit, counting skipped and
+    header rows.
 - **(e) Check-2 search cost.** The search is quadratic on very large lossy
   tables: 8 s for a synthetic 2,000-row table in which every row lost a column.
   The corpus timing shows no quadratic blowup on real filings (slowest
   `check_tables()` 1.14 s, longest table 68 lines), so a parity-preserving
   optimization is proposed as a Phase B follow-up.
+  - **Round 6 timing: Phase B code,** alongside the F6 and F7 changes,
+    preserving multiplicities and genuine ordering detection. Verify a large
+    lossy table and corpus parity under the revised definitions. Correction:
+    ordinary corpus timings do not rule out quadratic behaviour. Round 6 did not
+    retime the 8 s measurement.
 - **(f) `numeric_recall` and list markers.** Recall comes out low when an
   output line starts with "N. " ("2. Summary of …"), because
   `_visible_markdown_text` strips list-marker-shaped numbers. A lossless probe
   gave 0.75. Recall is diagnostic only.
+  - **Round 6 timing: Phase B code;** Round 6 reproduced the 0.75. The
+    limitation is documented now under Check 3.
 - **(g) Check 3's normalizer** (plan reviewer note 2). The accuracy suite's
   `normalize_numbers` lives in `tests/` and cannot be imported from `src/`.
   The check-3 sentence "the same way as the accuracy suite's
   `normalize_numbers`" should change to `quality._normalized_numbers()` over
   the visible source and Markdown text that `build_diagnostics()` already
   computes.
+  - **Round 6 timing: wording now.** Done 2026-10-04 in Check 3. This does not
+    excuse (f)'s extraction mismatch.
+
+### Round 6 rulings
+
+Astra's Round 6 (2026-10-04) is in the review record, from "# Round 6 (Phase A
+corpus record)". It recomputed the summary figures and the classification counts
+from `results.json`, and reran `corpus_phase_a.py` and `parity_impl.py` with
+identical results. The figures above stay as recorded; new counts go in a later
+run.
+
+- **Outcome.** Phase A is complete as a report-only release, with the known
+  limits recorded here. It is not a clean correctness review, and not approval
+  to enable Phase B enforcement.
+- **Accepted:** the 18-issuer replacement, the logging levels (with the scope
+  corrected in Diagnostics and API), checker-error isolation for Phase A only,
+  the header-shift caveat, and the overhead decision.
+
+Definition questions:
+
+| Question | Ruling |
+|---|---|
+| 1. Page header and footer tables | (c): a report-only page-furniture class, keyed on the parser's actual `_is_footer_element` discard. Other no-output tables stay value failures. |
+| 2. CAT 7 | (a): a genuine loss, fixed in the table-merge and header work. |
+| BABA/TSM header shift | (a) plus (b): renderer regressions and a report-only alignment diagnostic in the table-merge and header work. (c) alone is rejected; the caveat stays. |
+
+F1–F8 (all 11 check-2 tables and 37 rows stay accepted false positives in this
+baseline):
+
+| Cause | Ruling |
+|---|---|
+| F1, glued or raised markers | Letter/digit DOM-boundary rule, plus Raised digits (a) for marker-like spans with a negative `top`. (b) is rejected as the permanent remedy, and (c)'s genuine-loss reading is rejected. |
+| F2, glued currency code | Inline-boundary letter/digit split on both sides: 8400, not 400. |
+| F3, glued dash | Glued dash (b): UNH 68's single `-10` stays a documented known false positive, the only check-1 false positive Round 6 accepts as permanent. Phase B strict rejects it unless a separately reviewed narrow exception is approved. |
+| F4, identifier asymmetry | Fix the code: symmetric identifier extraction in every output context and check-2 line, plus unmatched-prose-punctuation repair. A wording excuse is rejected. |
+| F5, multipart identifiers | Complete dotted identifiers, identical on both sides, wholly report-only. Protect genuine values in the same cell or row and the Note 1 / Note 2 regressions; include adjacent genuine amounts in deletion tests. |
+| F6, inclusive pointer | Search strictly after the previous match first, with row consumption and provenance. Keep the row/column-swap mutation tests. |
+| F7, first data row in header | Keep the promoted row's identity, or mark it unevaluable. |
+| F8, glued unit suffix | The F2 boundary rule, recovering the full 1097, 2717 and the twelve unchecked cells. No generic digits-in-words rule. |
+
+All 21 F1–F8 tables, including BABA 75 with its genuine caption `31`, go into
+regression evidence. The 61 falsely reported references need correcting too.
+
+Before enabling Phase B enforcement (Round 6's prerequisites):
+
+1. Reconcile the spec, this record and the public documentation with these
+   decisions: the narrower parity claim, the currency exception, logging,
+   checker-failure semantics, metadata and recall. The spec and
+   classification.md parts are done in this revision (2026-10-04). README, the
+   usage documents and the CHANGELOG are addressed on branch
+   `docs/table-completeness-round6` (`aaca4f2`, `1a3f1dc`, `095888f`,
+   `ef0e727`), pending merge.
+2. Land the prerequisite table-merge and header fixes and regressions: CAT 7,
+   BABA/TSM, separate currency columns and genuine word and header losses.
+   Define the report-only alignment diagnostic there.
+3. Fix the marker and source-token blind spots and symmetric identifiers, and
+   implement page furniture as an explicit reported class. Genuine numeric
+   losses and ambiguous shortfalls stay enforced whatever their digit count.
+   UNH 68's single `-10` stays a documented known false positive, the only
+   check-1 false positive Round 6 accepts as permanent; Phase B strict rejects
+   it unless a separately reviewed narrow exception is approved.
+4. Make failed required checks visible and fatal to Phase B strict. Revise
+   check-2 matching and numbering without enforcing check 2. Address the
+   search-cost and recall follow-ups, and re-measure any proposed D3
+   diagnostic.
+5. Re-run the full suite, both rendering modes and this corpus under the
+   revised definitions. Classify changed and new findings, keep the deletion
+   mutations, update expected failures only with explanations, and meet the
+   Phase B 10% overhead target. Land the minor RCQ version bump and CHANGELOG
+   entry when check-1 enforcement is enabled.
+
+The expected-failure list is a development baseline, not a runtime exemption.
+At the enforcement decision it must be empty or hold only explicitly reviewed
+residuals.
 
 ## Diagnostics and API
 
@@ -872,7 +1131,30 @@ numeric_recall: float | None = None                 # check 3
 
 - **Warnings.** `warnings` gains one summary message per table with value-class
   failures once enforcement is on (decision D1). Until then the findings appear
-  only in the new fields and in `warn`-level log lines.
+  only in the new fields and, for check-1 value failures, in the log.
+- **Logging** (scope corrected in Round 6, 2026-10-04). Under `warn` and
+  `strict`, `enforce_quality()` logs one WARNING summary per document that has
+  check-1 value failures, and each table's value-failure finding at INFO.
+  - Reported marker and reference tokens and check-2 findings are not logged in
+    Phase A. A document with only those emits no completeness log line.
+  - Round 6 decided that the Phase B update logs them at INFO too, keeping the
+    WARNING summary for value failures only.
+- **Checker failure** (Phase A behaviour, documented in Round 6, 2026-10-04).
+  An exception raised by `check_tables()` (checks 1 and 2) does not fail the
+  conversion: `get_pages()` logs it at ERROR and continues with
+  `table_report = None`. Only that call is guarded. Check 3 (`_numeric_recall()`
+  in `build_diagnostics()`) and the per-table recording in `_stream_pages()` and
+  `_process_element()` run outside the guard, so an exception there propagates.
+  - After a `check_tables()` failure, apart from its log line, the diagnostics
+    are indistinguishable from policy `off`: empty findings, `tables_checked` 0,
+    `numeric_recall` None, nothing added to `warnings`, and empty XLSX
+    `completeness`. Round 6 accepts this for Phase A only.
+  - **Phase B requirement:** a structured distinction between disabled checks,
+    a completed check with zero eligible tables, and a failed check. Phase B
+    strict must reject a failed required check; warn may return output with the
+    failure recorded. Tests cover the Markdown, pages and XLSX entry points,
+    including a failure before any finding was collected. A successful
+    zero-table result cannot be inferred from an exception.
 - **Diagnostics access.** `convert_to_markdown()` and `parse_filing()` currently
   discard the value `enforce_quality()` returns, so callers can't get
   diagnostics. Decision D2 picks how to expose them.
@@ -893,14 +1175,18 @@ numeric_recall: float | None = None                 # check 3
   - In Phase B, value-class failures are also appended to the table's `issues`.
     That makes the table `needs_review`, and strict XLSX raises
     `XlsxQualityError`, as for any other issue.
-- **Where it runs.** `_stream_pages` records the output segment of each table
-  unit (`self.table_outputs`, keyed by node) where it calls
-  `_process_element(root)` for a table. It also records the unit's snapshot
-  metadata.
-  - In capture mode that metadata is the snapshot itself.
-  - In non-capture mode it comes from calling `snapshot_html_table()` for
-    metadata only. That call must not add the table to `_unreliable_tables` or
-    `table_snapshots`.
+- **Where it runs.** `_process_element()` records the output segment of each
+  outermost table (`self.table_outputs`, keyed by node), as rendered by
+  `_render_table()`. The `_stream_pages` table site records the unit's page
+  and snapshot ordinal. (Wording corrected on 2026-10-04, after Round 6.)
+  - **Snapshot ordinals** come from one counter shared by every mode, the one
+    that numbers snapshots in capture mode, so findings name the same snapshot
+    either way.
+  - **Header rows** come from `table_completeness.header_row_count()` in every
+    mode. It applies the snapshot builder's placement rules and
+    `xlsx_tables._header_count()` without building a snapshot. Normal mode does
+    not call `snapshot_html_table()` per table, and the checks never add a table
+    to `_unreliable_tables` or `table_snapshots`.
   - The checks run in `Parser.get_pages()` after page assembly. They need no
     elements, so they also run with `include_elements=False`.
   - Hidden nodes are computed once per document.
@@ -919,9 +1205,13 @@ numeric_recall: float | None = None                 # check 3
    - Run the checks on a wider corpus of at least 50 filings and record any false
      positives in this spec. The 7 fixtures and 20 RCQ filings above count
      toward that total. Done: see "Phase A corpus run" (109 documents, 55
-     filings), which awaits Astra's review.
+     filings), which Astra reviewed in Round 6 on 2026-10-04.
 2. **Phase B (after the table-merge and header-rules spec lands).**
-   - Strict raises `ParseQualityError` on value-class check-1 failures.
+   - It is also gated on Round 6's prerequisites (see "Phase A corpus run >
+     Round 6 rulings").
+   - Strict raises `ParseQualityError` on value-class check-1 failures,
+     including ambiguous shortfalls. Tokens in the report-only page-furniture
+     class that Round 6 approved are not value-class.
    - The expected-failure list should then be empty, or contain only entries this
      spec explicitly accepts.
    - Ship as a minor RCQ version bump with a CHANGELOG entry, because some
@@ -1004,7 +1294,12 @@ Fixture tests:
   the audit.
 - All three mutations are detected.
 - Non-capture rendering is byte-identical with and without the checks enabled.
-- No new strict failures in Phase A: the existing suite passes unchanged.
+- No new strict failures in Phase A: the existing suite passes unchanged. One
+  narrow exception was accepted in Round 6 (2026-10-04): the euro/pound
+  normalizer change (see Purpose), which also merges split euro and pound
+  negatives in rendering. It changes strict's numeric trace: an own-cell
+  `€ | 1,234` no longer fails falsely, and rare split layouts that already fail
+  for `$` now fail for `€` and `£` too.
 - Diagnostics and XLSX results remain picklable, and existing positional
   construction of `ParseDiagnostics`, `XlsxExportResult` and `XlsxTableResult`
   still works.
@@ -1015,6 +1310,11 @@ Fixture tests:
   not check, including the size thresholds.
 
 ## Decisions for review
+
+All five now have outcomes. Round 6 (2026-10-04) decided D1 and D3 and
+confirmed D4; D2 shipped as recommended in PR #4, as the plan assumed; D5 was
+resolved in revision 2. The recommendations are kept as they went to review,
+with each outcome beside them.
 
 - **D1. Enforcement timing.**
   - Recommended: report-only now, and enforce value-class check-1 failures in
@@ -1027,18 +1327,28 @@ Fixture tests:
   - Phase A corpus run: all 37 check-2 rows (11 tables) are false positives,
     so check 2 stays report-only until their causes are decided. F4–F7 cause
     34 of the rows, and the glued-text cases F2 and F8 cause 3.
+  - **Decided (Round 6):** report-only now. Phase B enforces check-1 value
+    loss only, including ambiguous shortfalls, subject to the page-furniture
+    class. Check 2 stays report-only until a separate review of its real-data
+    accuracy; passing the synthetic mutation tests is not enough. Check 3 and
+    D3 stay diagnostic only.
 - **D2. Diagnostics API.**
   - Recommended: add `convert_with_diagnostics(source, **kwargs) ->
     tuple[str | list[Page], ParseDiagnostics]` and leave the existing functions'
     return types unchanged.
   - Alternatives: a keyword-only `diagnostics=` out-parameter, or documenting
     `Parser.diagnostics` as the supported route.
+  - **Resolved:** `convert_with_diagnostics`, as recommended, shipped in
+    Phase A (PR #4).
 - **D3. Text completeness.** The lost AAPL header was caught only through its
   plain-text `(1)`. A per-table word-multiset check would catch header text
   directly, at the cost of more noise from header fusion.
   - Recommended: measure it in the Phase A corpus run before deciding.
   - Measured: see "Phase A corpus run", D3 measurement (40% noise in a sample
     of 30), with a recommendation.
+  - **Decided (Round 6):** no enforced word check. A filtered report-only word
+    diagnostic is a Phase B candidate, adopted only if it measures below 10%
+    noise on this corpus, and even then not enforced (see D3 measurement).
 - **D4. Token classes.**
   - Recommended: the per-token context classes above. Markers and references
     are reported, and every other token is enforced regardless of digit count.
@@ -1047,8 +1357,15 @@ Fixture tests:
     a reviewer can see that provenance was shared. There were none in the corpus.
   - Alternative: also enforce marker and reference tokens. That would fail
     tables over a lost footnote marker, exhibit-index column or signature date.
+  - **Confirmed (Round 6),** with one addition to implement before Phase B: a
+    report-only page-furniture class beside marker and reference (see "Round 6
+    rulings"). UNH 68's single `-10` (F3) stays a documented known false
+    positive, the only check-1 false positive Round 6 accepts as permanent;
+    Phase B strict rejects it unless a separately reviewed narrow exception is
+    approved.
 - **D5. `include_elements=False`.** Resolved in revision 2: the checks use output
   segments, not elements, so they run in this mode too.
+  - **Outcome:** resolved; Round 6 reopened nothing here.
 
 ## Deferred
 
