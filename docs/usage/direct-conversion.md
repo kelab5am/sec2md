@@ -37,7 +37,7 @@ themselves fail, the error is logged and the conversion continues without a
 table report, so the diagnostics look as they do with the checks off. Passing
 strict and the table completeness checks does not prove that a value sits under
 its correct column header: a column merge can shift headers one column away from
-their values, which neither check detects yet.
+their values, which neither strict nor these checks detect yet.
 
 ```python
 from sec2md import convert_with_diagnostics

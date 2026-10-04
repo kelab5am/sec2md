@@ -43,10 +43,10 @@ exhibits and related filings are not fetched.
 The frozen `XlsxExportResult` contains `path`, `status`, `tables`, `diagnostics`
 and `parse_diagnostics`, the parser's full `ParseDiagnostics`. Each
 `XlsxTableResult` contains `ordinal`, `sheet_name`, `status`, `issues` and
-`completeness`. That last field holds the table's completeness findings: numbers
-its Markdown lost and rows that changed order. Completeness findings do not
-change `status` or `issues` yet. `quality_policy="off"` skips the checks and
-leaves `completeness` empty.
+`completeness`. That last field holds the table's completeness findings:
+numbers, footnote markers and references its Markdown lost, and rows that
+changed order. Completeness findings do not change `status` or `issues` yet.
+`quality_policy="off"` skips the checks and leaves `completeness` empty.
 Overall status is `complete`, `needs_review`, or `no_tables`; table status is
 `exported`, `needs_review`, or `source_text_only`.
 
