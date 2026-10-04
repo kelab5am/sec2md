@@ -1030,9 +1030,14 @@ class Parser:
             ]
 
         if self.table_checks:
-            self.table_report = check_tables(
-                self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals
-            )
+            try:
+                self.table_report = check_tables(
+                    self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals
+                )
+            except Exception:
+                # Phase A is report-only: a defect in the checks must never fail a conversion.
+                logger.exception("sec2md table completeness: the checks failed; no table report")
+                self.table_report = None
 
         markdown = "\n\n".join(page.content for page in result if page.content)
         self._last_pages = result

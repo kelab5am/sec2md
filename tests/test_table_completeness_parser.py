@@ -4,6 +4,7 @@ import re
 
 import pytest
 
+from sec2md.core import convert_to_markdown
 from sec2md.parser import Parser
 from sec2md.table_completeness import check_tables
 
@@ -221,6 +222,24 @@ def test_table_checks_can_be_disabled():
     parser.get_pages()
     assert parser.table_report is None
     assert parser.table_outputs == {}
+
+
+def test_failing_checks_never_fail_the_conversion(monkeypatch, caplog):
+    # Phase A is report-only: a defect inside the checks must leave the output intact.
+    expected = convert_to_markdown(TWO_BY_TWO)
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("sec2md.parser.check_tables", boom)
+    with caplog.at_level("ERROR"):
+        assert convert_to_markdown(TWO_BY_TWO) == expected
+        parser = Parser(TWO_BY_TWO)
+        parser.get_pages()
+    assert parser.table_report is None
+    assert parser.diagnostics.tables_checked == 0
+    assert any(record.levelname == "ERROR" and "the checks failed" in record.getMessage()
+               for record in caplog.records)
 
 
 def test_report_is_reset_between_get_pages_calls():
