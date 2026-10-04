@@ -142,20 +142,26 @@ Strict raises in these cases:
 
 Strict does not check that every source number reached the output. Table
 completeness checks do that for each table, and they are reported but not
-enforced yet. Passing them does not prove that a value sits under its correct
-column header: a column merge can shift headers one column away from their
-values, which neither check detects yet. They appear in these
-`ParseDiagnostics` fields:
+enforced yet. Passing strict and the table completeness checks does not prove
+that a value sits under its correct column header: a column merge can shift
+headers one column away from their values, which neither strict nor these
+checks detect yet. Their findings appear in these `ParseDiagnostics` fields:
 
 - `table_completeness_failures`: numbers missing from a table's output
 - `table_completeness_reported`: lost footnote markers and references such as
   `Note 9`, which are never enforced
 - `table_structure_differences`: rows or values that changed order
-- `numeric_recall`: the share of visible source numbers present in the output
+- `numeric_recall`: the share of visible source numbers present in the output.
+  A number that starts an output line like a list marker (`2. Summary …`) is
+  not counted on the output side, so recall can read low.
 
-Each document with failures also logs one summary warning, and each failure is
-logged at INFO level. Use `convert_with_diagnostics()` to get the output
-together with its diagnostics. `quality_policy="off"` skips these checks.
+Each document with missing table values logs one summary warning, and each of
+those value failures is logged at INFO level. Lost markers, references and
+row-order findings are not logged yet. If the table checks themselves fail, the
+error is logged and the conversion continues without a table report, so the
+diagnostics look as if the checks were off. Use `convert_with_diagnostics()` to
+get the output together with its diagnostics. `quality_policy="off"` skips
+these checks.
 
 Byte decoding is deterministic: a Unicode BOM wins, followed by a recognized
 HTTP `charset`, an HTML/XML declaration in the first 8 KiB, strict UTF-8, and

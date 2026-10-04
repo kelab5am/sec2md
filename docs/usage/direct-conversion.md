@@ -30,11 +30,14 @@ source-node mapping, and on numbers in an element that cannot be traced to its
 source.
 
 It does not yet fail when a table loses a number. Table completeness findings are
-reported in the diagnostics, summarized in one warning per document and logged
-individually at INFO level. Passing strict and the table completeness checks
-does not prove that a value sits under its correct column header: a column
-merge can shift headers one column away from their values, which neither check
-detects yet.
+reported in the diagnostics. Of these, only missing table values are logged: one
+summary warning per document, then each value failure at INFO level. Lost
+markers, references and row-order findings are not logged yet. If the checks
+themselves fail, the error is logged and the conversion continues without a
+table report, so the diagnostics look as they do with the checks off. Passing
+strict and the table completeness checks does not prove that a value sits under
+its correct column header: a column merge can shift headers one column away from
+their values, which neither check detects yet.
 
 ```python
 from sec2md import convert_with_diagnostics
