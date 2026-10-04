@@ -157,11 +157,12 @@ checks detect yet. Their findings appear in these `ParseDiagnostics` fields:
 
 Each document with missing table values logs one summary warning, and each of
 those value failures is logged at INFO level. Lost markers, references and
-row-order findings are not logged yet. If the table checks themselves fail, the
-error is logged and the conversion continues without a table report, so the
-diagnostics look as if the checks were off. Use `convert_with_diagnostics()` to
-get the output together with its diagnostics. `quality_policy="off"` skips
-these checks.
+row-order findings are not logged yet. If the missing-value and row-order
+checks (`check_tables()`) fail, the error is logged and the conversion
+continues without a table report, so the diagnostics look as if the checks were
+off. Errors elsewhere, such as in the `numeric_recall` computation, still
+propagate. Use `convert_with_diagnostics()` to get the output together with its
+diagnostics. `quality_policy="off"` skips these checks.
 
 Byte decoding is deterministic: a Unicode BOM wins, followed by a recognized
 HTTP `charset`, an HTML/XML declaration in the first 8 KiB, strict UTF-8, and

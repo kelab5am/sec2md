@@ -32,9 +32,11 @@ source.
 It does not yet fail when a table loses a number. Table completeness findings are
 reported in the diagnostics. Of these, only missing table values are logged: one
 summary warning per document, then each value failure at INFO level. Lost
-markers, references and row-order findings are not logged yet. If the checks
-themselves fail, the error is logged and the conversion continues without a
-table report, so the diagnostics look as they do with the checks off. Passing
+markers, references and row-order findings are not logged yet. If the
+missing-value and row-order checks (`check_tables()`) fail, the error is logged
+and the conversion continues without a table report, so the diagnostics look as
+they do with the checks off; an error in the `numeric_recall` computation still
+propagates. Passing
 strict and the table completeness checks does not prove that a value sits under
 its correct column header: a column merge can shift headers one column away from
 their values, which neither strict nor these checks detect yet.

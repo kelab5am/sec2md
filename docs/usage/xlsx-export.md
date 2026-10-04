@@ -58,8 +58,9 @@ Overall status is `complete`, `needs_review`, or `no_tables`; table status is
 
 `XlsxDependencyError` explains how to install the missing optional dependency.
 Unexpected parsing/programming errors and filesystem failures propagate, with
-one exception: an error inside the table completeness checks is logged and does
-not propagate, and `completeness` is then empty.
+one exception: an error inside the missing-value and row-order checks
+(`check_tables()`) is logged and does not propagate, and `completeness` is then
+empty. An error in the `numeric_recall` computation still propagates.
 Existing Markdown defaults are unchanged.
 
 ## Workbook contents and copying
