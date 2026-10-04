@@ -23,6 +23,28 @@ recording diagnostics, or `"off"` for parser experimentation. Strict failures
 raise `ParseQualityError`, whose `.diagnostics` attribute contains the
 structured quality evidence.
 
+Strict raises when a source with at least 1,000 visible characters produces
+empty output, or when one with at least 10,000 keeps less than 10% of them. It
+also raises on replacement or C1 control characters, on elements without a
+source-node mapping, and on numbers in an element that cannot be traced to its
+source.
+
+It does not yet fail when a table loses a number. Table completeness findings are
+reported in the diagnostics, summarized in one warning per document and logged
+individually at INFO level. Passing strict and the table completeness checks
+does not prove that a value sits under its correct column header: a column
+merge can shift headers one column away from their values, which neither check
+detects yet.
+
+```python
+from sec2md import convert_with_diagnostics
+
+markdown, diagnostics = convert_with_diagnostics(html_bytes)
+for failure in diagnostics.table_completeness_failures:
+    print(failure)  # table 49 (snapshot 41, page 46): missing 9943 x1 [body] (total 1)
+print(diagnostics.tables_checked, diagnostics.numeric_recall)
+```
+
 Decoding follows a deterministic precedence: Unicode BOM, recognized HTTP
 `charset`, HTML/XML declaration in the first 8 KiB, strict UTF-8, then
 Windows-1252 fallback. Explicitly unsupported encodings fail. A URL gives

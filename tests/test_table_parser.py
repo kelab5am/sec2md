@@ -269,3 +269,19 @@ class TestTableParserValidation:
         soup = BeautifulSoup("<div>Not a table</div>", "lxml")
         with pytest.raises(ValueError, match="table tag"):
             TableParser(soup.find("div"))
+
+
+# €/£ split negatives merge like $ ones because the renderer uses quality.normalize_numeric_token.
+@pytest.mark.parametrize("symbol", ["$", "€", "£"], ids=["dollar", "euro", "pound"])
+def test_currency_fused_split_accounting_negative_merges_like_dollar(symbol):
+    html = f"""
+    <table><tr><th>Item</th><th>2025</th><th></th></tr>
+    <tr><td>Loss</td><td>({symbol}567</td><td>)</td></tr>
+    <tr><td>Other</td><td>({symbol}89</td><td>)</td></tr></table>
+    """
+    assert TableParser(_make_table(html)).md().splitlines() == [
+        "| Item | 2025 |",
+        "| --- | --- |",
+        f"| Loss | ({symbol}567) |",
+        f"| Other | ({symbol}89) |",
+    ]

@@ -11,7 +11,7 @@ from typing import Literal
 
 from sec2md.core import _link_resolution_url, _resolve_source
 from sec2md.parser import Parser
-from sec2md.quality import build_diagnostics, enforce_quality
+from sec2md.quality import ParseDiagnostics, build_diagnostics, enforce_quality
 from sec2md.utils import is_url
 from sec2md.xlsx_tables import prepare_table, select_export_tables
 from sec2md.xlsx_writer import render_workbook
@@ -25,6 +25,9 @@ class XlsxTableResult:
     sheet_name: str
     status: Literal['exported', 'needs_review', 'source_text_only']
     issues: tuple[str, ...]
+    # This table's table-completeness findings. Phase A reports them without
+    # changing status or issues.
+    completeness: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -33,6 +36,7 @@ class XlsxExportResult:
     status: Literal['complete', 'needs_review', 'no_tables']
     tables: tuple[XlsxTableResult, ...]
     diagnostics: tuple[str, ...]
+    parse_diagnostics: ParseDiagnostics | None = None
 
 
 class XlsxDependencyError(ImportError):
@@ -144,7 +148,7 @@ def export_xlsx(
 
     html, decode_diagnostics = _resolve_source(source, user_agent=user_agent)
     parser = Parser(html, source_url=link_url, decode_diagnostics=decode_diagnostics,
-                    capture_tables=True)
+                    capture_tables=True, table_checks=quality_policy != 'off')
     pages = parser.get_pages(include_images=False)
     diagnostics = parser.diagnostics
     if diagnostics is None:
@@ -152,6 +156,7 @@ def export_xlsx(
             html, '\n\n'.join(page.content for page in pages if page.content), pages,
             mapped_element_ids=tuple(key for key, nodes in parser.block_nodes_map.items() if nodes),
             trace_failures=parser.trace_numeric_failures, enforce_mappings=True,
+            table_report=parser.table_report,
         )
     enforce_quality(diagnostics, quality_policy)
     tables = tuple(prepare_table(snapshot) for snapshot in select_export_tables(parser.table_snapshots))
@@ -172,7 +177,11 @@ def export_xlsx(
         tables, source_url=link_url, source_hash=hashlib.sha256(hash_input).hexdigest(),
         hash_kind=hash_kind, document_diagnostics=messages,
     )
-    results = tuple(XlsxTableResult(w.ordinal, w.worksheet_name, w.status, w.issues)
+    # Worksheet ordinals are snapshot ordinals, which table findings also carry.
+    findings = parser.table_report.findings if parser.table_report else ()
+    completeness = {f.snapshot_ordinal: f.messages() for f in findings if f.snapshot_ordinal is not None}
+    results = tuple(XlsxTableResult(w.ordinal, w.worksheet_name, w.status, w.issues,
+                                    completeness.get(w.ordinal, ()))
                     for w in worksheets)
     issues = tuple(f'Table {table.ordinal}: {issue}' for table in results for issue in table.issues)
     if quality_policy == 'strict' and issues:
@@ -181,4 +190,4 @@ def export_xlsx(
     status = ('no_tables' if not results else 'needs_review'
               if messages or any(t.status != 'exported' for t in results) else 'complete')
     _publish(payload, path, overwrite=overwrite, load_workbook=load_workbook)
-    return XlsxExportResult(path, status, results, tuple(messages))
+    return XlsxExportResult(path, status, results, tuple(messages), diagnostics)

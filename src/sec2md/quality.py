@@ -6,12 +6,15 @@ import logging
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Collection, Literal, Sequence
+from typing import TYPE_CHECKING, Collection, Literal, Sequence
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from sec2md.models import Element, Page
+
+if TYPE_CHECKING:
+    from sec2md.table_completeness import TableCompletenessReport
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +33,9 @@ _TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?
 # "1. " markers the parser generates for <ol> items; they have no source text.
 _ORDERED_LIST_MARKER_RE = re.compile(r"(?m)^[ \t]*\d+\.(?=[ \t])")
 _QUALITY_POLICIES = frozenset({"strict", "warn", "off"})
+_MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+_NUMBER_TOKEN_RE = re.compile(r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)")
+_CURRENCY_SYMBOLS = str.maketrans({"$": None, "\u20ac": None, "\u00a3": None})
 
 
 def normalize_numeric_token(value: str) -> str | None:
@@ -46,7 +52,7 @@ def normalize_numeric_token(value: str) -> str | None:
     if emphasis:
         cleaned = emphasis.group("body").strip()
 
-    cleaned = cleaned.replace(",", "").replace("$", "").replace("%", "").strip()
+    cleaned = cleaned.translate(_CURRENCY_SYMBOLS).replace(",", "").replace("%", "").strip()
     accounting = cleaned.startswith("(") and cleaned.endswith(")")
     if cleaned.startswith("(") != cleaned.endswith(")"):
         return None
@@ -61,10 +67,9 @@ def normalize_numeric_token(value: str) -> str | None:
 def _normalized_numbers(text: str) -> tuple[str, ...]:
     """Extract normalized numeric tokens in source order."""
 
-    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
+    text = _MARKDOWN_IMAGE_RE.sub("", text)
     normalized: list[str] = []
-    pattern = r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)"
-    for match in re.finditer(pattern, text):
+    for match in _NUMBER_TOKEN_RE.finditer(text):
         token = normalize_numeric_token(match.group(0))
         if token is not None:
             normalized.append(token)
@@ -105,6 +110,13 @@ class ParseDiagnostics:
     mapped_elements: int
     trace_numeric_failures: tuple[str, ...]
     warnings: tuple[str, ...]
+    # Table completeness (Phase A: reported, never enforced). Defaults keep existing
+    # positional construction working.
+    table_completeness_failures: tuple[str, ...] = ()
+    table_completeness_reported: tuple[str, ...] = ()
+    table_structure_differences: tuple[str, ...] = ()
+    tables_checked: int = 0
+    numeric_recall: float | None = None
 
 
 def _is_or_has_ordered_list(node: Tag) -> bool:
@@ -223,11 +235,14 @@ def build_diagnostics(
     mapped_element_ids: Collection[str],
     trace_failures: Sequence[str],
     enforce_mappings: bool,
+    table_report: "TableCompletenessReport | None" = None,
 ) -> ParseDiagnostics:
     """Build immutable diagnostics for one source/output pair."""
 
-    source_chars = len(_visible_source_text(source_text))
-    output_chars = len(_visible_markdown_text(output))
+    source_visible = _visible_source_text(source_text)
+    output_visible = _visible_markdown_text(output)
+    source_chars = len(source_visible)
+    output_chars = len(output_visible)
     replacement_count = output.count("\ufffd")
     c1_count = len(_C1_CONTROL_RE.findall(output))
 
@@ -259,7 +274,24 @@ def build_diagnostics(
         mapped_elements=mapped_count,
         trace_numeric_failures=normalized_trace_failures,
         warnings=warnings,
+        table_completeness_failures=table_report.failures if table_report else (),
+        table_completeness_reported=table_report.reported if table_report else (),
+        table_structure_differences=table_report.structure if table_report else (),
+        tables_checked=table_report.tables_checked if table_report else 0,
+        # Checks 1-3 run together: Parser skips them all under quality_policy="off".
+        numeric_recall=_numeric_recall(source_visible, output_visible) if table_report is not None else None,
     )
+
+
+def _numeric_recall(source_visible: str, output_visible: str) -> float | None:
+    """Share of visible source numbers present in the visible output (check 3, diagnostic only)."""
+
+    expected = Counter(_normalized_numbers(source_visible))
+    if not expected:
+        return None
+    available = Counter(_normalized_numbers(output_visible))
+    matched = sum(min(count, available[token]) for token, count in expected.items())
+    return matched / sum(expected.values())
 
 
 def enforce_quality(diagnostics: ParseDiagnostics, policy: QualityPolicy) -> ParseDiagnostics:
@@ -268,6 +300,17 @@ def enforce_quality(diagnostics: ParseDiagnostics, policy: QualityPolicy) -> Par
     validate_quality_policy(policy)
     if policy == "off":
         return diagnostics
+    # Phase A: table completeness findings are reported, never enforced. One summary
+    # warning per document; each finding at INFO so large filings do not flood logs.
+    failures = diagnostics.table_completeness_failures
+    if failures:
+        logger.warning(
+            "sec2md table completeness: %d table(s) with missing values; "
+            "see ParseDiagnostics.table_completeness_failures",
+            len(failures),
+        )
+        for finding in failures:
+            logger.info("sec2md table completeness: %s", finding)
     if policy == "warn":
         for warning in diagnostics.warnings:
             logger.warning("sec2md quality: %s", warning)

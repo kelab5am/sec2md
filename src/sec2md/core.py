@@ -12,7 +12,13 @@ from sec2md.encoding import DecodeDiagnostics, decode_html, normalize_legacy_cha
 from sec2md.utils import is_url, fetch
 from sec2md.parser import Parser
 from sec2md.models import Page
-from sec2md.quality import QualityPolicy, build_diagnostics, enforce_quality, validate_quality_policy
+from sec2md.quality import (
+    ParseDiagnostics,
+    QualityPolicy,
+    build_diagnostics,
+    enforce_quality,
+    validate_quality_policy,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -201,6 +207,54 @@ def convert_to_markdown(
         >>> filing = company.get_filings(form="10-K").latest()
         >>> md = convert_to_markdown(filing.html())
     """
+    return _convert(
+        source,
+        base_url=base_url,
+        user_agent=user_agent,
+        return_pages=return_pages,
+        embed_images=embed_images,
+        quality_policy=quality_policy,
+    )[0]
+
+
+def convert_with_diagnostics(
+    source: str | bytes,
+    *,
+    base_url: str | None = None,
+    user_agent: str | None = None,
+    return_pages: bool = False,
+    embed_images: bool = False,
+    quality_policy: QualityPolicy = "strict",
+) -> tuple[str | List[Page], ParseDiagnostics]:
+    """
+    Convert like ``convert_to_markdown()`` and also return the parse diagnostics.
+
+    Takes the same arguments and raises the same errors. The diagnostics include the
+    table completeness findings, which every policy except ``off`` computes and none
+    enforces yet.
+
+    Returns:
+        (markdown string, or List[Page] if return_pages=True; ParseDiagnostics)
+    """
+    return _convert(
+        source,
+        base_url=base_url,
+        user_agent=user_agent,
+        return_pages=return_pages,
+        embed_images=embed_images,
+        quality_policy=quality_policy,
+    )
+
+
+def _convert(
+    source: str | bytes,
+    *,
+    base_url: str | None,
+    user_agent: str | None,
+    return_pages: bool,
+    embed_images: bool,
+    quality_policy: QualityPolicy,
+) -> tuple[str | List[Page], ParseDiagnostics]:
     validate_quality_policy(quality_policy)
     source_url = source if isinstance(source, str) and is_url(source) else None
     link_resolution_url = _link_resolution_url(source_url, base_url)
@@ -213,6 +267,7 @@ def convert_to_markdown(
         html,
         source_url=link_resolution_url,
         decode_diagnostics=decode_diagnostics,
+        table_checks=quality_policy != "off",
     )
 
     if return_pages:
@@ -230,9 +285,9 @@ def convert_to_markdown(
                 ),
                 trace_failures=parser.trace_numeric_failures,
                 enforce_mappings=True,
+                table_report=parser.table_report,
             )
-        enforce_quality(diagnostics, quality_policy)
-        return pages
+        return pages, enforce_quality(diagnostics, quality_policy)
 
     output = parser.markdown()
     pages = parser._last_pages
@@ -250,9 +305,9 @@ def convert_to_markdown(
             ),
             trace_failures=parser.trace_numeric_failures,
             enforce_mappings=True,
+            table_report=parser.table_report,
         )
-    enforce_quality(diagnostics, quality_policy)
-    return output
+    return output, enforce_quality(diagnostics, quality_policy)
 
 
 def parse_filing(
@@ -314,6 +369,7 @@ def parse_filing(
         html,
         source_url=link_resolution_url,
         decode_diagnostics=decode_diagnostics,
+        table_checks=quality_policy != "off",
     )
     pages = parser.get_pages(include_elements=include_elements)
     diagnostics = parser.diagnostics
@@ -329,6 +385,7 @@ def parse_filing(
             ),
             trace_failures=parser.trace_numeric_failures,
             enforce_mappings=include_elements,
+            table_report=parser.table_report,
         )
     enforce_quality(diagnostics, quality_policy)
     return pages

@@ -461,3 +461,44 @@ def test_staging_cleanup_failure_does_not_fail_a_completed_publish(tmp_path, mon
     destination = tmp_path / "out.xlsx"
     _publish(buffer.getvalue(), destination, overwrite=False, load_workbook=load_workbook)
     assert destination.exists()
+
+
+def drop_from_markdown(monkeypatch, text):
+    """Render tables without text, leaving the snapshots (and so the workbook) intact."""
+    from sec2md.parser import Parser
+
+    original = Parser._render_table
+    monkeypatch.setattr(Parser, '_render_table', lambda self, element: original(self, element).replace(text, ''))
+
+
+def test_completeness_findings_are_reported_without_changing_results(tmp_path, monkeypatch):
+    baseline = sec2md.export_xlsx(TABLE, tmp_path / 'baseline.xlsx')
+    drop_from_markdown(monkeypatch, '96,221')
+    result = sec2md.export_xlsx(TABLE, tmp_path / 'lossy.xlsx')
+    message = 'table 1 (snapshot 1, page 1): missing 96221 x1 [body] (total 1)'
+    assert result.tables[0].completeness == (message,)
+    assert result.parse_diagnostics.table_completeness_failures == (message,)
+    assert baseline.tables[0].completeness == ()
+    assert baseline.parse_diagnostics.tables_checked == 1
+    assert result.status == baseline.status == 'complete'
+    assert result.diagnostics == baseline.diagnostics
+    assert [(t.status, t.issues) for t in result.tables] == [(t.status, t.issues) for t in baseline.tables]
+
+
+def test_off_policy_exports_without_completeness(tmp_path, monkeypatch):
+    drop_from_markdown(monkeypatch, '96,221')
+    result = sec2md.export_xlsx(TABLE, tmp_path / 'filing.xlsx', quality_policy='off')
+    assert result.tables[0].completeness == ()
+    assert result.parse_diagnostics.tables_checked == 0
+
+
+def test_results_keep_positional_construction_and_pickling(tmp_path):
+    import pickle
+    from pathlib import Path
+
+    table = sec2md.XlsxTableResult(1, 'T1', 'exported', ())
+    export = sec2md.XlsxExportResult(Path('x.xlsx'), 'complete', (table,), ())
+    assert table.completeness == ()
+    assert export.parse_diagnostics is None
+    result = sec2md.export_xlsx(TABLE, tmp_path / 'filing.xlsx')
+    assert pickle.loads(pickle.dumps(result)) == result
