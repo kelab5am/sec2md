@@ -293,6 +293,20 @@ def test_normalized_numbers_reads_euro_and_pound_values():
     assert _normalized_numbers("€1,234 and £5") == ("1234", "5")
 
 
+OWN_CELL_CURRENCY = ('<table><tr><th>Item</th><th colspan="3">2026</th></tr>'
+                     "<tr><td>Revenue</td><td>{sign}</td><td>1,234</td><td></td></tr>"
+                     "<tr><td>Operating loss</td><td>{sign}</td><td>(567</td><td>)</td></tr>"
+                     "<tr><td>Net loss</td><td>{sign}</td><td>(89</td><td>)</td></tr></table>")
+
+
+@pytest.mark.parametrize("sign", ["$", "€", "£"], ids=["dollar", "euro", "pound"])
+def test_strict_traces_amount_whose_currency_sign_has_its_own_cell(sign):
+    # The source text reads "€ 1,234" and "€ (567 )" as single tokens. Unless the
+    # normalizer strips euro and pound signs as it strips dollar signs, those source
+    # numbers vanish and strict rejects the output's 1234 and -567 as untraceable.
+    convert_to_markdown(OWN_CELL_CURRENCY.format(sign=sign))
+
+
 LOSSY_TABLE = ("<p>" + "Revenue grew this year. " * 50 + "</p>"
                "<table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue</td><td>9,943</td></tr>"
                "<tr><td>Cost</td><td>1,200</td></tr></table>")
