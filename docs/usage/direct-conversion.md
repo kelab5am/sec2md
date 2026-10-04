@@ -30,7 +30,8 @@ source-node mapping, and on numbers in an element that cannot be traced to its
 source.
 
 It does not yet fail when a table loses a number. Table completeness findings are
-reported in the diagnostics and logged as warnings:
+reported in the diagnostics, summarized in one warning per document and logged
+individually at INFO level:
 
 ```python
 from sec2md import convert_with_diagnostics

@@ -367,12 +367,40 @@ def test_build_diagnostics_without_table_report_skips_all_three_checks():
     assert diagnostics.numeric_recall is None
 
 
+def table_completeness_logs(caplog, level):
+    """Messages the quality logger emitted at level for table completeness."""
+    return [record.getMessage() for record in caplog.records
+            if record.name == "sec2md.quality" and record.levelname == level
+            and record.getMessage().startswith("sec2md table completeness: ")]
+
+
 @pytest.mark.parametrize("policy", ["strict", "warn"])
 def test_table_failures_are_logged_but_never_enforced(policy, lossy_renderer, caplog):
-    with caplog.at_level("WARNING"):
+    with caplog.at_level("INFO"):
         output = convert_to_markdown(LOSSY_TABLE, quality_policy=policy)
     assert "9,943" not in output
-    assert f"sec2md table completeness: {LOSS_MESSAGE}" in caplog.text
+    warnings = table_completeness_logs(caplog, "WARNING")
+    assert len(warnings) == 1
+    assert "sec2md table completeness: 1 table(s) with missing values" in warnings[0]
+    assert f"sec2md table completeness: {LOSS_MESSAGE}" in table_completeness_logs(caplog, "INFO")
+
+
+TWO_LOSSY_TABLES = (LOSSY_TABLE + "<p>" + "Costs rose this year. " * 20 + "</p>"
+                    "<table><tr><th>Item</th><th>2025</th></tr><tr><td>Revenue</td><td>9,943</td></tr>"
+                    "<tr><td>Cost</td><td>1,100</td></tr></table>")
+
+
+def test_one_table_completeness_warning_per_document(lossy_renderer, caplog):
+    with caplog.at_level("INFO"):
+        output = convert_to_markdown(TWO_LOSSY_TABLES)
+    assert "9,943" not in output
+    warnings = table_completeness_logs(caplog, "WARNING")
+    assert len(warnings) == 1
+    assert "sec2md table completeness: 2 table(s) with missing values" in warnings[0]
+    assert table_completeness_logs(caplog, "INFO") == [
+        f"sec2md table completeness: {LOSS_MESSAGE}",
+        "sec2md table completeness: table 2 (snapshot 2, page 1): missing 9943 x1 [body] (total 1)",
+    ]
 
 
 def test_off_policy_skips_table_checks(monkeypatch, caplog):

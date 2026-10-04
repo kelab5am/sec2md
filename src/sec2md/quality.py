@@ -300,9 +300,17 @@ def enforce_quality(diagnostics: ParseDiagnostics, policy: QualityPolicy) -> Par
     validate_quality_policy(policy)
     if policy == "off":
         return diagnostics
-    # Phase A: table completeness findings are reported, never enforced.
-    for finding in diagnostics.table_completeness_failures:
-        logger.warning("sec2md table completeness: %s", finding)
+    # Phase A: table completeness findings are reported, never enforced. One summary
+    # warning per document; each finding at INFO so large filings do not flood logs.
+    failures = diagnostics.table_completeness_failures
+    if failures:
+        logger.warning(
+            "sec2md table completeness: %d table(s) with missing values; "
+            "see ParseDiagnostics.table_completeness_failures",
+            len(failures),
+        )
+        for finding in failures:
+            logger.info("sec2md table completeness: %s", finding)
     if policy == "warn":
         for warning in diagnostics.warnings:
             logger.warning("sec2md quality: %s", warning)

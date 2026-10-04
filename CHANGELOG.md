@@ -7,8 +7,9 @@
   - `ParseDiagnostics` gains `table_completeness_failures`,
     `table_completeness_reported`, `table_structure_differences`,
     `tables_checked` and `numeric_recall`.
-  - Failures are logged as warnings under `strict` and `warn`; nothing raises
-    yet. `quality_policy="off"` and `Parser(table_checks=False)` skip the checks.
+  - Under `strict` and `warn`, each document with failures logs one summary
+    warning and each failure at INFO level; nothing raises yet.
+    `quality_policy="off"` and `Parser(table_checks=False)` skip the checks.
   - `convert_with_diagnostics()` returns the output with its diagnostics.
   - `export_xlsx()` results gain `parse_diagnostics` and a per-table
     `completeness`.

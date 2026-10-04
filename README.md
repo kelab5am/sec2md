@@ -150,9 +150,9 @@ enforced yet. They appear in these `ParseDiagnostics` fields:
 - `table_structure_differences`: rows or values that changed order
 - `numeric_recall`: the share of visible source numbers present in the output
 
-Each failure is also logged as a warning. Use `convert_with_diagnostics()` to get
-the output together with its diagnostics. `quality_policy="off"` skips these
-checks.
+Each document with failures also logs one summary warning, and each failure is
+logged at INFO level. Use `convert_with_diagnostics()` to get the output
+together with its diagnostics. `quality_policy="off"` skips these checks.
 
 Byte decoding is deterministic: a Unicode BOM wins, followed by a recognized
 HTTP `charset`, an HTML/XML declaration in the first 8 KiB, strict UTF-8, and
