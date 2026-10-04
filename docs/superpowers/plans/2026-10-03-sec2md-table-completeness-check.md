@@ -141,7 +141,7 @@ The table checks reuse `quality._normalized_numbers()`. Today its pattern accept
 - Consumes: nothing new.
 - Produces: `normalize_numeric_token("€123") == "123"`; `quality._normalized_numbers(text: str) -> tuple[str, ...]` (signature unchanged).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_quality.py`:
 
@@ -159,12 +159,12 @@ def test_normalized_numbers_reads_euro_and_pound_values():
     assert _normalized_numbers("€1,234 and £5") == ("1234", "5")
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_quality.py -q -k "euro_and_pound"`
 Expected: 2 failures. `normalize_numeric_token("€123")` returns `None`, and `_normalized_numbers` returns `()`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/sec2md/quality.py`, add after `_QUALITY_POLICIES = frozenset({"strict", "warn", "off"})`:
 
@@ -203,12 +203,12 @@ with
     for match in _NUMBER_TOKEN_RE.finditer(text):
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_quality.py tests/accuracy -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/quality.py tests/test_quality.py
@@ -246,7 +246,7 @@ Creates the module with its full import and constant block, which Tasks 3–5 us
   - `hidden_sets(soup) -> tuple[list[Tag], set[int], set[int]]`, returning (outermost tables, hidden ids, grid-hidden ids)
   - `cell_text(cell: Tag, hidden: set[int]) -> tuple[str, str]`, returning (value text, marker text)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/test_table_completeness.py`:
 
@@ -335,12 +335,12 @@ def test_cell_text_skips_hidden_descendants():
     assert cell_text(soup.find("td"), hidden) == ("100", "")
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: collection error, `ModuleNotFoundError: No module named 'sec2md.table_completeness'`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/sec2md/table_completeness.py`:
 
@@ -537,12 +537,12 @@ def cell_text(cell: Tag, hidden: set[int]) -> tuple[str, str]:
     return value, marks
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: 20 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/table_completeness.py tests/test_table_completeness.py
@@ -580,7 +580,7 @@ What this task adds:
   - `is_data_row(cells: list[str], before_header_end: bool) -> bool`
   - `output_positions(segment: str, exhibit_index: bool) -> tuple[list[tuple[str, Counter]], Counter]`, returning (body lines as (label key, Counter of (token, position)), Counter of header-line and text-rendering occurrences)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_table_completeness.py`:
 
@@ -663,12 +663,12 @@ def test_output_positions_exhibit_index_body_is_all_references():
     assert body == [("", Counter({("3.1", "reference"): 1, ("2020", "reference"): 1}))]
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: collection error, `ImportError: cannot import name 'classify_cell'`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Append to `src/sec2md/table_completeness.py`:
 
@@ -761,12 +761,12 @@ def output_positions(segment: str, exhibit_index: bool) -> tuple[list[tuple[str,
     return body, other
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: 42 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/table_completeness.py tests/test_table_completeness.py
@@ -804,7 +804,7 @@ Header rows are computed for every table that contains digits (Task 5). To keep 
   - `unit_rows(table: Tag) -> list[_Row]`, where `_Row` has `.tr: Tag`, `.own: bool` and `.cells: list[Tag]`
   - `header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_table_completeness.py`:
 
@@ -882,12 +882,12 @@ def test_header_row_count_matches_snapshots_on_a_fixture():
     assert checked > 50
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: collection error, `ImportError: cannot import name 'header_row_count'`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Append to `src/sec2md/table_completeness.py`:
 
@@ -1005,12 +1005,12 @@ def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int
     return _header_count(grid)
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: 52 passed. The fixture test checks more than 50 tables of the NVDA 10-Q against real snapshots.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/table_completeness.py tests/test_table_completeness.py
@@ -1057,7 +1057,7 @@ What this task adds:
   - **`check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[int, int], snapshot_ordinals: Mapping[int, int]) -> TableCompletenessReport`.** Its mappings are keyed by `id(table)`.
   - **Message format:** `table 1 (snapshot 1, page 1): missing 9943 x1 [body] (total 1)`, with `, ambiguous` inside the brackets when applicable. A table with no output produces `table 1 produced no output (5 numbers)`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_table_completeness.py`:
 
@@ -1169,12 +1169,12 @@ def test_check_tables_skips_hidden_and_token_free_tables():
     assert report == TableCompletenessReport(0, ())
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: collection error, `ImportError: cannot import name 'TableCompletenessReport'`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Append to `src/sec2md/table_completeness.py`:
 
@@ -1379,12 +1379,12 @@ def check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[in
     return TableCompletenessReport(checked, tuple(findings))
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_table_completeness.py -q`
 Expected: 65 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/table_completeness.py tests/test_table_completeness.py
@@ -1417,7 +1417,7 @@ git commit -m "feat: match table tokens, check row structure and report findings
   - **`Parser._root_table_rows: dict[int, list[list[Tag]]]`**: effective rows computed at the table site, used once by `_render_table()`.
   - **`Parser._render_table(element: Tag) -> str`.**
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/test_table_completeness_parser.py`:
 
@@ -1670,12 +1670,12 @@ def test_effective_rows_runs_once_per_table(capture, table_checks, monkeypatch):
     assert len(calls) == 2
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_table_completeness_parser.py -q`
 Expected: every test fails, with `AttributeError: 'Parser' object has no attribute 'table_report'` (or `'table_outputs'`). `test_table_checks_can_be_disabled` fails with `TypeError: ... unexpected keyword argument 'table_checks'`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/sec2md/parser.py`:
 
@@ -1821,12 +1821,12 @@ and immediately before `markdown = "\n\n".join(page.content for page in result i
             )
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_table_completeness_parser.py tests/test_parser.py tests/test_xlsx_tables.py tests/test_xlsx.py -q`
 Expected: all pass. The new file has 89 tests: 40 review cases in both modes, plus 9 more.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/parser.py tests/test_table_completeness_parser.py
@@ -1850,7 +1850,7 @@ git commit -m "feat: run table completeness checks from the parser"
   - **`build_diagnostics(..., table_report=None)`.**
   - **Log line:** `sec2md table completeness: <message>`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_quality.py`:
 
@@ -1931,7 +1931,7 @@ def test_off_policy_skips_table_checks(monkeypatch, caplog):
     assert "table completeness" not in caplog.text
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_quality.py -q`
 Expected: the new tests fail:
@@ -1939,7 +1939,7 @@ Expected: the new tests fail:
 - `TypeError: build_diagnostics() got an unexpected keyword argument 'table_report'`
 - the policy-`off` test fails with `checks ran`
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/sec2md/quality.py`:
 
@@ -2047,12 +2047,12 @@ In `src/sec2md/core.py`:
 
 - In the three fallback `build_diagnostics(` calls, add `table_report=parser.table_report,` after their `enforce_mappings=...` argument. The calls are in `convert_to_markdown()` (return_pages branch and markdown branch) and in `parse_filing()`.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_quality.py tests/test_core.py tests/test_table_completeness_parser.py -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/quality.py src/sec2md/parser.py src/sec2md/core.py tests/test_quality.py
@@ -2073,7 +2073,7 @@ git commit -m "feat: record table completeness and numeric recall in diagnostics
 - Consumes: the `ParseDiagnostics` fields (Task 7).
 - Produces: `sec2md.convert_with_diagnostics(source, *, base_url=None, user_agent=None, return_pages=False, embed_images=False, quality_policy="strict") -> tuple[str | List[Page], ParseDiagnostics]`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_core.py`:
 
@@ -2114,12 +2114,12 @@ def test_convert_with_diagnostics_is_public():
     assert "convert_with_diagnostics" in sec2md.__all__
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_core.py -q -k convert_with_diagnostics`
 Expected: 4 failures, `ImportError: cannot import name 'convert_with_diagnostics' from 'sec2md'`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/sec2md/core.py`, replace the import
 
@@ -2259,12 +2259,12 @@ from sec2md.core import convert_to_markdown, convert_with_diagnostics, parse_fil
 
 and add `"convert_with_diagnostics",` to `__all__` after `"convert_to_markdown",`.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_core.py tests/test_quality.py tests/test_integration.py -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/core.py src/sec2md/__init__.py tests/test_core.py
@@ -2290,7 +2290,7 @@ git commit -m "feat: add convert_with_diagnostics"
 - Consumes: `Parser.table_report`, `TableFinding.messages()`, `TableFinding.snapshot_ordinal`.
 - Produces: `XlsxTableResult.completeness: tuple[str, ...] = ()` and `XlsxExportResult.parse_diagnostics: ParseDiagnostics | None = None`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_xlsx.py`:
 
@@ -2336,12 +2336,12 @@ def test_results_keep_positional_construction_and_pickling(tmp_path):
     assert pickle.loads(pickle.dumps(result)) == result
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_xlsx.py -q`
 Expected: 3 failures, `AttributeError: 'XlsxTableResult' object has no attribute 'completeness'` (or `'parse_diagnostics'`).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/sec2md/xlsx.py`:
 
@@ -2409,12 +2409,12 @@ with
     return XlsxExportResult(path, status, results, tuple(messages), diagnostics)
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_xlsx.py tests/test_xlsx_tables.py tests/test_xlsx_writer.py tests/accuracy/test_xlsx_accuracy.py -q`
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/sec2md/xlsx.py tests/test_xlsx.py
@@ -2440,7 +2440,7 @@ This task adds no production code. The pins describe the code from Tasks 1–9, 
 - Consumes: `Parser(table_checks=...)`, `Parser.table_report`, `Parser.table_outputs`, `Parser._table_pages`, `Parser._snapshot_ordinals`, `check_tables()`, `output_line_numbers()`, `tests.accuracy.fixtures.load_fixture`.
 - Produces: `PINNED_FAILURES`, which the table-merge and header-rules work will shrink.
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 Create `tests/test_table_completeness_fixtures.py`:
 
@@ -2572,7 +2572,7 @@ def test_row_structure_mutations_are_detected(mutate, message, expected):
     assert sum(1 for f in report.findings if any(message in s for s in f.structure)) == expected
 ```
 
-- [ ] **Step 2: Run the tests, then prove the pins can fail**
+- [x] **Step 2: Run the tests, then prove the pins can fail**
 
 Run: `python -m pytest tests/test_table_completeness_fixtures.py -q`
 Expected: 26 passed, in about 35 seconds.
@@ -2580,12 +2580,12 @@ Expected: 26 passed, in about 35 seconds.
 Then change `49: ("9943",)` to `49: ("9944",)` in `PINNED_FAILURES` and run `python -m pytest tests/test_table_completeness_fixtures.py -q -k "aapl and pinned"`.
 Expected: 2 failures, normal and capture. Revert the change.
 
-- [ ] **Step 3: Run the full suite and ruff**
+- [x] **Step 3: Run the full suite and ruff**
 
 Run: `python -m pytest -q` and `python -m ruff check src tests`
 Expected: about 790 passed, 14 deselected; ruff reports `All checks passed!`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tests/test_table_completeness_fixtures.py
@@ -2650,7 +2650,7 @@ Expect figures of this size. The new findings, not the old ones, are what this t
 - Consumes: the finished implementation (Tasks 1–10), run from the worktree root.
 - Produces: the spec's Phase A record, which Task 12's PR description links to.
 
-- [ ] **Step 1: Fetch the EDGAR filings**
+- [x] **Step 1: Fetch the EDGAR filings**
 
 This downloads 16 documents from sec.gov, so ask the user first, and ask for the User-Agent string to send: SEC requires a name and email. Do not invent one, and do not use an address from another context without asking.
 
@@ -2664,7 +2664,7 @@ Expected: one line per issuer, then `16 fetched, 0 failed`.
 
 At least 13 are required, to reach 50 distinct filings. For each failure (a name mismatch, or no such filing), replace that issuer in `ISSUERS` with another large filer of the same form, and run the script again; cached files are not fetched again. Record each replacement in `classification.md`.
 
-- [ ] **Step 2: Run the corpus**
+- [x] **Step 2: Run the corpus**
 
 From the worktree root:
 
@@ -2678,7 +2678,7 @@ Expected:
 
 Rendering-mode disagreement is a defect: investigate it like a false positive (Step 4).
 
-- [ ] **Step 3: Classify every new finding**
+- [x] **Step 3: Classify every new finding**
 
 Previously reviewed documents need no new classification: the 7 fixtures and the 20 META and RDDT primaries. First run the parity command from Task 12, Step 5 (`parity_impl.py`). It must report 0 mismatches, which confirms those documents' findings are unchanged from the reviewed evidence.
 
@@ -2698,7 +2698,7 @@ Then write one row per table in `classification.md`:
 
 The verdict is `genuine loss` when the token's text is absent from that table's output, and `false positive` otherwise. When many tables share one cause, as with repeated exhibit headers, one row may cover a run of tables; list their numbers. Also scan the reported-only tokens and note any that look like values.
 
-- [ ] **Step 4: Resolve each false positive**
+- [x] **Step 4: Resolve each false positive**
 
 For each false positive, run the v6 prototype on the same document to see whether it reports the same finding: `inspect_v6.py`, or `completeness_v6.analyze`.
 
@@ -2708,7 +2708,7 @@ For each false positive, run the v6 prototype on the same document to see whethe
   3. Rerun Step 2 and the full suite.
 - **The prototype agrees:** the spec's definitions cause it. Do not change the code. Record the case for the spec in Step 6, so Astra can decide.
 
-- [ ] **Step 5: Measure D3**
+- [x] **Step 5: Measure D3**
 
 From `results.json`, take the tables whose `word_losses` entry has `check1_value_failure: false`: these are the tables only a word check would flag.
 
@@ -2723,7 +2723,7 @@ In `classification.md`, record:
 - the summary's top missing words;
 - two examples of each kind.
 
-- [ ] **Step 6: Record Phase A in the spec**
+- [x] **Step 6: Record Phase A in the spec**
 
 In the main checkout, add a section "Phase A corpus run" to the spec, after "Evidence", and an entry in its review history. Record:
 

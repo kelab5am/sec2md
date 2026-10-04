@@ -1,6 +1,6 @@
 # sec2md Table Completeness Check Design
 
-Date: 2026-10-02 (revision 6, same day)
+Date: 2026-10-02 (revision 6, same day; Phase A corpus run recorded 2026-10-04)
 
 Status: Proposed, for review
 
@@ -21,7 +21,10 @@ losses it reveals belongs to the table-merge and header-rules spec.
 
 ## Review history
 
-Both review rounds are recorded in full, with reproductions, in the review record.
+Review rounds 1–5 are recorded in full, with reproductions, in the review
+record. The Phase A corpus run is recorded in this spec and in
+`../audits/2026-10-03-table-completeness-corpus/classification.md`, not in the
+review record.
 
 **Round 1** (revision 1 → 2):
 
@@ -61,6 +64,18 @@ Both review rounds are recorded in full, with reproductions, in the review recor
 | Finding | Change |
 |---|---|
 | 1. Row labels were reduced to letters, so `Note 1` and `Note 2` both became `note`, and two `Total` rows shared a key. Deleting the `Note 1` row paired its amount `9` with the surviving `Note 2` footnote. Deleting one `Total` row hid the loss. | Label keys keep identifier numbers (`note#1`, `note#2`). A pairing is proven only when its key is unique among both the source rows and the output body lines. Duplicate or uncertain labels go to the table-wide pass, where a value shortfall competing with a marker or reference is labelled *ambiguous*. Deleting the `Note 1` row now reports the value `9` missing. Deleting one of two `Total` rows reports it missing and ambiguous. |
+
+**Phase A corpus run** (2026-10-04; definitions unchanged; awaits Astra's review):
+
+| Recorded | Section |
+|---|---|
+| Corpus of 109 documents and 55 filings, with summary figures for the offline and EDGAR parts | Phase A corpus run |
+| Every false positive: 21 tables (20 false positive, 1 mixed), all definition cases; 0 implementation defects | Phase A corpus run |
+| Definition questions (page header and footer tables, CAT 7) and a detection gap (the BABA/TSM header shift) | Phase A corpus run |
+| D3 measurement (40% noise) and a recommendation | Phase A corpus run |
+| Overhead: Phase A accepts up to +25% on the fixtures in total; the 10% target moves to Phase B | Phase A corpus run, Evidence > Overhead, "Where it runs", Acceptance criteria |
+| Implementation review notes (a)–(g) for decision | Phase A corpus run |
+| Pointers to the record | Evidence (check 2 note), Policy and rollout, D1, D3 |
 
 ## Background
 
@@ -406,7 +421,8 @@ Two prototype mistakes during revision 4 show which rules are load-bearing:
 - **A trailing `(n)` is split off as a marker only when a number remains.**
   Without that condition, `$ (96)` lost its negative.
 
-Check 2 has 0 findings on real data only because of the data-row restriction.
+Check 2 had 0 findings on the revision 6 corpus (the Phase A run found 11
+tables, all false positives) only because of the data-row restriction.
 Without it, a stacked META equity statement's first-section period row matched
 the second section's repeated header line. Every later row then looked out of
 order (19 tables, 272 rows). AAPL's undetected `Maturities | 2023 | 2022` header
@@ -426,7 +442,407 @@ The revision 1 prototype added 16–23% to parse time, mostly from a per-cell
 parent walk for visibility. Revisions 2–4 compute hidden nodes once per
 document. The revision 6 prototype parses a second time to get snapshot
 metadata, so its timing is not representative; the implementation computes that
-metadata in the same parse. The 10% target below stands.
+metadata in the same parse. The 10% target now applies from Phase B; Phase A
+accepts up to +25% against unchanged `main` (see Phase A corpus run, Overhead).
+
+## Phase A corpus run
+
+Recorded 2026-10-04 from plan Task 11, on the implementation (branch
+`feat/table-completeness`, `f3639c0`). It awaits Astra's review, and Phase A is
+complete only after that review.
+
+- **Detail:** the per-table verdicts, the reported-only scan and the D3 sample
+  are in `../audits/2026-10-03-table-completeness-corpus/classification.md`.
+- **Source of the figures:** every figure comes from that folder's
+  `results.json`.
+
+### Corpus
+
+| Part | Documents | Distinct filings |
+|---|---|---|
+| Fixtures | 7 | 5 |
+| RCQ primary 10-Ks and 10-Qs (META 10, RDDT 10, NVDA 12) | 32 | 32 |
+| RCQ exhibits with at least two tables | 52 | (exhibits of the filings above) |
+| **Offline** | **91** | **37** |
+| EDGAR, new issuers | 18 | 18 |
+| **Total** | **109** | **55** |
+
+- **EDGAR manifest:**
+  `../audits/2026-10-03-table-completeness-corpus/edgar_manifest.json`. It
+  records the CIK, form, dates, accession, URL, size and SHA-256 of each
+  document.
+- **Issuers.** The user replaced the plan's 16 issuers on 2026-10-03.
+  - Dropped: XOM, BRK, PFE, WMT, JNJ, PRU and HD.
+  - Kept: JPM, KO, MSFT, TSLA, CAT, BAC, UNH, AMZN and GOOGL.
+  - Added: MU, NTRA, NFLX, CRM, CRDO, TSM, BABA, NVO and SPCX.
+- **Forms:**
+  - 10-Ks filed in 2025 for 12 issuers;
+  - 20-Fs filed in 2025 for TSM, BABA and NVO, which are foreign private
+    issuers;
+  - 10-Qs filed in 2025 for AMZN and GOOGL;
+  - for SPCX, the 10-Q filed in 2026, because it listed in 2026 and has no
+    10-K yet.
+- **Fetch.** All 18 documents were fetched, and no issuer had to be replaced.
+  JPM's and BAC's 10-Ks had dropped out of EDGAR's recent-filings list, so
+  `fetch_edgar.py` was extended, with the user's approval, to read the
+  older-filings pages.
+- **Duplicates.** Two RCQ NVDA primaries are the same filings as fixtures and
+  are skipped.
+
+### Summary figures
+
+| Measure | Offline 91 | EDGAR 18 | Corpus 109 |
+|---|---|---|---|
+| Tables checked | 2,131 | 2,489 | 4,620 |
+| Check 1: tables with value failures | 141 | 739 | 880 |
+| Check 1: value tokens | 185 | 1,486 | 1,671 |
+| … header role | 102 | 159 | 261 |
+| … label role | 38 | 824 | 862 |
+| … body role | 45 | 503 | 548 |
+| Reported tokens: reference | 41 | 60 | 101 |
+| Reported tokens: marker | 0 | 14 | 14 |
+| Ambiguous tokens | 0 | 0 | 0 |
+| Check 2: tables with findings | 0 | 11 | 11 |
+| Tables without output | 21 | 552 | 573 |
+| Documents whose two rendering modes disagree | 0 | 0 | 0 |
+
+- **No-output tables inside check 1:** the 573 tables without output and their
+  1,208 tokens are part of the 880 tables and 1,671 tokens. Without them,
+  check 1 has 307 tables and 463 tokens corpus-wide: 120 and 139 offline, 187
+  and 324 for EDGAR.
+- **Mode agreement:** normal and capture mode give identical findings in all
+  109 documents.
+- **Preview:** the 91 offline documents reproduce the plan's preview figures
+  exactly, including the D3 counts (178 tables with word losses, 54 of them
+  without a check-1 failure).
+- **Spread:** value failures occur in 44 of the 109 documents (32 offline, 12
+  EDGAR).
+- **Check 2:** the 11 check-2 tables hold 37 row findings. They are the first
+  check-2 findings on real data.
+
+### Classification
+
+The 7 fixtures and 20 META/RDDT primaries were reviewed in revision 6.
+`parity_impl.py` confirms that their findings are unchanged: 27 documents, 0
+finding mismatches, 0 header-row mismatches. Every other flagged table was
+classified: 775 tables in 82 documents.
+
+| Verdict | Tables | Value tokens |
+|---|---|---|
+| Genuine loss | 754 | 1,519 |
+| False positive | 20 | 22 |
+| Mixed: BABA 75, one genuine token and four false positive | 1 | (included above) |
+| **Total** | **775** | **1,541** |
+
+Genuine losses by cause (BABA 75 included):
+
+| Cause | Tables | Value tokens |
+|---|---|---|
+| Page header or footer table discarded on purpose (`parser.py:_is_footer_element`) | 573 | 1,208 |
+| Column merge drops a row-0 cell (`TableParser._merge_grid`): captions, period and column headers, paragraph cells, first-row amounts | 180 | 308 |
+| One-row PART normalization drops cells (`_one_row_table_to_text`, CAT 7) | 1 | 2 |
+| A space inserted in "March 31" at an inline-run boundary (`_one_row_table_to_text`) | 1 | 1 |
+
+The column-merge losses are the deferred defect from Background. They include
+amounts a reader needs: JPM's reported noninterest revenue (84,973 / 68,837 /
+61,985), opening balances in SPCX, TSLA and CRM, a first maturity bucket in
+SPCX, and CAT 33's first-row U.S. GAAP figures.
+
+### False positives
+
+**Implementation defects: 0.** For every false positive, the v6 prototype
+reports the same finding. Across all 82 documents, v6 agrees with the
+implementation on every finding. The one difference is a row-role label on TSM
+487, a genuine loss, where v6's row indexing is wrong. Every false positive is
+therefore a definition case, awaiting decision.
+
+Each subset was compared by running `completeness_v6.analyze(html,
+capture=False)` on the whole document and comparing every table that either
+side flags: value tokens and roles, reported classes and check-2 messages.
+
+- **JPM and BAC:** every finding is identical (341 of 341 and 195 of 195).
+- **The other 12 EDGAR documents with flagged tables (Part B):** every finding
+  is identical, except for the TSM 487 role label.
+- **The 64 offline documents** (12 NVDA primaries, 52 RCQ exhibits): 0
+  mismatches.
+- **CRDO, GOOGL, NFLX and NTRA:** these have no flagged table. They were compared
+  in the record's fix round: 0 differences, and the same counts of tables with
+  numbers (57, 70, 79 and 83).
+
+`parity_impl.py` covers the other 27 documents.
+
+**Every check-2 finding in the corpus is a false positive: all 11 tables, 37
+rows.** None of them is a real reordering.
+
+| Cause | Tables | Value tokens | Check-2 rows | Reported tokens | Candidate definition change |
+|---|---|---|---|---|---|
+| F1. Relative-positioned superscript glued to the digits or letters beside it ("Statement 11", "20341") | 8: KO 32, 43, 44, 50, 59, 63; NVO 34; CAT 61 | 14 | 0 | 0 | 4 tokens: see "Glued text"; 10 tokens: see "Raised digits" |
+| F2. Currency code glued (`RMB8,400` gives `400`) | 1: BABA 75 | 4 | 1 | 0 | See "Glued text" below |
+| F3. Prose dash glued ("par value -10") | 1: UNH 68 | 1 | 0 | 0 | See "Glued dash" below |
+| F4. Exhibit-index output tokenized by whole cell: "(See Exhibit 4.1)" gives `4.1)`, which is rejected | 5: BAC 358, AMZN 52, BABA 19, MU 68, MU 69 | 0 | 30 | 32 | Split identifiers on the output side in every mode, or treat an unmatched trailing ")" as punctuation |
+| F5. Three-part exhibit number ("Exhibit 10.11.2") split on the source side only | 2: KO 110, 112 | 1 | 1 | 1 | The same, plus an identifier pattern that takes three-part numbers |
+| F6. Check-2 pointer is inclusive, so a row matches the previous row's line again | 2: CAT 25, SPCX 41 | 0 | 2 | 0 | Search strictly after the pointer first |
+| F7. A headerless table's first data row became the header line, which check 2 skips | 1: CAT 143 | 0 | 1 | 0 | None proposed yet |
+| F8. Unit suffix glued (`1,097bps` gives `1`) | 1: JPM 367 | 2 | 2 | 0 | See "Glued text" below |
+| **Total** | **21** (BABA 75 included) | **22** | **37** | **33** | |
+
+The keys F1–F8 are classification.md's. The candidates in the table come from
+Parts A and B of the classification. The exception is the three-part identifier
+pattern, which is the record writer's. The option sets under "Raised digits" and
+"Glued dash" below give their own sources.
+
+Cell text joins inline nodes without a space, while TableParser joins them with
+one. The cases differ by the kind of boundary, so they need separate decisions.
+
+- **Glued text** (letter and digit meet at an element boundary): F2 (BABA 75),
+  F8 (JPM 367) and 4 of the 14 superscript tokens. Those 4 are KO 32, 43 and
+  44 ("equivalents1,2" and "Fair Value1,2" give `2`) and KO 59's `5`
+  ("Total4,5").
+  - Candidates (Part A): insert a space where an inline-element boundary
+    separates a digit from a letter, or let the tokenizer accept a number
+    followed by a unit suffix (F8 only).
+  - Either must keep NVDA's kerned digits (`1,2<span>34</span>`) concatenated,
+    which is a review case.
+  - The same mechanism also hides values: 12 of JPM 367's 15 "Nbps" cells
+    yield no source token at all, so those values are never checked.
+- **Raised digits** (the other 10 superscript tokens). These join a digit or a
+  comma to a digit, so the candidates above do not apply.
+  - The cases: KO 50 ("31," + "1" gives `311`), KO 59 ("2098" + "2"), KO 63
+    ("2024" + "2"), NVO 34 (six patent years such as "2034" + "1") and CAT 61
+    ("Statement 1" + "1").
+  - Each superscript is a relative-positioned span with a negative `top`
+    (-2.44 to -3.15 pt). Definitions deliberately do not treat relative
+    positioning as a marker, because NVDA kerns digits with it.
+  - In the six NVDA fixtures, the 126 relative-positioned digit spans carry no
+    `top` (checked in the record's fix round).
+  - Options: (a) and (b) are the record writer's; (c) traces to Part B's note 6.
+    - (a) treat a relative-positioned digit span with a negative `top` as a
+      footnote marker, after checking NVDA's kerning on more filings;
+    - (b) accept these as known false positives;
+    - (c) read them literally as genuine losses, since the fused source token
+      (`20341`) is absent from the output. classification.md calls this "Two
+      readings".
+- **Glued dash** (F3, UNH 68). In
+  "par value -`<ix:nonfraction>10</ix:nonfraction>`" the dash ends one text
+  node and the number sits in the next element. Cell text reads -10, but the
+  XBRL fact is +10, and the output "par value - 10" gives 10. None of the
+  candidates above applies.
+  - Options (the record writer's):
+    - (a) read a dash as a minus sign only when it touches the digits within
+      one text node. A real minus sign written outside its XBRL element would
+      then read as positive.
+    - (b) accept it as a known false positive (1 token in the corpus);
+    - (c) read it literally as a genuine loss of `-10`.
+- **Identifier wording.** Definitions say the identifier rule "applies on the
+  source and output sides". The implementation and v6 do not apply it to
+  exhibit-index output cells, header lines or check-2 lines. Either the wording
+  or the definition should change.
+- **Reported references.** 61 of the 101 reported references are also false
+  positives, from the same identifier asymmetry. 33 of them are the reported
+  tokens in the F4/F5 rows above. They are reported only. None of the 115
+  reported tokens is a real value in a reported class.
+- **Tokenizer blind spot.** A number followed by an unmatched ")" ("due 2029)")
+  is dropped on both sides, so its loss goes undetected.
+
+### Definition questions from deliberate parser behaviour
+
+These recommendations are for Astra and the user. Each one says where it comes
+from. Part B of the classification raised both questions without proposing
+options. Parts A and C also raised question 1, with options.
+
+**1. Page header and footer tables.** All 573 tables without output are page
+furniture that the parser removes on purpose.
+`_process_absolutely_positioned_container` passes an absolutely positioned
+`bottom:0; width:100%` child to `_is_footer_element`, then only reads a page
+number from it.
+
+- **Where:** JPM 334, BAC 180, NVO 38 (a running page header) and the NVDA
+  exhibits 21, with 1,208 value tokens in all.
+- **Task 6 watch item:** no HTML table inside a positioned container was
+  falsely reported as "no output". Every no-output table is a page header or
+  footer that the parser deliberately discards.
+- **Content:** page numbers and running titles in JPM, BAC and NVO. In three
+  NVDA policy exhibits, the footer is the only statement of the effective or
+  last-updated date.
+- **Scope:** these are HTML tables, so the positioned-div deferral does not
+  cover them.
+- **Phase B effect:** strict enforcement would fail JPM, BAC, NVO and the three
+  NVDA exhibits on these tables. NVO and the three exhibits have no other
+  genuine value loss, so they would keep failing after the table-merge fixes
+  land.
+- **Options:** (a) and (b) come from Parts A and C; (c) is the record writer's.
+  - (a) Keep them as enforced findings. Phase B then fails these filings until
+    the parser keeps footer text or the expected-failure list accepts them.
+  - (b) Exclude table units inside elements that `_is_footer_element`
+    classifies as page furniture, as hidden nodes are excluded.
+  - (c) Keep the units, but report their tokens only, as a page-furniture class
+    beside marker and reference. The class is decided by the parser's own
+    `_is_footer_element` test.
+- **Recommendation: (c).** This is the record writer's synthesis; Parts A and C
+  gave options without choosing.
+  - Strict stays usable on filings with table-based page footers, and the
+    check follows the parser's own decision.
+  - The NVDA effective-date losses stay visible in diagnostics.
+  - Whether the parser should keep footer text is a parser question for a
+    separate spec. A footer `<div>` without a table loses the same text and
+    produces no finding (an NVDA exhibit shows this).
+
+**2. CAT 7, a one-row PART table.** The PART branch of
+`_one_row_table_to_text` renders "Part III | 2025 Annual Meeting Proxy Statement
+… within 120 days …" as "PART III" only, losing `2025` and `120`. The ITEM
+branch keeps its title.
+
+- **Options** (the record writer's):
+  - (a) Keep it as a genuine finding, and have the PART branch keep the other
+    cells, in the table-merge and header-rules spec.
+  - (b) Treat the normalization as intended, and exclude one-row PART heading
+    tables from the units.
+- **Recommendation: (a).** This is the record writer's synthesis. The dropped
+  cell says where Part III's information comes from. One table in 109 documents
+  can sit on the expected-failure list until the parser change lands.
+
+### A detection gap: the BABA/TSM header shift
+
+This is not deliberate parser behaviour. It is a loss that neither check
+detects, caused by the deferred column-merge defect. Part B of the
+classification found it and rated it its most material finding for trading
+use, but did not propose options.
+
+The `_merge_grid` merge that drops captions also merges a header-only column
+into the column on its left. Year and currency headers then stand one column
+left of their values.
+
+- **Example, BABA 24 (income statement):** FY2023 revenue sits under "2024",
+  FY2024's 941,168 under "2025", and FY2025's RMB 996,347 under a blank header.
+  A reader would take 941,168 as FY2025 revenue.
+- **Extent:** a rough heuristic flags 66 tables (36 BABA, 30 TSM; not each one
+  verified), and it misses some, such as BABA 8 and 24.
+- **Detection:** check 1 flags these tables only for the lost caption token
+  (`31`). Check 2 excludes header lines by design.
+- **Options** (the record writer's):
+  - (a) Leave it to the table-merge and header-rules spec, with BABA 24 and TSM
+    79 and 312 as regression cases.
+  - (b) Add a report-only header-alignment check that compares each source
+    header cell's column span with the output column its text lands in.
+  - (c) Record it as a known limit only.
+- **Recommendation: (a) with (b).** This is the record writer's synthesis.
+  - Make it a first case of the table-merge and header-rules spec, and define
+    the alignment check there, since no Phase A check can see it.
+  - Until then, passing check 1 and check 2 is not proof that a value sits
+    under its correct period. `README.md` and `docs/usage/direct-conversion.md`,
+    where they describe what strict does not check, should say so.
+
+### D3 measurement
+
+- **Population:** 212 tables lose words but have no check-1 failure, with 1,020
+  missing words. That is out of 999 tables with any word loss.
+- **Sample:** every 7th table from index 3 in document order (k = 7, offset 3).
+  That gives 30 of the 212, covering all four groups that have such tables.
+- **Result:** 18 genuine text losses and 12 noise, a **noise rate of 40%**
+  (95% Wilson interval about 25–58%).
+  - Genuine: column headers and table titles dropped by the column merge (12);
+    "Filed Herewith" X marks fused into another column (3); signature dates
+    dropped (3).
+  - Noise: the header of an all-empty column removed with the column (8);
+    words split at inline-run boundaries (4).
+  - Header-fusion reordering, the expected noise, caused none.
+- **Top missing words:**
+  - All 999 tables: form 331, jpmorgan 286, chase 286, co 286, of 250, ended
+    186, bank 183, america 183, march 140, december 99. These come from page
+    header and footer tables and from lost period headers, which already fail
+    check 1.
+  - The 212 word-only tables: herewith 47, filed 46, by 31, date 21.
+- **Examples:**
+  - Genuine: TSM's executive-compensation headers ("Salary", "Bonus", …) are
+    lost, leaving five amounts unlabelled.
+  - Genuine: RDDT's "Filed Herewith" X marks now sit under the exhibit
+    "Number" column.
+  - Noise: MSFT's "None" is rendered "N one".
+  - Noise: META's empty "Filed Herewith" column is removed with its header.
+- **Recommendation (from Part C of the classification), for Astra and the
+  user:**
+  - Do not add an enforced word check. 40% noise is too high for a gate, and D1
+    and D4 enforce values only.
+  - Add a per-table word-multiset measure as a report-only diagnostic in Phase
+    B, with two noise filters. One joins intra-word splits and tokenizes
+    Unicode letters. The other ignores header words over columns with no body
+    content.
+  - Re-measure on this corpus before adopting it, with a target below 10%
+    noise.
+  - Fixing the column-merge and empty-column rules in the table-merge spec
+    removes most genuine word losses. The measure then serves mainly as a
+    regression net.
+
+### Overhead
+
+- **Decision.** Phase A accepts up to +25% parse time against unchanged `main`
+  on the fixtures in total, by the user's decision of 2026-10-03. The 10% target
+  moves to Phase B. "Where it runs" and the acceptance criteria now say this.
+- **Corpus timing (indicative).** 18 EDGAR documents, normal mode, best of two
+  runs:
+  - `get_pages()` in total: 51.4 s with the checks off and 59.8 s with them on,
+    +16.4% (from the unrounded totals);
+  - `check_tables()`: 6.7 s in total, the slowest 1.14 s (BAC);
+  - the longest table output: 68 lines (JPM).
+
+  Other jobs shared the machine. The baseline is the branch with the checks
+  off, not unchanged `main`, so this is not the acceptance measure.
+- **Fixtures.** Plan Task 12 measures the overhead against unchanged `main` on
+  the fixtures and reports it in the PR.
+
+### Implementation review notes for decision
+
+These come from the per-task code reviews and are recorded for Astra.
+
+- **The plan's code.** In each case the implementation is the plan's code as
+  written, so it follows the plan.
+- **v6.** For (b) to (e), the plan's code also matches the v6 prototype, which
+  behaves identically. v6 has no check 3, so (f) and (g) have no v6
+  counterpart.
+- **v6 and (a).** v6 applies its `€`/`£` translation only inside its own
+  tokenizer, so the rendering effect in (a) could not arise there. The plan
+  follows this spec, which puts the change into `normalize_numeric_token`.
+
+The notes:
+
+- **(a) User decision, Task 1: euro and pound rendering.** The `€`/`£` change to
+  `normalize_numeric_token` also changes Markdown rendering, because
+  `table_parser` uses that function to merge split numeric cells.
+  - `(€567` + `)` now renders as one cell, `(€567)`, as `$` already did.
+  - A TableParser test pins it, and the user accepted it on 2026-10-03.
+  - The spec's statement that rendering is unchanged should carry this
+    carve-out. The nearest sentence is the Purpose's "It does not change how
+    tables are parsed."
+  - The acceptance criterion on identical rendering with the checks on and off
+    is unaffected, because the normalizer applies either way.
+- **(b) Footnote markers that span inline nodes.** `<sup>1<span>0</span></sup>`
+  yields the marker tokens `1` and `0`, not `10`, because marker pieces are
+  joined with a space. The spec says text nodes are concatenated.
+  - Marker tokens are report-only. In rare cases a split digit could claim a
+    position a value needed.
+  - None of the corpus false positives comes from it.
+- **(c) A trailing marker after a short negative.** In `(96) (1)` the marker
+  is not split off, so `(1)` stays a numeric `-1`; `(196) (1)` splits correctly.
+  A surviving marker is then reported missing, and its `-1` can cover a lost
+  value `-1` in pass 2.
+- **(d) Check-2 row numbers.** "source row <i>" counts data rows, not source
+  rows as Definitions has it: JPM 367's data rows 9 and 29 are table rows 12
+  and 35. Either the spec wording or the numbering should change.
+- **(e) Check-2 search cost.** The search is quadratic on very large lossy
+  tables: 8 s for a synthetic 2,000-row table in which every row lost a column.
+  The corpus timing shows no quadratic blowup on real filings (slowest
+  `check_tables()` 1.14 s, longest table 68 lines), so a parity-preserving
+  optimization is proposed as a Phase B follow-up.
+- **(f) `numeric_recall` and list markers.** Recall comes out low when an
+  output line starts with "N. " ("2. Summary of …"), because
+  `_visible_markdown_text` strips list-marker-shaped numbers. A lossless probe
+  gave 0.75. Recall is diagnostic only.
+- **(g) Check 3's normalizer** (plan reviewer note 2). The accuracy suite's
+  `normalize_numbers` lives in `tests/` and cannot be imported from `src/`.
+  The check-3 sentence "the same way as the accuracy suite's
+  `normalize_numbers`" should change to `quality._normalized_numbers()` over
+  the visible source and Markdown text that `build_diagnostics()` already
+  computes.
 
 ## Diagnostics and API
 
@@ -475,8 +891,9 @@ numeric_recall: float | None = None                 # check 3
   - The checks run in `Parser.get_pages()` after page assembly. They need no
     elements, so they also run with `include_elements=False`.
   - Hidden nodes are computed once per document.
-  - Target overhead is at most 10% of parse time on the fixtures, measured in
-    the implementation PR.
+  - Overhead against unchanged `main` on the fixtures in total is at most +25%
+    of parse time in Phase A, by the user's decision of 2026-10-03, measured in
+    the implementation PR. The 10% target applies from Phase B.
 
 ## Policy and rollout
 
@@ -488,7 +905,8 @@ numeric_recall: float | None = None                 # check 3
      disappears without the list being updated.
    - Run the checks on a wider corpus of at least 50 filings and record any false
      positives in this spec. The 7 fixtures and 20 RCQ filings above count
-     toward that total.
+     toward that total. Done: see "Phase A corpus run" (109 documents, 55
+     filings), which awaits Astra's review.
 2. **Phase B (after the table-merge and header-rules spec lands).**
    - Strict raises `ParseQualityError` on value-class check-1 failures.
    - The expected-failure list should then be empty, or contain only entries this
@@ -577,7 +995,9 @@ Fixture tests:
 - Diagnostics and XLSX results remain picklable, and existing positional
   construction of `ParseDiagnostics`, `XlsxExportResult` and `XlsxTableResult`
   still works.
-- Parse-time overhead is 10% or less on the fixtures.
+- Parse-time overhead against unchanged `main` is +25% or less on the fixtures
+  in total in Phase A, by the user's decision of 2026-10-03. The 10% target
+  moves to Phase B.
 - README and `docs/usage/direct-conversion.md` describe what strict does and does
   not check, including the size thresholds.
 
@@ -591,6 +1011,9 @@ Fixture tests:
     It would also fail 18 of the 20 RCQ META/RDDT filings, breaking callers
     until the parser fixes land.
   - Check 2 stays report-only either way until the wider corpus run.
+  - Phase A corpus run: all 37 check-2 rows (11 tables) are false positives,
+    so check 2 stays report-only until their causes are decided. F4–F7 cause
+    34 of the rows, and the glued-text cases F2 and F8 cause 3.
 - **D2. Diagnostics API.**
   - Recommended: add `convert_with_diagnostics(source, **kwargs) ->
     tuple[str | list[Page], ParseDiagnostics]` and leave the existing functions'
@@ -601,6 +1024,8 @@ Fixture tests:
   plain-text `(1)`. A per-table word-multiset check would catch header text
   directly, at the cost of more noise from header fusion.
   - Recommended: measure it in the Phase A corpus run before deciding.
+  - Measured: see "Phase A corpus run", D3 measurement (40% noise in a sample
+    of 30), with a recommendation.
 - **D4. Token classes.**
   - Recommended: the per-token context classes above. Markers and references
     are reported, and every other token is enforced regardless of digit count.

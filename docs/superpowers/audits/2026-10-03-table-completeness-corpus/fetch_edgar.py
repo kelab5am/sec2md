@@ -22,25 +22,30 @@ import time
 
 import requests
 
-# (ticker, CIK, name check, form, filing year). Chosen for layout variety: banks and an
-# insurer, energy, industrials, consumer, pharma, technology, and several filing agents.
+# (ticker, CIK, name check, form, filing year). Issuer list chosen by the user on
+# 2026-10-03, replacing the plan's original 16 (XOM, BRK, PFE, WMT, JNJ, PRU and HD
+# dropped). TSM, BABA and NVO are foreign private issuers, so their 20-F annual reports
+# are used. SPCX (SpaceX) listed in 2026 and has a 10-Q but no 10-K yet. CIKs come from
+# https://www.sec.gov/files/company_tickers.json.
 ISSUERS = [
     ("JPM", 19617, "JPMORGAN", "10-K", "2025"),
-    ("XOM", 34088, "EXXON", "10-K", "2025"),
-    ("BRK", 1067983, "BERKSHIRE", "10-K", "2025"),
     ("KO", 21344, "COCA COLA", "10-K", "2025"),
-    ("PFE", 78003, "PFIZER", "10-K", "2025"),
-    ("WMT", 104169, "WALMART", "10-K", "2025"),
     ("MSFT", 789019, "MICROSOFT", "10-K", "2025"),
     ("TSLA", 1318605, "TESLA", "10-K", "2025"),
-    ("JNJ", 200406, "JOHNSON & JOHNSON", "10-K", "2025"),
     ("CAT", 18230, "CATERPILLAR", "10-K", "2025"),
-    ("PRU", 1137774, "PRUDENTIAL FINANCIAL", "10-K", "2025"),
     ("BAC", 70858, "BANK OF AMERICA", "10-K", "2025"),
-    ("HD", 354950, "HOME DEPOT", "10-K", "2025"),
     ("UNH", 731766, "UNITEDHEALTH", "10-K", "2025"),
+    ("MU", 723125, "MICRON", "10-K", "2025"),
+    ("NTRA", 1604821, "NATERA", "10-K", "2025"),
+    ("NFLX", 1065280, "NETFLIX", "10-K", "2025"),
+    ("CRM", 1108524, "SALESFORCE", "10-K", "2025"),
+    ("CRDO", 1807794, "CREDO TECHNOLOGY", "10-K", "2025"),
+    ("TSM", 1046179, "TAIWAN SEMICONDUCTOR", "20-F", "2025"),
+    ("BABA", 1577552, "ALIBABA", "20-F", "2025"),
+    ("NVO", 353278, "NOVO NORDISK", "20-F", "2025"),
     ("AMZN", 1018724, "AMAZON", "10-Q", "2025"),
     ("GOOGL", 1652044, "ALPHABET", "10-Q", "2025"),
+    ("SPCX", 1181412, "SPACE EXPLORATION", "10-Q", "2026"),
 ]
 PAUSE = 0.25
 
@@ -52,22 +57,39 @@ def get(session, url):
     return response
 
 
+def _match(data, filings, cik, form, year):
+    """The most recent filing of form filed in year in one columnar filings block, or None."""
+    for i, filed_form in enumerate(filings["form"]):
+        if filed_form == form and filings["filingDate"][i].startswith(year):
+            accession = filings["accessionNumber"][i]
+            document = filings["primaryDocument"][i]
+            return {
+                "company": data["name"], "cik": cik, "form": form,
+                "filing_date": filings["filingDate"][i], "report_date": filings["reportDate"][i],
+                "accession": accession,
+                "url": f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession.replace('-', '')}/{document}",
+            }
+    return None
+
+
 def resolve(session, cik, name_check, form, year):
     data = get(session, f"https://data.sec.gov/submissions/CIK{cik:010d}.json").json()
     if name_check.upper() not in data["name"].upper():
         raise ValueError(f"CIK {cik} is {data['name']!r}, expected {name_check!r}")
-    recent = data["filings"]["recent"]
-    for i, filed_form in enumerate(recent["form"]):
-        if filed_form == form and recent["filingDate"][i].startswith(year):
-            accession = recent["accessionNumber"][i]
-            document = recent["primaryDocument"][i]
-            return {
-                "company": data["name"], "cik": cik, "form": form,
-                "filing_date": recent["filingDate"][i], "report_date": recent["reportDate"][i],
-                "accession": accession,
-                "url": f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession.replace('-', '')}/{document}",
-            }
-    raise ValueError(f"CIK {cik} has no {form} filed in {year} in its recent filings")
+    entry = _match(data, data["filings"]["recent"], cik, form, year)
+    if entry:
+        return entry
+    # Frequent filers (banks issuing structured notes) push older filings out of "recent";
+    # SEC lists the rest in extra pages with the same columns. Read only pages whose date
+    # range covers the year, newest first.
+    for page in data["filings"].get("files", []):
+        if not (page.get("filingFrom", "") <= f"{year}-12-31" and page.get("filingTo", "") >= f"{year}-01-01"):
+            continue
+        older = get(session, f"https://data.sec.gov/submissions/{page['name']}").json()
+        entry = _match(data, older, cik, form, year)
+        if entry:
+            return entry
+    raise ValueError(f"CIK {cik} has no {form} filed in {year} in its filings")
 
 
 def main():
