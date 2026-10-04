@@ -142,7 +142,10 @@ Strict raises in these cases:
 
 Strict does not check that every source number reached the output. Table
 completeness checks do that for each table, and they are reported but not
-enforced yet. They appear in these `ParseDiagnostics` fields:
+enforced yet. Passing them does not prove that a value sits under its correct
+column header: a column merge can shift headers one column away from their
+values, which neither check detects yet. They appear in these
+`ParseDiagnostics` fields:
 
 - `table_completeness_failures`: numbers missing from a table's output
 - `table_completeness_reported`: lost footnote markers and references such as
