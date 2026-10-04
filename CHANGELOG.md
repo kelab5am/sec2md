@@ -2,6 +2,19 @@
 
 ## 0.1.22+rcq.3 (unreleased, pending review)
 
+- Table completeness checks, report-only: each visible table's Markdown is
+  compared with its source table.
+  - `ParseDiagnostics` gains `table_completeness_failures`,
+    `table_completeness_reported`, `table_structure_differences`,
+    `tables_checked` and `numeric_recall`.
+  - Failures are logged as warnings under `strict` and `warn`; nothing raises
+    yet. `quality_policy="off"` and `Parser(table_checks=False)` skip the checks.
+  - `convert_with_diagnostics()` returns the output with its diagnostics.
+  - `export_xlsx()` results gain `parse_diagnostics` and a per-table
+    `completeness`.
+- Quality checks normalize euro and pound amounts like dollar amounts. Because
+  table merging uses the same normalizer, a split euro or pound negative such
+  as `(€567` + `)` now merges into one cell, as dollar amounts already did.
 - Added XLSX table export: `export_xlsx()` and the `sec2md[xlsx]` extra
   (pull requests #1 and #2).
 - `chunk_section()` no longer returns neighbouring sections' text, element IDs

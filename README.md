@@ -132,6 +132,28 @@ numbers are detected. `"warn"` returns the output and records quality warnings;
 `"off"` disables quality enforcement for parser experimentation. A strict
 failure exposes the immutable `ParseQualityError.diagnostics` object.
 
+Strict raises in these cases:
+
+- a source with at least 1,000 visible characters produces empty output
+- a source with at least 10,000 visible characters keeps less than 10% of them
+- the output contains replacement (U+FFFD) or C1 control characters
+- an element lacks a source-node mapping
+- a number in an element cannot be traced to its source nodes
+
+Strict does not check that every source number reached the output. Table
+completeness checks do that for each table, and they are reported but not
+enforced yet. They appear in these `ParseDiagnostics` fields:
+
+- `table_completeness_failures`: numbers missing from a table's output
+- `table_completeness_reported`: lost footnote markers and references such as
+  `Note 9`, which are never enforced
+- `table_structure_differences`: rows or values that changed order
+- `numeric_recall`: the share of visible source numbers present in the output
+
+Each failure is also logged as a warning. Use `convert_with_diagnostics()` to get
+the output together with its diagnostics. `quality_policy="off"` skips these
+checks.
+
 Byte decoding is deterministic: a Unicode BOM wins, followed by a recognized
 HTTP `charset`, an HTML/XML declaration in the first 8 KiB, strict UTF-8, and
 finally Windows-1252 fallback. Unsupported explicit encodings fail rather than

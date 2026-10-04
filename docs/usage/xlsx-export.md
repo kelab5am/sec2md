@@ -40,8 +40,12 @@ Bytes/text are offline; `base_url` resolves links without fetching them. URL inp
 fetches only that document, using `user_agent` when supplied. Linked images,
 exhibits and related filings are not fetched.
 
-The frozen `XlsxExportResult` contains `path`, `status`, `tables` and `diagnostics`.
-Each `XlsxTableResult` contains `ordinal`, `sheet_name`, `status` and `issues`.
+The frozen `XlsxExportResult` contains `path`, `status`, `tables`, `diagnostics`
+and `parse_diagnostics`, the parser's full `ParseDiagnostics`. Each
+`XlsxTableResult` contains `ordinal`, `sheet_name`, `status`, `issues` and
+`completeness`. That last field holds the table's completeness findings: numbers
+its Markdown lost and rows that changed order. Completeness findings do not
+change `status` or `issues` yet.
 Overall status is `complete`, `needs_review`, or `no_tables`; table status is
 `exported`, `needs_review`, or `source_text_only`.
 
