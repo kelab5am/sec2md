@@ -7,9 +7,13 @@
   - `ParseDiagnostics` gains `table_completeness_failures`,
     `table_completeness_reported`, `table_structure_differences`,
     `tables_checked` and `numeric_recall`.
-  - Under `strict` and `warn`, each document with failures logs one summary
-    warning and each failure at INFO level; nothing raises yet.
+  - Under `strict` and `warn`, each document with missing table values logs one
+    summary warning and each value failure at INFO level; lost markers,
+    references and row-order findings are not logged. Nothing raises yet.
     `quality_policy="off"` and `Parser(table_checks=False)` skip the checks.
+  - If the missing-value and row-order checks (`check_tables()`) fail, the
+    error is logged and the conversion continues without a table report, as if
+    the checks were off. An error in `numeric_recall` still propagates.
   - `convert_with_diagnostics()` returns the output with its diagnostics.
   - `export_xlsx()` results gain `parse_diagnostics` and a per-table
     `completeness`.
