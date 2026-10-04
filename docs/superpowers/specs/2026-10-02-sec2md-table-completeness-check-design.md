@@ -810,6 +810,19 @@ The notes:
   `table_parser` uses that function to merge split numeric cells.
   - `(€567` + `)` now renders as one cell, `(€567)`, as `$` already did.
   - A TableParser test pins it, and the user accepted it on 2026-10-03.
+  - **Strict's numeric trace changes too.** `normalize_numeric_token` also
+    feeds strict's numeric trace (`trace_numeric_failures`), so strict
+    pass/fail changes the same way.
+    - A euro or pound amount whose currency sign sits in its own cell under a
+      spanning header (`€ | 1,234`, `€ | (567 | )`, `£ | (567 | )`) falsely
+      failed strict as "untraceable" on `main`. It now passes.
+    - Rare split layouts that already fail for `$` now fail for `€` and `£`
+      too: those where the `)` cell sits under its own `<th>`, such as
+      `(€567 | )` and `(£5.6 | )%`.
+    - No corpus document changed: 111 documents gave identical strict warnings
+      on `main` and on the branch.
+    - A strict test now pins the common layout, and the CHANGELOG discloses
+      the change. The user decided this on 2026-10-04.
   - The spec's statement that rendering is unchanged should carry this
     carve-out. The nearest sentence is the Purpose's "It does not change how
     tables are parsed."

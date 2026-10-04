@@ -2766,7 +2766,7 @@ The spec's acceptance criteria require the README and `docs/usage/direct-convers
 - Consumes: everything above.
 - Produces: user documentation, and the figures for the PR description.
 
-- [ ] **Step 1: README**
+- [x] **Step 1: README**
 
 In `README.md`, under "### Input, quality, and exhibit links", insert this after the paragraph ending "A strict failure exposes the immutable `ParseQualityError.diagnostics` object.":
 
@@ -2794,7 +2794,7 @@ the output together with its diagnostics. `quality_policy="off"` skips these
 checks.
 ```
 
-- [ ] **Step 2: Direct-conversion usage**
+- [x] **Step 2: Direct-conversion usage**
 
 In `docs/usage/direct-conversion.md`, under "### Quality policy and supported input", insert this after the paragraph ending "structured quality evidence.":
 
@@ -2818,7 +2818,7 @@ print(diagnostics.tables_checked, diagnostics.numeric_recall)
 ```
 ````
 
-- [ ] **Step 3: XLSX usage**
+- [x] **Step 3: XLSX usage**
 
 In `docs/usage/xlsx-export.md`, replace
 
@@ -2838,7 +2838,7 @@ its Markdown lost and rows that changed order. Completeness findings do not
 change `status` or `issues` yet.
 ```
 
-- [ ] **Step 4: CHANGELOG**
+- [x] **Step 4: CHANGELOG**
 
 In `CHANGELOG.md`, add to the top of the "## 0.1.22+rcq.3 (unreleased, pending review)" list:
 
@@ -2856,7 +2856,7 @@ In `CHANGELOG.md`, add to the top of the "## 0.1.22+rcq.3 (unreleased, pending r
 - Quality checks normalize euro and pound amounts like dollar amounts.
 ```
 
-- [ ] **Step 5: Parity with the reviewed prototype, and overhead against `main`**
+- [x] **Step 5: Parity with the reviewed prototype, and overhead against `main`**
 
 Run both from the worktree root. The scripts are in the main checkout's docs folder; the worktree has the same files from `main`.
 
@@ -2874,7 +2874,7 @@ python docs/superpowers/audits/2026-10-02-repo-audit/prototypes/v6/overhead_vs_m
 
 Expected: one line per fixture, and a `total` line at or below `+25.0%`. The validated implementation measured +20.6% in total, with AAPL highest at +24.0%. If the total exceeds +25%, stop and report it: the overhead limit is a user decision, not something to work around. Copy both outputs into the PR description.
 
-- [ ] **Step 6: Content before and after, against `main`**
+- [x] **Step 6: Content before and after, against `main`**
 
 The checks only report, so the Markdown must be exactly what `main` produces. The accuracy suite measures that content: words, numbers and financial rows kept, for each fixture. Run it on both checkouts from the worktree root:
 
@@ -2896,7 +2896,7 @@ Expected: the line `fixtures 7: 0 with a changed score or hash`, and exit status
 
 Any changed score or `DIFF` is a rendering change: find and fix it before opening the PR. Copy the output into the PR description.
 
-- [ ] **Step 7: Final checks and commit**
+- [x] **Step 7: Final checks and commit**
 
 Run: `python -m pytest -q` and `python -m ruff check src tests`
 Expected: all pass.
