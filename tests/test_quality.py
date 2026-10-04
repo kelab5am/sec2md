@@ -304,7 +304,14 @@ def test_strict_traces_amount_whose_currency_sign_has_its_own_cell(sign):
     # The source text reads "€ 1,234" and "€ (567 )" as single tokens. Unless the
     # normalizer strips euro and pound signs as it strips dollar signs, those source
     # numbers vanish and strict rejects the output's 1234 and -567 as untraceable.
-    convert_to_markdown(OWN_CELL_CURRENCY.format(sign=sign))
+    markdown = convert_to_markdown(OWN_CELL_CURRENCY.format(sign=sign))
+
+    # Strict passing is not enough: each amount must reach its row. Column
+    # alignment is not asserted, since euro and pound headers still shift.
+    lines = markdown.splitlines()
+    for label, amount in [("Revenue", "1,234"), ("Operating loss", "(567)"), ("Net loss", "(89)")]:
+        row = next((line for line in lines if line.startswith(f"| {label} |")), "")
+        assert amount in row, markdown
 
 
 LOSSY_TABLE = ("<p>" + "Revenue grew this year. " * 50 + "</p>"
