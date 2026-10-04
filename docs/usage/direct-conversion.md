@@ -38,6 +38,8 @@ table report, so the diagnostics look as they do with the checks off. Passing
 strict and the table completeness checks does not prove that a value sits under
 its correct column header: a column merge can shift headers one column away from
 their values, which neither strict nor these checks detect yet.
+`numeric_recall` can read low when an output line starts with a number shaped
+like a list marker (`2. Summary …`).
 
 ```python
 from sec2md import convert_with_diagnostics
