@@ -527,3 +527,550 @@ def test_extended_join_writes_currency_like_dollar_and_closes_percent_negatives(
     assert join([], "(3.2", [")%"], policy=EXTENDED) == "(3.2)%"
     assert join(["RMB"], "941,168", []) == "RMB 941,168"   # LEGACY: a plain space join
     assert join([], "(3.2", [")%"]) == "(3.2 )%"
+
+
+# --- Source grid, membership, R1, R2, R3.5-R3.6 ------------------------------------------
+
+def _parser(html):
+    return TableParser(_table(html))
+
+
+def _membership(parser):
+    return [(column.owners, column.markers) for column in parser.columns]
+
+
+def _header_texts(parser):
+    """Per output column, each header-zone row's header-cell texts (R6's inputs)."""
+    return [
+        [[cell.text for cell in cells] for cells in parser.column_header_cells(index)]
+        for index in range(len(parser.columns))
+    ]
+
+
+def _body_rows(parser):
+    return [row for index, row in enumerate(parser.to_matrix())
+            if parser.roles.role(index) != "header"]
+
+
+# edgar:CRM-10-K-2025-03-05.htm table 26, minimal: the caption's origin sits in a spacer
+# column, and its span covers 2025 and 2024 but not 2023 (as in the source).
+CRM_26_HTML = (
+    '<table><tr><td>4</td><td colspan="5">Fiscal Year Ended January 31,</td></tr>'
+    '<tr><td></td><td></td><td colspan="2">2025</td><td colspan="2">2024</td>'
+    '<td colspan="2">2023</td></tr>'
+    "<tr><td>Net cash provided by operating activities</td><td></td><td>$</td><td>13,092</td>"
+    "<td>$</td><td>10,234</td><td>$</td><td>7,111</td></tr>"
+    "<tr><td>Net cash used in investing activities</td><td></td><td colspan=\"2\">(3,163)</td>"
+    '<td colspan="2">(1,327)</td><td colspan="2">(1,989)</td></tr></table>'
+)
+
+
+def test_row_roles_are_decided_once_on_the_cleaned_source_grid():
+    from sec2md.table_parser import _origin_cells
+    from sec2md.table_roles import row_roles
+
+    parser = _parser(CRM_26_HTML)
+    assert parser.roles == row_roles(_origin_cells(parser.source_grid))
+    assert parser.roles.header_rows == (0, 1)
+    assert parser.roles.data_rows == (2, 3)
+    # Every source slot still points at its extracted cell: merges never rewrite the grid.
+    extracted = {id(cell) for row in parser.cells for cell in row}
+    assert all(slot is None or id(slot.cell) in extracted
+               for row in parser.source_grid for slot in row)
+
+
+def test_crm_26_caption_and_years_keep_their_own_columns():
+    parser = _parser(CRM_26_HTML)
+    assert _membership(parser) == [([0], []), ([1], []), ([2, 3], []), ([4, 5], []), ([6, 7], [])]
+    assert _header_texts(parser) == [
+        [["4"], []],
+        [["Fiscal Year Ended January 31,"], []],
+        [["Fiscal Year Ended January 31,"], ["2025"]],
+        [["Fiscal Year Ended January 31,"], ["2024"]],
+        [[], ["2023"]],
+    ]
+    assert _body_rows(parser) == [
+        ["Net cash provided by operating activities", "", "$ 13,092", "$ 10,234", "$ 7,111"],
+        ["Net cash used in investing activities", "", "(3,163)", "(1,327)", "(1,989)"],
+    ]
+
+
+# edgar:JPM-10-K-2025-02-14.htm table 109 (headerless, offset "$" rows) and
+# edgar:TSLA-10-K-2025-01-30.htm table 38: R1 keeps row 0's amounts.
+JPM_109_HTML = (
+    "<table><tr><td>Noninterest revenue – reported (c)</td><td>$</td><td>84,973</td>"
+    "<td>$</td><td>68,837</td></tr>"
+    '<tr><td>Fully taxable-equivalent adjustments (c)</td><td colspan="2">2,560</td>'
+    '<td colspan="2">3,782</td></tr>'
+    "<tr><td>Noninterest revenue – managed basis</td><td>$</td><td>87,533</td>"
+    "<td>$</td><td>72,619</td></tr></table>"
+)
+TSLA_38_HTML = (
+    "<table><tr><td>Beginning balance at fair value</td><td>$</td><td>487</td></tr>"
+    '<tr><td>Unrealized gains, net</td><td colspan="2">589</td></tr>'
+    "<tr><td>Ending balance</td><td>$</td><td>1,076</td></tr></table>"
+)
+
+
+def test_legacy_merge_keeps_row_zero_amounts():
+    parser = _parser(JPM_109_HTML)
+    assert parser.roles.header_rows == ()
+    assert _membership(parser) == [([0], []), ([1, 2], []), ([3, 4], [])]
+    assert parser.to_matrix() == [
+        ["Noninterest revenue – reported (c)", "$ 84,973", "$ 68,837"],
+        ["Fully taxable-equivalent adjustments (c)", "2,560", "3,782"],
+        ["Noninterest revenue – managed basis", "$ 87,533", "$ 72,619"],
+    ]
+
+
+def test_a_spanning_body_cell_counts_once_when_its_columns_merge():
+    assert _parser(TSLA_38_HTML).to_matrix() == [
+        ["Beginning balance at fair value", "$ 487"],
+        ["Unrealized gains, net", "589"],
+        ["Ending balance", "$ 1,076"],
+    ]
+
+
+# fixture:aapl-2023-10k table 15: a "$" row's amount sits one grid column right of the
+# other rows' amounts, all under one "2023" span; "(4)" + "%" sit under "Change".
+AAPL_15_HTML = (
+    '<table><tr><td colspan="3"></td><td colspan="3">2023</td><td colspan="3">Change</td>'
+    '<td colspan="3">2022</td></tr>'
+    '<tr><td colspan="3">Net sales by reportable segment:</td><td colspan="3"></td>'
+    '<td colspan="3"></td><td colspan="3"></td></tr>'
+    '<tr><td colspan="3">Americas</td><td>$</td><td>162,560</td><td></td>'
+    '<td colspan="2">(4)</td><td>%</td><td>$</td><td>169,658</td><td></td></tr>'
+    '<tr><td colspan="3">Europe</td><td colspan="2">94,294</td><td></td>'
+    '<td colspan="2">(1)</td><td>%</td><td colspan="2">95,118</td><td></td></tr></table>'
+)
+
+
+def test_offset_values_under_one_span_merge():
+    parser = _parser(AAPL_15_HTML)
+    assert _membership(parser) == [([0], []), ([1, 2], []), ([3], [4]), ([5, 6], [])]
+    # Revision 8: "Net sales by reportable segment:" is a trailing label-only row, so it is
+    # a body section label, not header.
+    assert _header_texts(parser) == [[[]], [["2023"]], [["Change"]], [["2022"]]]
+    assert _body_rows(parser) == [
+        ["Net sales by reportable segment:", "", "", ""],
+        ["Americas", "$ 162,560", "(4) %", "$ 169,658"],
+        ["Europe", "94,294", "(1) %", "95,118"],
+    ]
+    assert parser.to_matrix()[0] == ["", "2023", "Change", "2022"]
+
+
+# edgar:KO-10-K-2025-02-20.htm table 18: "$ —" in the offset "$" row.
+KO_18_HTML = (
+    '<table><tr><td colspan="3">Year Ended December 31,</td><td colspan="3">2024</td>'
+    '<td colspan="3">2023</td></tr>'
+    '<tr><td colspan="3">Europe, Middle East &amp; Africa</td><td>$</td><td>—</td><td></td>'
+    "<td>$</td><td>—</td><td></td></tr>"
+    '<tr><td colspan="3">Latin America</td><td colspan="2">126</td><td></td>'
+    '<td colspan="2">—</td><td></td></tr></table>'
+)
+
+
+def test_offset_nil_values_under_one_span_merge():
+    parser = _parser(KO_18_HTML)
+    assert _membership(parser) == [([0], []), ([1, 2], []), ([3, 4], [])]
+    assert _body_rows(parser) == [
+        ["Europe, Middle East & Africa", "$ —", "$ —"],
+        ["Latin America", "126", "—"],
+    ]
+
+
+def test_complementary_values_under_sibling_headers_do_not_merge():
+    parser = _parser(
+        "<table><tr><th>Item</th><th>2025</th><th>2024</th></tr>"
+        "<tr><td>A</td><td>100</td><td></td></tr>"
+        "<tr><td>B</td><td></td><td>200</td></tr></table>"
+    )
+    assert _membership(parser) == [([0], []), ([1], []), ([2], [])]
+    assert _body_rows(parser) == [["A", "100", ""], ["B", "", "200"]]
+
+
+def test_a_new_period_span_never_merges_into_the_previous_period_or_the_labels():
+    # BABA 24 / TSM 312: each year's span starts on a column that is empty in the body.
+    parser = _parser(
+        '<table><tr><td></td><td colspan="2">2025</td><td colspan="2">2024</td></tr>'
+        "<tr><td>Revenue</td><td></td><td>100</td><td></td><td>200</td></tr>"
+        "<tr><td>Costs</td><td></td><td>60</td><td></td><td>70</td></tr></table>"
+    )
+    assert _membership(parser) == [([0], []), ([1, 2], []), ([3, 4], [])]
+    assert _header_texts(parser) == [[[]], [["2025"]], [["2024"]]]
+    assert _body_rows(parser) == [["Revenue", "100", "200"], ["Costs", "60", "70"]]
+
+
+# Astra's round-1 case: one marker column under the 2024 span routes "$" right to 2024's
+# amounts and ")" left to 2025's amounts.
+MIXED_DIRECTION_HTML = (
+    '<table><tr><th>Metric</th><th colspan="2">2025</th><th colspan="2">2024</th></tr>'
+    "<tr><td>A</td><td>100</td><td></td><td>$</td><td>200</td></tr>"
+    "<tr><td>B</td><td>110</td><td></td><td>$</td><td>210</td></tr>"
+    "<tr><td>C</td><td>(30</td><td></td><td>)</td><td>400</td></tr>"
+    "<tr><td>D</td><td>(40</td><td></td><td>)</td><td>500</td></tr></table>"
+)
+
+
+def test_mixed_direction_marker_column_never_moves_a_header():
+    parser = _parser(MIXED_DIRECTION_HTML)
+    # Source grid columns: Metric, 2025's amounts, the marker column, 2024's amounts.
+    assert _membership(parser) == [([0], []), ([1], [2]), ([3], [2])]
+    assert _header_texts(parser) == [[["Metric"]], [["2025"]], [["2024"]]]
+    assert parser.to_matrix() == [
+        ["Metric", "2025", "2024"],
+        ["A", "100", "$ 200"],
+        ["B", "110", "$ 210"],
+        ["C", "(30)", "400"],
+        ["D", "(40)", "500"],
+    ]
+    assert "2025 2024" not in parser.md()
+
+
+def test_marker_column_with_independent_header_stays_visible():
+    parser = _parser(
+        "<table><tr><th>Label</th><th>2022</th><th>Change</th><th>2021</th></tr>"
+        "<tr><td>A</td><td>10</td><td>%</td><td>20</td></tr>"
+        "<tr><td>B</td><td>30</td><td>%</td><td>40</td></tr></table>"
+    )
+    assert _membership(parser) == [([0], []), ([1], []), ([2], []), ([3], [])]
+    assert parser.to_matrix() == [
+        ["Label", "2022", "Change", "2021"],
+        ["A", "10", "%", "20"],
+        ["B", "30", "%", "40"],
+    ]
+
+
+def test_header_veto_revalidates_the_remaining_marker_actions():
+    # "(" owns the independent header "Sign" and stays; without it, ")" alone would
+    # rebuild "10)", so the ")" action is dropped as well.
+    parser = _parser(
+        "<table><tr><th>Item</th><th>Sign</th><th>2025</th><th></th></tr>"
+        "<tr><td>A</td><td>(</td><td>10</td><td>)</td></tr>"
+        "<tr><td>B</td><td>(</td><td>20</td><td>)</td></tr></table>"
+    )
+    grid = parser.source_grid
+    unvetoed = object.__new__(TableParser)._safe_structural_actions(grid, policy=EXTENDED)
+    assert unvetoed == {1: {1: 2, 2: 2}, 3: {1: 2, 2: 2}}
+    assert TableParser._independent_header_veto(grid, (0,), unvetoed) == {3: {1: 2, 2: 2}}
+    assert _membership(parser) == [([0], []), ([1], []), ([2], []), ([3], [])]
+    assert _body_rows(parser) == [["A", "(", "10", ")"], ["B", "(", "20", ")"]]
+
+
+def test_marker_exception_joins_a_headerless_currency_column_to_the_next_period():
+    # A stray ")" makes the structural pass reject the "$" column; the legacy pass then
+    # applies the marker exception on the 2024 side and never joins the 2025 side.
+    parser = _parser(
+        "<table><tr><th>Item</th><th>2025</th><th></th><th>2024</th><th></th></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>$</td><td>200</td><td>)</td></tr>"
+        "<tr><td>Costs</td><td>60</td><td>$</td><td>70</td><td></td></tr></table>"
+    )
+    assert _membership(parser) == [([0], []), ([1], []), ([2, 3], []), ([4], [])]
+    assert _header_texts(parser) == [[["Item"]], [["2025"]], [["2024"]], [[]]]
+    assert _body_rows(parser) == [["Revenue", "100", "$ 200", ")"], ["Costs", "60", "$ 70", ""]]
+
+
+def test_marker_exception_needs_a_validated_value_in_every_marker_row():
+    # "$ —" does not validate, so the "$" column keeps its own column and 2025 its header.
+    parser = _parser(
+        "<table><tr><th>Item</th><th></th><th>2025</th></tr>"
+        "<tr><td>Revenue</td><td>$</td><td>100</td></tr>"
+        "<tr><td>Impairment</td><td>$</td><td>—</td></tr></table>"
+    )
+    assert _membership(parser) == [([0], []), ([1], []), ([2], [])]
+    assert _header_texts(parser) == [[["Item"]], [[]], [["2025"]]]
+    assert _body_rows(parser) == [["Revenue", "$", "100"], ["Impairment", "$", "—"]]
+
+
+def test_empty_group_never_qualifies_for_the_marker_exception():
+    parser = object.__new__(TableParser)
+    grid = _grid([["Item", "", "2025"], ["Revenue", "", "100"], ["Costs", "", "60"]])
+    columns = parser._structural_columns(grid, (0,), policy=EXTENDED)
+    assert [column.owners for column in columns] == [[0], [1], [2]]
+    assert not parser._merge_allowed(grid, (0,), columns[1], columns[2], policy=EXTENDED)
+    # The same column without a header passes the header test itself.
+    grid = _grid([["Item", "", ""], ["Revenue", "", "100"], ["Costs", "", "60"]])
+    columns = parser._structural_columns(grid, (0,), policy=EXTENDED)
+    assert parser._merge_allowed(grid, (0,), columns[1], columns[2], policy=EXTENDED)
+
+
+def test_marker_exception_requires_every_group_slot_to_be_a_marker():
+    parser = object.__new__(TableParser)
+    grid = _grid([["Item", "", "2025"], ["Revenue", "$", "100"], ["Costs", "", "60"],
+                  ["Other", "n/a", ""]])
+    columns = parser._structural_columns(grid, (0,), policy=EXTENDED)
+    assert not parser._merge_allowed(grid, (0,), columns[1], columns[2], policy=EXTENDED)
+
+
+def test_marker_exception_covers_currency_markers_only():
+    # An open-parenthesis group never qualifies: "(" columns stay with the careful merge.
+    from sec2md.table_parser import BodySlot, OutputColumn
+
+    parser = object.__new__(TableParser)
+    grid = _grid([["Item", "", "2025"], ["A", "(", "29)"], ["B", "", "5"]])
+    group = OutputColumn([1], [], [BodySlot(), BodySlot("(", (grid[1][1].cell,)), BodySlot()])
+    column = OutputColumn([2], [], [BodySlot(), BodySlot("29)", (grid[1][2].cell,)),
+                                    BodySlot("5", (grid[2][2].cell,))])
+    assert not parser._marker_exception(grid, (0,), [1, 2], group, column, policy=EXTENDED)
+    euro = OutputColumn([1], [], [BodySlot(), BodySlot("€", (grid[1][1].cell,)), BodySlot()])
+    priced = OutputColumn([2], [], [BodySlot(), BodySlot("29", (grid[1][2].cell,)),
+                                    BodySlot("5", (grid[2][2].cell,))])
+    assert parser._marker_exception(grid, (0,), [1, 2], euro, priced, policy=EXTENDED)
+
+
+def test_marker_exception_never_reads_a_currency_code_row_label_as_a_marker():
+    # R4, revision 17: in R0's label column only "$" is a currency marker (main's rule).
+    from sec2md.table_parser import BodySlot, OutputColumn
+
+    def column(grid, index):
+        return OutputColumn([index], [], [
+            BodySlot(grid[row][index].text, (grid[row][index].cell,)) if row else BodySlot()
+            for row in range(len(grid))])
+
+    parser = object.__new__(TableParser)
+    codes = _grid([["", "2025"], ["EUR", "1.08"], ["GBP", "1.27"]])
+    assert not parser._marker_exception(
+        codes, (0,), [1, 2], column(codes, 0), column(codes, 1), policy=EXTENDED)
+    assert not parser._merge_allowed(
+        codes, (0,), column(codes, 0), column(codes, 1), policy=EXTENDED)
+    # Without a header zone only the body test can keep the row labels apart.
+    headerless = _grid([["Rates", "2025"], ["EUR", "1.08"], ["GBP", "1.27"]])
+    assert not parser._merge_allowed(
+        headerless, (), column(headerless, 0), column(headerless, 1), policy=EXTENDED)
+    # The same codes outside the label column are markers.
+    marked = _grid([["", "", "2025"], ["Rate", "EUR", "1.08"], ["Rate", "GBP", "1.27"]])
+    assert parser._marker_exception(
+        marked, (0,), [1, 2], column(marked, 1), column(marked, 2), policy=EXTENDED)
+    dollars = _grid([["", "2025"], ["$", "1,234"], ["$", "456"]])
+    assert parser._marker_exception(
+        dollars, (0,), [1, 2], column(dollars, 0), column(dollars, 1), policy=EXTENDED)
+    assert vars(parser) == {}
+
+
+CODE_ROW_LABEL_CASES = {
+    # Task 4 review: one code row under text headers. The header test fails, so the body
+    # test and the marker exception both stand between "EUR" and "EUR 1.08".
+    "rate-and-prior-header": (
+        "<table><tr><td></td><td>Rate</td><td>Prior</td></tr>"
+        "<tr><td>EUR</td><td>1.08</td><td>1.10</td></tr></table>",
+        ["|  | Rate | Prior |", "| --- | --- | --- |", "| EUR | 1.08 | 1.10 |"],
+    ),
+    # Its headerless variant: the header test passes vacuously, so the body test decides.
+    "headerless": (
+        "<table><tr><td>EUR</td><td>1.08</td><td>1.10</td></tr></table>",
+        ["| EUR | 1.08 | 1.10 |"],
+    ),
+}
+
+
+@pytest.mark.parametrize("case", list(CODE_ROW_LABEL_CASES))
+def test_a_single_currency_code_row_label_keeps_its_own_column(case):
+    # R4, revision 17: closes the structural pass, the body test and the marker exception.
+    html, expected = CODE_ROW_LABEL_CASES[case]
+    lines = _markdown(html)
+    assert [line for line in expected if line not in lines] == []
+    assert [line for line in lines if "EUR 1.08" in line] == []
+
+
+def test_sub_label_currency_codes_fuse_into_the_first_period_known_limitation():
+    """Known limitation (spec revision 17, accepted 2026-10-06), pinned as today's rendering.
+
+    Codes that vary by row in a column other than R0's label column cannot be told apart
+    from R4's per-row currency-marker column, so they fuse into the first period's
+    amounts. main renders "| EUR | 1,234 | 987 |". A rule for this case is left to a
+    later task, which will change this test.
+    """
+    assert _markdown(_html(SUB_LABEL_CODE_ROWS)) == [
+        "|  | 2025 | 2024 |",
+        "| --- | --- | --- |",
+        "| Forward contracts |  |  |",
+        "|  | EUR 1,234 | 987 |",
+        "|  | JPY 456 | 789 |",
+    ]
+
+
+def test_header_text_is_never_concatenated_by_a_merge():
+    # R2: a merge never joins two header cells, so each header-zone row of an output column
+    # holds at most one header cell, and the matrix writes that cell's text unchanged.
+    for html in (CRM_26_HTML, AAPL_15_HTML, KO_18_HTML, MIXED_DIRECTION_HTML, JPM_109_HTML):
+        parser = _parser(html)
+        matrix = parser.to_matrix()
+        for index in range(len(parser.columns)):
+            per_row = parser.column_header_cells(index)
+            assert len(per_row) == len(parser.roles.header_rows)
+            assert all(len(cells) <= 1 for cells in per_row), (
+                index, [[cell.text for cell in cells] for cells in per_row])
+            for row, cells in zip(parser.roles.header_rows, per_row):
+                assert matrix[row][index] == (cells[0].text if cells else "")
+
+
+@pytest.mark.parametrize("html", [CRM_26_HTML, JPM_109_HTML, TSLA_38_HTML, AAPL_15_HTML,
+                                  KO_18_HTML, MIXED_DIRECTION_HTML],
+                         ids=["crm-26", "jpm-109", "tsla-38", "aapl-15", "ko-18", "mixed"])
+def test_merges_keep_every_source_cell_text(html):
+    parser = _parser(html)
+    kept = " ".join(" ".join(row) for row in parser.to_matrix())
+    for row in parser.cells:
+        for cell in row:
+            assert cell.text in kept
+
+
+def _fixture_tables(fixture_id):
+    import warnings
+
+    from sec2md.encoding import decode_html
+    from tests.accuracy.fixtures import load_fixture
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        soup = BeautifulSoup(decode_html(load_fixture(fixture_id)[1])[0], "lxml")
+    return soup.find_all("table")
+
+
+def _fixture_ids():
+    from tests.accuracy.fixtures import FIXTURE_IDS
+
+    return FIXTURE_IDS
+
+
+@pytest.mark.parametrize("fixture_id", _fixture_ids())
+def test_r6_invariant_one_header_cell_per_row_and_output_column(fixture_id):
+    # R2 and R3 guarantee it; the fallback join of conflicting texts is never accepted.
+    for table in _fixture_tables(fixture_id):
+        parser = TableParser(table)
+        for index in range(len(parser.columns)):
+            assert all(len(cells) <= 1 for cells in parser.column_header_cells(index)), (
+                fixture_id, index, parser.md()[:200])
+
+
+# Grid-hidden rows and cells (spec revision 11): left out before placement, with the
+# snapshot builder's rule (xlsx_tables._hidden on the element or an ancestor inside the table).
+HIDE = 'style="display:none"'
+
+# The corpus run's S2 reproduction (edgar:CAT-10-K table 34's shape).
+CAT_34_HIDDEN_HTML = (
+    "<table>"
+    f"<tr><td>Millions of dollars</td><td {HIDE}></td><td colspan='2'>Twelve Months Ended December 31,</td></tr>"
+    f"<tr><td></td><td {HIDE}></td><td {HIDE}></td><td>2024</td><td>2023</td></tr>"
+    f"<tr><td>Free cash flow</td><td {HIDE}></td><td {HIDE}></td><td>9,449</td><td>10,025</td></tr>"
+    "</table>"
+)
+
+# edgar:BAC-10-K table 336's shape: one row carries one hidden cell fewer than the others,
+# so counting hidden cells would shift its values one column left.
+BAC_336_HIDDEN_HTML = (
+    "<table>"
+    f"<tr><td>(Dollars in millions)</td><td {HIDE}></td><td {HIDE}></td><td>2024</td><td>2023</td></tr>"
+    f"<tr><td>Net income</td><td {HIDE}></td><td {HIDE}></td><td>27,132</td><td>26,515</td></tr>"
+    f"<tr><td>Compensation and benefits</td><td {HIDE}></td><td>40,182</td><td>38,330</td></tr>"
+    "</table>"
+)
+
+
+def _origin_texts(parser):
+    from sec2md.table_parser import _origin_cells
+
+    return [[None if slot is None else slot.text for slot in row] for row in _origin_cells(parser.source_grid)]
+
+
+def test_grid_hidden_cells_are_left_out_before_placement():
+    parser = _parser(CAT_34_HIDDEN_HTML)
+    assert _origin_texts(parser) == [
+        ["Millions of dollars", "Twelve Months Ended December 31,", None],
+        ["", "2024", "2023"],
+        ["Free cash flow", "9,449", "10,025"],
+    ]
+    assert [len(row) for row in parser.cells] == [2, 3, 3]
+
+
+def test_grid_hidden_cells_never_split_a_value_column():
+    parser = _parser(BAC_336_HIDDEN_HTML)
+    assert _origin_texts(parser) == [
+        ["(Dollars in millions)", "2024", "2023"],
+        ["Net income", "27,132", "26,515"],
+        ["Compensation and benefits", "40,182", "38,330"],
+    ]
+    assert _membership(parser) == [([0], []), ([1], []), ([2], [])]
+
+
+@pytest.mark.parametrize("hidden_row", [
+    f"<tr {HIDE}><td>Restated total</td><td>999</td></tr>",
+    "<tr hidden><td>Restated total</td><td>999</td></tr>",
+    '<tr style="visibility: hidden"><td>Restated total</td><td>999</td></tr>',
+], ids=["display-none", "hidden-attribute", "visibility-hidden"])
+def test_grid_hidden_row_is_left_out(hidden_row):
+    parser = _parser(
+        "<table><tr><td></td><td>2025</td></tr>"
+        f"{hidden_row}<tr><td>Revenue</td><td>100</td></tr></table>"
+    )
+    assert _origin_texts(parser) == [["", "2025"], ["Revenue", "100"]]
+    assert "999" not in " ".join(" ".join(row) for row in parser.to_matrix())
+
+
+def test_grid_hidden_cell_with_text_is_left_out_and_never_rendered():
+    parser = _parser(
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        f"<tr><td>Revenue</td><td {HIDE}>Draft 123</td><td>100</td><td>90</td></tr></table>"
+    )
+    assert _origin_texts(parser) == [["", "2025", "2024"], ["Revenue", "100", "90"]]
+    assert "Draft" not in " ".join(" ".join(row) for row in parser.to_matrix())
+
+
+def test_cells_inside_a_hidden_wrapper_within_the_table_are_left_out():
+    parser = _parser(
+        "<table><tbody><tr><td></td><td>2025</td></tr><tr><td>Revenue</td><td>100</td></tr></tbody>"
+        f"<tbody {HIDE}><tr><td>Restated revenue</td><td>999</td></tr></tbody>"
+        "<tbody><tr><td>Costs</td><td><span>60</span></td>"
+        '<td style="visibility:hidden"><span>7</span></td></tr></tbody></table>'
+    )
+    assert _origin_texts(parser) == [["", "2025"], ["Revenue", "100"], ["Costs", "60"]]
+
+
+def test_a_hidden_ancestor_outside_the_table_hides_nothing():
+    # The rule looks at the element and its ancestors inside the table only.
+    table = BeautifulSoup(
+        f"<div {HIDE}><table><tr><td></td><td>2025</td></tr><tr><td>Revenue</td><td>100</td></tr></table></div>",
+        "lxml",
+    ).find("table")
+    assert _origin_texts(TableParser(table)) == [["", "2025"], ["Revenue", "100"]]
+
+
+# edgar:JPM-10-K table 606's shape: a header row of rowspan-2 cells over a row that holds
+# only a hidden cell. That row stays, empty, so the rowspans end on it, as in the snapshot
+# builder; dropping it would let them cover the first data row and push its cells out.
+JPM_606_HIDDEN_HTML = (
+    "<table>"
+    "<tr><td rowspan='2'>Year ended December 31,</td><td rowspan='2'>Unrealized gains</td>"
+    "<td rowspan='2'>Fair value hedges</td></tr>"
+    f"<tr><td colspan='3' {HIDE}></td></tr>"
+    "<tr><td>Balance at December 31, 2021</td><td>$ 2,640</td><td>$ (131)</td></tr>"
+    "<tr><td>Net change</td><td>(11,764)</td><td>98</td></tr>"
+    "</table>"
+)
+
+
+def test_row_of_grid_hidden_cells_stays_an_empty_row_under_rowspans():
+    parser = _parser(JPM_606_HIDDEN_HTML)
+    assert [len(row) for row in parser.cells] == [3, 0, 3, 3]
+    assert _origin_texts(parser) == [
+        ["Year ended December 31,", "Unrealized gains", "Fair value hedges"],
+        ["Balance at December 31, 2021", "$ 2,640", "$ (131)"],
+        ["Net change", "(11,764)", "98"],
+    ]
+
+
+def test_rowspan_label_over_a_row_of_grid_hidden_cells_keeps_later_rows_in_place():
+    # edgar:BAC-10-K table 320's shape: a rowspan cell covers a row whose cells are hidden.
+    parser = _parser(
+        "<table><tr><td>Instrument</td><td>Fair Value</td><td>Technique</td></tr>"
+        "<tr><td>Residential</td><td>$ 636</td><td rowspan='3'>Discounted cash flow</td></tr>"
+        f"<tr><td {HIDE}></td><td {HIDE}></td></tr>"
+        "<tr><td>Loans</td><td>77</td></tr>"
+        "<tr><td>Commercial</td><td>$ 555</td><td>Market comparables</td></tr></table>"
+    )
+    assert _origin_texts(parser) == [
+        ["Instrument", "Fair Value", "Technique"],
+        ["Residential", "$ 636", "Discounted cash flow"],
+        ["Loans", "77", None],
+        ["Commercial", "$ 555", "Market comparables"],
+    ]

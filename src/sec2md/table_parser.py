@@ -6,7 +6,8 @@ from bs4 import Tag
 from bs4.element import NavigableString
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Literal, Optional, Sequence, cast
+from functools import lru_cache
+from typing import Callable, List, Literal, Optional, Sequence, cast
 from urllib.parse import urljoin
 
 from sec2md.quality import normalize_numeric_token
@@ -187,6 +188,57 @@ def _escape_table_pipes(text: str) -> str:
     return "".join(output)
 
 
+@lru_cache(maxsize=1)
+def _snapshot_hidden_rule() -> Callable[[Tag], bool]:
+    """xlsx_tables._hidden, the snapshot builder's rule for a hidden element.
+
+    Imported on first use: xlsx_tables imports this module.
+    """
+
+    from sec2md.xlsx_tables import _hidden
+
+    return _hidden
+
+
+def _grid_hidden_within(node: Tag, table: Tag, known: dict) -> bool:
+    """Whether a row or cell is grid-hidden: the snapshot builder's rule holds for it or
+    for an ancestor inside the table (spec "Grid-hidden").
+
+    known memoizes, across one table's rows and cells, the answer per element id and the
+    rule's verdict per (style attribute, hidden attribute present): the rule reads only
+    those two attributes, and most cells of a table share their style.
+    """
+
+    hidden = _snapshot_hidden_rule()
+    chain: list[Tag] = []
+    current: Tag | None = node
+    inherited = False
+    while current is not None and current is not table:
+        found = known.get(id(current))
+        if found is not None:
+            inherited = found
+            break
+        chain.append(current)
+        current = current.parent
+    for element in reversed(chain):
+        if not inherited:
+            attributes = element.attrs
+            key = (attributes.get("style"), "hidden" in attributes)
+            verdict = known.get(key)
+            if verdict is None:
+                verdict = known[key] = hidden(element)
+            inherited = verdict
+        known[id(element)] = inherited
+    return inherited
+
+
+def _descendants_named(node: Tag, names: tuple[str, ...]) -> list[Tag]:
+    """The descendant tags with one of these names, in document order: ``node.find_all``
+    without the cost of bs4's filter machinery."""
+
+    return [child for child in node.descendants if child.name in names]
+
+
 def _cell_value(text: str, *, policy: StructuralPolicy = LEGACY) -> str:
     """The cell text a structural rule reads: visible text under EXTENDED (R3.1)."""
 
@@ -285,6 +337,33 @@ class GridCell:
         return f"GridCell(cell={self.cell!r}, is_spanning={self.is_spanning})"
 
 
+@dataclass(frozen=True)
+class BodySlot:
+    """One output column's body text in one source row, with the source cells it holds."""
+
+    text: str = ""
+    cells: tuple[Cell, ...] = ()
+
+
+@dataclass
+class OutputColumn:
+    """An output column and its membership in source-grid columns (spec R1-R3).
+
+    Owning members carry header ownership. Marker members are marker columns the
+    structural pass removed; they feed body text and never own a header.
+    """
+
+    owners: list[int]
+    markers: list[int]
+    slots: list[BodySlot]
+
+
+def _contains_cells(container: Sequence[Cell], cells: Sequence[Cell]) -> bool:
+    """Whether every cell is among container, compared by source-cell identity."""
+
+    return all(any(cell is held for held in container) for cell in cells)
+
+
 class TableParser:
     """A table within a filing document"""
 
@@ -305,10 +384,26 @@ class TableParser:
         self.grid = self._create_grid()
 
     def _extract_cells(self) -> List[List[Cell]]:
+        """Source cells by row: every td and th that is not grid-hidden (spec "Source cell").
+
+        Grid-hidden rows and cells are left out before placement, so spans and positions
+        are those a reader sees, as in the snapshot builder and the checker's placed grid.
+        """
         rows = []
-        for tr in self.table_element.find_all('tr'):
+        hidden: dict = {}
+        for tr in _descendants_named(self.table_element, ("tr",)):
+            if _grid_hidden_within(tr, self.table_element, hidden):
+                continue
             row = []
-            for td in tr.find_all(['td', 'th']):
+            cells = _descendants_named(tr, ("td", "th"))
+            if cells and all(_grid_hidden_within(td, self.table_element, hidden) for td in cells):
+                # Every cell is grid-hidden: the row stays, empty, so spans from the rows
+                # above still end on it, as in the snapshot builder.
+                rows.append(row)
+                continue
+            for td in cells:
+                if _grid_hidden_within(td, self.table_element, hidden):
+                    continue
                 if td.find("a"):
                     text = render_cell_content(td, base_url=self.base_url)
                 else:
@@ -344,7 +439,14 @@ class TableParser:
             return default
 
     def _create_grid(self) -> List[List[GridCell]]:
-        """Create grid with spanning cells handled"""
+        """Build the source grid, decide row roles (R0) and merge columns with membership.
+
+        The source grid (span expansion plus ``_clean_grid``) and the row roles are kept
+        unchanged for the whole render; every later rule refers to their coordinates.
+        """
+        self.source_grid: List[List[Optional[GridCell]]] = []
+        self.roles = row_roles([])
+        self.columns: list[OutputColumn] = []
         if not self.cells:
             return []
 
@@ -374,10 +476,12 @@ class TableParser:
 
                 col += cell.colspan
 
-        grid = self._clean_grid(grid)
-        grid = self._merge_grid(grid, policy=EXTENDED)
-
-        return grid
+        self.source_grid = self._clean_grid(grid)
+        self.roles = row_roles(_origin_cells(self.source_grid))
+        self.columns = self._merge_grid(
+            self.source_grid, self.roles.header_rows, policy=EXTENDED
+        )
+        return self._output_grid()
 
     def _should_merge_cells(
         self,
@@ -498,7 +602,12 @@ class TableParser:
         """Rows the careful marker merge reads as body: R0's body rows under EXTENDED (R3.2)."""
 
         if policy is EXTENDED:
-            roles = row_roles(_origin_cells(grid))
+            # The Markdown render decided the roles of its source grid once (R0); any other
+            # grid (a bare parser's) gets its own.
+            if grid is getattr(self, "source_grid", None):
+                roles = self.roles
+            else:
+                roles = row_roles(_origin_cells(grid))
             return tuple(row for row in range(len(grid)) if roles.role(row) == "body")
         return range(self._body_start(grid, policy=policy), len(grid))
 
@@ -513,7 +622,25 @@ class TableParser:
 
         if policy is not EXTENDED:
             return None
+        if grid is getattr(self, "source_grid", None):
+            return self.roles.label_column
         return row_roles(_origin_cells(grid)).label_column
+
+    @staticmethod
+    def _holds_label_cell(
+        grid: Sequence[Sequence[Optional[GridCell]]],
+        label_column: int | None,
+        slot: BodySlot,
+        row: int,
+    ) -> bool:
+        """Whether a body slot holds R0's label-column cell of its row, by identity."""
+
+        if label_column is None:
+            return False
+        source = grid[row][label_column]
+        if source is None or source.is_spanning:
+            return False
+        return any(cell is source.cell for cell in slot.cells)
 
     @staticmethod
     def _structural_target(
@@ -676,31 +803,6 @@ class TableParser:
         return {}
 
     @staticmethod
-    def _header_merge_target(
-        source: int,
-        value: str,
-        source_actions: dict[int, int],
-        removed: set[int],
-        column_count: int,
-        *,
-        policy: StructuralPolicy = LEGACY,
-    ) -> int | None:
-        """Keep header fragments on the same side as their body actions."""
-
-        targets = sorted(set(source_actions.values()))
-        if len(targets) == 1 and targets[0] not in removed:
-            return targets[0]
-        marker_class = _marker_class(value, policy=policy)
-        if marker_class is not None:
-            target = TableParser._structural_target(source, marker_class)
-            if 0 <= target < column_count and target not in removed:
-                return target
-        for target in targets:
-            if target not in removed:
-                return target
-        return None
-
-    @staticmethod
     def _join_structural_text(
         prefixes: Sequence[str],
         target: str,
@@ -726,123 +828,237 @@ class TableParser:
             merged = f"{merged} %" if marker == "%" else f"{merged}{marker}"
         return merged
 
-    def _merge_structural_columns(
+    @staticmethod
+    def _header_cells(
+        grid: Sequence[Sequence[Optional[GridCell]]],
+        owners: Sequence[int],
+        row: int,
+    ) -> list[Cell]:
+        """The distinct header cells of owning members in one header-zone row, by identity."""
+
+        cells: list[Cell] = []
+        for column in owners:
+            slot = grid[row][column]
+            if slot is None or not visible_text(slot.cell.text):
+                continue
+            if not any(slot.cell is held for held in cells):
+                cells.append(slot.cell)
+        return cells
+
+    @staticmethod
+    def _independent_header_veto(
+        grid: Sequence[Sequence[Optional[GridCell]]],
+        header_rows: Sequence[int],
+        actions: dict[int, dict[int, int]],
+    ) -> dict[int, dict[int, int]]:
+        """Keep a marker column whose header cell covers no surviving column (R3.6).
+
+        Mirrors prepare_table's veto: a marker column carrying independent header text
+        must remain visible. Callers revalidate the remaining actions.
+        """
+
+        surviving = [column for column in range(len(grid[0]) if grid else 0) if column not in actions]
+        kept: dict[int, dict[int, int]] = {}
+        for source, moves in actions.items():
+            independent = False
+            for row in header_rows:
+                slot = grid[row][source]
+                if slot is None or not visible_text(slot.cell.text):
+                    continue
+                if not any(
+                    grid[row][column] is not None and grid[row][column].cell is slot.cell
+                    for column in surviving
+                ):
+                    independent = True
+                    break
+            if not independent:
+                kept[source] = moves
+        return kept
+
+    def _structural_columns(
         self,
-        grid: List[List[GridCell]],
+        grid: List[List[Optional[GridCell]]],
+        header_rows: Sequence[int],
         *,
-        policy: StructuralPolicy = LEGACY,
-    ) -> List[List[GridCell]]:
-        """Merge only proven accounting marker columns into numeric neighbors."""
+        policy: StructuralPolicy,
+    ) -> list[OutputColumn]:
+        """Remove proven marker columns, routing body markers only (R3.5, R3.6).
+
+        Header text never moves: each surviving column owns only itself, and a removed
+        column becomes a marker member of the columns it fed.
+        """
 
         actions = self._safe_structural_actions(grid, policy=policy)
-        if not actions:
-            return grid
-
-        removed = set(actions)
-        column_count = len(grid[0])
-        result: List[List[GridCell]] = []
-        body_rows = set(self._body_rows(grid, policy=policy))
-        for row_index, row in enumerate(grid):
-            rebuilt: List[GridCell] = []
-            for target in range(column_count):
-                if target in removed:
+        actions = self._independent_header_veto(grid, header_rows, actions)
+        actions = self._validated_structural_actions(grid, actions, policy=policy)
+        header = set(header_rows)
+        columns: list[OutputColumn] = []
+        for target in range(len(grid[0])):
+            if target in actions:
+                continue
+            markers = sorted(
+                source for source, moves in actions.items() if target in moves.values()
+            )
+            slots: list[BodySlot] = []
+            for row_index, row in enumerate(grid):
+                if row_index in header:
+                    slots.append(BodySlot())
                     continue
-
+                original = row[target]
+                original_text = original.text.strip() if original is not None else ""
+                cells: list[Cell] = [original.cell] if original_text else []
+                if not markers:  # nothing routes into this column: its own text
+                    slots.append(BodySlot(original_text, tuple(cells)))
+                    continue
                 prefixes: list[str] = []
                 suffixes: list[str] = []
-                for source, source_actions in actions.items():
-                    cell = row[source]
-                    value = _cell_value(cell.text, policy=policy) if cell is not None else ""
-                    if not value:
+                for source in markers:
+                    if actions[source].get(row_index) != target:
                         continue
-                    merge_target = source_actions.get(row_index)
-                    if merge_target is None and row_index not in body_rows:
-                        merge_target = self._header_merge_target(
-                            source,
-                            value,
-                            source_actions,
-                            removed,
-                            column_count,
-                            policy=policy,
-                        )
-                    if merge_target != target:
-                        continue
-                    if source < target:
-                        prefixes.append(value)
-                    else:
-                        suffixes.append(value)
-
-                original = row[target]
-                original_text = original.text.strip() if original else ""
-                merged_text = self._join_structural_text(
+                    source_slot = row[source]
+                    value = _cell_value(source_slot.text, policy=policy)
+                    (prefixes if source < target else suffixes).append(value)
+                    cells.append(source_slot.cell)
+                text = self._join_structural_text(
                     prefixes, original_text, suffixes, policy=policy
                 )
-                if merged_text != original_text:
-                    rebuilt.append(GridCell(Cell(text=merged_text)))
-                elif original is not None:
-                    rebuilt.append(original)
-                else:
-                    rebuilt.append(GridCell(Cell(text="")))
-            result.append(rebuilt)
-        return result
+                slots.append(BodySlot(text, tuple(cells)))
+            columns.append(OutputColumn([target], markers, slots))
+        return columns
+
+    def _merge_allowed(
+        self,
+        grid: List[List[Optional[GridCell]]],
+        header_rows: Sequence[int],
+        group: OutputColumn,
+        column: OutputColumn,
+        *,
+        policy: StructuralPolicy,
+    ) -> bool:
+        """R2: may column merge into the group on its left?"""
+
+        header = set(header_rows)
+        body_rows = [row for row in range(len(grid)) if row not in header]
+        label_column = self._label_column(grid, policy=policy)
+        if not all(
+            self._should_merge_cells(
+                GridCell(Cell(group.slots[row].text)),
+                GridCell(Cell(column.slots[row].text)),
+                policy=policy,
+                label=self._holds_label_cell(grid, label_column, group.slots[row], row),
+            )
+            for row in body_rows
+        ):
+            return False
+        if all(
+            _contains_cells(
+                self._header_cells(grid, group.owners, row),
+                self._header_cells(grid, column.owners, row),
+            )
+            for row in header_rows
+        ):
+            return True
+        return self._marker_exception(grid, header_rows, body_rows, group, column, policy=policy)
+
+    def _marker_exception(
+        self,
+        grid: List[List[Optional[GridCell]]],
+        header_rows: Sequence[int],
+        body_rows: Sequence[int],
+        group: OutputColumn,
+        column: OutputColumn,
+        *,
+        policy: StructuralPolicy,
+    ) -> bool:
+        """R2's marker exception: a headerless group of currency markers.
+
+        Every non-empty body slot of the group must be a currency marker, with at least
+        one, and the column must hold a value that validates when joined in each of those
+        rows. An empty group never qualifies. "(" columns are left to the careful merge,
+        because _should_merge_cells can never pass for them. In R0's label column only "$"
+        is a currency marker (R4, revision 17).
+        """
+
+        if any(self._header_cells(grid, group.owners, row) for row in header_rows):
+            return False
+        marker_rows = [row for row in body_rows if group.slots[row].text]
+        if not marker_rows:
+            return False
+        label_column = self._label_column(grid, policy=policy)
+        for row in marker_rows:
+            marker = _cell_value(group.slots[row].text, policy=policy)
+            label = self._holds_label_cell(grid, label_column, group.slots[row], row)
+            if _marker_class(marker, policy=policy, label=label) != "currency":
+                return False
+            value = column.slots[row].text.strip()
+            joined = self._join_structural_text([marker], value, [], policy=policy)
+            if not value or self._numeric_token(joined, policy=policy) is None:
+                return False
+        return True
+
+    @staticmethod
+    def _merged_column(group: OutputColumn, column: OutputColumn) -> OutputColumn:
+        """R1: combine every body row; a source cell already in the group counts once."""
+
+        slots: list[BodySlot] = []
+        for mine, theirs in zip(group.slots, column.slots):
+            if not theirs.text:
+                slots.append(mine)
+            elif not mine.text:
+                slots.append(theirs)
+            elif theirs.cells and _contains_cells(mine.cells, theirs.cells):
+                slots.append(mine)
+            else:
+                added = tuple(cell for cell in theirs.cells if not _contains_cells(mine.cells, [cell]))
+                slots.append(BodySlot(f"{mine.text} {theirs.text}", mine.cells + added))
+        return OutputColumn(
+            group.owners + column.owners, group.markers + column.markers, slots
+        )
 
     def _merge_grid(
         self,
-        grid: List[List[GridCell]],
+        grid: List[List[Optional[GridCell]]],
+        header_rows: Sequence[int],
         *,
-        policy: StructuralPolicy = LEGACY,
-    ) -> List[List[GridCell]]:
-        """Merge columns in one clean pass"""
+        policy: StructuralPolicy,
+    ) -> list[OutputColumn]:
+        """The careful marker merge, then the left-to-right legacy merge under R1 and R2."""
+
         if not grid or not grid[0]:
-            return grid
-
-        # R4, revision 17: R0's own label-column cells, which the structural pass keeps by
-        # identity; there only "$" is a currency marker.
-        label_column = self._label_column(grid, policy=policy)
-        label_cells = [row[label_column] if label_column is not None else None for row in grid]
-        grid = self._merge_structural_columns(grid, policy=policy)
-        if not grid or not grid[0]:
-            return grid
-
-        result = []
-        current_col = None
-
-        for col_idx in range(len(grid[0])):
-            col = [row[col_idx] for row in grid]
-
-            if current_col is None:
-                current_col = col
-                continue
-
-            cell_pairs = list(zip(current_col[1:], col[1:]))
-            should_merge = all(
-                self._should_merge_cells(
-                    c1, c2, policy=policy,
-                    label=c1 is not None and c1 is label_cells[row],
-                )
-                for row, (c1, c2) in enumerate(cell_pairs, start=1)
-            )
-
-            if should_merge:
-                merged = [current_col[0]]  # Keep header
-                for c1, c2 in cell_pairs:
-                    if not c1:
-                        merged.append(c2)
-                    elif not c2:
-                        merged.append(c1)
-                    else:
-                        text = f"{c1.text} {c2.text}".strip()
-                        merged_cell = Cell(text=text)
-                        merged.append(GridCell(merged_cell))
-                current_col = merged
+            return []
+        merged: list[OutputColumn] = []
+        for column in self._structural_columns(grid, header_rows, policy=policy):
+            if merged and self._merge_allowed(grid, header_rows, merged[-1], column, policy=policy):
+                merged[-1] = self._merged_column(merged[-1], column)
             else:
-                result.append(current_col)
-                current_col = col
+                merged.append(column)
+        return merged
 
-        if current_col is not None:
-            result.append(current_col)
+    def column_header_cells(self, index: int) -> list[list[Cell]]:
+        """Per header-zone row, the distinct header cells of an output column's owners."""
 
-        return list(map(list, zip(*result)))
+        owners = self.columns[index].owners
+        return [self._header_cells(self.source_grid, owners, row) for row in self.roles.header_rows]
+
+    def _output_grid(self) -> List[List[GridCell]]:
+        """One row per source row: header rows hold each column's header-cell text, body
+        rows its merged body text."""
+
+        header = set(self.roles.header_rows)
+        rows: List[List[GridCell]] = []
+        for row_index in range(len(self.source_grid)):
+            if row_index in header:
+                texts = [
+                    " ".join(
+                        cell.text
+                        for cell in self._header_cells(self.source_grid, column.owners, row_index)
+                    )
+                    for column in self.columns
+                ]
+            else:
+                texts = [column.slots[row_index].text for column in self.columns]
+            rows.append([GridCell(Cell(text=text)) for text in texts])
+        return rows
 
     def to_matrix(self) -> List[List[str]]:
         """Convert grid to text matrix"""

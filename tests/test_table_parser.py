@@ -242,15 +242,18 @@ class TestToMatrix:
         ))
         assert sorted(legacy) == [2, 4]
 
-    def test_suffix_marker_header_merges_to_left_numeric_column(self):
+    def test_suffix_marker_column_with_its_own_header_stays_visible(self):
+        # Spec 2026-10-05 R3.5/R3.6: header text never moves, and a marker column whose
+        # header ("Change") covers no value column is not removed. Previously the header
+        # was joined into "2022 Change" over the merged "10 %".
         html = """
         <table><tr><th>Label</th><th>2022</th><th>Change</th><th>2021</th></tr>
         <tr><td>A</td><td>10</td><td>%</td><td>20</td></tr>
         <tr><td>B</td><td>30</td><td>%</td><td>40</td></tr></table>
         """
         matrix = TableParser(_make_table(html)).to_matrix()
-        assert matrix[0] == ["Label", "2022 Change", "2021"]
-        assert matrix[1] == ["A", "10 %", "20"]
+        assert matrix[0] == ["Label", "2022", "Change", "2021"]
+        assert matrix[1] == ["A", "10", "%", "20"]
 
     def test_matrix_dimensions(self):
         html = """<table>
