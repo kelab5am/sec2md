@@ -308,6 +308,49 @@ class TestOneRowTable:
         pages = parser.get_pages(include_elements=False)
         assert "PART II" in pages[0].content
 
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_part_header_table_keeps_every_cell(self, capture_tables):
+        # R8, CAT 10-K 2025 table 7: the PART branch used to return "PART III" alone and
+        # drop the cell holding 2025 and 120.
+        parser = Parser(f"<html><body>{CAT_7_TABLE}</body></html>", capture_tables=capture_tables)
+        pages = parser.get_pages()
+        assert pages[0].content == f"PART III {CAT_7_SENTENCE}"
+        assert [element.content for element in pages[0].elements] == [f"PART III {CAT_7_SENTENCE}"]
+        assert parser.diagnostics.warnings == ()
+
+    def test_part_header_cells_are_joined_after_the_normalized_label(self):
+        parser = Parser("<p>x</p>")
+        cells = BeautifulSoup(
+            "<table><tr><td> part\xa0iv </td><td></td><td>Exhibits and</td><td>Financial Statement Schedules</td>"
+            "</tr></table>",
+            "lxml",
+        ).find_all("td")
+        assert parser._one_row_table_to_text(cells) == "PART IV Exhibits and Financial Statement Schedules"
+        assert parser._one_row_table_to_text(cells[:2]) == "PART IV"
+
+    def test_item_header_table_still_keeps_only_the_first_later_cell(self):
+        # R8 changes the PART branch only; the ITEM branch keeps its title cell, as today.
+        parser = Parser("<p>x</p>")
+        cells = BeautifulSoup(
+            "<table><tr><td>Item 1.</td><td></td><td>Business</td><td>Page 4</td></tr></table>", "lxml"
+        ).find_all("td")
+        assert parser._one_row_table_to_text(cells) == "ITEM 1. Business"
+
+
+# CAT 10-K 2025 table 7: the cover page's "Documents Incorporated by Reference" row, with
+# its column-width row of empty cells.
+CAT_7_SENTENCE = (
+    "2025 Annual Meeting Proxy Statement (Proxy Statement) to be filed with the Securities and "
+    "Exchange Commission (SEC) within 120 days after the end of the fiscal year."
+)
+CAT_7_TABLE = (
+    '<table style="border-collapse:collapse;display:inline-table;width:99.853%">'
+    '<tr><td style="width:1.0%"></td><td style="width:13.980%"></td><td style="width:0.1%"></td>'
+    '<td style="width:1.0%"></td><td style="width:83.820%"></td><td style="width:0.1%"></td></tr>'
+    '<tr><td colspan="3"><span>Part&#160;III</span></td>'
+    f'<td colspan="3"><div><span>{CAT_7_SENTENCE}</span></div></td></tr></table>'
+)
+
 
 class TestSpacerPreservation:
     """Regression: spacer divs with &nbsp; must not be dropped before table parsing."""

@@ -1067,6 +1067,12 @@ class Parser:
         return rows
 
     def _one_row_table_to_text(self, cells: list[Tag]) -> str:
+        """Flatten a one-row table to one line.
+
+        An ITEM label keeps its first non-empty later cell as the title. A PART label is
+        normalized and keeps every non-empty later cell (spec R8). Other rows join their
+        non-empty cells.
+        """
         texts = [
             render_cell_content(c, base_url=self.source_url)
             if c.find("a")
@@ -1084,7 +1090,7 @@ class Parser:
 
         if (m := PART_HEADER_CELL_RE.match(first)):
             roman = m.group(1).upper()
-            return f"PART {roman}"
+            return " ".join([f"PART {roman}", *(t for t in texts[1:] if t)])
 
         return " ".join(t for t in texts if t).strip()
 
