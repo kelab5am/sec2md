@@ -421,6 +421,122 @@ class TestTableSplitKeepsHeader:
         assert emitted == data
 
 
+def _fused_header_document(rows: int, *, long_row: int | None = None) -> str:
+    """A table whose three header rows R6 fuses into one header line, with empty header cells.
+
+    The label column and the note column carry no header text; "Year Ended" and
+    "(In millions)" span both amount columns and repeat in each of their headers.
+    """
+    def label(index):
+        return "Long line item " + " ".join(["detail"] * 400) if index == long_row else f"Line item {index}"
+
+    body = "".join(
+        f"<tr><td>{label(i)}</td><td>{100 + i}</td><td>{200 + i}</td><td>Note {i % 7 + 1}</td></tr>"
+        for i in range(rows)
+    )
+    return (
+        "<html><body><p>Consolidated revenue by line item.</p><table>"
+        '<tr><td></td><td colspan="2">Year Ended</td><td></td></tr>'
+        "<tr><td></td><td>2025</td><td>2024</td><td></td></tr>"
+        '<tr><td></td><td colspan="2">(In millions)</td><td></td></tr>'
+        f"{body}</table></body></html>"
+    )
+
+
+FUSED_CAPTION = "Consolidated revenue by line item."
+FUSED_HEADER_LINE = "|  | Year Ended — 2025 — (In millions) | Year Ended — 2024 — (In millions) |  |"
+FUSED_SEPARATOR = "| --- | --- | --- | --- |"
+FUSED_ELLIPSIS = "|...|...|...|...|"
+
+
+def _row_cells(line: str) -> list[str]:
+    """A Markdown table line's cells, keeping blank ones (one outer pipe removed each side)."""
+    return [cell.strip() for cell in line.strip()[1:-1].split("|")]
+
+
+class TestChunkedFusedHeaderTables:
+    """Spec 2026-10-05 (table merge and header rules), Testing, "Integration": tables with
+    fused headers and empty header cells, rendered by Parser, then chunked."""
+
+    @staticmethod
+    def _render(html):
+        from sec2md.parser import Parser
+
+        pages = Parser(html).get_pages(include_elements=True)
+        (table,) = [element for element in pages[0].elements if element.kind == "table"]
+        return pages, table
+
+    @staticmethod
+    def _parts(chunks, table):
+        parts = [element for chunk in chunks for element in chunk.elements
+                 if element.id.startswith(f"{table.id}:part-")]
+        assert [part.id for part in parts] == [f"{table.id}:part-{i}" for i in range(len(parts))]
+        return parts
+
+    def test_renderer_writes_the_fused_header_line_with_empty_header_cells(self):
+        pages, table = self._render(_fused_header_document(3))
+        assert table.content.split("\n") == [
+            FUSED_CAPTION, "", FUSED_HEADER_LINE, FUSED_SEPARATOR,
+            "| Line item 0 | 100 | 200 | Note 1 |",
+            "| Line item 1 | 101 | 201 | Note 2 |",
+            "| Line item 2 | 102 | 202 | Note 3 |",
+        ]
+        start, end = table.content_start_offset, table.content_end_offset
+        assert pages[0].content[start:end] == table.content
+
+    def test_every_part_keeps_content_and_repeats_the_header_prefix_in_full(self):
+        pages, table = self._render(_fused_header_document(40))
+        data = [line for line in table.content.split("\n") if line.startswith("| Line item ")]
+        assert len(data) == 40
+        chunks = chunk_pages(pages, chunk_size=128, chunk_overlap=0, max_table_tokens=128)
+        parts = self._parts(chunks, table)
+        assert len(parts) > 2
+
+        emitted = []
+        for part in parts:
+            lines = part.content.split("\n")
+            assert lines[:3] == [FUSED_CAPTION, FUSED_HEADER_LINE, FUSED_SEPARATOR]
+            emitted.extend(line for line in lines[3:] if line != FUSED_ELLIPSIS)
+        assert emitted == data
+
+    def test_every_part_keeps_the_column_count(self):
+        pages, table = self._render(_fused_header_document(40))
+        chunks = chunk_pages(pages, chunk_size=128, chunk_overlap=0, max_table_tokens=128)
+        blocks = [block for chunk in chunks for block in chunk.blocks if block.block_type == "Table"]
+        assert len(blocks) > 2
+        for part in self._parts(chunks, table):
+            assert {len(_row_cells(line)) for line in part.content.split("\n")[1:]} == {4}
+        for block in blocks:
+            lines = block.content.split("\n")
+            assert lines[0] == FUSED_CAPTION
+            assert _row_cells(lines[1]) == ["", "Year Ended — 2025 — (In millions)",
+                                            "Year Ended — 2024 — (In millions)", ""]
+            assert {len(_row_cells(line)) for line in lines[1:]} == {4}
+
+    def test_every_part_cites_the_table_span_of_its_page(self):
+        pages, table = self._render(_fused_header_document(40))
+        start, end = table.content_start_offset, table.content_end_offset
+        cited = pages[0].content[start:end]
+        assert cited == table.content
+        chunks = chunk_pages(pages, chunk_size=128, chunk_overlap=0, max_table_tokens=128)
+        for part in self._parts(chunks, table):
+            assert (part.content_start_offset, part.content_end_offset) == (start, end)
+            assert all(line in cited.split("\n") for line in part.content.split("\n") if line != FUSED_ELLIPSIS)
+
+    def test_a_row_over_the_token_budget_is_kept_whole_with_its_prefix(self):
+        from sec2md.chunker.blocks import estimate_tokens
+
+        pages, table = self._render(_fused_header_document(12, long_row=5))
+        (long_line,) = [line for line in table.content.split("\n") if line.startswith("| Long line item ")]
+        chunks = chunk_pages(pages, chunk_size=128, chunk_overlap=0, max_table_tokens=128)
+        holding = [part for part in self._parts(chunks, table) if long_line in part.content.split("\n")]
+        assert len(holding) == 1
+        lines = holding[0].content.split("\n")
+        assert lines[:3] == [FUSED_CAPTION, FUSED_HEADER_LINE, FUSED_SEPARATOR]
+        assert [line for line in lines[3:] if line != FUSED_ELLIPSIS] == [long_line]
+        assert estimate_tokens(holding[0].content) > 128
+
+
 class TestChunkOverlapContiguity:
     def test_each_chunk_is_a_contiguous_run_of_source_sentences(self):
         alpha = [f"Alpha sentence number {i} talks about revenue growth in the quarter." for i in range(6)]

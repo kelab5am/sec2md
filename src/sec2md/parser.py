@@ -410,6 +410,20 @@ class Parser:
             header_line=record.header_line,
             header_source=record.header_source,
             header_capacity=record.header_capacity,
+            header_cells=record.header_cells,
+        )
+
+    def element_header_records(self, element_id: str) -> tuple[ElementHeaderRecord, ...]:
+        """The bound header records (spec R6a) of the tables mapped to one element.
+
+        In mapped-node order; empty for an unknown element or one without a table record.
+        Valid after ``get_pages(include_elements=True)``.
+        """
+
+        return tuple(
+            self._header_records[id(node)]
+            for node in self.block_nodes_map.get(element_id, ())
+            if id(node) in self._header_records
         )
 
     @staticmethod
@@ -1115,9 +1129,7 @@ class Parser:
         for page in pages:
             for element in page.elements or ():
                 nodes = self.block_nodes_map.get(element.id, ())
-                records = [
-                    self._header_records[id(node)] for node in nodes if id(node) in self._header_records
-                ]
+                records = list(self.element_header_records(element.id))
                 if records:
                     misses.extend(
                         f"{element.id}:{location.miss}"

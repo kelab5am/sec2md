@@ -1,6 +1,6 @@
 # sec2md
 
-This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin an independently reviewed commit and require distribution version `0.1.22+rcq.3` for reproducible use.
+This is the RCQ-maintained fork of [`lucasastorian/sec2md`](https://github.com/lucasastorian/sec2md). `sec2md` parses one supplied HTML document; it does not download a complete accession. Consumers should pin an independently reviewed commit and require distribution version `0.1.22+rcq.4` for reproducible use.
 
 [![PyPI](https://img.shields.io/pypi/v/sec2md.svg)](https://pypi.org/project/sec2md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -141,11 +141,10 @@ Strict raises in these cases:
 - a number in an element cannot be traced to its source nodes
 
 Strict does not check that every source number reached the output. Table
-completeness checks do that for each table, and they are reported but not
-enforced yet. Passing strict and the table completeness checks does not prove
-that a value sits under its correct column header: a column merge can shift
-headers one column away from their values, which neither strict nor these
-checks detect yet. Their findings appear in these `ParseDiagnostics` fields:
+completeness checks do that for each table, and a header-alignment check tests
+that each value sits under the header its source column carries. They are
+reported but not enforced yet. Their findings appear in these
+`ParseDiagnostics` fields:
 
 - `table_completeness_failures`: numbers missing from a table's output
 - `table_completeness_reported`: lost footnote markers and references such as
@@ -154,6 +153,27 @@ checks detect yet. Their findings appear in these `ParseDiagnostics` fields:
 - `numeric_recall`: the share of visible source numbers present in the output.
   A number that starts an output line like a list marker (`2. Summary …`) is
   not counted on the output side, so recall can read low.
+- `table_header_alignment`: values whose output column header does not match
+  the header cells above their source column, at most 10 per table plus a total:
+  `table 24 (snapshot 19, page 41): "Revenue" 941168 under "2025 — RMB"; expected "2024"`
+- `table_header_alignment_coverage`: how many tables, rows and values the
+  alignment check evaluated, and how many it skipped and why, as (key, count)
+  pairs. A completed run always lists the same 21 keys in the same order, with
+  zeros where nothing applied; an empty tuple means the check did not run.
+
+No alignment findings means no misplaced value among the values the check
+evaluated; `values_evaluated` says how many that was. It skips, and counts:
+tables with no Markdown output, tables it cannot place reliably (nested tables,
+broken spans), tables without header rows or without data rows, one-row and
+plain-text renderings, rows below a header repeated mid-table, rows whose label
+is not unique in the table, nil values such as `—`, values with no header cell
+that tells their column apart from the others (a caption over every column is
+never required), values missing from the output (check 1 reports those), values
+found in more than one output cell, headers it cannot read unambiguously, and
+header searches that reach their work bound. It judges numbers only: text
+cells, years and header-only columns are not evaluated. It is not logged, never
+makes strict raise, and is not applied to XLSX output, whose workbook has its
+own grid.
 
 Each document with missing table values logs one summary warning, and each of
 those value failures is logged at INFO level. Lost markers, references and
@@ -206,6 +226,33 @@ sec2md handles both:
 | Mac              | $29,357           |
 | iPad             | $28,300           |
 ```
+
+Every source value is kept, and each sits under the header its source column
+carries. A table with several header rows gets one header line: each column's
+header rows are joined top to bottom with ` — `, and a header cell that spans
+several columns repeats in each of them. Currency markers in their own column
+join the amount, as `$` does:
+
+```markdown
+|  | Year Ended June 30, — 2025 | Year Ended June 30, — 2024 |
+| --- | --- | --- |
+| Revenue | $ 1,234 | $ 1,100 |
+| Operating income | 456 | 412 |
+```
+
+Header rows are the rows before the first data row, as long as each row after
+the first looks like a header row: an empty label cell, a period or unit caption
+or a year in the label cell, a row of years, a row of `th` cells, or a row with
+text in its label cell only, such as a second title line. A second row of column
+headings under a mostly empty first row also stays, as before; columns holding only
+currency markers, `%`, `)`, `)%` or `(` are not counted. A row with any other
+label, such as `Common Stock | AAPL`, stays in the body, and so do label-only rows
+at the end of the header, such as `Accounts Receivable:` just before the data. A
+table whose first row is already data gets a header line of empty cells, so no
+data row is mistaken for a header. Hidden rows and cells (`display:none`) are
+left out. XLSX export keeps its own column rules, so its prepared tables do not
+change; only the page number on its contents sheet, which is guessed from the
+Markdown page text, can change (on 4 pages in 2 documents of the review corpus).
 
 ## Multimodal: Image Extraction
 

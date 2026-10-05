@@ -2020,6 +2020,52 @@ def test_header_record_counts_each_header_cell_once_across_rowspans():
     assert record.header_capacity == (("2025", 3),)
 
 
+def test_header_record_lists_each_header_cell_with_the_columns_it_heads():
+    # The accuracy suite's own trace re-tokenizes these texts with its own normalizer.
+    record, _ = _record(
+        '<table><tr><th></th><th colspan="2">2025</th></tr>'
+        "<tr><th>Item</th><th>2025</th><th>Budget</th></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"
+    )
+    # Document order, cells without text left out; the spanning 2025 heads two columns.
+    assert record.header_cells == (("2025", 2), ("Item", 1), ("2025", 1), ("Budget", 1))
+
+
+def test_header_record_of_a_headerless_table_lists_no_header_cells():
+    record, _ = _record(JPM_109_HTML)
+    assert record.header_cells == ()
+
+
+# Malformed markup: lxml keeps a table placed directly in a header-zone <tr> inside that row,
+# so its cells are read for the outer row and again for their own row.
+NESTED_IN_HEADER_ROW_HTML = (
+    "<table><tr><th>Item</th><th>Period</th><table><tr><th>Fiscal</th><th>2024</th></tr></table></tr>"
+    "<tr><td>Revenue</td><td>100</td></tr></table>"
+)
+
+
+@pytest.mark.parametrize("case", [*sorted(PER_CLASS_CASES), "nested-in-header-row"])
+def test_header_cells_reproduce_the_header_source_and_capacity(case):
+    from collections import Counter
+
+    from sec2md.quality import _normalized_numbers
+
+    html = NESTED_IN_HEADER_ROW_HTML if case == "nested-in-header-row" else PER_CLASS_CASES[case][0]
+    record, _ = _record(html)
+    texts = [text for text, _ in record.header_cells]
+    assert all(texts)
+    assert tuple(sorted(Counter(_normalized_numbers(" ".join(texts))).items())) == record.header_source
+    capacity: Counter[str] = Counter()
+    for text, columns in record.header_cells:
+        for token, count in Counter(_normalized_numbers(text)).items():
+            capacity[token] += count * columns
+    assert tuple(sorted((token, count) for token, count in capacity.items() if count)) == record.header_capacity
+    if case == "nested-in-header-row":
+        # Each source cell is listed once, as header_source counts it: one 2024 heading one column.
+        assert record.header_source == record.header_capacity == (("2024", 1),)
+        assert record.header_cells == (("Item", 1), ("Period", 1), ("Fiscal", 1), ("2024", 1))
+
+
 def test_list_table_has_no_header_record():
     parser = _parser("<table><tr><td>•</td><td>List item text</td></tr></table>")
     assert parser.md() == "- List item text"

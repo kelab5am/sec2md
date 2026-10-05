@@ -14,23 +14,18 @@ from sec2md.table_completeness import check_tables, hidden_sets, output_line_num
 from sec2md.table_parser import TableParser
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 
-# Every value-class check-1 failure on the fixtures today, as {unit ordinal: missing tokens}.
-# Each traces to a parser defect named in the 2026-10-02 audit; the table-merge and
-# header-rules spec should empty this list. A new loss or a fixed loss both fail the test,
-# so update this list deliberately.
+# Every value-class check-1 failure on the fixtures, as {unit ordinal: missing tokens}. The
+# 10 losses pinned before the table-merge and header-rules spec (2026-10-05) were all class 1
+# (the legacy merge dropped row-0 text); R1 keeps them, so none is left. A new loss fails the
+# test, so update this list deliberately.
 PINNED_FAILURES = {
-    "aapl-2023-10k": {
-        13: ("-1",),       # repurchase-table header, lost with its plain-text "(1)"
-        32: ("74427",),    # column-merge row 0
-        49: ("9943",),     # column-merge row 0
-        53: ("4258",),     # column-merge row 0
-    },
+    "aapl-2023-10k": {},
     "nvda-2026-10k": {},
-    "nvda-2002-10k": {19: ("1997", "1998", "31", "31")},  # period headers
-    "nvda-2026-q2-10q": {31: ("3.5",)},                   # $3.5 guarantees row
+    "nvda-2002-10k": {},
+    "nvda-2026-q2-10q": {},
     "nvda-2026-08-26-8k": {},
-    "nvda-2026-ex99-1": {9: ("15365", "24077", "42779", "50344", "74421")},  # operating cash flow row
-    "nvda-2026-ex99-2": {7: ("3.5",), 10: ("15365", "24077", "42779", "50344", "74421")},
+    "nvda-2026-ex99-1": {},
+    "nvda-2026-ex99-2": {},
 }
 TABLES_CHECKED = {
     "aapl-2023-10k": 57, "nvda-2026-10k": 62, "nvda-2002-10k": 97, "nvda-2026-q2-10q": 49,

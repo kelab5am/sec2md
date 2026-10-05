@@ -364,6 +364,7 @@ LABELS_TABLE = REPEATED_HEADER_TABLE.format(top="2025", lower="Actual")
 LINKED_LABELS_TABLE = REPEATED_HEADER_TABLE.format(top='<a href="#fy2025">2025</a>', lower="Actual")
 EQUAL_TABLE = REPEATED_HEADER_TABLE.format(top="2025", lower="2025")
 LABELS_HEADER = "| Metric | 2025 — Actual | 2025 — Budget |"
+LABELS_HEADER_CELLS = (("Metric", 1), ("2025", 2), ("Actual", 1), ("Budget", 1))
 
 
 class TestHeaderRecordBinding:
@@ -380,6 +381,7 @@ class TestHeaderRecordBinding:
             header_line=LABELS_HEADER,
             header_source=(("2025", 1),),
             header_capacity=(("2025", 2),),
+            header_cells=LABELS_HEADER_CELLS,
         )}
         assert element.content.splitlines()[0] == LABELS_HEADER
         assert parser._render_header_records == {}
@@ -402,10 +404,20 @@ class TestHeaderRecordBinding:
             header_line=LABELS_HEADER,
             header_source=(("2025", 1),),
             header_capacity=(("2025", 2),),
+            header_cells=LABELS_HEADER_CELLS,
         )}
         assert parser._render_header_records == {}
         assert parser.header_accounting_misses == ()
         assert parser.trace_numeric_failures == ()
+
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_element_header_records_returns_the_records_bound_to_an_element(self, capture_tables):
+        parser = Parser(f"<html><body>{LABELS_TABLE}</body></html>", capture_tables=capture_tables)
+        pages = parser.get_pages()
+        (element,) = pages[0].elements
+        table = parser.soup.find("table")
+        assert parser.element_header_records(element.id) == (parser._header_records[id(table)],)
+        assert parser.element_header_records("sec2md-unknown") == ()
 
     @pytest.mark.parametrize("html, capture_tables", [
         pytest.param(CAT_7_TABLE, False, id="one-row"),

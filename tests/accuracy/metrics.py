@@ -8,7 +8,7 @@ import re
 import warnings
 from collections import Counter
 from dataclasses import dataclass
-from typing import Literal, Sequence
+from typing import Literal, Mapping, Sequence
 
 from bs4 import BeautifulSoup
 from bs4 import XMLParsedAsHTMLWarning
@@ -210,23 +210,93 @@ def _oracle_visible_xbrl_tags(nodes: Sequence[Tag]) -> tuple[str, ...]:
     return tuple(tags)
 
 
-def _oracle_trace_numeric_failures(element, nodes: Sequence[Tag]) -> tuple[str, ...]:
-    """Compare numeric multisets using only the accuracy harness normalizer."""
+def _oracle_whole_line_starts(content: str, segment: str) -> list[int]:
+    """Offsets where segment occupies whole lines of content."""
 
-    expected = Counter(
-        normalize_numbers(re.sub(r"!\[[^\]]*\]\([^)]*\)", "", element.content))
-    )
+    starts: list[int] = []
+    start = content.find(segment) if segment else -1
+    while start != -1:
+        end = start + len(segment)
+        if (start == 0 or content[start - 1] == "\n") and (end == len(content) or content[end] == "\n"):
+            starts.append(start)
+        start = content.find(segment, start + 1)
+    return starts
+
+
+def _oracle_header_line_spans(content: str, records: Sequence) -> list[tuple[int, int] | None]:
+    """Locate each record's header line in element content, independently of production.
+
+    A header line is located only as the first line of its own table segment: the segment
+    must occupy whole lines exactly once and start with the recorded header line. A line
+    two records would claim is located for neither, so each is consumed once (spec R6a).
+    """
+
+    spans: list[tuple[int, int] | None] = []
+    for record in records:
+        starts = _oracle_whole_line_starts(content, record.segment)
+        first_line = record.segment.split("\n", 1)[0]
+        located = len(starts) == 1 and first_line == record.header_line
+        spans.append((starts[0], starts[0] + len(first_line)) if located else None)
+    claimed = Counter(span for span in spans if span is not None)
+    return [span if span is not None and claimed[span] == 1 else None for span in spans]
+
+
+def _oracle_header_tokens(record) -> tuple[Counter, Counter]:
+    """A table's header source and capacity, tokenized with the harness normalizer.
+
+    The source joins the header-zone cell texts with single spaces, as the mapped-node
+    pool is joined, and tokenizes them once; the capacity counts each cell's tokens once
+    per output column whose header the cell covers.
+    """
+
+    source = Counter(normalize_numbers(" ".join(text for text, _ in record.header_cells)))
+    capacity: Counter = Counter()
+    for text, columns in record.header_cells:
+        for token, count in Counter(normalize_numbers(text)).items():
+            capacity[token] += count * columns
+    return source, capacity
+
+
+def _oracle_trace_numeric_failures(
+    element, nodes: Sequence[Tag], header_records: Sequence = ()
+) -> tuple[str, ...]:
+    """Compare numeric multisets using only the accuracy harness normalizer.
+
+    With the element's table header records, R6a's header accounting applies, tokenized
+    with this harness's normalizer rather than strict's. Each located header line is
+    checked on its own against its table's header capacity, an excess failing as
+    ``<element id>:header:<token>``. Located lines then leave the output pool, and their
+    tables' header-zone tokens leave the source pool. A record whose header line is not
+    located grants no exemption and subtracts nothing.
+    """
+
+    content = element.content
+    header_failures: list[str] = []
+    header_source: Counter = Counter()
+    spans = _oracle_header_line_spans(content, header_records) if header_records else []
+    located = [(record, span) for record, span in zip(header_records, spans) if span is not None]
+    for record, (start, end) in located:
+        source, capacity = _oracle_header_tokens(record)
+        for token, count in sorted(Counter(normalize_numbers(content[start:end])).items()):
+            header_failures.extend(
+                f"{element.id}:header:{token}" for _ in range(max(0, count - capacity[token]))
+            )
+        header_source += source
+    for _, (start, end) in sorted(located, key=lambda item: item[1], reverse=True):
+        content = content[:start] + content[end:]
+
+    expected = Counter(normalize_numbers(re.sub(r"!\[[^\]]*\]\([^)]*\)", "", content)))
     available = Counter(
         normalize_numbers(
             " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
         )
-    )
+    ) - header_source
     failures: list[str] = []
     for token, count in sorted(expected.items()):
         failures.extend(
             f"{element.id}:{token}" for _ in range(max(0, count - available[token]))
         )
-    return tuple(failures)
+    return tuple(header_failures + failures)
 
 
 def _visible_text(soup: BeautifulSoup) -> str:
@@ -356,30 +426,89 @@ def extract_financial_rows(text: str | bytes) -> list[tuple[str, tuple[str, ...]
     return _markdown_rows(text)
 
 
+def _is_table_line(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") or stripped.startswith("> |")
+
+
+def _header_line_indexes(lines: Sequence[str]) -> set[int]:
+    """Indexes of Markdown table header lines: a table line right before a delimiter row."""
+
+    return {
+        index
+        for index, (line, following) in enumerate(zip(lines, lines[1:]))
+        if _is_table_line(line)
+        and not _is_delimiter_row(_markdown_cells(line))
+        and _is_table_line(following)
+        and _is_delimiter_row(_markdown_cells(following))
+    }
+
+
+def extract_header_lines(markdown: str) -> list[tuple[str, tuple[str, ...]]]:
+    """Each Markdown table header line as (its cells' text, its normalized numbers).
+
+    The text is the cells joined with `` | ``, whitespace collapsed, so a source row's
+    label can be looked up in it; the numbers are the line's normalized numeric tokens.
+    """
+
+    lines = markdown.splitlines()
+    result: list[tuple[str, tuple[str, ...]]] = []
+    for index in sorted(_header_line_indexes(lines)):
+        text = " | ".join(_markdown_cells(lines[index]))
+        result.append((_normalized_row_label(text), tuple(normalize_numbers(text))))
+    return result
+
+
+def _body_markdown(markdown: str) -> str:
+    """The Markdown without its table header lines."""
+
+    lines = markdown.splitlines()
+    header = _header_line_indexes(lines)
+    return "\n".join(line for index, line in enumerate(lines) if index not in header)
+
+
 def _strip_markdown_link_destinations(text: str) -> str:
     """Remove non-visible destinations while retaining rendered link labels."""
 
     return _MARKDOWN_LINK_RE.sub(r"\1", text)
 
 
-def _link_aware_source_rows(source: bytes) -> list[tuple[str, tuple[str, ...]]]:
-    """Use DOM-aware labels only for tables with split same-destination anchors."""
+def source_soup(source: bytes) -> BeautifulSoup:
+    """The source document as every source-side row measurement here reads it."""
 
     decoded, _ = decode_html(source)
     source_text = normalize_legacy_characters(decoded)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
-        soup = BeautifulSoup(source_text, "lxml")
+        return BeautifulSoup(source_text, "lxml")
 
-    rows: list[tuple[str, tuple[str, ...]]] = []
-    for table in soup.find_all("table"):
+
+def _link_aware_source_rows(source: bytes) -> list[tuple[str, tuple[str, ...]]]:
+    """Use DOM-aware labels only for tables with split same-destination anchors."""
+
+    return [(label, numbers) for _, _, label, numbers in _link_aware_source_row_positions(source)]
+
+
+def _link_aware_source_row_positions(
+    source: bytes,
+) -> list[tuple[int, int, str, tuple[str, ...]]]:
+    """``_link_aware_source_rows`` with each row's position.
+
+    A position is (index of the table among the document's ``table`` elements, index of
+    the row among that table's ``tr`` elements), both from zero in document order. A
+    nested table's rows appear under the outer table too, as they always have.
+    """
+
+    soup = source_soup(source)
+    rows: list[tuple[int, int, str, tuple[str, ...]]] = []
+    for table_index, table in enumerate(soup.find_all("table")):
         table_has_split_link = any(
             left.get("href")
             and left.get("href") == right.get("href")
             for cell in table.find_all(["td", "th"])
             for left, right in zip(cell.find_all("a"), cell.find_all("a")[1:])
         )
-        for row in table.find_all("tr"):
+        for row_index, row in enumerate(table.find_all("tr")):
             cells = row.find_all(["td", "th"], recursive=False)
             if not cells:
                 cells = row.find_all(["td", "th"])
@@ -400,7 +529,7 @@ def _link_aware_source_rows(source: bytes) -> list[tuple[str, tuple[str, ...]]]:
                 "",
             )
             if numbers:
-                rows.append((label, numbers))
+                rows.append((table_index, row_index, label, numbers))
     return rows
 
 
@@ -408,10 +537,28 @@ def _normalized_label(label: str) -> str:
     return _normalized_row_label(label)
 
 
+def _in_header_line(
+    row: tuple[str, tuple[str, ...]], header_lines: Sequence[tuple[str, tuple[str, ...]]]
+) -> bool:
+    """Whether one header line holds the row's label text and its numbers as a sub-multiset."""
+
+    label, numbers = row
+    need = Counter(numbers)
+    return any(label in text and not need - Counter(have) for text, have in header_lines)
+
+
 def _financial_row_recall(
     source: Sequence[tuple[str, tuple[str, ...]]],
     actual: Sequence[tuple[str, tuple[str, ...]]],
+    header_lines: Sequence[tuple[str, tuple[str, ...]]] = (),
 ) -> float:
+    """Share of eligible source rows (2+ label words, 2+ numbers) present in the output.
+
+    A row is present when an output row has its exact label and numbers, or (spec
+    2026-10-05: R6 fuses header rows into one header line) when one output header line
+    contains its label text and its numbers as a sub-multiset.
+    """
+
     expected = {
         key
         for row in source
@@ -424,7 +571,140 @@ def _financial_row_recall(
     }
     if not expected:
         return 1.0
-    return len(expected & available) / len(expected)
+    present = expected & available
+    if header_lines:
+        present |= {key for key in expected - present if _in_header_line(key, header_lines)}
+    return len(present) / len(expected)
+
+
+@dataclass(frozen=True, order=True)
+class SourceRow:
+    """One source row with visible text, with its position (spec 2026-10-05 revision 11:
+    the body-row guard covers every such row).
+
+    table and row index every ``table`` element and each table's ``tr`` elements in document
+    order, from zero, as ``_link_aware_source_row_positions`` does (a nested table's rows also
+    appear under the outer table). cells are the row's non-empty visible cell texts.
+    """
+
+    table: int
+    row: int
+    cells: tuple[str, ...]
+
+    @property
+    def key(self) -> str:
+        return _row_signature(self.cells)
+
+
+_ZERO_WIDTH = str.maketrans(dict.fromkeys("\u200b\u200c\u200d\u2060\ufeff"))
+_SPACE_RE = re.compile(r"\s+")
+
+
+def _row_signature(cells: Sequence[str]) -> str:
+    """A row's text with every space removed, so cell boundaries and joins do not matter:
+    ``$`` + ``1,234`` and ``$ 1,234``, ``(29`` + ``)`` and ``(29)`` sign alike."""
+
+    return _SPACE_RE.sub("", "".join(cells).translate(_ZERO_WIDTH))
+
+
+def _snapshot_hidden(node: Tag) -> bool:
+    """The snapshot builder's rule for a hidden element (xlsx_tables._hidden)."""
+
+    from sec2md.xlsx_tables import _hidden
+
+    return _hidden(node)
+
+
+def _grid_hidden(node: Tag, table: Tag) -> bool:
+    """Grid-hidden (spec revision 11): hidden by the snapshot rule, itself or through an
+    ancestor inside the table."""
+
+    current: Tag | None = node
+    while current is not None and current is not table:
+        if _snapshot_hidden(current):
+            return True
+        current = current.parent
+    return False
+
+
+def _visible_cell_text(cell: Tag) -> str:
+    """A source cell's visible text: its strings joined, links read by their labels, and a
+    cell holding only an image read as a bullet, as the renderer writes it."""
+
+    text = _SPACE_RE.sub(" ", cell.get_text(" ", strip=True).translate(_ZERO_WIDTH)).strip()
+    if not text and cell.find("img") is not None:
+        return "\u25cf"
+    return text
+
+
+def text_source_rows(source: bytes) -> tuple[SourceRow, ...]:
+    """Every source row with visible text, in document order (grid-hidden rows and cells left
+    out)."""
+
+    rows: list[SourceRow] = []
+    for table_index, table in enumerate(source_soup(source).find_all("table")):
+        for row_index, row in enumerate(table.find_all("tr")):
+            if _grid_hidden(row, table):
+                continue
+            cells = row.find_all(["td", "th"], recursive=False) or row.find_all(["td", "th"])
+            texts = tuple(
+                text
+                for cell in cells
+                if not _grid_hidden(cell, table) and (text := _visible_cell_text(cell))
+            )
+            if texts:
+                rows.append(SourceRow(table_index, row_index, texts))
+    return tuple(rows)
+
+
+def _output_cells(line: str) -> list[str]:
+    """A Markdown table line's non-empty cells: link labels only, pipes unescaped."""
+
+    cells = (cell.replace("\\|", "|") for cell in _markdown_cells(_strip_markdown_link_destinations(line)))
+    return [cell for cell in cells if cell.strip()]
+
+
+def body_line_counts(markdown: str) -> Counter:
+    """How many table body lines of the Markdown carry each row signature (header lines and
+    delimiters left out)."""
+
+    lines = markdown.splitlines()
+    header = _header_line_indexes(lines)
+    return Counter(
+        _row_signature(_output_cells(line))
+        for index, line in enumerate(lines)
+        if index not in header and _is_table_line(line) and not _is_delimiter_row(_markdown_cells(line))
+    )
+
+
+def body_matched_rows(source: bytes, markdown: str) -> tuple[SourceRow, ...]:
+    """The source rows with visible text that output body lines render: the same text in the
+    same order, spaces and cell boundaries aside. A row present only in a header line is not
+    body-matched.
+
+    Rows sharing a signature are counted, not told apart: with n source rows and m body lines
+    of one signature, the first min(n, m) of those rows in document order are returned.
+    """
+
+    available = body_line_counts(markdown)
+    matched: list[SourceRow] = []
+    for row in text_source_rows(source):
+        if available[row.key] > 0:
+            available[row.key] -= 1
+            matched.append(row)
+    return tuple(matched)
+
+
+def _in_header_line_cells(cells: Sequence[str], markdown: str) -> bool:
+    """Whether one header line of the Markdown holds every cell text of a source row."""
+
+    lines = markdown.splitlines()
+    wanted = [_row_signature([cell]) for cell in cells]
+    for index in _header_line_indexes(lines):
+        have = _row_signature(_output_cells(lines[index]))
+        if all(part in have for part in wanted):
+            return True
+    return False
 
 
 def _representative_row_failures(
@@ -475,8 +755,15 @@ def _element_ids(pages: Sequence[Page]) -> list[str]:
 
 
 def _mapping_and_trace(
-    pages: Sequence[Page], annotated_html: str
+    pages: Sequence[Page],
+    annotated_html: str,
+    header_records: Mapping[str, Sequence] | None = None,
 ) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
+    """Check element mappings, trace numbers and visible XBRL tags per element.
+
+    header_records maps an element ID to its tables' header records (spec R6a); the
+    numeric trace accounts for those tables' header lines.
+    """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         soup = BeautifulSoup(annotated_html, "lxml")
@@ -493,7 +780,8 @@ def _mapping_and_trace(
             if not nodes:
                 missing.append(element.id)
                 continue
-            failures.extend(_oracle_trace_numeric_failures(element, nodes))
+            records = header_records.get(element.id, ()) if header_records else ()
+            failures.extend(_oracle_trace_numeric_failures(element, nodes, records))
             element_tags = set(element.tags or [])
             visible_tags = set(_oracle_visible_xbrl_tags(nodes))
             invalid_tags.update(element_tags - visible_tags)
@@ -512,26 +800,55 @@ def _section_keys(pages: Sequence[Page], form: str) -> tuple[str, ...]:
     return tuple(keys)
 
 
-def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page], ParseDiagnostics]:
+def _render(source: bytes) -> tuple[Parser, list[Page]]:
+    """Parse one document, with elements, as every measurement here does."""
+
     text, _ = decode_html(source)
     text = normalize_legacy_characters(text)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         parser = Parser(text)
         pages = parser.get_pages(include_elements=True)
+    return parser, pages
+
+
+def _markdown_of(pages: Sequence[Page]) -> str:
+    return "\n\n".join(page.content for page in pages if page.content)
+
+
+def _parse_document(
+    source: bytes,
+) -> tuple[str, bytes, str, list[Page], ParseDiagnostics, dict[str, tuple]]:
+    """Parse once; also return each element's table header records (spec R6a)."""
+
+    parser, pages = _render(source)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         annotated_html = parser.html()
     if parser.diagnostics is None:
         raise RuntimeError("Parser did not provide parse diagnostics")
-    markdown = "\n\n".join(page.content for page in pages if page.content)
-    return markdown, canonical_pages(pages), annotated_html, pages, parser.diagnostics
+    header_records = {
+        element.id: records
+        for page in pages
+        for element in page.elements or ()
+        if (records := parser.element_header_records(element.id))
+    }
+    return (_markdown_of(pages), canonical_pages(pages), annotated_html, pages,
+            parser.diagnostics, header_records)
+
+
+def _parse_once(source: bytes) -> tuple[str, bytes, str, list[Page], ParseDiagnostics]:
+    return _parse_document(source)[:5]
 
 
 def _link_aware_financial_row_recall(source: bytes, markdown: str) -> float:
     """Compare visible source and Markdown table content without link syntax."""
 
+    visible = _strip_markdown_link_destinations(markdown)
     return _financial_row_recall(
         _link_aware_source_rows(source),
-        extract_financial_rows(_strip_markdown_link_destinations(markdown)),
+        extract_financial_rows(visible),
+        extract_header_lines(visible),
     )
 
 
@@ -545,10 +862,10 @@ def audit_document(
 
     if quality_policy not in {"strict", "warn", "off"}:
         raise ValueError(f"unknown quality policy: {quality_policy}")
-    first = _parse_once(source)
-    second = _parse_once(source)
-    markdown, pages_bytes, annotated_html, pages, diagnostics = first
-    markdown_2, pages_bytes_2, annotated_html_2, _, _ = second
+    first = _parse_document(source)
+    second = _parse_document(source)
+    markdown, pages_bytes, annotated_html, pages, diagnostics, header_records = first
+    markdown_2, pages_bytes_2, annotated_html_2, _, _, _ = second
     enforce_quality(diagnostics, quality_policy)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
@@ -560,7 +877,7 @@ def audit_document(
     element_ids = _element_ids(pages)
     counts = Counter(element_ids)
     duplicates = tuple(sorted(element_id for element_id, count in counts.items() if count > 1))
-    missing, trace_failures, invalid_tags = _mapping_and_trace(pages, annotated_html)
+    missing, trace_failures, invalid_tags = _mapping_and_trace(pages, annotated_html, header_records)
     expected_sections = _section_keys(pages, contract.form)
     exhibit_link_count = len(re.findall(r"\[[^\]]+\]\([^)]*\)", markdown))
     output_rows = extract_financial_rows(markdown)

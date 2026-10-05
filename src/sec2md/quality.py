@@ -84,12 +84,15 @@ class ElementHeaderRecord:
     the header line that render wrote, which must be the segment's first line.
     header_source and header_capacity are the render's sorted (token, count) pairs: the
     header-zone cells' tokens, and each cell's tokens times the output columns it heads.
+    header_cells are those cells with text, in document order, as (text, columns headed),
+    for consumers with their own tokenizer, such as the accuracy suite's trace.
     """
 
     segment: str
     header_line: str
     header_source: tuple[tuple[str, int], ...] = ()
     header_capacity: tuple[tuple[str, int], ...] = ()
+    header_cells: tuple[tuple[str, int], ...] = ()
 
 
 HeaderMiss = Literal["missing", "ambiguous"]

@@ -421,11 +421,15 @@ class TableHeaderRecord:
     spaces, as strict's source pool is built, then tokenized once with strict's tokenizer.
     header_capacity multiplies each cell's own tokens by the number of output columns
     whose header that cell covers. Counts are sorted (token, count) pairs.
+    header_cells lists the same header-zone cells that have text, in document order, as
+    (text, output columns whose header the cell covers), so an independent consumer can
+    tokenize them its own way.
     """
 
     header_line: str | None
     header_source: tuple[tuple[str, int], ...] = ()
     header_capacity: tuple[tuple[str, int], ...] = ()
+    header_cells: tuple[tuple[str, int], ...] = ()
 
 
 class TableParser:
@@ -1229,15 +1233,18 @@ class TableParser:
         covering = [
             [cell for cells in self.column_header_cells(index) for cell in cells] for index in kept
         ]
+        columns = [
+            sum(1 for cells in covering if any(cell is held for held in cells)) for cell in zone_cells
+        ]
         capacity: Counter[str] = Counter()
-        for cell, text in zip(zone_cells, texts):
-            columns = sum(1 for cells in covering if any(cell is held for held in cells))
+        for text, heads in zip(texts, columns):
             for token, count in Counter(_normalized_numbers(text)).items():
-                capacity[token] += count * columns
+                capacity[token] += count * heads
         return TableHeaderRecord(
             header_line,
             tuple(sorted(source.items())),
             tuple(sorted((token, count) for token, count in capacity.items() if count)),
+            tuple((text, heads) for text, heads in zip(texts, columns) if text),
         )
 
     def _looks_like_list_table(self) -> bool:
