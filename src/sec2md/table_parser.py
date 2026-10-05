@@ -167,6 +167,40 @@ def render_cell_content(cell: Tag, *, base_url: str | None = None) -> str:
     return _collapse_structural_whitespace(joined).strip()
 
 
+def has_descendant(node: Tag, name: str) -> bool:
+    """Whether a tag has a descendant tag with this name: ``node.find(name)`` without the
+    cost of bs4's filter machinery, which dominates on tables with many cells. Strings
+    and comments have no name (None), so only tags can match."""
+
+    return any(child.name == name for child in node.descendants)
+
+
+def extract_cell_text(td: Tag, *, base_url: str | None = None) -> str:
+    """A td or th cell's text as the Markdown render reads it (the spec's extracted text).
+
+    A cell with a link keeps it as Markdown (render_cell_content); any other cell joins its
+    strings with single spaces. Zero-width characters are removed, and a cell holding only
+    an image reads as a bullet. The header-alignment check reads source cells through this
+    same function, so its labels match the header line text R6 writes.
+    """
+
+    if has_descendant(td, "a"):
+        text = render_cell_content(td, base_url=base_url)
+    else:
+        text = (
+            td.get_text(separator=" ", strip=True)
+            .replace('\xa0', ' ')
+            .replace('\r\n', ' ')
+            .replace('\r', ' ')
+            .replace('\n', ' ')
+            .translate(_ZERO_WIDTH)
+            .strip()
+        )
+    if not text and has_descendant(td, 'img'):
+        text = '●'  # or '•' depending on your BULLETS set
+    return text
+
+
 def _escape_table_pipes(text: str) -> str:
     """Escape visible, unescaped pipes without changing Markdown link URLs."""
 
@@ -436,21 +470,7 @@ class TableParser:
             for td in cells:
                 if _grid_hidden_within(td, self.table_element, hidden):
                     continue
-                if td.find("a"):
-                    text = render_cell_content(td, base_url=self.base_url)
-                else:
-                    text = (
-                        td.get_text(separator=" ", strip=True)
-                        .replace('\xa0', ' ')
-                        .replace('\r\n', ' ')
-                        .replace('\r', ' ')
-                        .replace('\n', ' ')
-                        .translate(_ZERO_WIDTH)
-                        .strip()
-                    )
-                if not text:
-                    if td.find('img'):
-                        text = '●'  # or '•' depending on your BULLETS set
+                text = extract_cell_text(td, base_url=self.base_url)
                 rowspan = self._safe_parse_int(td.get('rowspan'))
                 colspan = self._safe_parse_int(td.get('colspan'))
                 row.append(Cell(text=text, rowspan=rowspan, colspan=colspan,

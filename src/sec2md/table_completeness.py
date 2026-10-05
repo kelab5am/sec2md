@@ -216,6 +216,16 @@ def label_key(text: str) -> str:
     return letters + ("#" + ",".join(identifiers) if identifiers else "")
 
 
+def row_label_key(texts: list[tuple[str, str]]) -> str:
+    """Check 1's key of a source row: the label key of its first non-empty cell value."""
+    return label_key(next((value for value, _ in texts if value), ""))
+
+
+def line_label_key(cells: list[str]) -> str:
+    """Check 1's key of an output line, from its cells with split negatives merged."""
+    return label_key(cells[0]) if cells else ""
+
+
 def is_period_row(cells: list[str], before_header_end: bool) -> bool:
     """Header or period row, decided by context, never by the shape of its numbers."""
     if before_header_end:
@@ -274,7 +284,7 @@ def output_positions(segment: str, exhibit_index: bool) -> tuple[list[tuple[str,
                 found.update((t, "reference") for t in numbers(cell))
             else:
                 found.update(_output_cell_positions(cell, signature_row))
-        body.append((label_key(cells[0]) if cells else "", found))
+        body.append((line_label_key(cells), found))
     return body, other
 
 
@@ -338,10 +348,16 @@ def unit_rows(table: Tag) -> list[_Row]:
 _NUMERIC_FACT_NAMES = {"ix:nonfraction", "ix:fraction", "nonfraction", "fraction"}
 
 
-def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int:
-    """xlsx_tables._header_count over the grid a snapshot would build; 0 where a snapshot is unreliable."""
+def place_unit(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> tuple[list[_Row], list[list[_GridCell | None]]] | None:
+    """The snapshot builder's placement of a unit's own visible rows.
+
+    Returns (placed rows, grid): grid[r][k] is the cell covering slot (r, k), or None. Placed
+    rows and columns, empty ones included, are the original coordinates. None means the
+    placement is unreliable: a nested table, a bad or oversized span, an overlap, or an
+    oversized grid. A unit without visible cells gives an empty grid.
+    """
     if table.find("table") is not None:
-        return 0
+        return None
     rows = [row for row in rows if row.own and id(row.tr) not in grid_hidden]
     # The snapshot builder's placement rules, with occupied spans kept per row so each
     # lookup only scans its own row (the builder compares every cell with every other).
@@ -362,33 +378,41 @@ def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int
                 try:
                     value = int(td.get(attr, "1"))
                 except (TypeError, ValueError):
-                    return 0
+                    return None
                 if value <= 0 or value > limit:
-                    return 0
+                    return None
                 spans.append(value)
             rowspan, colspan = spans
             bottom, end = r + rowspan, column + colspan
             if bottom > len(rows) or any(start < end and finish > column
                                          for rr in range(r, bottom) for start, finish in taken[rr]):
-                return 0
+                return None
             cells.append(_GridCell(td, grid_hidden, r, column, rowspan, colspan))
             for rr in range(r, bottom):
                 taken[rr].append((column, end))
             row_widths[r] += colspan
             column = end
     if not cells:
-        return 0
+        return rows, []
     flat_width = max(row_widths)
     height = max(c.row + c.rowspan for c in cells)
     width = max(c.column + c.colspan for c in cells)
     if width > flat_width or height * width > 1_000_000:
-        return 0
-    grid = [[None] * width for _ in range(height)]
+        return None
+    grid: list[list[_GridCell | None]] = [[None] * width for _ in range(height)]
     for c in cells:
         for r in range(c.row, c.row + c.rowspan):
             for k in range(c.column, c.column + c.colspan):
                 grid[r][k] = c
-    return _header_count(grid)
+    return rows, grid
+
+
+def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int:
+    """xlsx_tables._header_count over the grid a snapshot would build; 0 where a snapshot is unreliable."""
+    placed = place_unit(table, rows, grid_hidden)
+    if placed is None or not placed[1]:
+        return 0
+    return _header_count(placed[1])
 
 
 # --- matching ------------------------------------------------------------------------
@@ -469,6 +493,13 @@ def row_structure(source_rows: list[tuple[str, ...]], segment: str) -> list[str]
 
 # --- report ---------------------------------------------------------------------------
 
+def unit_location(ordinal: int, snapshot_ordinal: int | None, page: int | None) -> str:
+    """'table 24 (snapshot 19, page 41)': how findings name a table unit."""
+    parts = [f"snapshot {snapshot_ordinal}" if snapshot_ordinal else "", f"page {page}" if page else ""]
+    detail = ", ".join(p for p in parts if p)
+    return f"table {ordinal}" + (f" ({detail})" if detail else "")
+
+
 @dataclass(frozen=True)
 class TableFinding:
     """Check 1 and check 2 results for one table unit."""
@@ -482,9 +513,7 @@ class TableFinding:
     produced_output: bool = True
 
     def _where(self) -> str:
-        parts = [f"snapshot {self.snapshot_ordinal}" if self.snapshot_ordinal else "", f"page {self.page}" if self.page else ""]
-        detail = ", ".join(p for p in parts if p)
-        return f"table {self.ordinal}" + (f" ({detail})" if detail else "")
+        return unit_location(self.ordinal, self.snapshot_ordinal, self.page)
 
     def value_message(self) -> str | None:
         if not self.missing_values:
@@ -578,7 +607,7 @@ def check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[in
             if row.own and len(row_tokens) >= 2 and is_data_row(values, row_index < header_rows):
                 source_rows.append(tuple(row_tokens))
             total += sum(occurrences.values())
-            row_occurrences.append((label_key(next((v for v, _ in texts if v), "")) if row.own else "", occurrences))
+            row_occurrences.append((row_label_key(texts) if row.own else "", occurrences))
         if not total:
             continue
         missing_values, missing_reported = match_occurrences(row_occurrences, body, other)
