@@ -72,6 +72,8 @@ class Parser:
         self.table_checks = table_checks
         # Table completeness inputs, recorded during rendering without changing it.
         self.table_outputs: dict[int, str] = {}
+        # Link-free cell texts of the Markdown render by id(td), reused by the alignment check.
+        self._cell_texts: dict[int, str] = {}
         self._table_pages: dict[int, int] = {}
         self._snapshot_ordinals: dict[int, int] = {}
         self._snapshot_ordinal = 0
@@ -433,6 +435,13 @@ class Parser:
 
         self.includes_table = True
         table_parser = TableParser(element, base_url=self.source_url)
+        if self.table_checks:
+            # A cell with a link is extracted by the check itself, against the same base URL.
+            self._cell_texts.update(
+                (id(cell.node), cell.text)
+                for row in table_parser.cells for cell in row
+                if cell.node is not None and "](" not in cell.text
+            )
         rendered = table_parser.md().strip()
         self._render_header_records[id(element)] = (element, table_parser.header_record)
         return rendered
@@ -1013,6 +1022,7 @@ class Parser:
         self._snapshot_nodes = []
         self._unreliable_tables = {}
         self.table_outputs = {}
+        self._cell_texts = {}
         self._table_pages = {}
         self._snapshot_ordinals = {}
         self._snapshot_ordinal = 0
@@ -1066,7 +1076,8 @@ class Parser:
         if self.table_checks:
             try:
                 self.table_report = check_tables(
-                    self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals
+                    self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals,
+                    cell_texts=self._cell_texts, base_url=self.source_url,
                 )
             except Exception:
                 # Phase A is report-only: a defect in the checks must never fail a conversion.

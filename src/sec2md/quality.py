@@ -221,6 +221,10 @@ class ParseDiagnostics:
     table_structure_differences: tuple[str, ...] = ()
     tables_checked: int = 0
     numeric_recall: float | None = None
+    # Header alignment (report-only). An empty tuple means the check did not run (policy
+    # "off", or a failure inside check_tables()); a completed run emits every coverage key.
+    table_header_alignment: tuple[str, ...] = ()
+    table_header_alignment_coverage: tuple[tuple[str, int], ...] = ()
 
 
 def _is_or_has_ordered_list(node: Tag) -> bool:
@@ -384,6 +388,8 @@ def build_diagnostics(
         tables_checked=table_report.tables_checked if table_report else 0,
         # Checks 1-3 run together: Parser skips them all under quality_policy="off".
         numeric_recall=_numeric_recall(source_visible, output_visible) if table_report is not None else None,
+        table_header_alignment=table_report.alignment if table_report else (),
+        table_header_alignment_coverage=table_report.alignment_coverage if table_report else (),
     )
 
 

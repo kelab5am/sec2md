@@ -9,7 +9,8 @@ import pytest
 from sec2md.chunker.blocks import is_separator_row
 from sec2md.encoding import decode_html
 from sec2md.parser import Parser
-from sec2md.table_completeness import check_tables, output_line_numbers
+from sec2md.table_alignment import COVERAGE_KEYS
+from sec2md.table_completeness import check_tables, hidden_sets, output_line_numbers
 from sec2md.table_parser import TableParser
 from tests.accuracy.fixtures import FIXTURE_IDS, load_fixture
 
@@ -64,6 +65,36 @@ def test_fixture_reports_exactly_the_pinned_failures(fixture_id, capture):
     assert report.tables_checked == TABLES_CHECKED[fixture_id]
     assert report.structure == ()
     assert not any(ambiguous for f in report.findings for _, _, ambiguous in f.missing_values)
+
+
+# Header-alignment coverage per fixture (spec 2026-10-05), in COVERAGE_KEYS order and the
+# same in both rendering modes. The renderer leaves no evaluated value misaligned.
+# Revision 11's header zone: aapl gains two evaluated tables (years rows that read as data
+# before). Revision 12: label-only rows continue the zone, so ex99-1 units 5, 6, 11 and
+# ex99-2 unit 12, which stack two title rows, have their header zones again and are
+# evaluated (all their values aligned).
+ALIGNMENT_COVERAGE = {
+    "aapl-2023-10k": (66, 8, 1, 0, 5, 5, 47, 423, 15, 159, 249, 758, 51, 30, 0, 30, 0, 0, 647, 647, 0),
+    "nvda-2026-10k": (64, 0, 3, 0, 2, 3, 56, 465, 12, 106, 347, 894, 45, 72, 0, 49, 0, 0, 728, 728, 0),
+    "nvda-2002-10k": (172, 0, 125, 0, 1, 4, 42, 459, 43, 80, 336, 1076, 148, 27, 0, 120, 0, 0, 781, 781, 0),
+    "nvda-2026-q2-10q": (52, 1, 3, 0, 2, 2, 44, 354, 9, 87, 258, 865, 64, 32, 0, 59, 0, 0, 710, 710, 0),
+    "nvda-2026-08-26-8k": (5, 0, 1, 0, 1, 2, 1, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    "nvda-2026-ex99-1": (11, 0, 0, 0, 2, 1, 8, 109, 0, 10, 99, 363, 5, 5, 0, 13, 0, 0, 340, 340, 0),
+    "nvda-2026-ex99-2": (12, 0, 0, 0, 2, 1, 9, 65, 0, 4, 61, 296, 16, 5, 0, 19, 0, 0, 256, 256, 0),
+}
+
+
+@pytest.mark.parametrize("fixture_id", FIXTURE_IDS)
+def test_header_alignment_reports_nothing_on_the_fixtures(fixture_id):
+    parser = parse(fixture_id)[0]
+    normal = parser.diagnostics
+    capture = parse(fixture_id, capture_tables=True)[0].diagnostics
+    assert normal.table_header_alignment == capture.table_header_alignment == ()
+    expected = tuple(zip(COVERAGE_KEYS, ALIGNMENT_COVERAGE[fixture_id]))
+    assert normal.table_header_alignment_coverage == capture.table_header_alignment_coverage == expected
+    # Units are numbered as check 1 numbers them: every visible outermost table.
+    outermost, hidden, _ = hidden_sets(parser.soup)
+    assert dict(expected)["tables_total"] == sum(id(table) not in hidden for table in outermost)
 
 
 @pytest.mark.parametrize("fixture_id", FIXTURE_IDS)

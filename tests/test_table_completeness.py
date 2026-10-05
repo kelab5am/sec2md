@@ -324,7 +324,9 @@ def test_check_tables_excludes_header_rows_from_row_structure():
     table = soup.find("table")
     output = "| Denomination | €1 | €2 |\n| --- | --- | --- |\n| Issued | 2 | 1 |"
     report = check_tables(soup, {id(table): output}, {}, {})
-    assert report == TableCompletenessReport(1, ())
+    # The report also carries the header-alignment coverage (spec 2026-10-05), so compare
+    # checks 1 and 2 only.
+    assert (report.tables_checked, report.findings) == (1, ())
 
 
 def test_check_tables_reports_tables_without_output():
@@ -337,4 +339,7 @@ def test_check_tables_skips_hidden_and_token_free_tables():
     soup = soup_of('<div style="display:none">' + MERGE_LOSS + "</div>"
                    "<table><tr><td>Name</td><td>Title</td></tr><tr><td>Jane</td><td>CFO</td></tr></table>")
     report = check_tables(soup, {}, {}, {})
-    assert report == TableCompletenessReport(0, ())
+    assert (report.tables_checked, report.findings, report.alignment) == (0, (), ())
+    # The alignment check counts the visible text table as a unit without output.
+    assert dict(report.alignment_coverage)["tables_total"] == 1
+    assert dict(report.alignment_coverage)["table_no_output"] == 1

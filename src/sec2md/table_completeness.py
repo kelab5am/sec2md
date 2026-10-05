@@ -3,14 +3,15 @@
 Implements docs/superpowers/specs/2026-10-02-sec2md-table-completeness-check-design.md
 (revision 6). Each visible outermost source table is compared with the exact text the
 parser emitted for it. Check 1 reports source numbers missing from that text; check 2
-reports rows and values that changed order. Nothing here changes rendering.
+reports rows and values that changed order. check_tables also runs the header-alignment
+check (table_alignment; spec 2026-10-05). Nothing here changes rendering.
 """
 from __future__ import annotations
 
 import re
 from collections import Counter
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache, lru_cache, partial
 from typing import Mapping
 
 from bs4 import NavigableString, Tag
@@ -18,6 +19,7 @@ from bs4.element import Comment, Declaration, Doctype, ProcessingInstruction
 
 from sec2md.chunker.blocks import is_separator_row
 from sec2md.quality import _MARKDOWN_LINK_RE, _is_hidden_tag, _normalized_numbers
+from sec2md.table_parser import has_descendant
 from sec2md.xlsx_tables import _header_count, _hidden as _grid_hidden, _visible_text
 
 _BLOCK = {"p", "div", "br", "li", "tr", "table", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6", "td", "th"}
@@ -356,7 +358,7 @@ def place_unit(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> tuple[lis
     placement is unreliable: a nested table, a bad or oversized span, an overlap, or an
     oversized grid. A unit without visible cells gives an empty grid.
     """
-    if table.find("table") is not None:
+    if has_descendant(table, "table"):
         return None
     rows = [row for row in rows if row.own and id(row.tr) not in grid_hidden]
     # The snapshot builder's placement rules, with occupied spans kept per row so each
@@ -407,12 +409,16 @@ def place_unit(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> tuple[lis
     return rows, grid
 
 
-def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int:
-    """xlsx_tables._header_count over the grid a snapshot would build; 0 where a snapshot is unreliable."""
-    placed = place_unit(table, rows, grid_hidden)
+def placed_header_rows(placed: tuple[list[_Row], list[list[_GridCell | None]]] | None) -> int:
+    """xlsx_tables._header_count over a placement from place_unit; 0 where it is unreliable or empty."""
     if placed is None or not placed[1]:
         return 0
     return _header_count(placed[1])
+
+
+def header_row_count(table: Tag, rows: list[_Row], grid_hidden: set[int]) -> int:
+    """xlsx_tables._header_count over the grid a snapshot would build; 0 where a snapshot is unreliable."""
+    return placed_header_rows(place_unit(table, rows, grid_hidden))
 
 
 # --- matching ------------------------------------------------------------------------
@@ -542,8 +548,16 @@ class TableFinding:
 
 @dataclass(frozen=True)
 class TableCompletenessReport:
+    """Checks 1 and 2 per table, plus the header-alignment findings and coverage counts.
+
+    alignment_coverage holds every table_alignment.COVERAGE_KEYS key in order once
+    check_tables completes; empty means the alignment check did not run.
+    """
+
     tables_checked: int
     findings: tuple[TableFinding, ...]
+    alignment: tuple[str, ...] = ()
+    alignment_coverage: tuple[tuple[str, int], ...] = ()
 
     @property
     def failures(self) -> tuple[str, ...]:
@@ -563,30 +577,55 @@ def _direct_cells(tr: Tag) -> list[Tag]:
 
 
 def check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[int, int],
-                 snapshot_ordinals: Mapping[int, int]) -> TableCompletenessReport:
-    """Run checks 1 and 2 over every visible outermost table of a parsed document."""
+                 snapshot_ordinals: Mapping[int, int], *,
+                 cell_texts: Mapping[int, str] | None = None,
+                 base_url: str | None = None) -> TableCompletenessReport:
+    """Run checks 1 and 2 and the header-alignment check over every visible outermost table.
+
+    cell_texts optionally maps id(td) to the cell's ``table_parser.extract_cell_text`` result
+    already computed by the render, which the header-alignment check then reuses. base_url is
+    the base URL the render resolved links against (the Parser's source URL): the
+    header-alignment check resolves the links of the cells it extracts itself against it.
+    """
+    # Imported here: table_alignment builds on this module.
+    from sec2md.table_alignment import align_table, coverage_items
+
     numbers.cache_clear()  # the token cache is per document
     outermost, hidden, grid_hidden = hidden_sets(soup)
     units = [t for t in outermost if id(t) not in hidden]
     findings, checked = [], 0
+    alignment: list[str] = []
+    alignment_coverage: Counter = Counter()
     for ordinal, table in enumerate(units, 1):
         all_rows = unit_rows(table)
         rows = [row for row in all_rows if id(row.tr) not in hidden]
         own_rows = [row for row in rows if row.own]
         own_index = {id(row.tr): i for i, row in enumerate(own_rows)}
         texts_by_row = [[cell_text(c, hidden) for c in _direct_cells(row.tr) if id(c) not in hidden] for row in rows]
+        raw = table_outputs.get(id(table), "")
+
+        # The header-alignment check covers every unit, pairing rows by check 1's keys. The
+        # unit is placed at most once, for whichever of the two checks needs it first.
+        placement = cache(partial(place_unit, table, all_rows, grid_hidden))
+        row_keys = {id(row.tr): row_label_key(texts) for row, texts in zip(rows, texts_by_row) if row.own}
+        aligned = align_table(table, all_rows, grid_hidden, raw, row_keys,
+                              Counter(key for key in row_keys.values() if key), placement=placement,
+                              cell_texts=cell_texts, base_url=base_url)
+        alignment_coverage.update(aligned.coverage)
+        alignment.extend(aligned.messages(unit_location(ordinal, snapshot_ordinals.get(id(table)),
+                                                        table_pages.get(id(table)))))
+
         if not any(_DIGIT.search(value) or _DIGIT.search(marks) for texts in texts_by_row for value, marks in texts):
             continue  # no source tokens
         leading = [value for row, texts in zip(rows, texts_by_row) if row.own and own_index[id(row.tr)] < 3
                    for value, _ in texts]
         exhibit_index = (any(_EXHIBIT_HEADING.match(v) for v in leading)
                          and any(_DESCRIPTION_HEADING.search(v) for v in leading))
-        raw = table_outputs.get(id(table), "")
         segment = _MARKDOWN_LINK_RE.sub(lambda m: m.group(1), raw)
         body, other = output_positions(segment, exhibit_index)
 
         # Header rows are never data rows (check 2) and label value findings "header".
-        header_rows = header_row_count(table, all_rows, grid_hidden)
+        header_rows = placed_header_rows(placement())
         row_occurrences, source_rows, total = [], [], 0
         for row, texts in zip(rows, texts_by_row):
             row_index = own_index[id(row.tr)] if row.own else -1
@@ -617,4 +656,5 @@ def check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[in
             findings.append(TableFinding(ordinal, snapshot_ordinals.get(id(table)), table_pages.get(id(table)),
                                          tuple(missing_values), tuple(missing_reported), tuple(structure),
                                          produced_output=bool(raw.strip())))
-    return TableCompletenessReport(checked, tuple(findings))
+    return TableCompletenessReport(checked, tuple(findings), tuple(alignment),
+                                   coverage_items(alignment_coverage))

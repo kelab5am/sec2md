@@ -135,6 +135,8 @@ def visible_text(text: str | None) -> str:
 
     if not text:
         return ""
+    if text.isascii() and "[" not in text:
+        return text.strip()  # no link, zero-width character or no-break space to remove
     text = _MARKDOWN_LINK_RE.sub(r"\1", text.translate(_ZERO_WIDTH))
     return text.replace("\xa0", " ").strip()
 

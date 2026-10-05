@@ -342,6 +342,8 @@ def test_parse_diagnostics_positional_construction_keeps_working():
     assert diagnostics.table_structure_differences == ()
     assert diagnostics.tables_checked == 0
     assert diagnostics.numeric_recall is None
+    assert diagnostics.table_header_alignment == ()
+    assert diagnostics.table_header_alignment_coverage == ()
 
 
 def test_diagnostics_with_table_findings_survive_pickling(lossy_renderer):
@@ -378,6 +380,25 @@ def test_build_diagnostics_without_table_report_skips_all_three_checks():
     )
     assert diagnostics.tables_checked == 0
     assert diagnostics.numeric_recall is None
+    # An empty tuple means the header-alignment check did not run.
+    assert diagnostics.table_header_alignment == ()
+    assert diagnostics.table_header_alignment_coverage == ()
+
+
+def test_build_diagnostics_carries_header_alignment_findings_and_coverage():
+    from sec2md.table_alignment import COVERAGE_KEYS
+    from sec2md.table_completeness import TableCompletenessReport
+
+    coverage = tuple((key, 1 if key == "tables_total" else 0) for key in COVERAGE_KEYS)
+    finding = 'table 1 (snapshot 1, page 1): "Revenue" 100 under "2024"; expected "2025"'
+    diagnostics = build_diagnostics(
+        "<p>Revenue 100.</p>", "Revenue 100.", [],
+        mapped_element_ids=(), trace_failures=(), enforce_mappings=False,
+        table_report=TableCompletenessReport(1, (), (finding,), coverage),
+    )
+    assert diagnostics.table_header_alignment == (finding,)
+    assert diagnostics.table_header_alignment_coverage == coverage
+    assert diagnostics.warnings == ()
 
 
 def table_completeness_logs(caplog, level):
