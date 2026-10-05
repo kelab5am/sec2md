@@ -10,7 +10,14 @@ from typing import List, Literal, Optional, Sequence, cast
 from urllib.parse import urljoin
 
 from sec2md.quality import normalize_numeric_token
-from sec2md.table_roles import ZERO_WIDTH_CHARACTERS
+from sec2md.table_roles import (
+    CURRENCY_MARKERS,
+    CURRENCY_PATTERN,
+    ZERO_WIDTH_CHARACTERS,
+    OriginCell,
+    row_roles,
+    visible_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +30,16 @@ STRUCTURAL_MARKERS: dict[str, StructuralColumn] = {
     ")": "close_paren",
     "%": "percent",
 }
-
+# EXTENDED (R3.4, R4): ")%" closes a percentage negative and every marker of the closed
+# currency list behaves as "$".
+EXTENDED_MARKERS: dict[str, StructuralColumn] = {
+    **STRUCTURAL_MARKERS,
+    ")%": "close_paren",
+    **{marker: "currency" for marker in CURRENCY_MARKERS},
+}
+# Local numeric rules for EXTENDED validation (R3.3, R4); strict's normalizer is unchanged.
+_CURRENCY_PREFIX = re.compile(rf"^(\(?\s*){CURRENCY_PATTERN}\s*")
+_LEADING_DOT = re.compile(r"(?<!\d)\.(?=\d)")
 
 
 class StructuralPolicy(Enum):
@@ -171,13 +187,47 @@ def _escape_table_pipes(text: str) -> str:
     return "".join(output)
 
 
+def _cell_value(text: str, *, policy: StructuralPolicy = LEGACY) -> str:
+    """The cell text a structural rule reads: visible text under EXTENDED (R3.1)."""
+
+    if policy is EXTENDED:
+        return visible_text(text)
+    return text.strip()
+
+
+def _origin_cells(
+    grid: Sequence[Sequence[Optional["GridCell"]]],
+) -> list[list[OriginCell | None]]:
+    """The neutral R0 grid: each origin slot's text and th markup, None where a span covers it."""
+
+    return [
+        [
+            None if cell is None or cell.is_spanning else OriginCell(cell.cell.text, cell.cell.header)
+            for cell in row
+        ]
+        for row in grid
+    ]
+
+
 def _marker_class(
     value: str,
     *,
     policy: StructuralPolicy = LEGACY,
+    label: bool = False,
 ) -> StructuralColumn | None:
-    """The structural marker class of one whole, stripped cell text."""
+    """The structural marker class of one whole, stripped cell text.
 
+    ``label`` says the cell lies in R0's label column. There, under EXTENDED, only "$" is a
+    currency marker, which keeps main's rule: a row label such as "EUR" or "JPY" is text
+    (R4, revision 17). LEGACY ignores it.
+    """
+
+    if policy is EXTENDED:
+        text = visible_text(value)
+        marker_class = EXTENDED_MARKERS.get(text)
+        if label and marker_class == "currency" and text != "$":
+            return None
+        return marker_class
     return STRUCTURAL_MARKERS.get(value)
 
 
@@ -185,13 +235,18 @@ def _classify_structural_column(
     values: Sequence[str],
     *,
     policy: StructuralPolicy = LEGACY,
+    label: bool = False,
 ) -> StructuralColumn | None:
-    """Classify a column only when its marker evidence is uniform and repeated."""
+    """Classify a column only when its marker evidence is uniform.
 
-    nonempty = [value.strip() for value in values if value.strip()]
-    if len(nonempty) < 2:
+    LEGACY needs the marker repeated; EXTENDED accepts a single marker (R3.4), which
+    final validation must still accept. ``label`` marks R0's label column (_marker_class).
+    """
+
+    nonempty = [text for text in (_cell_value(value, policy=policy) for value in values) if text]
+    if len(nonempty) < (1 if policy is EXTENDED else 2):
         return None
-    classes = {_marker_class(value, policy=policy) for value in nonempty}
+    classes = {_marker_class(value, policy=policy, label=label) for value in nonempty}
     if None in classes or len(classes) != 1:
         return None
     return cast(StructuralColumn, classes.pop())
@@ -330,22 +385,24 @@ class TableParser:
         val2: Optional[GridCell],
         *,
         policy: StructuralPolicy = LEGACY,
+        label: bool = False,
     ) -> bool:
-        """Check if two cells should be merged based on the rules"""
+        """Check if two cells should be merged based on the rules.
+
+        ``label`` says val1 is R0's label-column cell, where only "$" is a currency
+        marker under EXTENDED (_marker_class).
+        """
+        s1 = _cell_value(val1.text, policy=policy) if val1 is not None else ""
+        s2 = _cell_value(val2.text, policy=policy) if val2 is not None else ""
+
         # Handle empty cells
-        if not val1 or not val2:
-            return True
-
-        s1 = val1.text.strip()
-        s2 = val2.text.strip()
-
         if not s1 or not s2:
             return True
 
         if self.is_footnote(s2):
             return True
 
-        if _marker_class(s1, policy=policy) == "currency":
+        if _marker_class(s1, policy=policy, label=label) == "currency":
             return True
 
         if s2 == '%':
@@ -391,14 +448,24 @@ class TableParser:
 
     @staticmethod
     def _numeric_token(value: str, *, policy: StructuralPolicy = LEGACY) -> str | None:
-        """Validate one complete rebuilt numeric token under a structural policy."""
+        """Validate one complete rebuilt numeric token under a structural policy.
 
+        EXTENDED reads visible text, strips one leading currency marker of the closed list
+        and accepts leading-dot decimals (R3.3, R4). The result is for validation only;
+        strict's normalize_numeric_token is unchanged.
+        """
+
+        if policy is EXTENDED:
+            text = _CURRENCY_PREFIX.sub(r"\1", visible_text(value), count=1)
+            return normalize_numeric_token(_LEADING_DOT.sub("0.", text))
         return normalize_numeric_token(value)
 
     @staticmethod
     def _is_numeric_fragment(value: str, *, policy: StructuralPolicy = LEGACY) -> bool:
         """Return whether a cell contains a complete or accounting numeric fragment."""
 
+        if policy is EXTENDED:
+            value = _CURRENCY_PREFIX.sub(r"\1", visible_text(value), count=1).strip()
         if TableParser._numeric_token(value, policy=policy) is not None:
             return True
         if value.startswith("(") and not value.endswith(")"):
@@ -428,9 +495,25 @@ class TableParser:
         *,
         policy: StructuralPolicy = LEGACY,
     ) -> Sequence[int]:
-        """Rows the careful marker merge reads as body."""
+        """Rows the careful marker merge reads as body: R0's body rows under EXTENDED (R3.2)."""
 
+        if policy is EXTENDED:
+            roles = row_roles(_origin_cells(grid))
+            return tuple(row for row in range(len(grid)) if roles.role(row) == "body")
         return range(self._body_start(grid, policy=policy), len(grid))
+
+    def _label_column(
+        self,
+        grid: List[List[GridCell]],
+        *,
+        policy: StructuralPolicy = LEGACY,
+    ) -> int | None:
+        """R0's label column under EXTENDED (R4, revision 17); None under LEGACY or for an
+        empty grid, so LEGACY never reads it."""
+
+        if policy is not EXTENDED:
+            return None
+        return row_roles(_origin_cells(grid)).label_column
 
     @staticmethod
     def _structural_target(
@@ -454,6 +537,8 @@ class TableParser:
 
         column_count = len(grid[0])
         body_rows = self._body_rows(grid, policy=policy)
+        # R4, revision 17: in R0's label column only "$" is a currency marker.
+        label_column = self._label_column(grid, policy=policy)
         values_by_column = {
             column: [
                 grid[row][column].text if grid[row][column] is not None else ""
@@ -464,10 +549,13 @@ class TableParser:
         candidate_actions: dict[int, dict[int, int]] = {}
 
         for column, values in values_by_column.items():
-            marker_class = _classify_structural_column(values, policy=policy)
-            nonempty = [value.strip() for value in values if value.strip()]
+            label = column == label_column
+            marker_class = _classify_structural_column(values, policy=policy, label=label)
+            nonempty = [
+                text for text in (_cell_value(value, policy=policy) for value in values) if text
+            ]
             if marker_class is None:
-                classes = [_marker_class(value, policy=policy) for value in nonempty]
+                classes = [_marker_class(value, policy=policy, label=label) for value in nonempty]
                 legacy_mixed = (
                     set(classes) == {"currency", "close_paren"}
                     and classes.count("currency") >= 2
@@ -478,11 +566,12 @@ class TableParser:
 
             row_actions: dict[int, int] = {}
             for row in body_rows:
-                value = grid[row][column].text.strip() if grid[row][column] else ""
+                cell = grid[row][column]
+                value = _cell_value(cell.text, policy=policy) if cell is not None else ""
                 if not value:
                     continue
                 row_marker_class = marker_class or cast(
-                    StructuralColumn, _marker_class(value, policy=policy)
+                    StructuralColumn, _marker_class(value, policy=policy, label=label)
                 )
                 target = self._structural_target(column, row_marker_class)
                 if not 0 <= target < column_count:
@@ -516,18 +605,28 @@ class TableParser:
             return actions
 
         for column, values in values_by_column.items():
-            nonempty = [value.strip() for value in values if value.strip()]
+            nonempty = [
+                text for text in (_cell_value(value, policy=policy) for value in values) if text
+            ]
             if column in actions or len(nonempty) != 1 or column != column_count - 1:
                 continue
             marker_class = _marker_class(nonempty[0], policy=policy)
             if marker_class != "close_paren":
                 continue
-            row = next(row for row in body_rows if grid[row][column] and grid[row][column].text.strip())
+            row = next(
+                row
+                for row in body_rows
+                if grid[row][column] is not None
+                and _cell_value(grid[row][column].text, policy=policy)
+            )
             target = self._structural_target(column, marker_class)
-            target_value = grid[row][target].text if grid[row][target] else ""
-            if not target_value.strip().startswith("("):
+            target_cell = grid[row][target]
+            target_value = (
+                _cell_value(target_cell.text, policy=policy) if target_cell is not None else ""
+            )
+            if not target_value.startswith("("):
                 continue
-            if self._numeric_token(f"{target_value.strip()})", policy=policy) is None:
+            if self._numeric_token(f"{target_value})", policy=policy) is None:
                 continue
             trial_actions = dict(actions)
             trial_actions[column] = {row: target}
@@ -555,7 +654,7 @@ class TableParser:
                     for other_source, other_actions in actions.items():
                         if other_actions.get(row) != target:
                             continue
-                        value = grid[row][other_source].text.strip()
+                        value = _cell_value(grid[row][other_source].text, policy=policy)
                         if other_source < target:
                             prefixes.append(value)
                         else:
@@ -652,7 +751,8 @@ class TableParser:
                 prefixes: list[str] = []
                 suffixes: list[str] = []
                 for source, source_actions in actions.items():
-                    value = row[source].text.strip() if row[source] else ""
+                    cell = row[source]
+                    value = _cell_value(cell.text, policy=policy) if cell is not None else ""
                     if not value:
                         continue
                     merge_target = source_actions.get(row_index)
@@ -696,6 +796,10 @@ class TableParser:
         if not grid or not grid[0]:
             return grid
 
+        # R4, revision 17: R0's own label-column cells, which the structural pass keeps by
+        # identity; there only "$" is a currency marker.
+        label_column = self._label_column(grid, policy=policy)
+        label_cells = [row[label_column] if label_column is not None else None for row in grid]
         grid = self._merge_structural_columns(grid, policy=policy)
         if not grid or not grid[0]:
             return grid
@@ -712,7 +816,11 @@ class TableParser:
 
             cell_pairs = list(zip(current_col[1:], col[1:]))
             should_merge = all(
-                self._should_merge_cells(c1, c2, policy=policy) for c1, c2 in cell_pairs
+                self._should_merge_cells(
+                    c1, c2, policy=policy,
+                    label=c1 is not None and c1 is label_cells[row],
+                )
+                for row, (c1, c2) in enumerate(cell_pairs, start=1)
             )
 
             if should_merge:

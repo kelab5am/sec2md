@@ -64,6 +64,10 @@ def reverse_numeric_cells(segment):
 
 MERGE_LOSS = ("<table><tr><td>2024</td><td>$</td><td>9,943</td></tr>"
               "<tr><td>2025</td><td></td><td>10,775</td></tr><tr><td>Total</td><td>$</td><td>20,718</td></tr></table>")
+SINGLE_DIGIT_ROW = ("<table><tr><td>Impairment</td><td>$</td><td>9</td></tr><tr><td>Other</td><td></td><td>12</td></tr>"
+                    "<tr><td>Total</td><td>$</td><td>21</td></tr></table>")
+NOTE1_ROW = ("<table><tr><td>Note 1 Revenue</td><td>$</td><td>9,943</td></tr><tr><td>Other</td><td></td><td>12</td></tr>"
+             "<tr><td>Total</td><td>$</td><td>9,955</td></tr></table>")
 TWO_BY_TWO = ("<table><tr><th>Item</th><th>2026</th><th>2025</th></tr>"
               "<tr><td>Revenue</td><td>120</td><td>100</td></tr><tr><td>Cost</td><td>50</td><td>40</td></tr></table>")
 SPLIT_NEGATIVE = ('<table><tr><th>Item</th><th colspan="2">2026</th></tr>'
@@ -106,8 +110,11 @@ NESTED = ("<table><tr><td>Outer<table><tr><td>Inner</td><td>77</td></tr><tr><td>
 
 # (name, html, mutate, expected findings) with the same result in both rendering modes.
 CASES = [
-    ("prose repeats the lost value", "<p>Commitments include $9,943 million due in 2024.</p>" + MERGE_LOSS, None,
-     {1: (lost("9943"), (), ())}),
+    # Spec 2026-10-05 (R0, R3.2): the renderer now keeps a headerless first row's amount
+    # beside its "$", so these three losses are simulated on the output.
+    ("prose repeats the lost value", "<p>Commitments include $9,943 million due in 2024.</p>" + MERGE_LOSS,
+     lambda s: s.replace("| $ 9,943 |", "| $ |"), {1: (lost("9943"), (), ())}),
+    ("first-row amount kept beside its $", MERGE_LOSS, None, {}),
     ("inline-split number",
      "<table><tr><td>Item</td><td>2026</td></tr><tr><td>Revenue</td><td>1,2<span>34</span></td></tr></table>", None,
      {1: (lost("1234"), (), ())}),
@@ -115,10 +122,9 @@ CASES = [
     ("hidden value leaked into the output keeps the visible value", HIDDEN, lambda s: s.replace("100", "100 999"), {}),
     ("euro and pound values", CURRENCIES, None, {}),
     ("lost euro value", CURRENCIES, lambda s: s.replace("€123", "€"), {1: (lost("123"), (), ())}),
-    ("lost single-digit $9",
-     "<table><tr><td>Impairment</td><td>$</td><td>9</td></tr><tr><td>Other</td><td></td><td>12</td></tr>"
-     "<tr><td>Total</td><td>$</td><td>21</td></tr></table>", None,
+    ("lost single-digit $9", SINGLE_DIGIT_ROW, lambda s: s.replace("| $ 9 |", "| $ |"),
      {1: (lost("9"), (), ())}),
+    ("single-digit first-row $9 kept", SINGLE_DIGIT_ROW, None, {}),
     ("sup footnote marker rendered as (1)",
      "<table><tr><th>Item</th><th>2026</th></tr><tr><td>Revenue<sup>(1)</sup></td><td>120</td></tr></table>", None, {}),
     ("percentage range",
@@ -136,10 +142,9 @@ CASES = [
     ("numeric cells reversed", TWO_BY_TWO, reverse_numeric_cells,
      {1: ((), (), ("source row 1: values out of order within the row",
                    "source row 2: values out of order within the row"))}),
-    ("'Note 1 Revenue' row loses its amount",
-     "<table><tr><td>Note 1 Revenue</td><td>$</td><td>9,943</td></tr><tr><td>Other</td><td></td><td>12</td></tr>"
-     "<tr><td>Total</td><td>$</td><td>9,955</td></tr></table>", None,
+    ("'Note 1 Revenue' row loses its amount", NOTE1_ROW, lambda s: s.replace("| $ 9,943 |", "| $ |"),
      {1: (lost("9943"), (), ())}),
+    ("'Note 1 Revenue' first-row amount kept", NOTE1_ROW, None, {}),
     ("split negative preserved", SPLIT_NEGATIVE, None, {}),
     ("split negative deleted", SPLIT_NEGATIVE, lambda s: s.replace("(29", ""), {1: (lost("-29"), (), ())}),
     ("body rows swapped", TWO_BY_TWO, swap_body_rows,

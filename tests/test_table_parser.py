@@ -3,7 +3,7 @@
 import pytest
 from bs4 import BeautifulSoup, Tag
 
-from sec2md.table_parser import TableParser, Cell
+from sec2md.table_parser import TableParser, Cell, GridCell
 
 
 def _make_table(html: str) -> Tag:
@@ -225,15 +225,22 @@ class TestToMatrix:
         assert matrix[1] == ["A", "10", "%", "100"]
         assert matrix[2] == ["B", "20", "$", "200"]
 
-    def test_singleton_structural_marker_does_not_bypass_two_row_floor(self):
+    def test_singleton_structural_marker_keeps_the_legacy_two_row_floor(self):
+        # Spec 2026-10-05 R3.4: the Markdown render (EXTENDED) merges a single marker
+        # whose rebuilt token validates; LEGACY, used by XLSX, keeps the two-row floor.
         html = """
         <table><tr><th>Label</th><th>A</th><th></th><th>B</th><th></th><th>C</th><th></th></tr>
         <tr><td>R1</td><td>(10</td><td>)</td><td>(20</td><td>)</td><td>(30</td><td>)</td></tr>
         <tr><td>R2</td><td>(11</td><td>)</td><td>(21</td><td>)</td><td>31</td><td></td></tr></table>
         """
-        matrix = TableParser(_make_table(html)).to_matrix()
-        assert len(matrix[0]) == 5
-        assert matrix[1][-2:] == ["(30", ")"]
+        parser = TableParser(_make_table(html))
+        matrix = parser.to_matrix()
+        assert matrix[1] == ["R1", "(10)", "(20)", "(30)"]
+        assert matrix[2] == ["R2", "(11)", "(21)", "31"]
+        legacy = object.__new__(TableParser)._safe_structural_actions(parser._clean_grid(
+            [[GridCell(Cell(c.text)) for c in row] for row in parser.cells]
+        ))
+        assert sorted(legacy) == [2, 4]
 
     def test_suffix_marker_header_merges_to_left_numeric_column(self):
         html = """

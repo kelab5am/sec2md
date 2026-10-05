@@ -218,3 +218,312 @@ def test_cells_keep_their_td_or_th_markup():
     assert [[cell.header for cell in row] for row in parser.cells] == [[True, False], [False, True]]
     # XLSX builds cells from text alone; they are td cells.
     assert Cell("x").header is False
+
+
+# --- R3.1-R3.4 and R4: the careful marker merge under EXTENDED ---------------------------
+
+def _actions(rows, policy=LEGACY):
+    return object.__new__(TableParser)._safe_structural_actions(_grid(rows), policy=policy)
+
+
+def _html(rows, header_tag="td"):
+    """A table whose first row uses header_tag, one cell per text and no spans."""
+    body = []
+    for index, row in enumerate(rows):
+        tag = header_tag if index == 0 else "td"
+        body.append("<tr>" + "".join(f"<{tag}>{text}</{tag}>" for text in row) + "</tr>")
+    return "<table>" + "".join(body) + "</table>"
+
+
+def test_zero_width_marker_slot_is_empty_under_extended_only():
+    # R3.1 (NTRA): XLSX passes source text with U+200B; LEGACY keeps reading it as content.
+    rows = [
+        ["Item", "", "2025"],
+        ["Revenue", "$", "100"],
+        ["Costs", "\u200b", "60"],
+        ["Other", "$", "5"],
+    ]
+    assert _actions(rows, EXTENDED) == {1: {1: 2, 3: 2}}
+    assert _actions(rows) == {}
+
+
+# MSFT 24 / TSM 312: a bare year starts the "$" column in the last header row.
+YEAR_IN_DOLLAR_COLUMN = [
+    ["(In millions, except per share amounts)", "", "", "", ""],
+    ["Year Ended June 30,", "2025", "", "2024", ""],
+    ["Product", "$", "63,946", "$", "64,773"],
+    ["Service and other", "", "217,778", "", "180,349"],
+    ["Total revenue", "$", "281,724", "$", "245,122"],
+]
+
+
+def test_body_start_is_the_r0_body_under_extended():
+    # R3.2: the year row is header, so the "$" columns are uniform marker columns.
+    assert _actions(YEAR_IN_DOLLAR_COLUMN, EXTENDED) == {1: {2: 2, 4: 2}, 3: {2: 4, 4: 4}}
+    assert _actions(YEAR_IN_DOLLAR_COLUMN) == {}
+    parser = object.__new__(TableParser)
+    assert parser._body_rows(_grid(YEAR_IN_DOLLAR_COLUMN), policy=EXTENDED) == (2, 3, 4)
+    assert parser._body_rows(_grid(YEAR_IN_DOLLAR_COLUMN)) == range(1, 5)
+
+
+def test_year_in_dollar_column_renders_joined_amounts():
+    lines = _markdown(_html(YEAR_IN_DOLLAR_COLUMN))
+    assert lines[-3:] == [
+        "| Product | $ 63,946 | $ 64,773 |",
+        "| Service and other | 217,778 | 180,349 |",
+        "| Total revenue | $ 281,724 | $ 245,122 |",
+    ]
+
+
+# nvda-2002-10k table 138: per-share values with leading-dot decimals.
+LEADING_DOT_ROWS = [
+    ["", "", "2002", "", "2001"],
+    ["Basic", "$", ".75", "$", ".62"],
+    ["Diluted", "$", "(.62)", "$", ".60"],
+]
+
+
+def test_leading_dot_decimals_validate_under_extended_only():
+    # R3.3: fragment recognition and final validation both accept ".75" and "(.62)".
+    parser = object.__new__(TableParser)
+    assert parser._is_numeric_fragment(".75", policy=EXTENDED)
+    assert parser._is_numeric_fragment("(.62", policy=EXTENDED)
+    assert parser._numeric_token("$ (.62)", policy=EXTENDED) == "-0.62"
+    assert not parser._is_numeric_fragment(".75")
+    assert parser._numeric_token("$ .75") is None
+    assert _actions(LEADING_DOT_ROWS, EXTENDED) == {1: {1: 2, 2: 2}, 3: {1: 4, 2: 4}}
+    assert _actions(LEADING_DOT_ROWS) == {}
+
+
+def test_leading_dot_values_join_their_dollar_marker():
+    assert _markdown(_html(LEADING_DOT_ROWS))[-2:] == [
+        "| Basic | $ .75 | $ .62 |",
+        "| Diluted | $ (.62) | $ .60 |",
+    ]
+
+
+def test_strict_normalizer_is_unchanged_by_local_numeric_rules():
+    from sec2md.quality import normalize_numeric_token
+
+    assert normalize_numeric_token(".75") is None
+    assert normalize_numeric_token("RMB 1,234") is None
+
+
+# BABA 69: one negative per marker column.
+SINGLE_NEGATIVE_ROWS = [
+    ["", "2024", "", "2025", ""],
+    ["Deferred revenue", "37,142", "", "44,138", ""],
+    ["Less: current portion", "(72,818", ")", "(68,335", ")"],
+]
+
+
+def test_single_marker_column_merges_under_extended_only():
+    # R3.4: one non-empty marker may merge when the rebuilt token validates.
+    assert _actions(SINGLE_NEGATIVE_ROWS, EXTENDED) == {2: {2: 1}, 4: {2: 3}}
+    assert _actions(SINGLE_NEGATIVE_ROWS) == {}
+    assert _markdown(_html(SINGLE_NEGATIVE_ROWS))[-2:] == [
+        "| Deferred revenue | 37,142 | 44,138 |",
+        "| Less: current portion | (72,818) | (68,335) |",
+    ]
+
+
+def test_single_unmatched_open_marker_still_fails_validation():
+    rows = [["Item", "", "2025"], ["A", "(", "10"], ["B", "", "20"]]
+    assert _actions(rows, EXTENDED) == {}
+
+
+# TSM 79: ")%" closes a percentage negative.
+PERCENT_CLOSE_ROWS = [
+    ["", "2023", "", "2024", ""],
+    ["Net margin", "(3.2", ")%", "(4.5", ")%"],
+    ["Growth", "1.5", "%", "(2.0", ")%"],
+]
+
+
+def test_percent_close_marker_merges_under_extended_only():
+    # Column 2 mixes "%" and ")%" (percent and close classes), so it stays split.
+    assert _actions(PERCENT_CLOSE_ROWS, EXTENDED) == {4: {1: 3, 2: 3}}
+    assert _actions(PERCENT_CLOSE_ROWS) == {}
+    rows = [["", "2023", ""], ["Net margin", "(3.2", ")%"], ["Growth", "(1.5", ")%"]]
+    assert _actions(rows, EXTENDED) == {2: {1: 1, 2: 1}}
+    assert _markdown(_html(rows))[-2:] == ["| Net margin | (3.2)% |", "| Growth | (1.5)% |"]
+
+
+CURRENCY_MARKER_CASES = ["€", "NT$", "DKK"]
+CURRENCY_IDS = ["symbol", "prefixed-dollar", "iso-code"]
+CURRENCY_AMOUNTS = [
+    ("1,234", "{m} 1,234"),
+    ("(1,234)", "{m} (1,234)"),
+    ("12.5", "{m} 12.5"),
+    ("3.2 %", "{m} 3.2 %"),
+]
+
+
+@pytest.mark.parametrize("marker", CURRENCY_MARKER_CASES, ids=CURRENCY_IDS)
+@pytest.mark.parametrize("amount, rendered", CURRENCY_AMOUNTS,
+                         ids=["positive", "negative", "decimal", "percent"])
+def test_currency_marker_column_joins_its_amount_under_extended(marker, amount, rendered):
+    # R4: every marker of the closed list behaves as "$" does.
+    rows = [["Item", "", "2025"], ["Revenue", marker, amount], ["Costs", marker, "60"]]
+    assert _actions(rows, EXTENDED) == {1: {1: 2, 2: 2}}
+    assert _actions(rows) == {}
+    assert _markdown(_html(rows, "th"))[-2:] == [
+        f"| Revenue | {rendered.format(m=marker)} |",
+        f"| Costs | {marker} 60 |",
+    ]
+
+
+@pytest.mark.parametrize("marker", CURRENCY_MARKER_CASES, ids=CURRENCY_IDS)
+def test_currency_marker_and_split_negative_rebuild_one_token(marker):
+    rows = [["Item", "", "2025", ""], ["Revenue", marker, "(1,234", ")"], ["Costs", marker, "60", ""]]
+    assert _actions(rows, EXTENDED) == {1: {1: 2, 2: 2}, 3: {1: 2}}
+    assert _markdown(_html(rows, "th"))[-2:] == [
+        f"| Revenue | {marker} (1,234) |",
+        f"| Costs | {marker} 60 |",
+    ]
+
+
+def test_currency_marker_needs_a_validated_amount_on_its_right():
+    rows = [["Item", "", "2025"], ["Costs", "€", "60"], ["Revenue", "€", "n/a"]]
+    assert _actions(rows, EXTENDED) == {}
+
+
+@pytest.mark.parametrize("code", ["XYZ", "ABC"])
+def test_unknown_currency_code_is_not_a_marker(code):
+    rows = [["Item", "", "2025"], ["Revenue", code, "1,234"], ["Costs", code, "60"]]
+    assert _actions(rows, EXTENDED) == {}
+    assert _markdown(_html(rows, "th"))[-2:] == [
+        f"| Revenue | {code} | 1,234 |",
+        f"| Costs | {code} | 60 |",
+    ]
+
+
+def test_header_row_currency_label_is_not_a_marker_column():
+    # BABA 24: "RMB" over each amount is header text (R4), never a body marker.
+    rows = [
+        ["", "Year ended March 31,", "", "", ""],
+        ["", "2024", "", "2025", ""],
+        ["", "RMB", "", "RMB", ""],
+        ["Revenue", "", "941,168", "", "996,347"],
+        ["Costs", "", "(12,000)", "", "(13,000)"],
+    ]
+    assert _actions(rows, EXTENDED) == {}
+
+
+def test_currency_markers_merge_in_the_legacy_pass_like_dollar_under_extended():
+    parser = object.__new__(TableParser)
+    euro, amount = GridCell(Cell("€")), GridCell(Cell("1,234"))
+    assert parser._should_merge_cells(euro, amount, policy=EXTENDED)
+    assert not parser._should_merge_cells(euro, amount)
+    assert not parser._should_merge_cells(GridCell(Cell("XYZ")), amount, policy=EXTENDED)
+    assert parser._should_merge_cells(GridCell(Cell("$")), amount)
+
+
+# Revision 17 (R4): R0's label column is never a currency-marker column for a marker other
+# than "$", which keeps main's rule. Row labels such as "EUR" or "JPY" stay their own column.
+EXCHANGE_RATE_ROWS = [
+    ["", "2025", "2024"],
+    ["EUR", "1.08", "1.10"],
+    ["GBP", "1.27", "1.25"],
+    ["JPY", "0.0067", "0.0071"],
+]
+NOTIONAL_BY_CURRENCY_ROWS = [["", "2025", "2024"], ["JPY", "1,234", "987"], ["EUR", "456", "789"]]
+
+
+@pytest.mark.parametrize("rows", [EXCHANGE_RATE_ROWS, NOTIONAL_BY_CURRENCY_ROWS],
+                         ids=["exchange-rates", "notional-by-currency"])
+def test_currency_code_label_column_is_not_a_marker_column(rows):
+    assert _actions(rows, EXTENDED) == {}
+    assert _actions(rows) == {}
+    labels = [row[0] for row in rows[1:]]
+    assert table_parser._classify_structural_column(labels, policy=EXTENDED) == "currency"
+    assert table_parser._classify_structural_column(labels, policy=EXTENDED, label=True) is None
+    parser = object.__new__(TableParser)
+    code, amount = GridCell(Cell(rows[1][0])), GridCell(Cell(rows[1][1]))
+    assert parser._should_merge_cells(code, amount, policy=EXTENDED)
+    assert not parser._should_merge_cells(code, amount, policy=EXTENDED, label=True)
+
+
+def test_dollar_label_column_keeps_mains_rule():
+    rows = [["", "2025", "2024"], ["$", "1,234", "987"], ["$", "456", "789"]]
+    assert _actions(rows, EXTENDED) == _actions(rows) == {0: {1: 1, 2: 1}}
+    dollars = table_parser._classify_structural_column(["$", "$"], policy=EXTENDED, label=True)
+    assert dollars == "currency"
+    parser = object.__new__(TableParser)
+    dollar, amount = GridCell(Cell("$")), GridCell(Cell("1,234"))
+    assert parser._should_merge_cells(dollar, amount, policy=EXTENDED, label=True)
+    assert parser._should_merge_cells(dollar, amount, label=True)
+
+
+CURRENCY_LABEL_TABLES = {
+    # The exchange-rate shape: an empty th over the codes, years over the rates.
+    "exchange-rates": (
+        "<table><tr><th></th><th>2025</th><th>2024</th></tr>"
+        "<tr><td>EUR</td><td>1.08</td><td>1.10</td></tr>"
+        "<tr><td>GBP</td><td>1.27</td><td>1.25</td></tr>"
+        "<tr><td>JPY</td><td>0.0067</td><td>0.0071</td></tr></table>",
+        ["|  | 2025 | 2024 |", "| --- | --- | --- |", "| EUR | 1.08 | 1.10 |",
+         "| GBP | 1.27 | 1.25 |", "| JPY | 0.0067 | 0.0071 |"],
+    ),
+    # USD notionals by currency under td years: "JPY 1,234" would read as a yen amount.
+    "notional-by-currency": (
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        "<tr><td>JPY</td><td>1,234</td><td>987</td></tr>"
+        "<tr><td>EUR</td><td>456</td><td>789</td></tr></table>",
+        ["|  | 2025 | 2024 |", "| --- | --- | --- |", "| JPY | 1,234 | 987 |",
+         "| EUR | 456 | 789 |"],
+    ),
+    # A real currency-marker column beside the code labels still joins its amounts.
+    "marker-column-beside-code-labels": (
+        "<table><tr><th></th><th></th><th>2025</th></tr>"
+        "<tr><td>EUR</td><td>€</td><td>1,234</td></tr>"
+        "<tr><td>GBP</td><td>£</td><td>987</td></tr></table>",
+        ["|  | 2025 |", "| --- | --- |", "| EUR | € 1,234 |", "| GBP | £ 987 |"],
+    ),
+}
+
+
+@pytest.mark.parametrize("case", list(CURRENCY_LABEL_TABLES))
+def test_currency_code_row_labels_keep_their_own_column(case):
+    html, expected = CURRENCY_LABEL_TABLES[case]
+    assert _markdown(html) == expected
+
+
+def test_headerless_currency_code_row_labels_keep_their_own_column():
+    # No header zone, so only the body test of the merge can keep the labels apart.
+    lines = _markdown(
+        "<table><tr><td>JPY</td><td>1,234</td><td>987</td></tr>"
+        "<tr><td>EUR</td><td>456</td><td>789</td></tr></table>"
+    )
+    assert "| JPY | 1,234 | 987 |" in lines
+    assert "| EUR | 456 | 789 |" in lines
+
+
+# Codes in a sub-label column: R0's label column holds the section label only.
+SUB_LABEL_CODE_ROWS = [
+    ["", "", "2025", "2024"],
+    ["Forward contracts", "", "", ""],
+    ["", "EUR", "1,234", "987"],
+    ["", "JPY", "456", "789"],
+]
+
+
+def test_sub_label_currency_codes_merge_as_a_marker_column_known_limitation():
+    """Known limitation (spec revision 17, accepted 2026-10-06), pinned as today's behaviour.
+
+    Codes that vary by row in a column other than R0's label column cannot be told apart
+    from R4's per-row currency-marker column, so the structural pass joins them to the
+    first period's amounts. A rule for this case is left to a later task, which will
+    change this test.
+    """
+    assert _actions(SUB_LABEL_CODE_ROWS, EXTENDED) == {1: {2: 2, 3: 2}}
+    assert _actions(SUB_LABEL_CODE_ROWS) == {}
+
+
+def test_extended_join_writes_currency_like_dollar_and_closes_percent_negatives():
+    join = TableParser._join_structural_text
+    assert join(["RMB"], "941,168", [], policy=EXTENDED) == "RMB 941,168"
+    assert join(["€", "("], "1,234", [")"], policy=EXTENDED) == "€ (1,234)"
+    assert join([], "(3.2", [")%"], policy=EXTENDED) == "(3.2)%"
+    assert join(["RMB"], "941,168", []) == "RMB 941,168"   # LEGACY: a plain space join
+    assert join([], "(3.2", [")%"]) == "(3.2 )%"
