@@ -409,6 +409,8 @@ class TableParser:
 
         self.table_element = table_element
         self.base_url = base_url
+        # Set by each to_markdown() call; None until a render writes a table.
+        self.header_record: TableHeaderRecord | None = None
 
         self.cells = self._extract_cells()
         self.grid = self._create_grid()
@@ -1235,7 +1237,7 @@ class TableParser:
         Returns:
             Markdown table string
         """
-        self.header_record: TableHeaderRecord | None = None
+        self.header_record = None
         # Special-case list tables
         if self._looks_like_list_table():
             row = self.cells[0]

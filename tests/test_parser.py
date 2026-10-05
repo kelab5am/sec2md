@@ -12,8 +12,10 @@ from sec2md.element_builder import (
     augment_html_with_ids,
     ordered_unique_nodes,
 )
+from sec2md.core import convert_to_markdown
 from sec2md.models import Element, Page
 from sec2md.parser import Parser
+from sec2md.quality import ElementHeaderRecord, ParseQualityError, enforce_quality
 
 
 class TestParserBasics:
@@ -350,6 +352,169 @@ CAT_7_TABLE = (
     '<tr><td colspan="3"><span>Part&#160;III</span></td>'
     f'<td colspan="3"><div><span>{CAT_7_SENTENCE}</span></div></td></tr></table>'
 )
+
+
+# R6a: a spanning 2025 over two labels; its header line repeats 2025 legitimately.
+REPEATED_HEADER_TABLE = (
+    '<table><tr><th>Metric</th><th colspan="2">{top}</th></tr>'
+    "<tr><th></th><th>{lower}</th><th>Budget</th></tr>"
+    "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"
+)
+LABELS_TABLE = REPEATED_HEADER_TABLE.format(top="2025", lower="Actual")
+LINKED_LABELS_TABLE = REPEATED_HEADER_TABLE.format(top='<a href="#fy2025">2025</a>', lower="Actual")
+EQUAL_TABLE = REPEATED_HEADER_TABLE.format(top="2025", lower="2025")
+LABELS_HEADER = "| Metric | 2025 — Actual | 2025 — Budget |"
+
+
+class TestHeaderRecordBinding:
+    """R6a: a table's header record comes from the render that supplied element content."""
+
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_table_without_links_binds_the_normal_render_record(self, capture_tables):
+        parser = Parser(f"<html><body>{LABELS_TABLE}</body></html>", capture_tables=capture_tables)
+        pages = parser.get_pages()
+        (element,) = pages[0].elements
+        table = parser.soup.find("table")
+        assert parser._header_records == {id(table): ElementHeaderRecord(
+            segment=element.content,
+            header_line=LABELS_HEADER,
+            header_source=(("2025", 1),),
+            header_capacity=(("2025", 2),),
+        )}
+        assert element.content.splitlines()[0] == LABELS_HEADER
+        assert parser._render_header_records == {}
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_table_with_links_binds_the_anchor_stripped_render_record(self, capture_tables):
+        parser = Parser(f"<html><body>{LINKED_LABELS_TABLE}</body></html>", capture_tables=capture_tables)
+        pages = parser.get_pages()
+        (element,) = pages[0].elements
+        table = parser.soup.find("table")
+        # The page holds the normal render, with links; the element holds the anchor-stripped
+        # re-render, whose record is bound. The normal render's record is discarded.
+        assert pages[0].content.splitlines()[0] == (
+            "| Metric | [2025](#fy2025) — Actual | [2025](#fy2025) — Budget |"
+        )
+        assert parser._header_records == {id(table): ElementHeaderRecord(
+            segment=element.content,
+            header_line=LABELS_HEADER,
+            header_source=(("2025", 1),),
+            header_capacity=(("2025", 2),),
+        )}
+        assert parser._render_header_records == {}
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+
+    @pytest.mark.parametrize("html, capture_tables", [
+        pytest.param(CAT_7_TABLE, False, id="one-row"),
+        pytest.param("<table><tr><td>Revenue</td><td>100</td></tr><tr><td>Cost</td><td>40</td></tr></table>",
+                     False, id="headerless"),
+        pytest.param('<table><tr><td>•</td><td><a href="#p">First point</a></td></tr></table>', False,
+                     id="list-table-re-render"),
+        pytest.param(LABELS_TABLE.replace("<td>200</td>", "<td><table><tr><td>200</td></tr></table></td>"),
+                     True, id="unreliable-capture"),
+    ])
+    def test_table_without_a_written_header_line_binds_no_record(self, html, capture_tables):
+        parser = Parser(f"<html><body>{html}</body></html>", capture_tables=capture_tables)
+        parser.get_pages()
+        assert parser._header_records == {}
+        assert parser.header_accounting_misses == ()
+
+    @pytest.mark.parametrize("wrapper", ["<ul><li>{}</li></ul>", "<b>{}</b>"], ids=["list-item", "bold"])
+    @pytest.mark.parametrize("table, ordinary", [
+        pytest.param(EQUAL_TABLE, (), id="no-excess"),
+        pytest.param(LABELS_TABLE, ("2025",), id="ordinary-excess"),
+    ])
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_table_rendered_inside_other_content_is_a_missing_association(self, capture_tables, table,
+                                                                         ordinary, wrapper):
+        # The table's Markdown reaches the element inside a list item or bold run, not as a
+        # segment of its own, so its header line cannot be located.
+        parser = Parser(f"<html><body>{wrapper.format(table)}</body></html>", capture_tables=capture_tables)
+        pages = parser.get_pages()
+        (element,) = pages[0].elements
+        assert "| --- | --- | --- |" in element.content
+        assert parser._header_records == {}
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary)
+
+    def test_repeated_parse_resets_header_accounting(self):
+        parser = Parser(f"<html><body><ul><li>{LABELS_TABLE}</li></ul>{LABELS_TABLE}</body></html>")
+        first = (parser.get_pages(), parser.header_accounting_misses, parser.trace_numeric_failures)
+        assert len(parser._header_records) == 1 and len(first[1]) == 1
+        second = (parser.get_pages(), parser.header_accounting_misses, parser.trace_numeric_failures)
+        assert second[1:] == first[1:]
+        assert len(parser._header_records) == 1
+
+
+# The final review's case: a period caption spanning two year columns. R6 writes it in both
+# columns' header text, so the header line holds "31" twice against one source occurrence.
+SPANNING_CAPTION_TABLE = (
+    "<table><tr><td></td><td colspan='2'>Year Ended December 31,</td></tr>"
+    "<tr><td></td><td>2025</td><td>2024</td></tr>"
+    "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>"
+)
+SPANNING_CAPTION_HEADER = "|  | Year Ended December 31, — 2025 | Year Ended December 31, — 2024 |"
+
+
+def _intro_and(fragment):
+    return f"<html><body><p>Intro.</p>{fragment}</body></html>"
+
+
+class TestWrappedTableHeaderLimitation:
+    """R6a cannot locate the header line of a table rendered inside other content."""
+
+    @pytest.mark.parametrize("wrapper", [
+        pytest.param("<ol><li>Results: {}</li></ol>", id="list-item"),
+        pytest.param("<b>{}</b>", id="bold"),
+        pytest.param("<em>{}</em>", id="italic"),
+        pytest.param('<span style="font-weight:700">{}</span>', id="bold-styled-span"),
+    ])
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_wrapped_spanning_caption_fails_strict_known_limitation(self, capture_tables, wrapper):
+        """Known limitation (spec revision 17, accepted 2026-10-06); binding records for wrapped
+        tables is a follow-up task.
+
+        A table rendered inside a list item or a bold or italic run reaches the element inside
+        that content, not as a segment of its own, so R6a records a miss and strict applies the
+        ordinary trace. R6 repeats the spanning caption's "31" in both year columns against one
+        source occurrence, so default strict raises where main passes (main wrote the caption
+        once). The same table in a <div> passes (next test).
+        """
+        html = _intro_and(wrapper.format(SPANNING_CAPTION_TABLE))
+        parser = Parser(html, capture_tables=capture_tables)
+        pages = parser.get_pages()
+        (element,) = pages[0].elements
+        message = f"untraceable normalized number: {element.id}:31"
+        with pytest.raises(ParseQualityError) as caught:
+            enforce_quality(parser.diagnostics, "strict")
+        assert str(caught.value) == message
+        if not capture_tables:
+            with pytest.raises(ParseQualityError) as caught:
+                convert_to_markdown(html, quality_policy="strict")
+            assert str(caught.value) == message
+        assert SPANNING_CAPTION_HEADER in element.content
+        assert parser._header_records == {}
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == (f"{element.id}:31",)
+
+    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    def test_same_table_in_a_div_binds_its_record_and_passes_strict(self, capture_tables):
+        html = _intro_and(f"<div>{SPANNING_CAPTION_TABLE}</div>")
+        parser = Parser(html, capture_tables=capture_tables)
+        parser.get_pages()
+        table = parser.soup.find("table")
+        (record,) = parser._header_records.values()
+        assert record.header_line == SPANNING_CAPTION_HEADER
+        assert record.header_capacity == (("2024", 1), ("2025", 1), ("31", 2))
+        assert parser._header_records.keys() == {id(table)}
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+        assert parser.diagnostics.warnings == ()
+        if not capture_tables:
+            assert SPANNING_CAPTION_HEADER in convert_to_markdown(html, quality_policy="strict")
 
 
 class TestSpacerPreservation:

@@ -2026,6 +2026,15 @@ def test_list_table_has_no_header_record():
     assert parser.header_record is None
 
 
+def test_header_record_is_none_until_a_render_writes_one():
+    # Parser reads header_record after md(); a render replaced without writing one (the
+    # fixtures' blank-renderer mutation) must leave None, not a missing attribute.
+    parser = _parser('<table><tr><th>Item</th><th>2025</th></tr><tr><td>Revenue</td><td>100</td></tr></table>')
+    assert parser.header_record is None
+    parser.md()
+    assert parser.header_record is not None
+
+
 def test_year_shaped_amounts_beside_a_row_label_stay_in_the_body():
     # R0 (revision 6): the label "Revenue" lets the bare years of its row count.
     assert _markdown(
