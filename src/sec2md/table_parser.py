@@ -5,10 +5,12 @@ import logging
 from bs4 import Tag
 from bs4.element import NavigableString
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Literal, Optional, Sequence, cast
 from urllib.parse import urljoin
 
 from sec2md.quality import normalize_numeric_token
+from sec2md.table_roles import ZERO_WIDTH_CHARACTERS
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,24 @@ STRUCTURAL_MARKERS: dict[str, StructuralColumn] = {
     ")": "close_paren",
     "%": "percent",
 }
+
+
+
+class StructuralPolicy(Enum):
+    """Vocabulary and thresholds of the structural helpers (spec R9).
+
+    LEGACY keeps today's rules; xlsx_tables.prepare_table relies on them through a bare
+    ``object.__new__(TableParser)``. EXTENDED adds the Markdown render's rules (R3, R4).
+    """
+
+    LEGACY = "legacy"
+    EXTENDED = "extended"
+
+
+LEGACY = StructuralPolicy.LEGACY
+EXTENDED = StructuralPolicy.EXTENDED
+
+_ZERO_WIDTH = str.maketrans(dict.fromkeys(ZERO_WIDTH_CHARACTERS))
 
 _BLOCK_DESCENDANT_TAGS = {
     "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "p"
@@ -48,7 +68,7 @@ def _inline_fragments(
     fragments: list[InlineFragment] = []
     for child in node.children:
         if isinstance(child, NavigableString):
-            text = str(child).replace("\xa0", " ").replace("\u200b", "").replace("\ufeff", "")
+            text = str(child).replace("\xa0", " ").translate(_ZERO_WIDTH)
             if text:
                 fragments.append(InlineFragment(text=text, href=inherited_href))
             continue
@@ -151,13 +171,27 @@ def _escape_table_pipes(text: str) -> str:
     return "".join(output)
 
 
-def _classify_structural_column(values: Sequence[str]) -> StructuralColumn | None:
+def _marker_class(
+    value: str,
+    *,
+    policy: StructuralPolicy = LEGACY,
+) -> StructuralColumn | None:
+    """The structural marker class of one whole, stripped cell text."""
+
+    return STRUCTURAL_MARKERS.get(value)
+
+
+def _classify_structural_column(
+    values: Sequence[str],
+    *,
+    policy: StructuralPolicy = LEGACY,
+) -> StructuralColumn | None:
     """Classify a column only when its marker evidence is uniform and repeated."""
 
     nonempty = [value.strip() for value in values if value.strip()]
     if len(nonempty) < 2:
         return None
-    classes = {STRUCTURAL_MARKERS.get(value) for value in nonempty}
+    classes = {_marker_class(value, policy=policy) for value in nonempty}
     if None in classes or len(classes) != 1:
         return None
     return cast(StructuralColumn, classes.pop())
@@ -169,6 +203,7 @@ class Cell:
     text: str
     rowspan: int = 1
     colspan: int = 1
+    header: bool = False  # a th element (R0's explicit header rows)
 
     def __bool__(self) -> bool:
         return bool(self.text.strip())
@@ -228,13 +263,16 @@ class TableParser:
                         .replace('\r\n', ' ')
                         .replace('\r', ' ')
                         .replace('\n', ' ')
+                        .translate(_ZERO_WIDTH)
+                        .strip()
                     )
                 if not text:
                     if td.find('img'):
                         text = '●'  # or '•' depending on your BULLETS set
                 rowspan = self._safe_parse_int(td.get('rowspan'))
                 colspan = self._safe_parse_int(td.get('colspan'))
-                row.append(Cell(text=text, rowspan=rowspan, colspan=colspan))
+                row.append(Cell(text=text, rowspan=rowspan, colspan=colspan,
+                                header=td.name == "th"))
             if row:
                 rows.append(row)
         return rows or [[Cell(text="")]]
@@ -282,11 +320,17 @@ class TableParser:
                 col += cell.colspan
 
         grid = self._clean_grid(grid)
-        grid = self._merge_grid(grid)
+        grid = self._merge_grid(grid, policy=EXTENDED)
 
         return grid
 
-    def _should_merge_cells(self, val1: Optional[GridCell], val2: Optional[GridCell]) -> bool:
+    def _should_merge_cells(
+        self,
+        val1: Optional[GridCell],
+        val2: Optional[GridCell],
+        *,
+        policy: StructuralPolicy = LEGACY,
+    ) -> bool:
         """Check if two cells should be merged based on the rules"""
         # Handle empty cells
         if not val1 or not val2:
@@ -301,7 +345,7 @@ class TableParser:
         if self.is_footnote(s2):
             return True
 
-        if s1 == '$':
+        if _marker_class(s1, policy=policy) == "currency":
             return True
 
         if s2 == '%':
@@ -346,31 +390,47 @@ class TableParser:
         return filtered_grid
 
     @staticmethod
-    def _is_numeric_fragment(value: str) -> bool:
+    def _numeric_token(value: str, *, policy: StructuralPolicy = LEGACY) -> str | None:
+        """Validate one complete rebuilt numeric token under a structural policy."""
+
+        return normalize_numeric_token(value)
+
+    @staticmethod
+    def _is_numeric_fragment(value: str, *, policy: StructuralPolicy = LEGACY) -> bool:
         """Return whether a cell contains a complete or accounting numeric fragment."""
 
-        if normalize_numeric_token(value) is not None:
+        if TableParser._numeric_token(value, policy=policy) is not None:
             return True
         if value.startswith("(") and not value.endswith(")"):
-            return normalize_numeric_token(value[1:].strip()) is not None
+            return TableParser._numeric_token(value[1:].strip(), policy=policy) is not None
         if value.endswith(")") and not value.startswith("("):
-            return normalize_numeric_token(value[:-1].strip()) is not None
+            return TableParser._numeric_token(value[:-1].strip(), policy=policy) is not None
         return False
 
     @staticmethod
-    def _body_start(grid: List[List[GridCell]]) -> int:
+    def _body_start(grid: List[List[GridCell]], *, policy: StructuralPolicy = LEGACY) -> int:
         """Skip leading nonnumeric header rows before classifying structural columns."""
 
         body_start = 1
         while body_start < len(grid) - 1:
             if any(
-                TableParser._is_numeric_fragment(cell.text)
+                TableParser._is_numeric_fragment(cell.text, policy=policy)
                 for cell in grid[body_start]
                 if cell is not None and cell.text.strip()
             ):
                 break
             body_start += 1
         return body_start
+
+    def _body_rows(
+        self,
+        grid: List[List[GridCell]],
+        *,
+        policy: StructuralPolicy = LEGACY,
+    ) -> Sequence[int]:
+        """Rows the careful marker merge reads as body."""
+
+        return range(self._body_start(grid, policy=policy), len(grid))
 
     @staticmethod
     def _structural_target(
@@ -384,6 +444,8 @@ class TableParser:
     def _safe_structural_actions(
         self,
         grid: List[List[GridCell]],
+        *,
+        policy: StructuralPolicy = LEGACY,
     ) -> dict[int, dict[int, int]]:
         """Find column removals whose fully rebuilt rows are numeric tokens."""
 
@@ -391,8 +453,7 @@ class TableParser:
             return {}
 
         column_count = len(grid[0])
-        body_start = self._body_start(grid)
-        body_rows = range(body_start, len(grid))
+        body_rows = self._body_rows(grid, policy=policy)
         values_by_column = {
             column: [
                 grid[row][column].text if grid[row][column] is not None else ""
@@ -403,15 +464,14 @@ class TableParser:
         candidate_actions: dict[int, dict[int, int]] = {}
 
         for column, values in values_by_column.items():
-            marker_class = _classify_structural_column(values)
+            marker_class = _classify_structural_column(values, policy=policy)
             nonempty = [value.strip() for value in values if value.strip()]
             if marker_class is None:
-                marker_classes = {STRUCTURAL_MARKERS.get(value) for value in nonempty}
+                classes = [_marker_class(value, policy=policy) for value in nonempty]
                 legacy_mixed = (
-                    marker_classes == {"currency", "close_paren"}
-                    and sum(value == "$" for value in nonempty) >= 2
-                    and sum(value == ")" for value in nonempty) >= 2
-                    and all(value in STRUCTURAL_MARKERS for value in nonempty)
+                    set(classes) == {"currency", "close_paren"}
+                    and classes.count("currency") >= 2
+                    and classes.count("close_paren") >= 2
                 )
                 if not legacy_mixed:
                     continue
@@ -421,20 +481,22 @@ class TableParser:
                 value = grid[row][column].text.strip() if grid[row][column] else ""
                 if not value:
                     continue
-                row_marker_class = marker_class or STRUCTURAL_MARKERS[value]
+                row_marker_class = marker_class or cast(
+                    StructuralColumn, _marker_class(value, policy=policy)
+                )
                 target = self._structural_target(column, row_marker_class)
                 if not 0 <= target < column_count:
                     row_actions = {}
                     break
                 target_value = grid[row][target].text if grid[row][target] else ""
-                if not self._is_numeric_fragment(target_value):
+                if not self._is_numeric_fragment(target_value, policy=policy):
                     row_actions = {}
                     break
                 row_actions[row] = target
             if row_actions:
                 candidate_actions[column] = row_actions
 
-        actions = self._validated_structural_actions(grid, candidate_actions)
+        actions = self._validated_structural_actions(grid, candidate_actions, policy=policy)
 
         # The legacy NVIDIA table has two repeated close-marker columns and
         # at least one validated currency column, followed by one final close
@@ -443,12 +505,12 @@ class TableParser:
         repeated_close_columns = {
             column
             for column in actions
-            if _classify_structural_column(values_by_column[column]) == "close_paren"
+            if _classify_structural_column(values_by_column[column], policy=policy) == "close_paren"
         }
         currency_columns = {
             column
             for column in actions
-            if _classify_structural_column(values_by_column[column]) == "currency"
+            if _classify_structural_column(values_by_column[column], policy=policy) == "currency"
         }
         if len(repeated_close_columns) < 2 or not currency_columns:
             return actions
@@ -457,7 +519,7 @@ class TableParser:
             nonempty = [value.strip() for value in values if value.strip()]
             if column in actions or len(nonempty) != 1 or column != column_count - 1:
                 continue
-            marker_class = STRUCTURAL_MARKERS.get(nonempty[0])
+            marker_class = _marker_class(nonempty[0], policy=policy)
             if marker_class != "close_paren":
                 continue
             row = next(row for row in body_rows if grid[row][column] and grid[row][column].text.strip())
@@ -465,11 +527,11 @@ class TableParser:
             target_value = grid[row][target].text if grid[row][target] else ""
             if not target_value.strip().startswith("("):
                 continue
-            if normalize_numeric_token(f"{target_value.strip()})") is None:
+            if self._numeric_token(f"{target_value.strip()})", policy=policy) is None:
                 continue
             trial_actions = dict(actions)
             trial_actions[column] = {row: target}
-            validated = self._validated_structural_actions(grid, trial_actions)
+            validated = self._validated_structural_actions(grid, trial_actions, policy=policy)
             if column in validated:
                 actions = validated
 
@@ -479,6 +541,8 @@ class TableParser:
         self,
         grid: List[List[GridCell]],
         actions: dict[int, dict[int, int]],
+        *,
+        policy: StructuralPolicy = LEGACY,
     ) -> dict[int, dict[int, int]]:
         """Keep only actions whose complete rebuilt numeric token is valid."""
 
@@ -497,8 +561,10 @@ class TableParser:
                         else:
                             suffixes.append(value)
                     target_value = grid[row][target].text if grid[row][target] else ""
-                    merged = self._join_structural_text(prefixes, target_value, suffixes)
-                    if normalize_numeric_token(merged) is None:
+                    merged = self._join_structural_text(
+                        prefixes, target_value, suffixes, policy=policy
+                    )
+                    if self._numeric_token(merged, policy=policy) is None:
                         invalid_sources.add(source)
                         break
             if not invalid_sources:
@@ -517,13 +583,15 @@ class TableParser:
         source_actions: dict[int, int],
         removed: set[int],
         column_count: int,
+        *,
+        policy: StructuralPolicy = LEGACY,
     ) -> int | None:
         """Keep header fragments on the same side as their body actions."""
 
         targets = sorted(set(source_actions.values()))
         if len(targets) == 1 and targets[0] not in removed:
             return targets[0]
-        marker_class = STRUCTURAL_MARKERS.get(value)
+        marker_class = _marker_class(value, policy=policy)
         if marker_class is not None:
             target = TableParser._structural_target(source, marker_class)
             if 0 <= target < column_count and target not in removed:
@@ -538,31 +606,43 @@ class TableParser:
         prefixes: Sequence[str],
         target: str,
         suffixes: Sequence[str],
+        *,
+        policy: StructuralPolicy = LEGACY,
     ) -> str:
         parts = [part for part in [*prefixes, target, *suffixes] if part]
         if not parts:
             return ""
-        if not all(part in STRUCTURAL_MARKERS or part == target for part in parts):
+        if not all(
+            _marker_class(part, policy=policy) is not None or part == target for part in parts
+        ):
             return " ".join(parts)
 
         merged = target
         for marker in reversed(prefixes):
-            merged = f"{marker} {merged}" if marker == "$" else f"{marker}{merged}"
+            if _marker_class(marker, policy=policy) == "currency":
+                merged = f"{marker} {merged}"
+            else:
+                merged = f"{marker}{merged}"
         for marker in suffixes:
             merged = f"{merged} %" if marker == "%" else f"{merged}{marker}"
         return merged
 
-    def _merge_structural_columns(self, grid: List[List[GridCell]]) -> List[List[GridCell]]:
+    def _merge_structural_columns(
+        self,
+        grid: List[List[GridCell]],
+        *,
+        policy: StructuralPolicy = LEGACY,
+    ) -> List[List[GridCell]]:
         """Merge only proven accounting marker columns into numeric neighbors."""
 
-        actions = self._safe_structural_actions(grid)
+        actions = self._safe_structural_actions(grid, policy=policy)
         if not actions:
             return grid
 
         removed = set(actions)
         column_count = len(grid[0])
         result: List[List[GridCell]] = []
-        body_start = self._body_start(grid)
+        body_rows = set(self._body_rows(grid, policy=policy))
         for row_index, row in enumerate(grid):
             rebuilt: List[GridCell] = []
             for target in range(column_count):
@@ -576,13 +656,14 @@ class TableParser:
                     if not value:
                         continue
                     merge_target = source_actions.get(row_index)
-                    if merge_target is None and row_index < body_start:
+                    if merge_target is None and row_index not in body_rows:
                         merge_target = self._header_merge_target(
                             source,
                             value,
                             source_actions,
                             removed,
                             column_count,
+                            policy=policy,
                         )
                     if merge_target != target:
                         continue
@@ -593,7 +674,9 @@ class TableParser:
 
                 original = row[target]
                 original_text = original.text.strip() if original else ""
-                merged_text = self._join_structural_text(prefixes, original_text, suffixes)
+                merged_text = self._join_structural_text(
+                    prefixes, original_text, suffixes, policy=policy
+                )
                 if merged_text != original_text:
                     rebuilt.append(GridCell(Cell(text=merged_text)))
                 elif original is not None:
@@ -603,12 +686,17 @@ class TableParser:
             result.append(rebuilt)
         return result
 
-    def _merge_grid(self, grid: List[List[GridCell]]) -> List[List[GridCell]]:
+    def _merge_grid(
+        self,
+        grid: List[List[GridCell]],
+        *,
+        policy: StructuralPolicy = LEGACY,
+    ) -> List[List[GridCell]]:
         """Merge columns in one clean pass"""
         if not grid or not grid[0]:
             return grid
 
-        grid = self._merge_structural_columns(grid)
+        grid = self._merge_structural_columns(grid, policy=policy)
         if not grid or not grid[0]:
             return grid
 
@@ -623,7 +711,9 @@ class TableParser:
                 continue
 
             cell_pairs = list(zip(current_col[1:], col[1:]))
-            should_merge = all(self._should_merge_cells(c1, c2) for c1, c2 in cell_pairs)
+            should_merge = all(
+                self._should_merge_cells(c1, c2, policy=policy) for c1, c2 in cell_pairs
+            )
 
             if should_merge:
                 merged = [current_col[0]]  # Keep header
