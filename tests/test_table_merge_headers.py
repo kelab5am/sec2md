@@ -1074,3 +1074,987 @@ def test_rowspan_label_over_a_row_of_grid_hidden_cells_keeps_later_rows_in_place
         ["Loans", "77", None],
         ["Commercial", "$ 555", "Market comparables"],
     ]
+
+
+# --- R5, R6, R7: the header line --------------------------------------------------------
+# Each class case is a minimal copy of a real table from the evidence report; the
+# expected Markdown follows from the rules, header line first.
+
+PER_CLASS_CASES = {
+    # Class 1, row-0 amounts: headerless, so the header line has empty cells.
+    "jpm-109": (JPM_109_HTML, [
+        "|  |  |  |",
+        "| --- | --- | --- |",
+        "| Noninterest revenue – reported (c) | $ 84,973 | $ 68,837 |",
+        "| Fully taxable-equivalent adjustments (c) | 2,560 | 3,782 |",
+        "| Noninterest revenue – managed basis | $ 87,533 | $ 72,619 |",
+    ]),
+    # Class 1, row-0 caption: the caption and the years stay header; the caption's spacer
+    # column keeps its own header (R2, R7).
+    "crm-26": (CRM_26_HTML, [
+        "| 4 | Fiscal Year Ended January 31, | Fiscal Year Ended January 31, — 2025 "
+        "| Fiscal Year Ended January 31, — 2024 | 2023 |",
+        "| --- | --- | --- | --- | --- |",
+        "| Net cash provided by operating activities |  | $ 13,092 | $ 10,234 | $ 7,111 |",
+        "| Net cash used in investing activities |  | (3,163) | (1,327) | (1,989) |",
+    ]),
+    # Class 2: the Notes column and 2022's amounts stay apart (edgar:TSM-20-F table 248).
+    "tsm-248": (
+        "<table><tr><td></td><td>Notes</td><td colspan=\"2\">2022</td><td></td>"
+        "<td colspan=\"2\">2023</td><td></td></tr>"
+        "<tr><td></td><td></td><td colspan=\"2\">NT$</td><td></td><td colspan=\"2\">NT$</td><td></td></tr>"
+        "<tr><td>Gain (loss) on hedging instruments</td><td></td><td>$</td><td>1,329.2</td><td></td>"
+        "<td>$</td><td>( 74.7</td><td>)</td></tr>"
+        "<tr><td>EARNINGS PER SHARE</td><td>27</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+        "<tr><td>Basic earnings per share</td><td></td><td>$</td><td>38.29</td><td></td>"
+        "<td>$</td><td>32.85</td><td></td></tr></table>",
+        [
+            "|  | Notes | 2022 — NT$ | 2023 — NT$ |",
+            "| --- | --- | --- | --- |",
+            "| Gain (loss) on hedging instruments |  | $ 1,329.2 | $ ( 74.7) |",
+            "| EARNINGS PER SHARE | 27 |  |  |",
+            "| Basic earnings per share |  | $ 38.29 | $ 32.85 |",
+        ],
+    ),
+    # Class 2: "Filed Herewith" X marks stay out of "Number" (rcq:RDDT 10-Q 2024 Q2 table 52).
+    "rddt-52": (
+        "<table><tr><td>Exhibit Number</td><td>Exhibit Description</td>"
+        "<td colspan=\"3\">Incorporated by Reference</td><td>Filed Herewith</td></tr>"
+        "<tr><td></td><td></td><td>Form</td><td>Filing Date</td><td>Number</td><td></td></tr>"
+        "<tr><td>3.1</td><td>Amended and Restated Certificate of Incorporation</td><td>8-K</td>"
+        "<td>3/25/2024</td><td>3.1</td><td></td></tr>"
+        "<tr><td>31.1</td><td>Certification of Principal Executive Officer</td><td></td><td></td>"
+        "<td></td><td>X</td></tr></table>",
+        [
+            "| Exhibit Number | Exhibit Description | Incorporated by Reference — Form "
+            "| Incorporated by Reference — Filing Date | Incorporated by Reference — Number "
+            "| Filed Herewith |",
+            "| --- | --- | --- | --- | --- | --- |",
+            "| 3.1 | Amended and Restated Certificate of Incorporation | 8-K | 3/25/2024 | 3.1 |  |",
+            "| 31.1 | Certification of Principal Executive Officer |  |  |  | X |",
+        ],
+    ),
+    # Class 3: a year starting on the "$" column (edgar:MSFT-10-K table 24). The label-only
+    # "Revenue:" row right before the first data row is a body section label (revision 8).
+    "msft-24": (
+        "<table><tr><td>(In millions, except per share amounts)</td><td></td><td></td><td></td><td></td></tr>"
+        "<tr><td>Year Ended June 30,</td><td colspan=\"2\">2025</td><td colspan=\"2\">2024</td></tr>"
+        "<tr><td>Revenue:</td><td></td><td></td><td></td><td></td></tr>"
+        "<tr><td>Product</td><td>$</td><td>63,946</td><td>$</td><td>64,773</td></tr>"
+        "<tr><td>Service and other</td><td></td><td>217,778</td><td></td><td>180,349</td></tr></table>",
+        [
+            "| (In millions, except per share amounts) — Year Ended June 30, | 2025 | 2024 |",
+            "| --- | --- | --- |",
+            "| Revenue: |  |  |",
+            "| Product | $ 63,946 | $ 64,773 |",
+            "| Service and other | 217,778 | 180,349 |",
+        ],
+    ),
+    # Class 3, empty-slot shift (edgar:BABA-20-F table 24).
+    "baba-24": (
+        "<table><tr><td></td><td></td><td></td><td colspan=\"7\">Year ended March 31,</td></tr>"
+        "<tr><td></td><td></td><td></td><td colspan=\"2\">2023</td><td></td><td></td>"
+        "<td colspan=\"2\">2024</td><td></td></tr>"
+        "<tr><td></td><td></td><td></td><td colspan=\"2\">RMB</td><td></td><td></td>"
+        "<td colspan=\"2\">RMB</td><td></td></tr>"
+        "<tr><td></td><td>Notes</td><td></td><td colspan=\"2\"></td><td></td><td></td>"
+        "<td colspan=\"2\"></td><td></td></tr>"
+        "<tr><td>Revenue</td><td>5, 24</td><td></td><td></td><td>868,687</td><td></td><td></td>"
+        "<td></td><td>941,168</td><td></td></tr>"
+        "<tr><td>Cost of revenue</td><td>24</td><td></td><td></td><td>( 549,695</td><td>)</td><td></td>"
+        "<td></td><td>( 586,323</td><td>)</td></tr></table>",
+        [
+            "|  | Notes | Year ended March 31, — 2023 — RMB | Year ended March 31, — 2024 — RMB |",
+            "| --- | --- | --- | --- |",
+            "| Revenue | 5, 24 | 868,687 | 941,168 |",
+            "| Cost of revenue | 24 | ( 549,695) | ( 586,323) |",
+        ],
+    ),
+    # Class 3: a footnote column inside a segment span (edgar:JPM-10-K table 482). "(b)(c)"
+    # keeps its own column under its segment's header; "Consumer" starts one column
+    # before the "2024" span, as in the source, so that column is header-only.
+    "jpm-482": (
+        "<table><tr><td></td><td></td><td colspan=\"9\">2024</td></tr>"
+        "<tr><td>Year ended December 31, (in millions)</td>"
+        "<td colspan=\"4\">Consumer, excluding credit card</td><td colspan=\"2\">Credit card</td>"
+        "<td colspan=\"2\">Wholesale</td><td colspan=\"2\">Total</td></tr>"
+        "<tr><td>Purchases</td><td></td><td>$</td><td>647</td><td>(b)(c)</td><td>$</td><td>—</td>"
+        "<td>$</td><td>1,432</td><td>$</td><td>2,079</td></tr>"
+        "<tr><td>Sales</td><td></td><td colspan=\"2\">10,440</td><td></td><td colspan=\"2\">—</td>"
+        "<td colspan=\"2\">45,147</td><td colspan=\"2\">55,587</td></tr></table>",
+        [
+            "| Year ended December 31, (in millions) | Consumer, excluding credit card "
+            "| 2024 — Consumer, excluding credit card | 2024 — Consumer, excluding credit card "
+            "| 2024 — Credit card | 2024 — Wholesale | 2024 — Total |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
+            "| Purchases |  | $ 647 | (b)(c) | $ — | $ 1,432 | $ 2,079 |",
+            "| Sales |  | 10,440 |  | — | 45,147 | 55,587 |",
+        ],
+    ),
+    # Class 5: "Products 36.5 %" is data, never header (fixture:aapl-2023-10k table 18).
+    "aapl-18": (
+        "<table><tr><td>Gross margin percentage:</td><td colspan=\"2\"></td><td colspan=\"2\"></td></tr>"
+        "<tr><td>Products</td><td>36.5</td><td>%</td><td>36.3</td><td>%</td></tr>"
+        "<tr><td>Services</td><td>70.8</td><td>%</td><td>71.7</td><td>%</td></tr></table>",
+        # Revision 8: "Gross margin percentage:" is a trailing label-only row (a body
+        # section label), so the header zone is empty.
+        [
+            "|  |  |  |",
+            "| --- | --- | --- |",
+            "| Gross margin percentage: |  |  |",
+            "| Products | 36.5 % | 36.3 % |",
+            "| Services | 70.8 % | 71.7 % |",
+        ],
+    ),
+    # Class 5: Class A's share count stays in the body (rcq:META 10-Q 2024 Q1 table 4).
+    "meta-4": (
+        "<table><tr><td colspan=\"2\">Class</td><td colspan=\"2\">Number of Shares Outstanding</td></tr>"
+        "<tr><td>Class A Common Stock</td><td>$0.000006 par value</td><td>2,191,446,233</td>"
+        "<td>shares outstanding as of April 19, 2024</td></tr>"
+        "<tr><td>Class B Common Stock</td><td>$0.000006 par value</td><td>345,087,958</td>"
+        "<td>shares outstanding as of April 19, 2024</td></tr></table>",
+        [
+            "| Class | Class | Number of Shares Outstanding | Number of Shares Outstanding |",
+            "| --- | --- | --- | --- |",
+            "| Class A Common Stock | $0.000006 par value | 2,191,446,233 "
+            "| shares outstanding as of April 19, 2024 |",
+            "| Class B Common Stock | $0.000006 par value | 345,087,958 "
+            "| shares outstanding as of April 19, 2024 |",
+        ],
+    ),
+    # Class 6: the signature date stays (edgar:GOOGL-10-Q table 89). No data row, so row
+    # 0 alone is the header and row 1 is not fused into it (R5).
+    "googl-89": (
+        "<table><tr><td></td><td></td><td>ALPHABET INC.</td></tr>"
+        "<tr><td>October 29, 2025</td><td>By:</td><td>/s/ ANAT ASHKENAZI</td></tr>"
+        "<tr><td></td><td></td><td>Anat Ashkenazi</td></tr>"
+        "<tr><td></td><td></td><td>Senior Vice President, Chief Financial Officer</td></tr></table>",
+        [
+            "|  |  | ALPHABET INC. |",
+            "| --- | --- | --- |",
+            "| October 29, 2025 | By: | /s/ ANAT ASHKENAZI |",
+            "|  |  | Anat Ashkenazi |",
+            "|  |  | Senior Vice President, Chief Financial Officer |",
+        ],
+    ),
+    # Class 6: exhibit-index columns stay (fixture:aapl-2023-10k table 64). "104**" is a
+    # footnoted complete number (revision 7), but one label-column number makes no
+    # identifier column, so the table has no data row and row 0 alone is the header.
+    "aapl-64": (
+        "<table><tr><td colspan=\"2\"></td><td colspan=\"3\">Incorporated by Reference</td></tr>"
+        "<tr><td>Exhibit Number</td><td>Exhibit Description</td><td>Form</td><td>Exhibit</td>"
+        "<td>Filing Date/ Period End Date</td></tr>"
+        "<tr><td>104**</td><td>Inline XBRL for the cover page of this Annual Report on Form 10-K</td>"
+        "<td></td><td></td><td></td></tr></table>",
+        [
+            "|  |  | Incorporated by Reference | Incorporated by Reference | Incorporated by Reference |",
+            "| --- | --- | --- | --- | --- |",
+            "| Exhibit Number | Exhibit Description | Form | Exhibit | Filing Date/ Period End Date |",
+            "| 104** | Inline XBRL for the cover page of this Annual Report on Form 10-K |  |  |  |",
+        ],
+    ),
+    # Class 8: one negative per ")" column (edgar:BABA-20-F table 69).
+    "baba-69": (
+        "<table><tr><td></td><td></td><td colspan=\"6\">As of March 31,</td><td></td></tr>"
+        "<tr><td></td><td></td><td colspan=\"2\">2024</td><td></td><td></td><td colspan=\"2\">2025</td><td></td></tr>"
+        "<tr><td></td><td></td><td colspan=\"2\">RMB</td><td></td><td></td><td colspan=\"2\">RMB</td><td></td></tr>"
+        "<tr><td>Deferred revenue</td><td></td><td></td><td>37,142</td><td></td><td></td><td></td>"
+        "<td>44,138</td><td></td></tr>"
+        "<tr><td>Less: current portion</td><td></td><td></td><td>( 72,818</td><td>)</td><td></td><td></td>"
+        "<td>( 68,335</td><td>)</td></tr></table>",
+        [
+            "|  | As of March 31, — 2024 — RMB | As of March 31, — 2025 — RMB |",
+            "| --- | --- | --- |",
+            "| Deferred revenue | 37,142 | 44,138 |",
+            "| Less: current portion | ( 72,818) | ( 68,335) |",
+        ],
+    ),
+    # Class 8: the ")" column no longer shares 2024's "$" (edgar:MSFT-10-K table 43).
+    "msft-43": (
+        "<table><tr><td colspan=\"7\">(In millions)</td></tr>"
+        "<tr><td>June 30,</td><td colspan=\"2\">2025</td><td></td><td colspan=\"2\">2024</td><td></td></tr>"
+        "<tr><td>Land</td><td>$</td><td>9,338</td><td></td><td>$</td><td>8,163</td><td></td></tr>"
+        "<tr><td>Buildings and improvements</td><td></td><td>137,921</td><td></td><td></td>"
+        "<td>93,943</td><td></td></tr>"
+        "<tr><td>Accumulated depreciation</td><td></td><td>( 93,653</td><td>)</td><td></td>"
+        "<td>( 76,421</td><td>)</td></tr></table>",
+        [
+            "| (In millions) — June 30, | (In millions) — 2025 | (In millions) — 2024 |",
+            "| --- | --- | --- |",
+            "| Land | $ 9,338 | $ 8,163 |",
+            "| Buildings and improvements | 137,921 | 93,943 |",
+            "| Accumulated depreciation | ( 93,653) | ( 76,421) |",
+        ],
+    ),
+}
+
+
+@pytest.mark.parametrize("case", list(PER_CLASS_CASES))
+def test_per_class_rendering(case):
+    html, expected = PER_CLASS_CASES[case]
+    assert _markdown(html) == expected
+
+
+# The R0 named cases with their expected output headers (roles are pinned in
+# tests/test_table_roles.py).
+NAMED_ROLE_HEADERS = {
+    "nvda-2026-10k-17": (
+        '<table><tr><td></td><td colspan="4">Year Ended</td></tr>'
+        '<tr><td></td><td colspan="2">Jan 25, 2026</td><td colspan="2">Jan 26, 2025</td></tr>'
+        '<tr><td></td><td colspan="4">(In millions)</td></tr>'
+        "<tr><td>Net cash provided by operating activities</td><td>$</td><td>102,718</td>"
+        "<td>$</td><td>64,089</td></tr>"
+        "<tr><td>Net cash used in investing activities</td><td>$</td><td>(52,228)</td>"
+        "<td>$</td><td>(20,421)</td></tr></table>",
+        "|  | Year Ended — Jan 25, 2026 — (In millions) | Year Ended — Jan 26, 2025 — (In millions) |",
+        ["| Net cash provided by operating activities | $ 102,718 | $ 64,089 |",
+         "| Net cash used in investing activities | $ (52,228) | $ (20,421) |"],
+    ),
+    "split-negative-first-data-row": (
+        '<table><tr><th>Metric</th><th colspan="2">2025</th><th colspan="2">2024</th></tr>'
+        "<tr><td>Loss</td><td>(29</td><td>)</td><td>(40</td><td>)</td></tr>"
+        "<tr><td>Gain</td><td>50</td><td></td><td>60</td><td></td></tr></table>",
+        "| Metric | 2025 | 2024 |",
+        ["| Loss | (29) | (40) |", "| Gain | 50 | 60 |"],
+    ),
+    "single-digit-first-data-row": (
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        "<tr><td>Stores</td><td>9</td><td>7</td></tr><tr><td>Employees</td><td>3</td><td>4</td></tr></table>",
+        "|  | 2025 | 2024 |",
+        ["| Stores | 9 | 7 |", "| Employees | 3 | 4 |"],
+    ),
+    "exhibit-index-at-3.1": (
+        "<table><tr><td>Exhibit Number</td><td>Description</td></tr>"
+        "<tr><td>3.1</td><td>Articles of Incorporation</td></tr><tr><td>3.2</td><td>Bylaws</td></tr></table>",
+        "| Exhibit Number | Description |",
+        ["| 3.1 | Articles of Incorporation |", "| 3.2 | Bylaws |"],
+    ),
+    # Revision 8: a trailing label-only row is a body section label (nvda-2002-10k).
+    "section-label-row": (
+        "<table><tr><td></td><td>As of Jan 27, 2002</td><td>As of Jan 28, 2001</td></tr>"
+        "<tr><td>Accounts Receivable:</td><td></td><td></td></tr>"
+        "<tr><td>Accounts receivable</td><td>$ 100</td><td>$ 90</td></tr></table>",
+        "|  | As of Jan 27, 2002 | As of Jan 28, 2001 |",
+        ["| Accounts Receivable: |  |  |", "| Accounts receivable | $ 100 | $ 90 |"],
+    ),
+    # Revision 7: "2.1(1)" is a footnoted complete number (nvda-2002-10k exhibit index).
+    "footnoted-exhibit-index": (
+        "<table><tr><td>Exhibit Number</td><td>Description</td></tr>"
+        "<tr><td>2.1(1)</td><td>Asset Purchase Agreement</td></tr>"
+        "<tr><td>4.1</td><td>Specimen Stock Certificate</td></tr>"
+        "<tr><td>10.2</td><td>Stock Plan</td></tr></table>",
+        "| Exhibit Number | Description |",
+        ["| 2.1(1) | Asset Purchase Agreement |", "| 4.1 | Specimen Stock Certificate |",
+         "| 10.2 | Stock Plan |"],
+    ),
+    "exhibit-index-1-then-3.1": (
+        "<table><tr><td>Exhibit Number</td><td>Description</td></tr>"
+        "<tr><td>1</td><td>Agreement</td></tr><tr><td>3.1</td><td>Articles</td></tr></table>",
+        "| Exhibit Number | Description |",
+        ["| 1 | Agreement |", "| 3.1 | Articles |"],
+    ),
+    "all-integer-exhibit-index": (
+        "<table><tr><td>Exhibit Number</td><td>Description</td></tr>"
+        "<tr><td>1</td><td>Agreement</td></tr><tr><td>2</td><td>Plan</td></tr></table>",
+        "| Exhibit Number | Description |",
+        ["| 1 | Agreement |", "| 2 | Plan |"],
+    ),
+    "caption-number-control": (
+        '<table><tr><td>4</td><td colspan="2">Fiscal Year Ended January 31,</td></tr>'
+        "<tr><td></td><td>2025</td><td>2024</td></tr><tr><td>Revenue</td><td>100</td><td>200</td></tr></table>",
+        "| 4 | Fiscal Year Ended January 31, — 2025 | Fiscal Year Ended January 31, — 2024 |",
+        ["| Revenue | 100 | 200 |"],
+    ),
+    "text-table-without-data": (
+        "<table><tr><td>Name</td><td>Title</td></tr><tr><td>Jane Doe</td><td>Director</td></tr>"
+        "<tr><td>John Roe</td><td>Officer</td></tr></table>",
+        "| Name | Title |",
+        ["| Jane Doe | Director |", "| John Roe | Officer |"],
+    ),
+    "bare-year-label-column": (
+        "<table><tr><td>Year</td><td>Amount</td></tr><tr><td>2025</td><td>100</td></tr>"
+        "<tr><td>2024</td><td>90</td></tr></table>",
+        "| Year | Amount |",
+        ["| 2025 | 100 |", "| 2024 | 90 |"],
+    ),
+    "standalone-footnote-mark-in-header-row": (
+        "<table><tr><td>Item</td><td>Amount</td><td>(1)</td></tr>"
+        "<tr><td>Revenue</td><td>100</td><td></td></tr><tr><td>Costs</td><td>60</td><td></td></tr></table>",
+        "|  |  |  |",
+        ["| Item | Amount | (1) |", "| Revenue | 100 |  |", "| Costs | 60 |  |"],
+    ),
+    "linked-number": (
+        '<table><tr><th>Item</th><th>2025</th></tr><tr><td>Revenue</td>'
+        '<td><a href="https://www.sec.gov/a/filing.htm#r1">1,234</a></td></tr></table>',
+        "| Item | 2025 |",
+        ["| Revenue | [1,234](https://www.sec.gov/a/filing.htm#r1) |"],
+    ),
+}
+
+
+@pytest.mark.parametrize("case", list(NAMED_ROLE_HEADERS))
+def test_named_role_case_renders_its_expected_header(case):
+    html, header, body = NAMED_ROLE_HEADERS[case]
+    lines = _markdown(html)
+    assert lines[0] == header
+    assert lines[2:] == body
+
+
+# Renderer side of R0's coordinate equivalence: the same table as test_table_roles'
+# PLACED grid, with a leading spacer column, a blank row, a rowspan and linked labels.
+COORDINATE_HTML = (
+    '<table><tr><td></td><td>4</td><td colspan="3">Fiscal Year Ended January 31,</td></tr>'
+    "<tr><td></td><td></td><td></td><td></td><td></td></tr>"
+    '<tr><td></td><td></td><td colspan="2">2025</td><td>2024</td></tr>'
+    '<tr><td></td><td><a href="#revenue">Revenue</a></td><td>$</td><td>100</td><td>200</td></tr>'
+    '<tr><td></td><td>Costs</td><td></td><td><a href="#costs">60</a></td><td>70</td></tr>'
+    '<tr><td></td><td rowspan="2">Total</td><td>$</td><td>160</td><td>270</td></tr>'
+    "<tr><td></td><td></td><td></td><td>5</td></tr></table>"
+)
+
+
+def test_renderer_reads_r0_on_its_cleaned_grid_like_the_placed_grid():
+    from sec2md.table_parser import _origin_cells
+
+    parser = _parser(COORDINATE_HTML)
+    assert [[None if slot is None else slot.text for slot in row]
+            for row in _origin_cells(parser.source_grid)] == [
+        ["4", "Fiscal Year Ended January 31,", None, None],
+        ["", "2025", None, "2024"],
+        ["[Revenue](#revenue)", "$", "100", "200"],
+        ["Costs", "", "[60](#costs)", "70"],
+        ["Total", "$", "160", "270"],
+        [None, "", "", "5"],
+    ]
+    assert parser.roles.header_rows == (0, 1)
+    assert parser.roles.data_rows == (2, 3, 4, 5)
+    assert parser.roles.label_column == 0
+
+
+def test_spanning_header_and_its_equal_lower_text_are_written_once():
+    # Astra's R6a source: a spanning 2025 over a lower 2025 and "Budget".
+    assert _markdown(
+        '<table><tr><th></th><th colspan="2">2025</th></tr>'
+        "<tr><th>Item</th><th>2025</th><th>Budget</th></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"
+    ) == ["| Item | 2025 | 2025 — Budget |", "| --- | --- | --- |", "| Revenue | 100 | 200 |"]
+
+
+def test_rowspan_header_cell_appears_once_per_column():
+    assert _markdown(
+        '<table><tr><th rowspan="2">Item</th><th colspan="2">2025</th></tr>'
+        "<tr><th>Actual</th><th>Budget</th></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"
+    )[0] == "| Item | 2025 — Actual | 2025 — Budget |"
+
+
+def test_equal_header_texts_compare_by_normalized_visible_text():
+    # Case and whitespace do not make a lower text new, with or without the same link.
+    assert _markdown(
+        '<table><tr><th></th><th>Total</th></tr><tr><th></th><th>TOTAL </th></tr>'
+        "<tr><td>Revenue</td><td>100</td></tr></table>"
+    )[0] == "|  | Total |"
+    assert _markdown(
+        '<table><tr><th></th><th><a href="#t">Total</a></th></tr><tr><th></th><th><a href="#t">TOTAL </a></th></tr>'
+        "<tr><td>Revenue</td><td>100</td></tr></table>"
+    )[0] == "|  | [Total](#t) |"
+
+
+@pytest.mark.parametrize("upper, lower, header", [
+    ('<a href="ex101.htm">Plan</a>', '<a href="ex102.htm">Plan</a>', "[Plan](ex101.htm) — [Plan](ex102.htm)"),
+    ("Total", '<a href="#t">TOTAL</a>', "Total — [TOTAL](#t)"),
+], ids=["different-destinations", "link-and-no-link"])
+def test_equal_labels_with_different_links_are_both_kept(upper, lower, header):
+    # Revision 11, R6 step 2: equality compares link destinations too (was: suppressed by
+    # label, which dropped META 10-Q 2026-Q1 table 39's second exhibit link).
+    assert _markdown(
+        f"<table><tr><th></th><th>{upper}</th></tr><tr><th></th><th>{lower}</th></tr>"
+        "<tr><td>Revenue</td><td>100</td></tr></table>"
+    )[0] == f"|  | {header} |"
+
+
+@pytest.mark.parametrize("html, header", [
+    # Only a text equal to the one kept just before it is skipped: each lower 2025 is a
+    # new cell after "Q1" or "Q2", so it is written again.
+    ('<table><tr><th></th><th colspan="2">2025</th></tr>'
+     "<tr><th></th><th>Q1</th><th>Q2</th></tr>"
+     "<tr><th>x</th><th>2025</th><th>2025</th></tr>"
+     "<tr><td>Revenue</td><td>100</td><td>3</td></tr></table>",
+     "| x | 2025 — Q1 — 2025 | 2025 — Q2 — 2025 |"),
+    # Whitespace inside a text is collapsed before comparing: a line break in the lower cell
+    # does not make it new.
+    ("<table><tr><th></th><th>Total amount</th></tr><tr><th></th><th>Total\n   amount</th></tr>"
+     "<tr><td>Revenue</td><td>100</td></tr></table>",
+     "|  | Total amount |"),
+    # An empty header row between two equal texts does not separate them.
+    ("<table><tr><th></th><th>Total</th><th>X</th></tr><tr><th></th><th></th><th>Y</th></tr>"
+     "<tr><th></th><th>Total</th><th>Z</th></tr>"
+     "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>",
+     "|  | Total | X — Y — Z |"),
+], ids=["adjacent-only", "whitespace-collapsed", "empty-row-between"])
+def test_r6_skips_only_a_text_equal_to_the_one_kept_before_it(html, header):
+    assert _markdown(html)[0] == header
+
+
+# Malformed markup: row 1's colspan overlaps the 2025 rowspan, so placement gives row 1 of
+# that column to "Budget" and the same 2025 cell comes back below it.
+OVERLAPPING_SPANS_HTML = (
+    '<table><tr><td></td><td>X</td><td rowspan="3">2025</td></tr>'
+    '<tr><td></td><td colspan="2">Budget</td></tr>'
+    "<tr><td></td><td>Y</td></tr>"
+    "<tr><td>Revenue</td><td>1</td><td>2</td></tr></table>"
+)
+
+
+def test_a_header_cell_is_written_once_per_column_when_spans_overlap():
+    # R6: a cell already written in a column is not written again, as a rowspan is not, so
+    # the header line stays within header_capacity (R6a), which counts each cell once per
+    # column (was "2025 — Budget — 2025" with a capacity of one 2025).
+    assert _markdown(OVERLAPPING_SPANS_HTML) == [
+        "|  | X — Budget — Y | 2025 — Budget |",
+        "| --- | --- | --- |",
+        "| Revenue | 1 | 2 |",
+    ]
+    record, markdown = _record(OVERLAPPING_SPANS_HTML)
+    assert record.header_line == markdown.splitlines()[0]
+    assert record.header_source == record.header_capacity == (("2025", 1),)
+
+
+@pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+def test_overlapping_spans_pass_strict(capture_tables):
+    # main passes this document; the header line must not invent a second 2025.
+    from sec2md.parser import Parser
+    from sec2md.quality import enforce_quality
+
+    parser = Parser(
+        "<html><body><p>Segment results for the year are shown below.</p>"
+        f"{OVERLAPPING_SPANS_HTML}<p>End of note.</p></body></html>",
+        capture_tables=capture_tables,
+    )
+    parser.get_pages()
+    assert parser.trace_numeric_failures == ()
+    enforce_quality(parser.diagnostics, "strict")
+
+
+def test_header_record_counts_a_table_nested_in_a_header_cell_once():
+    # The nested cells are read as cells of the outer row and of their own row, and the
+    # outer cell's text already holds theirs. R6a counts each source cell once, as strict's
+    # pool holds it: one 2024 (was three, which let three header copies pass strict).
+    from collections import Counter
+
+    from sec2md.quality import _normalized_numbers
+
+    html = ("<table><tr><th>Item</th><th>Period<table><tr><th>Fiscal</th><th>2024</th></tr></table></th></tr>"
+            "<tr><td>Revenue</td><td>100</td></tr></table>")
+    record, markdown = _record(html)
+    assert markdown.splitlines()[0] == "| Item — Fiscal | Period Fiscal 2024 — 2024 | Fiscal | 2024 |"
+    assert Counter(_normalized_numbers(_table(html).get_text(" ", strip=True)))["2024"] == 1
+    assert record.header_source == record.header_capacity == (("2024", 1),)
+
+
+@pytest.mark.parametrize("nested", [
+    "<table><tr><th>Fiscal</th><th>2024</th></tr></table>",
+    "<div><table><tr><th>Fiscal</th><th>2024</th></tr></table></div>",
+], ids=["tr-direct", "div-wrapped"])
+def test_header_record_reads_each_cell_of_a_table_nested_in_a_header_row_once(nested):
+    # lxml keeps a table placed in a <tr> (directly or in a wrapper) inside that row, so its
+    # cells are read for the outer row and again for their own row, and no zone cell holds
+    # them. R6a counts each source cell once: one 2024 heading one column (was two of each,
+    # which let the second written copy pass strict).
+    from collections import Counter
+
+    from sec2md.quality import _normalized_numbers
+
+    html = (f"<table><tr><th>Item</th><th>Period</th>{nested}</tr>"
+            "<tr><td>Revenue</td><td>100</td></tr></table>")
+    record, markdown = _record(html)
+    assert markdown.splitlines()[0] == "| Item — Fiscal | Period — 2024 | Fiscal | 2024 |"
+    assert Counter(_normalized_numbers(_table(html).get_text(" ", strip=True)))["2024"] == 1
+    assert record.header_source == record.header_capacity == (("2024", 1),)
+
+
+def test_header_only_column_stays():
+    # R7: "(a)" heads a column with no body text (nvda-2026-10k table 20's shape).
+    assert _markdown(
+        "<table><tr><th>Statement</th><th>Page</th><th>(a)</th></tr>"
+        "<tr><td>Balance Sheets</td><td>45</td><td></td></tr>"
+        "<tr><td>Income Statements</td><td>46</td><td></td></tr></table>"
+    ) == [
+        "| Statement | Page | (a) |",
+        "| --- | --- | --- |",
+        "| Balance Sheets | 45 |  |",
+        "| Income Statements | 46 |  |",
+    ]
+
+
+def test_single_data_row_table_renders_an_empty_header_line():
+    assert _markdown("<table><tr><td>Revenue</td><td>100</td></tr></table>") == [
+        "|  |  |", "| --- | --- |", "| Revenue | 100 |"]
+
+
+def test_zero_width_cell_beside_an_amount():
+    assert _markdown(
+        '<table><tr><td></td><td colspan="3">2025</td></tr>'
+        "<tr><td>Revenue</td><td>$</td><td>1,234</td><td>\u200b</td></tr>"
+        "<tr><td>Costs</td><td>\u200b</td><td>567</td><td>\u200b</td></tr></table>"
+    ) == ["|  | 2025 |", "| --- | --- |", "| Revenue | $ 1,234 |", "| Costs | 567 |"]
+
+
+def test_leading_dot_per_share_values():
+    assert _markdown(
+        '<table><tr><td></td><td colspan="2">2002</td><td colspan="2">2001</td></tr>'
+        "<tr><td>Basic</td><td>$</td><td>.75</td><td>$</td><td>.62</td></tr>"
+        "<tr><td>Diluted</td><td>$</td><td>(.62)</td><td>$</td><td>.60</td></tr></table>"
+    ) == [
+        "|  | 2002 | 2001 |",
+        "| --- | --- | --- |",
+        "| Basic | $ .75 | $ .62 |",
+        "| Diluted | $ (.62) | $ .60 |",
+    ]
+
+
+def test_marker_column_holding_a_nil_value_stays_split():
+    # Recorded residual (class 8): whole-column validation rejects a ")" column that also
+    # holds a nil value, so "(29" and ")" stay in two columns under the same span.
+    assert _markdown(
+        '<table><tr><td></td><td colspan="2">2025</td></tr>'
+        "<tr><td>Loss</td><td>(29</td><td>)</td></tr>"
+        "<tr><td>Other</td><td>40</td><td>—</td></tr></table>"
+    ) == ["|  | 2025 | 2025 |", "| --- | --- | --- |", "| Loss | (29 | ) |", "| Other | 40 | — |"]
+
+
+# --- R5 with revision 11's header zone: header-like rows only ----------------------------
+# The corpus run's S1 reproductions (acceptance REPORT.md): body rows before the first row
+# with a complete number stay in the body, as main renders them.
+
+HEADER_ZONE_CASES = {
+    # fixture:aapl-2023-10k table 8: trading symbols are text, the notes' symbols nil values.
+    "securities": (
+        "<table><tr><td>Title of each class</td><td>Trading symbol(s)</td></tr>"
+        "<tr><td>Common Stock</td><td>AAPL</td></tr>"
+        "<tr><td>1.375% Notes due 2024</td><td>—</td></tr></table>",
+        ["| Title of each class | Trading symbol(s) |",
+         "| --- | --- |",
+         "| Common Stock | AAPL |",
+         "| 1.375% Notes due 2024 | — |"],
+    ),
+    # META 10-K table 44's shape: values with units are not complete numbers.
+    "values-with-units": (
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        "<tr><td>Finance leases</td><td>15.1 years</td><td>13.7 years</td></tr>"
+        "<tr><td>Discount rate</td><td>4.1 %</td><td>3.6 %</td></tr></table>",
+        ["|  | 2025 | 2024 |",
+         "| --- | --- | --- |",
+         "| Finance leases | 15.1 years | 13.7 years |",
+         "| Discount rate | 4.1 % | 3.6 % |"],
+    ),
+    # KO 10-K table 110's shape: three-part exhibit numbers before the first two-part one.
+    "exhibit-numbers": (
+        "<table><tr><td>10.5.22</td><td>Plan A</td></tr><tr><td>10.5.23</td><td>Plan B</td></tr>"
+        "<tr><td>10.6</td><td>Plan C</td></tr><tr><td>10.7</td><td>Plan D</td></tr></table>",
+        ["| 10.5.22 | Plan A |",
+         "| --- | --- |",
+         "| 10.5.23 | Plan B |",
+         "| 10.6 | Plan C |",
+         "| 10.7 | Plan D |"],
+    ),
+    # META 10-Q 2026-Q1 table 39's shape: "10.1+" rows with equal descriptions and different
+    # links stay body rows, so both links are kept.
+    "linked-exhibit-pair": (
+        "<table><tr><td>Exhibit Number</td><td>Exhibit Description</td></tr>"
+        '<tr><td>10.1+</td><td><a href="ex101.htm">Director Compensation Policy</a></td></tr>'
+        '<tr><td>10.2+</td><td><a href="ex102.htm">Director Compensation Policy</a></td></tr>'
+        "<tr><td>31.1</td><td>Certification</td></tr><tr><td>31.2</td><td>Certification</td></tr></table>",
+        ["| Exhibit Number | Exhibit Description |",
+         "| --- | --- |",
+         "| 10.1+ | [Director Compensation Policy](ex101.htm) |",
+         "| 10.2+ | [Director Compensation Policy](ex102.htm) |",
+         "| 31.1 | Certification |",
+         "| 31.2 | Certification |"],
+    ),
+    # A column-heading second row under a first row that is not sparse ends the zone and
+    # stays in the body, as main renders it.
+    "column-heading-second-row-under-a-full-row": (
+        '<table><tr><td>Obligations</td><td colspan="2">Payments Due by Period</td></tr>'
+        "<tr><td>Contractual obligations</td><td>Total</td><td>Less than 1 year</td></tr>"
+        "<tr><td>Long-term debt</td><td>$ 9,000</td><td>$ 1,000</td></tr></table>",
+        ["| Obligations | Payments Due by Period | Payments Due by Period |",
+         "| --- | --- | --- |",
+         "| Contractual obligations | Total | Less than 1 year |",
+         "| Long-term debt | $ 9,000 | $ 1,000 |"],
+    ),
+    # Revision 12 (S8): under a sparse first row, main fuses the column headings into its
+    # header line, so they stay in the zone.
+    "column-heading-second-row-under-a-sparse-row": (
+        '<table><tr><td></td><td colspan="3">Payments Due by Period</td></tr>'
+        "<tr><td>Contractual obligations</td><td>Total</td><td>Less than 1 year</td><td>1-3 years</td></tr>"
+        "<tr><td>Long-term debt</td><td>$ 9,000</td><td>$ 1,000</td><td>$ 2,000</td></tr></table>",
+        ["| Contractual obligations | Payments Due by Period — Total | Payments Due by Period — Less than 1 year "
+         "| Payments Due by Period — 1-3 years |",
+         "| --- | --- | --- | --- |",
+         "| Long-term debt | $ 9,000 | $ 1,000 | $ 2,000 |"],
+    ),
+    # The fusion applies to the second row only: a third column-heading row is body.
+    "third-column-heading-row": (
+        '<table><tr><td></td><td colspan="3">Payments Due by Period</td></tr>'
+        "<tr><td>Contractual obligations</td><td>Total</td><td>Less than 1 year</td><td>1-3 years</td></tr>"
+        "<tr><td>Obligation type</td><td>All</td><td>Short</td><td>Medium</td></tr>"
+        "<tr><td>Long-term debt</td><td>$ 9,000</td><td>$ 1,000</td><td>$ 2,000</td></tr></table>",
+        ["| Contractual obligations | Payments Due by Period — Total | Payments Due by Period — Less than 1 year "
+         "| Payments Due by Period — 1-3 years |",
+         "| --- | --- | --- | --- |",
+         "| Obligation type | All | Short | Medium |",
+         "| Long-term debt | $ 9,000 | $ 1,000 | $ 2,000 |"],
+    ),
+    # S8: an exhibit index title over its column headings (fixtures aapl-2023-10k 61-63,
+    # nvda-2026-10k 61, nvda-2026-q2-10q 51 have this pair under a caption span).
+    "exhibit-index-title": (
+        '<table><tr><td colspan="3">Exhibit Index</td></tr>'
+        "<tr><td>Exhibit Number</td><td>Description</td><td>Filed Herewith</td></tr>"
+        "<tr><td>3.1</td><td>Articles of Incorporation</td><td></td></tr>"
+        "<tr><td>31.1</td><td>Certification</td><td>X</td></tr></table>",
+        ["| Exhibit Index — Exhibit Number | Exhibit Index — Description | Exhibit Index — Filed Herewith |",
+         "| --- | --- | --- |",
+         "| 3.1 | Articles of Incorporation |  |",
+         "| 31.1 | Certification | X |"],
+    ),
+    # S8: rcq META 10-K 2025-FY table 37's shape, the balance date among the headings.
+    "fair-value-headings": (
+        '<table><tr><td></td><td colspan="2"></td><td colspan="6">Fair Value Measurement Using</td></tr>'
+        '<tr><td>Description</td><td colspan="2">December 31, 2024</td><td colspan="2">Level 1</td>'
+        '<td colspan="2">Level 2</td><td colspan="2">Level 3</td></tr>'
+        "<tr><td>Cash equivalents:</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+        "<tr><td>Money market funds</td><td>$</td><td>36,165</td><td>$</td><td>36,165</td><td>$</td><td>—</td>"
+        "<td>$</td><td>—</td></tr>"
+        "<tr><td>Time deposits</td><td></td><td>369</td><td></td><td>—</td><td></td><td>369</td><td></td><td>—</td>"
+        "</tr></table>",
+        ["| Description | December 31, 2024 | Fair Value Measurement Using — Level 1 "
+         "| Fair Value Measurement Using — Level 2 | Fair Value Measurement Using — Level 3 |",
+         "| --- | --- | --- | --- | --- |",
+         "| Cash equivalents: |  |  |  |  |",
+         "| Money market funds | $ 36,165 | $ 36,165 | $ — | $ — |",
+         "| Time deposits | 369 | — | 369 | — |"],
+    ),
+    # S8: edgar:TSLA-10-K table 40's shape, a statement title beside the quarter-end dates.
+    "statement-title-beside-dates": (
+        '<table><tr><td></td><td colspan="6">Three Months Ended</td></tr>'
+        "<tr><td>Condensed Consolidated Statements of Operations (unaudited):</td>"
+        '<td colspan="2">March 31, 2024</td><td colspan="2">June 30, 2024</td><td colspan="2">September 30, 2024</td></tr>'
+        "<tr><td>Other income (expense), net</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
+        "<tr><td>Before adoption</td><td>$</td><td>108</td><td>$</td><td>20</td><td>$</td><td>(270)</td></tr>"
+        "<tr><td>Adjustments</td><td></td><td>335</td><td></td><td>(100)</td><td></td><td>7</td></tr></table>",
+        ["| Condensed Consolidated Statements of Operations (unaudited): | Three Months Ended — March 31, 2024 "
+         "| Three Months Ended — June 30, 2024 | Three Months Ended — September 30, 2024 |",
+         "| --- | --- | --- | --- |",
+         "| Other income (expense), net |  |  |  |",
+         "| Before adoption | $ 108 | $ 20 | $ (270) |",
+         "| Adjustments | 335 | (100) | 7 |"],
+    ),
+    # Revision 12 (S7): fixture:nvda-2026-ex99-1 unit 5's shape. Stacked full-width titles
+    # and captions are label-only rows, so they continue the zone and the dates join the
+    # header line; the trailing section labels stay body.
+    "stacked-titles": (
+        '<table><tr><td colspan="3">NVIDIA CORPORATION</td></tr>'
+        '<tr><td colspan="3">CONDENSED CONSOLIDATED BALANCE SHEETS</td></tr>'
+        '<tr><td colspan="3">(In millions)</td></tr><tr><td colspan="3">(Unaudited)</td></tr>'
+        "<tr><td></td><td>July 26,</td><td>January 25,</td></tr>"
+        "<tr><td></td><td>2026</td><td>2026</td></tr>"
+        '<tr><td colspan="3">ASSETS</td></tr><tr><td>Current assets:</td><td></td><td></td></tr>'
+        "<tr><td>Cash and cash equivalents</td><td>$ 22,443</td><td>$ 10,605</td></tr></table>",
+        ["| NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) "
+         "| NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) — July 26, — 2026 "
+         "| NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) — January 25, — 2026 |",
+         "| --- | --- | --- |",
+         "| ASSETS |  |  |",
+         "| Current assets: |  |  |",
+         "| Cash and cash equivalents | $ 22,443 | $ 10,605 |"],
+    ),
+    # Revision 13 (S9): the "%" columns are marker-only, so they leave the sparse-row count
+    # and the operating-lease row stays in the body, as main renders it (AMZN 10-Q table 21).
+    "marker-columns-leave-the-sparse-row-count": (
+        '<table><tr><td></td><td colspan="2">December 31, 2024</td><td colspan="2">September 30, 2025</td></tr>'
+        '<tr><td>Remaining lease term, operating leases</td><td colspan="2">10.6 years</td>'
+        '<td colspan="2">10.0 years</td></tr>'
+        '<tr><td>Remaining lease term, finance leases</td><td colspan="2">11.9 years</td>'
+        '<td colspan="2">12.1 years</td></tr>'
+        "<tr><td>Discount rate, operating leases</td><td>3.5</td><td>%</td><td>3.6</td><td>%</td></tr></table>",
+        ["|  | December 31, 2024 | September 30, 2025 |",
+         "| --- | --- | --- |",
+         "| Remaining lease term, operating leases | 10.6 years | 10.0 years |",
+         "| Remaining lease term, finance leases | 11.9 years | 12.1 years |",
+         "| Discount rate, operating leases | 3.5 % | 3.6 % |"],
+    ),
+    # Revision 13, the mirror case (JPM 10-K table 207's shape): without its "%" columns the
+    # headings row is full, so it joins the header line, as main fuses it.
+    "headings-fuse-without-marker-columns": (
+        '<table><tr><td></td><td colspan="9">Three months ended</td></tr>'
+        '<tr><td>Average amount (in millions)</td><td colspan="3">December 31, 2024</td>'
+        '<td colspan="3">September 30, 2024</td><td colspan="3">December 31, 2023</td></tr>'
+        "<tr><td>JPMorgan Chase &amp; Co.:</td><td></td><td></td><td></td><td></td><td></td><td></td>"
+        "<td></td><td></td><td></td></tr>"
+        "<tr><td>Eligible cash (a)</td><td>$</td><td>396,123</td><td></td><td>$</td><td>412,389</td><td></td>"
+        "<td>$</td><td>485,263</td><td></td></tr>"
+        '<tr><td>Eligible securities (b)(c)</td><td colspan="2">464,877</td><td></td>'
+        '<td colspan="2">453,899</td><td></td><td colspan="2">313,365</td><td></td></tr>'
+        '<tr><td>LCR</td><td colspan="2">113</td><td>%</td><td colspan="2">114</td><td>%</td>'
+        '<td colspan="2">113</td><td>%</td></tr></table>',
+        ["| Average amount (in millions) | Three months ended — December 31, 2024 "
+         "| Three months ended — September 30, 2024 | Three months ended — December 31, 2023 |",
+         "| --- | --- | --- | --- |",
+         "| JPMorgan Chase & Co.: |  |  |  |",
+         "| Eligible cash (a) | $ 396,123 | $ 412,389 | $ 485,263 |",
+         "| Eligible securities (b)(c) | 464,877 | 453,899 | 313,365 |",
+         "| LCR | 113 % | 114 % | 113 % |"],
+    ),
+    # Revision 13 control (nvda-2026-10k unit 38's shape): "$" columns that also hold the
+    # dates and values written from them still count, so the pair fuses.
+    "currency-columns-holding-values-still-count": (
+        '<table><tr><td></td><td colspan="2">Jan 25, 2026</td><td colspan="2">Jan 26, 2025</td></tr>'
+        '<tr><td>Inventories:</td><td colspan="4">(In millions)</td></tr>'
+        "<tr><td>Raw materials</td><td>$</td><td>3,807</td><td>$</td><td>3,408</td></tr>"
+        '<tr><td>Work in process</td><td colspan="2">8,822</td><td colspan="2">3,399</td></tr></table>',
+        ["| Inventories: | Jan 25, 2026 — (In millions) | Jan 26, 2025 — (In millions) |",
+         "| --- | --- | --- |",
+         "| Raw materials | $ 3,807 | $ 3,408 |",
+         "| Work in process | 8,822 | 3,399 |"],
+    ),
+    # Revision 15: a full-width caption whose cell starts in the label column is label-only
+    # (decided by origin), so right before the data it is a body row ...
+    "full-width-caption-from-the-label-column": (
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        '<tr><td colspan="3">(In millions)</td></tr>'
+        "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>",
+        ["|  | 2025 | 2024 |",
+         "| --- | --- | --- |",
+         "| (In millions) |  |  |",
+         "| Revenue | 100 | 90 |"],
+    ),
+    # ... while the same caption starting in a value column is not label-only: header.
+    "caption-from-a-value-column": (
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        '<tr><td></td><td colspan="2">(In millions)</td></tr>'
+        "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>",
+        ["|  | 2025 — (In millions) | 2024 — (In millions) |",
+         "| --- | --- | --- |",
+         "| Revenue | 100 | 90 |"],
+    ),
+    # Round-2 control: the label-only lease-term title continues the zone, the
+    # "Finance leases | 15.1 years" row ends it, and the title then trails, so it is body.
+    "lease-term-title": (
+        "<table><tr><td></td><td>2025</td><td>2024</td></tr>"
+        "<tr><td>Weighted-average remaining lease term:</td><td></td><td></td></tr>"
+        "<tr><td>Finance leases</td><td>15.1 years</td><td>13.7 years</td></tr>"
+        "<tr><td>Weighted-average discount rate:</td><td></td><td></td></tr>"
+        "<tr><td>Finance leases</td><td>3.5 %</td><td>3.4 %</td></tr></table>",
+        ["|  | 2025 | 2024 |",
+         "| --- | --- | --- |",
+         "| Weighted-average remaining lease term: |  |  |",
+         "| Finance leases | 15.1 years | 13.7 years |",
+         "| Weighted-average discount rate: |  |  |",
+         "| Finance leases | 3.5 % | 3.4 % |"],
+    ),
+    # Controls: header-like second rows keep today's multi-row header.
+    "period-label-control": (
+        '<table><tr><td></td><td colspan="2">Payments due</td></tr>'
+        "<tr><td>Year Ended December 31,</td><td>2025</td><td>2024</td></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>",
+        ["| Year Ended December 31, | Payments due — 2025 | Payments due — 2024 |",
+         "| --- | --- | --- |",
+         "| Revenue | 100 | 90 |"],
+    ),
+    # edgar:BAC-10-K table 46's shape: a unit-caption years row under the table title.
+    "unit-caption-years-row": (
+        '<table><tr><td>Table 2</td><td colspan="2">Noninterest Income</td></tr>'
+        "<tr><td>(Dollars in millions)</td><td>2024</td><td>2023</td></tr>"
+        "<tr><td>Fees and commissions:</td><td></td><td></td></tr>"
+        "<tr><td>Card income</td><td>$ 5,964</td><td>$ 5,957</td></tr></table>",
+        ["| Table 2 — (Dollars in millions) | Noninterest Income — 2024 | Noninterest Income — 2023 |",
+         "| --- | --- | --- |",
+         "| Fees and commissions: |  |  |",
+         "| Card income | $ 5,964 | $ 5,957 |"],
+    ),
+    "year-like-label-control": (
+        "<table><tr><td>Region</td><td>Q1</td><td>Q2</td></tr>"
+        "<tr><td>2024(a)</td><td>Actual</td><td>Actual</td></tr>"
+        "<tr><td>East</td><td>10</td><td>20</td></tr></table>",
+        ["| Region — 2024(a) | Q1 — Actual | Q2 — Actual |",
+         "| --- | --- | --- |",
+         "| East | 10 | 20 |"],
+    ),
+    # edgar:TSM-20-F table 136's shape: the canonical years row, here under a caption.
+    "year-run-control": (
+        '<table><tr><td></td><td colspan="3">Year Ended December 31,</td></tr>'
+        "<tr><td>Function</td><td>2022</td><td>2023</td><td>2024</td></tr>"
+        "<tr><td>Research</td><td>10</td><td>20</td><td>30</td></tr></table>",
+        ["| Function | Year Ended December 31, — 2022 | Year Ended December 31, — 2023 "
+         "| Year Ended December 31, — 2024 |",
+         "| --- | --- | --- | --- |",
+         "| Research | 10 | 20 | 30 |"],
+    ),
+    "th-row-control": (
+        '<table><tr><td></td><td colspan="2">Fiscal Year</td></tr>'
+        "<tr><th>Item</th><th>Actual</th><th>Budget</th></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>",
+        ["| Item | Fiscal Year — Actual | Fiscal Year — Budget |",
+         "| --- | --- | --- |",
+         "| Revenue | 100 | 90 |"],
+    ),
+    # Years rows (spec revision 11): a year run, a unit caption or a year in the label
+    # column keeps the years in the header line.
+    "years-row-function": (
+        "<table><tr><td>Function</td><td>2022</td><td>2023</td><td>2024</td></tr>"
+        "<tr><td>Research</td><td>10</td><td>20</td><td>30</td></tr></table>",
+        ["| Function | 2022 | 2023 | 2024 |", "| --- | --- | --- | --- |", "| Research | 10 | 20 | 30 |"],
+    ),
+    "years-row-dollars-caption": (
+        "<table><tr><td>(Dollars in millions)</td><td>2024</td><td>2023</td></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>",
+        ["| (Dollars in millions) | 2024 | 2023 |", "| --- | --- | --- |", "| Revenue | 100 | 90 |"],
+    ),
+    "years-row-first-year-in-label-column": (
+        "<table><tr><td>2023</td><td>2022</td></tr><tr><td>Revenue</td><td>100</td></tr></table>",
+        ["| 2023 | 2022 |", "| --- | --- |", "| Revenue | 100 |"],
+    ),
+    "year-shaped-amounts-stay-data": (
+        "<table><tr><td></td><td>2026</td><td>2025</td></tr>"
+        "<tr><td>Revenue</td><td>2000</td><td>1900</td></tr></table>",
+        ["|  | 2026 | 2025 |", "| --- | --- | --- |", "| Revenue | 2000 | 1900 |"],
+    ),
+    # Named limitation: bare years within one of each other read as a header row.
+    "named-limitation-units": (
+        "<table><tr><th>Item</th><th>First</th><th>Second</th></tr>"
+        "<tr><td>Units</td><td>2024</td><td>2025</td></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>",
+        ["| Item — Units | First — 2024 | Second — 2025 |", "| --- | --- | --- |", "| Revenue | 100 | 90 |"],
+    ),
+}
+
+
+@pytest.mark.parametrize("case", list(HEADER_ZONE_CASES))
+def test_header_zone_continues_only_through_header_like_rows(case):
+    html, expected = HEADER_ZONE_CASES[case]
+    assert _markdown(html) == expected
+
+
+def test_grid_hidden_cells_leave_spanning_headers_over_their_values():
+    # The corpus run's S2 reproduction: main wrote "| Millions of dollars | 2024 | 2023 |".
+    assert _markdown(CAT_34_HIDDEN_HTML) == [
+        "| Millions of dollars | Twelve Months Ended December 31, — 2024 | Twelve Months Ended December 31, — 2023 |",
+        "| --- | --- | --- |",
+        "| Free cash flow | 9,449 | 10,025 |",
+    ]
+
+
+def test_grid_hidden_cells_keep_a_row_with_fewer_hidden_cells_in_its_columns():
+    # BAC 336's shape: counting hidden cells split a value column.
+    assert _markdown(BAC_336_HIDDEN_HTML) == [
+        "| (Dollars in millions) | 2024 | 2023 |",
+        "| --- | --- | --- |",
+        "| Net income | 27,132 | 26,515 |",
+        "| Compensation and benefits | 40,182 | 38,330 |",
+    ]
+
+
+def test_row_of_grid_hidden_cells_under_rowspans_keeps_the_first_data_row():
+    # JPM 606's shape: the first data row is kept, under its headers.
+    assert _markdown(JPM_606_HIDDEN_HTML) == [
+        "| Year ended December 31, | Unrealized gains | Fair value hedges |",
+        "| --- | --- | --- |",
+        "| Balance at December 31, 2021 | $ 2,640 | $ (131) |",
+        "| Net change | (11,764) | 98 |",
+    ]
+
+
+# --- R6a inputs: the per-render header record --------------------------------------------
+
+def _record(html):
+    parser = _parser(html)
+    markdown = parser.md()
+    return parser.header_record, markdown
+
+
+def test_header_record_counts_spanning_headers_per_output_column():
+    record, markdown = _record(PER_CLASS_CASES["jpm-482"][0])
+    assert record.header_line == markdown.splitlines()[0]
+    assert record.header_source == (("2024", 1), ("31", 1))
+    # "2024" covers five output columns; "December 31," only the label column.
+    assert record.header_capacity == (("2024", 5), ("31", 1))
+
+
+def test_header_record_for_astras_repeated_2025_source():
+    record, _ = _record(
+        '<table><tr><th></th><th colspan="2">2025</th></tr>'
+        "<tr><th>Item</th><th>2025</th><th>Budget</th></tr>"
+        "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"
+    )
+    assert record.header_line == "| Item | 2025 | 2025 — Budget |"
+    assert record.header_source == (("2025", 2),)
+    # Two columns under the spanning cell plus one under the lower cell.
+    assert record.header_capacity == (("2025", 3),)
+
+
+def test_header_record_of_a_headerless_table_has_no_header_line():
+    record, markdown = _record(JPM_109_HTML)
+    assert markdown.splitlines()[0] == "|  |  |  |"
+    assert record.header_line is None
+    assert record.header_source == record.header_capacity == ()
+
+
+def test_header_record_reads_cell_nodes_not_link_destinations():
+    record, markdown = _record(
+        '<table><tr><th>Item</th><th><a href="https://www.sec.gov/2024/10.htm">2025</a></th></tr>'
+        "<tr><td>Revenue</td><td>100</td></tr></table>"
+    )
+    assert markdown.splitlines()[0] == "| Item | [2025](https://www.sec.gov/2024/10.htm) |"
+    assert record.header_source == record.header_capacity == (("2025", 1),)
+
+
+def test_header_record_counts_each_header_cell_once_across_rowspans():
+    record, _ = _record(
+        '<table><tr><th rowspan="2">Fiscal 2025</th><th colspan="2">2025</th></tr>'
+        "<tr><th>Q1</th><th>Q2</th></tr><tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"
+    )
+    assert record.header_line == "| Fiscal 2025 | 2025 — Q1 | 2025 — Q2 |"
+    # "Q1" and "Q2" hold no standalone number for strict's tokenizer.
+    assert record.header_source == (("2025", 2),)
+    assert record.header_capacity == (("2025", 3),)
+
+
+def test_list_table_has_no_header_record():
+    parser = _parser("<table><tr><td>•</td><td>List item text</td></tr></table>")
+    assert parser.md() == "- List item text"
+    assert parser.header_record is None
+
+
+def test_year_shaped_amounts_beside_a_row_label_stay_in_the_body():
+    # R0 (revision 6): the label "Revenue" lets the bare years of its row count.
+    assert _markdown(
+        "<table><tr><th>Item</th><th>2026</th><th>2025</th></tr>"
+        "<tr><td>Revenue</td><td>2000</td><td>1900</td></tr>"
+        "<tr><td>Cost</td><td>500</td><td>400</td></tr></table>"
+    ) == ["| Item | 2026 | 2025 |", "| --- | --- | --- |", "| Revenue | 2000 | 1900 |",
+          "| Cost | 500 | 400 |"]
+
+
+def test_th_row_of_currency_denominations_stays_header():
+    # R0 (revision 6): an explicit header row, all th, is never a data row.
+    assert _markdown(
+        "<table><tr><th>Denomination</th><th>€1</th><th>€2</th></tr>"
+        "<tr><td>Issued</td><td>2</td><td>1</td></tr></table>"
+    ) == ["| Denomination | €1 | €2 |", "| --- | --- | --- |", "| Issued | 2 | 1 |"]
+
+
+def test_header_source_tokenizes_header_cells_like_the_strict_source_pool():
+    # A split negative across header cells is one token, exactly as in the table's text.
+    from collections import Counter
+
+    from sec2md.quality import _normalized_numbers
+
+    html = ("<table><tr><th>Item</th><th>(</th><th>29</th><th>)</th></tr>"
+            "<tr><td>Revenue</td><td></td><td>100</td><td></td></tr></table>")
+    record, markdown = _record(html)
+    assert markdown.splitlines()[0] == "| Item | ( | 29 | ) |"
+    assert record.header_source == (("-29", 1),)
+    assert Counter(_normalized_numbers(_table(html).get_text(" ", strip=True)))["-29"] == 1
+    # Capacity stays per cell: the "29" cell heads one output column.
+    assert record.header_capacity == (("29", 1),)

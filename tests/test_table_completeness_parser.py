@@ -179,7 +179,9 @@ CASES = [
      lambda s: s.replace("| Impairment | 9 |", "| Impairment |  |"), {1: (lost("9"), (), ())}),
     ("amount kept, standalone <sup>9</sup> deleted", STANDALONE_MARKER,
      lambda s: s.replace("| Footnote | 9 |", "| Footnote |  |"), {1: ((), (("9", "standalone_marker"),), ())}),
-    ("unlabelled rows, amount deleted", UNLABELLED_MARKER, lambda s: s.replace("| 9 |\n| 9 |", "|  |\n| 9 |", 1),
+    # R7 keeps the "Item" column (header text, empty body), so rows read "|  | 9 |".
+    ("unlabelled rows, amount deleted", UNLABELLED_MARKER,
+     lambda s: s.replace("|  | 9 |\n|  | 9 |", "|  |  |\n|  | 9 |", 1),
      {1: (lost("9", role="label", ambiguous=True), (), ())}),
     ("'Note 1' / 'Note 2' rows, output unchanged", NOTES, None, {}),
     ("'Note 1' row deleted", NOTES, drop_line("| Note 1 |"), {1: (lost("9"), (("1", "reference"),), ())}),
@@ -203,9 +205,9 @@ def test_review_case(name, html, mutate, expected, capture):
 
 
 def test_nested_table_follows_each_rendering_mode():
-    # Normal Markdown drops the outer cell's 12 beside a nested table; capture-mode
-    # fallback text keeps it.
-    assert findings(NESTED, capture=False) == {1: (lost("12"), (), ())}
+    # Normal Markdown used to drop the outer cell's 12 beside a nested table; R1 and R7
+    # (spec 2026-10-05) keep it, and capture-mode fallback text keeps it as before.
+    assert findings(NESTED, capture=False) == {}
     assert findings(NESTED, capture=True) == {}
 
 

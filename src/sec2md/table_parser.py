@@ -2,15 +2,16 @@ from __future__ import annotations
 
 import re
 import logging
+from collections import Counter
 from bs4 import Tag
 from bs4.element import NavigableString
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
 from typing import Callable, List, Literal, Optional, Sequence, cast
 from urllib.parse import urljoin
 
-from sec2md.quality import normalize_numeric_token
+from sec2md.quality import _normalized_numbers, normalize_numeric_token
 from sec2md.table_roles import (
     CURRENCY_MARKERS,
     CURRENCY_PATTERN,
@@ -311,6 +312,7 @@ class Cell:
     rowspan: int = 1
     colspan: int = 1
     header: bool = False  # a th element (R0's explicit header rows)
+    node: Optional[Tag] = field(default=None, repr=False, compare=False)
 
     def __bool__(self) -> bool:
         return bool(self.text.strip())
@@ -362,6 +364,34 @@ def _contains_cells(container: Sequence[Cell], cells: Sequence[Cell]) -> bool:
     """Whether every cell is among container, compared by source-cell identity."""
 
     return all(any(cell is held for held in container) for cell in cells)
+
+
+# A Markdown link's destination, as render_cell_content writes it: "[label](destination)".
+_LINK_DESTINATION = re.compile(r"!?\[[^\]]*\]\(([^)]*)\)")
+
+
+def _header_key(text: str) -> tuple[str, tuple[str, ...]]:
+    """Header text for R6's equality test: the visible text (whitespace collapsed, case
+    folded) and the link destinations, so equal labels with different links are both kept."""
+
+    return " ".join(visible_text(text).split()).casefold(), tuple(_LINK_DESTINATION.findall(text))
+
+
+@dataclass(frozen=True)
+class TableHeaderRecord:
+    """What one render wrote as a table's header line (spec R6a's inputs).
+
+    header_line is the exact Markdown header line written, or None when it holds no text.
+    header_source counts the numeric tokens of the header-zone source cells, each cell
+    once: their nodes' ``get_text(" ", strip=True)`` joined in document order with single
+    spaces, as strict's source pool is built, then tokenized once with strict's tokenizer.
+    header_capacity multiplies each cell's own tokens by the number of output columns
+    whose header that cell covers. Counts are sorted (token, count) pairs.
+    """
+
+    header_line: str | None
+    header_source: tuple[tuple[str, int], ...] = ()
+    header_capacity: tuple[tuple[str, int], ...] = ()
 
 
 class TableParser:
@@ -422,7 +452,7 @@ class TableParser:
                 rowspan = self._safe_parse_int(td.get('rowspan'))
                 colspan = self._safe_parse_int(td.get('colspan'))
                 row.append(Cell(text=text, rowspan=rowspan, colspan=colspan,
-                                header=td.name == "th"))
+                                header=td.name == "th", node=td))
             if row:
                 rows.append(row)
         return rows or [[Cell(text="")]]
@@ -1071,78 +1101,122 @@ class TableParser:
         return str(text).replace("\xa0", " ").strip()
 
     def _process_headers(self, matrix: List[List[str]]) -> tuple[List[str], List[List[str]]]:
-        """
-        Process table headers with smart header fusion.
+        """Fuse the R0 header zone into one header line per output column (R5, R6).
+
+        Each header-zone row contributes its text, top to bottom, joined with " — ";
+        empty texts and a text equal to the one kept before it are skipped. Equality
+        compares link destinations too, so equal labels with different links are both
+        kept. A header cell is written at most once per column: a cell already met in an
+        earlier row of the column (a rowspan, or a span that overlapping markup interrupts)
+        is left out, so the line stays within R6a's header_capacity. With an empty header
+        zone the header cells are empty and every row is body.
 
         Returns:
             Tuple of (headers, data_rows)
         """
-        if not matrix or len(matrix) < 1:
+        if not matrix:
             return [], []
 
-        nrows = len(matrix)
-        ncols = len(matrix[0]) if matrix else 0
+        header_rows = [row for row in self.roles.header_rows if row < len(matrix)]
+        ncols = len(matrix[0])
+        headers = []
+        for column in range(ncols):
+            parts: list[str] = []
+            previous = None
+            met: list[Cell] = []
+            for row in header_rows:
+                text = self._normalize_text(matrix[row][column]) if column < len(matrix[row]) else ""
+                if column < len(self.columns):
+                    cells = self._header_cells(self.source_grid, self.columns[column].owners, row)
+                    new = [cell for cell in cells if not any(cell is held for held in met)]
+                    met.extend(new)
+                    if len(new) < len(cells):
+                        text = self._normalize_text(" ".join(cell.text for cell in new))
+                key = _header_key(text)
+                if not key[0] or key == previous:
+                    continue
+                parts.append(text)
+                previous = key
+            headers.append(" — ".join(parts))
+        header = set(header_rows)
+        data = [row for index, row in enumerate(matrix) if index not in header]
+        return headers, data
 
-        if nrows < 2:
-            # Single row - treat as header with no data
-            return [self._normalize_text(v) for v in matrix[0]], []
+    def _kept_columns(self, headers: List[str], data: List[List[str]]) -> List[int]:
+        """Columns holding header text or body text (R7)."""
 
-        # Get first two rows
-        row0 = [self._normalize_text(v) for v in matrix[0]]
-        row1 = [self._normalize_text(v) for v in matrix[1]]
-
-        # Check if we should fuse headers
-        nonempty_row1 = sum(1 for v in row1 if v)
-        many_blanks_in_row0 = sum(1 for v in row0 if v == "") >= max(2, ncols // 2)
-
-        if nonempty_row1 >= max(2, ncols // 2) and many_blanks_in_row0:
-            # Fuse the two header rows
-            fused = []
-            for j in range(ncols):
-                top = row0[j] if j < len(row0) else ""
-                bot = row1[j] if j < len(row1) else ""
-                if top and bot:
-                    fused.append(f"{top} — {bot}")
-                elif top:
-                    fused.append(top)
-                elif bot:
-                    fused.append(bot)
-                else:
-                    fused.append("")
-            return fused, matrix[2:]
-        else:
-            # Use row0 as header, rest as data
-            return row0, matrix[1:]
+        return [
+            column
+            for column in range(len(headers))
+            if self._normalize_text(headers[column])
+            or any(column < len(row) and self._normalize_text(row[column]) for row in data)
+        ]
 
     def _clean_empty_rows_and_cols(self, headers: List[str], data: List[List[str]]) -> tuple[List[str], List[List[str]]]:
-        """Remove completely empty rows and columns"""
-        if not data:
-            return headers, data
+        """Remove empty rows, and columns with neither header text nor body text (R7)."""
 
-        ncols = len(headers)
-
-        # Remove empty rows
         cleaned_data = [row for row in data if any(self._normalize_text(cell) for cell in row)]
-
-        if not cleaned_data:
-            return headers, []
-
-        # Identify empty columns
-        cols_with_content = set()
-        for row in cleaned_data:
-            for j, cell in enumerate(row):
-                if j < ncols and self._normalize_text(cell):
-                    cols_with_content.add(j)
-
-        # Keep columns with content
-        if not cols_with_content:
+        keep = self._kept_columns(headers, cleaned_data)
+        if not keep:
             return [], []
-
-        cols_to_keep = sorted(cols_with_content)
-        new_headers = [headers[j] for j in cols_to_keep if j < len(headers)]
-        new_data = [[row[j] if j < len(row) else "" for j in cols_to_keep] for row in cleaned_data]
-
+        new_headers = [headers[column] for column in keep]
+        new_data = [[row[column] if column < len(row) else "" for column in keep] for row in cleaned_data]
         return new_headers, new_data
+
+    def _inside_zone_cell(self, cell: Cell, zone_nodes: set[int]) -> bool:
+        """Whether a cell's node lies inside another header-zone cell's node (a nested table)."""
+
+        parent = cell.node.parent if cell.node is not None else None
+        while parent is not None and parent is not self.table_element:
+            if id(parent) in zone_nodes:
+                return True
+            parent = parent.parent
+        return False
+
+    def _header_record(self, header_line: str | None, kept: Sequence[int]) -> TableHeaderRecord:
+        """R6a's inputs for the header line this render wrote; each source cell counts once.
+
+        A nested table's cells are read for the outer row that holds the table and again for
+        their own rows. When the table sits in a cell, that cell's text already holds them, so
+        a zone cell inside another zone cell is left out. When lxml keeps the table in the
+        ``<tr>`` itself, directly or in a wrapper such as ``<div>``, no zone cell holds them,
+        so each remaining node is read once, at its first read in document order. Both rules
+        apply to header_source and header_capacity alike.
+        """
+
+        zone_cells: list[Cell] = []
+        for row in self.roles.header_rows:
+            for slot in self.source_grid[row]:
+                if slot is not None and not any(slot.cell is held for held in zone_cells):
+                    zone_cells.append(slot.cell)
+        document_order = {id(cell): index for index, cell in enumerate(
+            cell for row in self.cells for cell in row
+        )}
+        zone_cells.sort(key=lambda cell: document_order[id(cell)])
+        zone_nodes = {id(cell.node) for cell in zone_cells if cell.node is not None}
+        zone_cells = [cell for cell in zone_cells if not self._inside_zone_cell(cell, zone_nodes)]
+        first_reads: dict[int, Cell] = {}
+        for cell in zone_cells:
+            first_reads.setdefault(id(cell.node) if cell.node is not None else id(cell), cell)
+        zone_cells = list(first_reads.values())
+        texts = [
+            cell.node.get_text(" ", strip=True) if cell.node is not None else cell.text
+            for cell in zone_cells
+        ]
+        source = Counter(_normalized_numbers(" ".join(text for text in texts if text)))
+        covering = [
+            [cell for cells in self.column_header_cells(index) for cell in cells] for index in kept
+        ]
+        capacity: Counter[str] = Counter()
+        for cell, text in zip(zone_cells, texts):
+            columns = sum(1 for cells in covering if any(cell is held for held in cells))
+            for token, count in Counter(_normalized_numbers(text)).items():
+                capacity[token] += count * columns
+        return TableHeaderRecord(
+            header_line,
+            tuple(sorted(source.items())),
+            tuple(sorted((token, count) for token, count in capacity.items() if count)),
+        )
 
     def _looks_like_list_table(self) -> bool:
         """Special case - some quirky files format lists as tables"""
@@ -1161,6 +1235,7 @@ class TableParser:
         Returns:
             Markdown table string
         """
+        self.header_record: TableHeaderRecord | None = None
         # Special-case list tables
         if self._looks_like_list_table():
             row = self.cells[0]
@@ -1179,6 +1254,7 @@ class TableParser:
 
         # Process headers
         headers, data = self._process_headers(matrix)
+        kept = self._kept_columns(headers, data)
 
         # Clean empty rows/columns
         headers, data = self._clean_empty_rows_and_cols(headers, data)
@@ -1190,10 +1266,13 @@ class TableParser:
         lines = []
 
         # Header row
+        header_line = None
         if headers:
             escaped_headers = [_escape_table_pipes(str(h)) for h in headers]
             lines.append("| " + " | ".join(escaped_headers) + " |")
             lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+            if any(self._normalize_text(h) for h in headers):
+                header_line = lines[0]
 
         # Data rows
         for row in data:
@@ -1204,6 +1283,7 @@ class TableParser:
             escaped_row = [_escape_table_pipes(str(cell)) for cell in row[:len(headers)]]
             lines.append("| " + " | ".join(escaped_row) + " |")
 
+        self.header_record = self._header_record(header_line, kept)
         return "\n".join(lines)
 
     def md(self) -> str:
