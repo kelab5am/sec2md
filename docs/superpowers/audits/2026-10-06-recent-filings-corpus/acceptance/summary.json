@@ -1,0 +1,232 @@
+{
+ "corpus": "recent",
+ "check1": {
+  "main": {
+   "with_output|tableparser": 608,
+   "with_output|one_row": 8,
+   "no_output|no_output": 2135
+  },
+  "candidate": {
+   "with_output|one_row": 4,
+   "with_output|tableparser": 62,
+   "no_output|no_output": 2135
+  },
+  "genuine_main_tableparser_class1": "not applicable: class 1's tables are Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+  "furniture_unchanged": true,
+  "residual_genuine": 62,
+  "genuine_still_failing": "not applicable: class 1's tables are Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)"
+ },
+ "findings": {
+  "new_check1_values": 12,
+  "new_check1_reported": 26,
+  "new_check2": 16,
+  "removed": {
+   "check1_value_tokens": 770,
+   "check1_reported_tokens": 40,
+   "check2_rows": 7
+  },
+  "f_tables_changed": "not applicable: the false positives are Phase A's (FALSE_POSITIVES); residual_genuine lists every candidate TableParser value failure with output"
+ },
+ "strict": {
+  "new_failures": 0,
+  "misses": 0,
+  "trace_failures": {
+   "main": 18,
+   "candidate": 18
+  },
+  "documents_with_warnings": {
+   "main": 18,
+   "candidate": 18
+  }
+ },
+ "sections": {
+  "own_type": {
+   "same": 140
+  },
+  "all_types": {
+   "same": 560
+  },
+  "pages_differences": 20
+ },
+ "xlsx": {
+  "snapshots": 7075,
+  "documents_differing": 10
+ },
+ "modes": {
+  "candidate_findings_disagree": 0,
+  "main_findings_disagree": 0,
+  "candidate_alignment_disagree": 0,
+  "candidate_coverage_disagree": 0,
+  "candidate_strict_disagree": 0,
+  "candidate_output_differs": 0,
+  "candidate_sections_disagree": 0
+ },
+ "alignment": {
+  "identities_hold": true,
+  "production_match": true,
+  "deterministic_candidate_outputs": true,
+  "findings_lines": {
+   "main": 18734,
+   "candidate": 0
+  },
+  "values_listed": 222099,
+  "evaluated_main": 111255,
+  "evaluated_candidate": 113374,
+  "evaluated_on_main_not_candidate": 0,
+  "evaluated_on_candidate_not_main": 2119,
+  "loss_transitions": {}
+ },
+ "assignment": {
+  "steps": 11576,
+  "ok": 11576,
+  "failures": 0,
+  "contradictions": 0
+ },
+ "retention": {
+  "header_cells": 38572,
+  "literal_separator_cells": 23,
+  "header_cells_represented": 38572,
+  "values": 117342,
+  "word_only_values": 15514,
+  "literal_separator_values": 112,
+  "no_discriminating_values": 3968,
+  "values_equal": 117330,
+  "values_exact_case": 117330,
+  "header_only_columns": 2256,
+  "header_only_rendered": 2256,
+  "value_mismatches": 12,
+  "header_cell_misses": 0,
+  "header_only_misses": 0
+ },
+ "class8": {
+  "tables": "not applicable: class 8's table list is Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+  "fixed": "not applicable: class 8's table list is Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+  "remaining": "not applicable: class 8's table list is Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+  "corpus": {
+   "main": {
+    "tables": 285,
+    "cells": 728
+   },
+   "candidate": {
+    "tables": 41,
+    "cells": 146
+   }
+  },
+  "candidate_split_tables": 41
+ },
+ "limitations": {
+  "years_row": 3,
+  "identifier_caption": 100,
+  "year_run_no_data_after": 2,
+  "year_run_data_row": 0
+ },
+ "moved_rows": {
+  "rows": 4252,
+  "tables": 2177,
+  "fixture_rows": 0,
+  "fixture_tables": 0,
+  "first_header_row": 265,
+  "rule_ok": 4252,
+  "rule_failures": 0,
+  "rule_failure_tables": 0,
+  "reasons": {
+   "label_empty": 3407,
+   "year_run": 672,
+   "sparse_row_fusion": 257,
+   "label_period_text": 196,
+   "label_unit_text": 605,
+   "label_only": 124,
+   "label_year_like": 12
+  },
+  "rows_without_reason_beyond_first": 0,
+  "signals_rows": {
+   "words_in_value_cells": 1334,
+   "link": 1,
+   "value_with_unit": 20
+  },
+  "signals_tables": {
+   "link": 1,
+   "value_with_unit": 20,
+   "words_in_value_cells": 847
+  },
+  "any_signal_rows": 1334,
+  "any_signal_tables": 847,
+  "beyond_snapshot_header_rows": 3987,
+  "beyond_snapshot_header_tables": 2098,
+  "sparse_row_fusion_only_rows": 10,
+  "sparse_row_fusion_only_tables": 10,
+  "label_only_rows": 124,
+  "label_only_tables": 100
+ },
+ "header_departures": {
+  "rows": 502,
+  "tables": 477,
+  "data_rows": 316,
+  "non_data_rows": 186,
+  "non_data_tables": 178,
+  "non_data_label_only_rows": 105,
+  "non_data_with_value_text_rows": 81,
+  "non_data_with_value_text_tables": 75,
+  "non_data_by_document": {
+   "recent:AMZN-10-K-2022-02-04.htm": 2,
+   "recent:AMZN-10-K-2023-02-03.htm": 2,
+   "recent:AMZN-10-K-2024-02-02.htm": 2,
+   "recent:AMZN-10-K-2025-02-07.htm": 2,
+   "recent:AMZN-10-K-2026-02-06.htm": 2,
+   "recent:BAC-10-K-2022-02-22.htm": 5,
+   "recent:BAC-10-K-2023-02-22.htm": 1,
+   "recent:BAC-10-K-2024-02-20.htm": 1,
+   "recent:BAC-10-K-2026-02-25.htm": 1,
+   "recent:CAT-10-K-2022-02-16.htm": 5,
+   "recent:CAT-10-K-2023-02-15.htm": 5,
+   "recent:CAT-10-K-2024-02-16.htm": 5,
+   "recent:CAT-10-K-2026-02-13.htm": 5,
+   "recent:CRM-10-K-2022-03-11.htm": 3,
+   "recent:CRM-10-K-2023-03-08.htm": 3,
+   "recent:CRM-10-K-2024-03-06.htm": 3,
+   "recent:CRM-10-K-2026-03-02.htm": 3,
+   "recent:GOOGL-10-K-2022-02-02.htm": 1,
+   "recent:GOOGL-10-K-2023-02-03.htm": 1,
+   "recent:GOOGL-10-K-2024-01-31.htm": 2,
+   "recent:GOOGL-10-K-2025-02-05.htm": 2,
+   "recent:GOOGL-10-K-2026-02-05.htm": 1,
+   "recent:JPM-10-K-2022-02-22.htm": 6,
+   "recent:JPM-10-K-2023-02-21.htm": 7,
+   "recent:JPM-10-K-2024-02-16.htm": 7,
+   "recent:JPM-10-K-2026-02-13.htm": 7,
+   "recent:KO-10-K-2022-02-22.htm": 1,
+   "recent:KO-10-K-2023-02-21.htm": 1,
+   "recent:KO-10-K-2024-02-20.htm": 1,
+   "recent:KO-10-K-2026-02-20.htm": 2,
+   "recent:MSFT-10-K-2022-07-28.htm": 7,
+   "recent:MSFT-10-K-2023-07-27.htm": 7,
+   "recent:MSFT-10-K-2024-07-30.htm": 7,
+   "recent:MSFT-10-K-2026-07-29.htm": 6,
+   "recent:MU-10-K-2021-10-08.htm": 2,
+   "recent:MU-10-K-2022-10-07.htm": 1,
+   "recent:MU-10-K-2023-10-06.htm": 1,
+   "recent:MU-10-K-2024-10-04.htm": 1,
+   "recent:NFLX-10-K-2022-01-27.htm": 2,
+   "recent:NFLX-10-K-2023-01-26.htm": 2,
+   "recent:NFLX-10-K-2024-01-26.htm": 2,
+   "recent:NFLX-10-K-2026-01-23.htm": 2,
+   "recent:NTRA-10-K-2022-02-25.htm": 1,
+   "recent:NTRA-10-K-2024-02-29.htm": 1,
+   "recent:NVO-20-F-2022-02-02.htm": 2,
+   "recent:NVO-20-F-2023-02-01.htm": 2,
+   "recent:NVO-20-F-2024-01-31.htm": 2,
+   "recent:NVO-20-F-2026-02-04.htm": 2,
+   "recent:TSLA-10-K-2022-02-07.htm": 16,
+   "recent:TSLA-10-K-2023-01-31.htm": 11,
+   "recent:TSM-20-F-2026-04-16.htm": 1,
+   "recent:UNH-10-K-2022-02-15.htm": 4,
+   "recent:UNH-10-K-2023-02-24.htm": 4,
+   "recent:UNH-10-K-2024-02-28.htm": 5,
+   "recent:UNH-10-K-2026-03-02.htm": 6
+  },
+  "zone_cuts": 193,
+  "zone_cuts_by_label_only_row": 0,
+  "zone_cuts_inconsistent": [],
+  "stacked_title_tables": 0
+ }
+}

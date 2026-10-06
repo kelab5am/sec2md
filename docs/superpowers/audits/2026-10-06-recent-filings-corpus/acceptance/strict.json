@@ -1,0 +1,122 @@
+{
+ "new_failures": [],
+ "documents_with_warnings": {
+  "main": {
+   "recent:MSFT-10-K-2023-07-27.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2023-07-27.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2024-07-30.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2024-07-30.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2026-07-29.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2026-07-29.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2022-02-25.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2022-02-25.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2023-03-01.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2023-03-01.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2024-02-29.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2024-02-29.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2026-02-27.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2026-02-27.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2022-02-07.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2022-02-07.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2023-01-31.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2023-01-31.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ]
+  },
+  "candidate": {
+   "recent:MSFT-10-K-2023-07-27.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2023-07-27.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2024-07-30.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2024-07-30.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2026-07-29.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:MSFT-10-K-2026-07-29.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2022-02-25.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2022-02-25.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2023-03-01.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2023-03-01.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2024-02-29.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2024-02-29.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2026-02-27.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:NTRA-10-K-2026-02-27.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2022-02-07.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2022-02-07.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2023-01-31.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "recent:TSLA-10-K-2023-01-31.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ]
+  }
+ },
+ "misses": [],
+ "trace_failures": {
+  "main": 18,
+  "candidate": 18
+ }
+}

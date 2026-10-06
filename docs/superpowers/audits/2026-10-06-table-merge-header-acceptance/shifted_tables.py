@@ -9,7 +9,8 @@ inspect_unit.py), as R6 writes a faithful header: the header-zone cells over the
 column, top to bottom, joined with " — ". The output line is the one body line whose first
 cell is the label (exactly one), the cell is the one cell with that text (exactly one), and
 the header is the header line's cell at the same index. Both runs' normal-mode Markdown
-are checked; main is expected to fail.
+are checked; main is expected to fail. Phase A only: the tables are Phase A's, so
+`--corpus recent` is refused.
 """
 from __future__ import annotations
 
@@ -102,7 +103,10 @@ def main():
     ap.add_argument("--main-dir", required=True)
     ap.add_argument("--candidate-dir", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--corpus", choices=acc_common.CORPORA, default="phase-a")
     args = ap.parse_args()
+    acc_common.phase_a_only("shifted_tables.py", args.corpus,
+                            "the known shifted tables are Phase A tables (BABA, TSM, JPM, MSFT, RDDT)")
     dumps, results = {}, []
     for doc, unit, label, value, expected in ASSERTIONS:
         entry = {"doc": doc, "unit": unit, "label": label, "value": value, "expected": expected}

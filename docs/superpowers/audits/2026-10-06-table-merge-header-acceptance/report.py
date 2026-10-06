@@ -8,6 +8,14 @@ check1.json, findings.json, strict.json, sections.json, xlsx.json, modes.json,
 alignment.json, alignment_losses.json, alignment_values.tsv.gz, assignment.json,
 retention.json, class8.json, limitations.json, moved_rows.json, header_departures.json,
 run_check.json and summary.json.
+
+--corpus (default phase-a) must be the corpus every input was made with (recorded in each
+_run.json and the merges summary; no record means phase-a). With --corpus recent,
+run_check.json and summary.json record `"corpus": "recent"`, and the figures that come from
+Phase A's evidence are written as not applicable: class 8's table list (and with it the
+fixed and remaining counts; every candidate split table is listed instead), check 1's
+class-1 tables, and Phase A's false-positive tables (so `residual_genuine` lists every
+candidate TableParser value failure with output).
 """
 from __future__ import annotations
 
@@ -38,6 +46,13 @@ FALSE_POSITIVES = {
 }
 FIXTURE_TYPES = {"fixture:aapl-2023-10k": "10-K", "fixture:nvda-2026-10k": "10-K", "fixture:nvda-2002-10k": "10-K",
                  "fixture:nvda-2026-q2-10q": "10-Q", "fixture:nvda-2026-08-26-8k": "8-K"}
+# Figures that come from Phase A's evidence, under any other corpus.
+NOT_APPLICABLE_CLASS8 = ("not applicable: class 8's table list is Phase A evidence "
+                         "(../2026-10-04-table-merge-header-evidence/events.json)")
+NOT_APPLICABLE_CLASS1 = ("not applicable: class 1's tables are Phase A evidence "
+                         "(../2026-10-04-table-merge-header-evidence/events.json)")
+NOT_APPLICABLE_FALSE_POSITIVES = ("not applicable: the false positives are Phase A's (FALSE_POSITIVES); "
+                                  "residual_genuine lists every candidate TableParser value failure with output")
 
 
 def own_filing_type(doc_id):
@@ -45,7 +60,7 @@ def own_filing_type(doc_id):
         return FIXTURE_TYPES[doc_id]
     if doc_id.startswith("rcq:"):
         return doc_id.split("__")[1]
-    if doc_id.startswith("edgar:"):
+    if doc_id.startswith(("edgar:", acc_common.RECENT_PREFIX)):
         match = re.search(r"-(10-K|10-Q|20-F|8-K)-", doc_id)
         return match.group(1) if match else None
     return None
@@ -91,7 +106,10 @@ def main():
     ap.add_argument("--analysis-dir", required=True)
     ap.add_argument("--merges", required=True)
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--corpus", choices=acc_common.CORPORA, default="phase-a",
+                    help="the corpus every input was made with (phase-a, the default, or recent)")
     args = ap.parse_args()
+    phase_a = args.corpus == "phase-a"
     runs = {}
     for name, directory in (("main", args.main_dir), ("candidate", args.candidate_dir),
                             ("analysis", args.analysis_dir)):
@@ -102,6 +120,13 @@ def main():
     events = json.load(open(acc_common.EVENTS, encoding="utf-8"))
     ev = {d["id"]: {t["table"]: t for t in d["tables"]} for d in events["documents"]}
     merges = acc_common.read_json_gz(args.merges)
+    recorded = {name: run.get("corpus", "phase-a") for name, run in runs.items()}
+    recorded["merges"] = merges["summary"].get("corpus", "phase-a")
+    if set(recorded.values()) != {args.corpus}:
+        sys.exit(f"report.py: --corpus {args.corpus}, but the inputs were made with the corpora {recorded}")
+    false_positives = FALSE_POSITIVES
+    if not phase_a:  # Phase A's evidence covers none of this corpus's tables
+        ev, false_positives = {}, {}
 
     check1 = {"main": Counter(), "candidate": Counter(), "residual_genuine": [], "fp_tables": [],
               "furniture_changes": [], "one_row": {"main": [], "candidate": []}, "genuine_main": []}
@@ -153,7 +178,7 @@ def main():
                 for table, f in cv.items():
                     key = "with_output" if f["produced_output"] else "no_output"
                     check1["candidate"][f"{key}|{f['path']}"] += 1
-                    if f["produced_output"] and f["path"] == "tableparser" and (doc_id, table) not in FALSE_POSITIVES:
+                    if f["produced_output"] and f["path"] == "tableparser" and (doc_id, table) not in false_positives:
                         check1["residual_genuine"].append({"doc": doc_id, "table": table, "tokens": f["tokens"],
                                                            "main_tokens": mv.get(table, {}).get("tokens")})
                     if f["produced_output"] and f["path"] == "one_row":
@@ -165,7 +190,7 @@ def main():
                 furniture_c = {t: f["tokens"] for t, f in cv.items() if not f["produced_output"]}
                 if furniture_m != furniture_c:
                     check1["furniture_changes"].append({"doc": doc_id, "main": furniture_m, "candidate": furniture_c})
-                for (fp_doc, table), cause in FALSE_POSITIVES.items():
+                for (fp_doc, table), cause in false_positives.items():
                     if fp_doc != doc_id:
                         continue
                     fm = next((strip_snapshot([f])[0] for f in m["findings"] if f["table"] == table), None)
@@ -374,12 +399,16 @@ def main():
         "one_row": check1["one_row"],
         "furniture_unchanged": not check1["furniture_changes"], "furniture_changes": check1["furniture_changes"],
     }
+    if not phase_a:
+        check1_summary.update(genuine_main_tableparser_class1=NOT_APPLICABLE_CLASS1,
+                              genuine_main_tables=NOT_APPLICABLE_CLASS1, genuine_still_failing=NOT_APPLICABLE_CLASS1,
+                              false_positives=NOT_APPLICABLE_FALSE_POSITIVES)
     write("check1.json", check1_summary)
     write("findings.json", {"new_check1_values": findings["new_check1_values"],
                             "new_check1_reported": findings["new_check1_reported"],
                             "new_check2": findings["new_check2"], "removed": dict(findings["removed"]),
                             "tables_with_findings": findings["tables_with_findings"],
-                            "f_tables": findings["f_tables"]})
+                            "f_tables": findings["f_tables"] if phase_a else NOT_APPLICABLE_FALSE_POSITIVES})
     write("strict.json", strict)
     write("sections.json", {"own_type": dict(sections["own_type"]), "all_types": dict(sections["all_types"]),
                             "differences": sections["differences"],
@@ -403,6 +432,10 @@ def main():
                               "failures": assignment["failures"]})
     write("retention.json", {**dict(retention), **retention_lists})
     class8["corpus"] = {k: dict(v) for k, v in class8["corpus"].items()}
+    if not phase_a:  # no class 8 table list: every candidate split table instead
+        class8 = {"tables": NOT_APPLICABLE_CLASS8, "fixed": NOT_APPLICABLE_CLASS8, "remaining": NOT_APPLICABLE_CLASS8,
+                  "corpus": class8["corpus"],
+                  "candidate_split_tables": class8.get("candidate_split_tables_outside_class8", [])}
     write("class8.json", class8)
     write("limitations.json", limitations)
     def tables(items):
@@ -454,19 +487,21 @@ def main():
     }
     write("moved_rows.json", moved_summary)
     write("header_departures.json", departure_summary)
-    write("run_check.json", {"documents": doc_ids, "runs": {k: {kk: vv for kk, vv in v.items()
-                                                                 if kk not in ("documents", "document_seconds")}
-                                                            for k, v in runs.items()}})
+    write("run_check.json", {**acc_common.corpus_record(args.corpus), "documents": doc_ids,
+                             "runs": {k: {kk: vv for kk, vv in v.items() if kk not in ("documents", "document_seconds")}
+                                      for k, v in runs.items()}})
     summary = {
+        **acc_common.corpus_record(args.corpus),
         "check1": {k: check1_summary[k] for k in ("main", "candidate", "genuine_main_tableparser_class1",
                                                   "furniture_unchanged")} | {
             "residual_genuine": len(check1["residual_genuine"]),
-            "genuine_still_failing": len(check1.get("genuine_still_failing", []))},
+            "genuine_still_failing": (len(check1.get("genuine_still_failing", [])) if phase_a
+                                      else NOT_APPLICABLE_CLASS1)},
         "findings": {"new_check1_values": len(findings["new_check1_values"]),
                      "new_check1_reported": len(findings["new_check1_reported"]),
                      "new_check2": len(findings["new_check2"]), "removed": dict(findings["removed"]),
-                     "f_tables_changed": [(f["doc"], f["table"], f["cause"]) for f in findings["f_tables"]
-                                          if not f["same"]]},
+                     "f_tables_changed": ([(f["doc"], f["table"], f["cause"]) for f in findings["f_tables"]
+                                           if not f["same"]] if phase_a else NOT_APPLICABLE_FALSE_POSITIVES)},
         "strict": {"new_failures": len(strict["new_failures"]), "misses": len(strict["misses"]),
                    "trace_failures": strict["trace_failures"],
                    "documents_with_warnings": {k: len(v) for k, v in strict["documents_with_warnings"].items()}},
@@ -482,9 +517,11 @@ def main():
         "assignment": {"steps": assignment["steps"], "ok": assignment["ok"],
                        "failures": len(assignment["failures"]), "contradictions": assignment["contradictions"]},
         "retention": dict(retention) | {k: len(v) for k, v in retention_lists.items()},
-        "class8": {"tables": len(class8["tables"]), "fixed": class8["fixed"], "remaining": class8["remaining"],
-                   "corpus": class8["corpus"],
-                   "candidate_split_tables_outside_class8": len(class8["candidate_split_tables_outside_class8"])},
+        "class8": ({"tables": len(class8["tables"]), "fixed": class8["fixed"], "remaining": class8["remaining"],
+                    "corpus": class8["corpus"],
+                    "candidate_split_tables_outside_class8": len(class8["candidate_split_tables_outside_class8"])}
+                   if phase_a else {k: class8[k] for k in ("tables", "fixed", "remaining", "corpus")}
+                   | {"candidate_split_tables": len(class8["candidate_split_tables"])}),
         "limitations": {k: len(v) for k, v in limitations.items()},
         "moved_rows": {k: moved_summary[k] for k in ("rows", "tables", "fixture_rows", "fixture_tables",
                                                      "first_header_row", "rule_ok", "rule_failures",

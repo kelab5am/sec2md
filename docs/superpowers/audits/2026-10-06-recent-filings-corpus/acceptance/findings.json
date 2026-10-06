@@ -1,0 +1,733 @@
+{
+ "new_check1_values": [
+  {
+   "doc": "recent:BABA-20-F-2026-05-20.htm",
+   "table": 39,
+   "tokens": [
+    [
+     "116.70",
+     "body",
+     false
+    ],
+    [
+     "152.69",
+     "body",
+     false
+    ],
+    [
+     "68.00",
+     "body",
+     false
+    ],
+    [
+     "78.37",
+     "body",
+     false
+    ],
+    [
+     "79.96",
+     "body",
+     false
+    ],
+    [
+     "84.60",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:JPM-10-K-2024-02-16.htm",
+   "table": 367,
+   "tokens": [
+    [
+     "3",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 193,
+   "tokens": [
+    [
+     "-2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 194,
+   "tokens": [
+    [
+     "-5",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 272,
+   "tokens": [
+    [
+     "328.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 314,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 315,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 278,
+   "tokens": [
+    [
+     "132734.5",
+     "body",
+     false
+    ],
+    [
+     "1448.4",
+     "body",
+     false
+    ],
+    [
+     "2009.1",
+     "body",
+     false
+    ],
+    [
+     "752.5",
+     "body",
+     false
+    ],
+    [
+     "79610.6",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 288,
+   "tokens": [
+    [
+     "328.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 328,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 329,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 330,
+   "tokens": [
+    [
+     "750.0",
+     "body",
+     false
+    ]
+   ]
+  }
+ ],
+ "new_check1_reported": [
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 217,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 219,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 220,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 222,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 223,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 225,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 232,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 234,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 235,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 240,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 241,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 243,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 239,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 240,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 242,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 243,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 248,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 249,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "table": 250,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 53,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 55,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 58,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 60,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 68,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 70,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 72,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  }
+ ],
+ "new_check2": [
+  {
+   "doc": "recent:BAC-10-K-2022-02-22.htm",
+   "table": 79,
+   "rows": [
+    "source row 2: appears before an earlier source row"
+   ],
+   "main_rows": [
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row"
+   ]
+  },
+  {
+   "doc": "recent:BAC-10-K-2022-02-22.htm",
+   "table": 284,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2022-02-22.htm",
+   "table": 326,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2022-02-22.htm",
+   "table": 328,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row",
+    "source row 13: appears before an earlier source row",
+    "source row 14: appears before an earlier source row",
+    "source row 15: appears before an earlier source row",
+    "source row 16: appears before an earlier source row",
+    "source row 17: appears before an earlier source row",
+    "source row 18: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2023-02-22.htm",
+   "table": 252,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2023-02-22.htm",
+   "table": 284,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2023-02-22.htm",
+   "table": 327,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2023-02-22.htm",
+   "table": 329,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row",
+    "source row 13: appears before an earlier source row",
+    "source row 14: appears before an earlier source row",
+    "source row 15: appears before an earlier source row",
+    "source row 16: appears before an earlier source row",
+    "source row 17: appears before an earlier source row",
+    "source row 18: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2024-02-20.htm",
+   "table": 256,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2024-02-20.htm",
+   "table": 289,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2024-02-20.htm",
+   "table": 332,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2024-02-20.htm",
+   "table": 334,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row",
+    "source row 13: appears before an earlier source row",
+    "source row 14: appears before an earlier source row",
+    "source row 15: appears before an earlier source row",
+    "source row 16: appears before an earlier source row",
+    "source row 17: appears before an earlier source row",
+    "source row 18: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2026-02-25.htm",
+   "table": 256,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2026-02-25.htm",
+   "table": 290,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2026-02-25.htm",
+   "table": 335,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "recent:BAC-10-K-2026-02-25.htm",
+   "table": 337,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row",
+    "source row 13: appears before an earlier source row",
+    "source row 14: appears before an earlier source row",
+    "source row 15: appears before an earlier source row",
+    "source row 16: appears before an earlier source row",
+    "source row 17: appears before an earlier source row",
+    "source row 18: appears before an earlier source row"
+   ],
+   "main_rows": []
+  }
+ ],
+ "removed": {
+  "check1_value_tokens": 770,
+  "check1_reported_tokens": 40,
+  "check2_rows": 7
+ },
+ "tables_with_findings": {
+  "main": 2851,
+  "candidate": 2316
+ },
+ "f_tables": "not applicable: the false positives are Phase A's (FALSE_POSITIVES); residual_genuine lists every candidate TableParser value failure with output"
+}

@@ -1,0 +1,4205 @@
+{
+ "summary": {
+  "documents": 70,
+  "modes": [
+   "normal",
+   "capture"
+  ],
+  "cases": 140,
+  "main": {
+   "pass": 122,
+   "fail": 18
+  },
+  "branch": {
+   "pass": 122,
+   "fail": 18
+  },
+  "transitions": {
+   "pass->pass": 122,
+   "fail->fail-same": 18
+  },
+  "new_failures": 0,
+  "new_failures_by_class": {
+   "wrapped_table": 0,
+   "zero_width_number": 0,
+   "header_row_table": 0,
+   "other": 0
+  },
+  "new_failure_items_by_class": {
+   "wrapped_table": 0,
+   "zero_width_number": 0,
+   "header_row_table": 0,
+   "other": 0
+  },
+  "pre_existing_failures": 18,
+  "fixed": 0
+ },
+ "sides": {
+  "main": {
+   "side": "main",
+   "src": "C:\\Users\\einstein\\AppData\\Local\\Temp\\claude\\C--Users-einstein-kelab5am-sec2md\\95c5be76-e581-42c1-84d7-0b7535f959cc\\scratchpad\\corpus-task4\\main\\src",
+   "sec2md_file": "C:\\Users\\einstein\\AppData\\Local\\Temp\\claude\\C--Users-einstein-kelab5am-sec2md\\95c5be76-e581-42c1-84d7-0b7535f959cc\\scratchpad\\corpus-task4\\main\\src\\sec2md\\__init__.py",
+   "images": true,
+   "worker_sec2md_files": [
+    "C:\\Users\\einstein\\AppData\\Local\\Temp\\claude\\C--Users-einstein-kelab5am-sec2md\\95c5be76-e581-42c1-84d7-0b7535f959cc\\scratchpad\\corpus-task4\\main\\src\\sec2md\\__init__.py"
+   ],
+   "manifest": "C:\\Users\\einstein\\kelab5am\\sec2md\\docs\\superpowers\\audits\\2026-10-06-recent-filings-corpus\\manifest.json",
+   "recent_cache": "C:\\Users\\einstein\\kelab5am\\sec2md\\outputs\\recent-filings-corpus",
+   "skipped": [],
+   "workers": 6,
+   "wall_seconds": 205.7,
+   "git_toplevel": null,
+   "git_head": null,
+   "git_status_src": null
+  },
+  "branch": {
+   "side": "branch",
+   "src": "C:\\Users\\einstein\\kelab5am\\sec2md\\.worktrees\\tmh-proto\\src",
+   "sec2md_file": "C:\\Users\\einstein\\kelab5am\\sec2md\\.worktrees\\tmh-proto\\src\\sec2md\\__init__.py",
+   "images": true,
+   "worker_sec2md_files": [
+    "C:\\Users\\einstein\\kelab5am\\sec2md\\.worktrees\\tmh-proto\\src\\sec2md\\__init__.py"
+   ],
+   "manifest": "C:\\Users\\einstein\\kelab5am\\sec2md\\docs\\superpowers\\audits\\2026-10-06-recent-filings-corpus\\manifest.json",
+   "recent_cache": "C:\\Users\\einstein\\kelab5am\\sec2md\\outputs\\recent-filings-corpus",
+   "skipped": [],
+   "workers": 6,
+   "wall_seconds": 216.9,
+   "git_toplevel": "C:/Users/einstein/kelab5am/sec2md/.worktrees/tmh-proto",
+   "git_head": "1252c4587cdc62f95c72292f21c56adaa1cb9e51",
+   "git_status_src": ""
+  }
+ },
+ "new_failures": [],
+ "pre_existing_failures": [
+  {
+   "doc": "recent:MSFT-10-K-2023-07-27.htm",
+   "mode": "normal",
+   "items": {
+    "425": 1
+   }
+  },
+  {
+   "doc": "recent:MSFT-10-K-2023-07-27.htm",
+   "mode": "capture",
+   "items": {
+    "425": 1
+   }
+  },
+  {
+   "doc": "recent:MSFT-10-K-2024-07-30.htm",
+   "mode": "normal",
+   "items": {
+    "425": 1
+   }
+  },
+  {
+   "doc": "recent:MSFT-10-K-2024-07-30.htm",
+   "mode": "capture",
+   "items": {
+    "425": 1
+   }
+  },
+  {
+   "doc": "recent:MSFT-10-K-2026-07-29.htm",
+   "mode": "normal",
+   "items": {
+    "425": 1
+   }
+  },
+  {
+   "doc": "recent:MSFT-10-K-2026-07-29.htm",
+   "mode": "capture",
+   "items": {
+    "425": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2022-02-25.htm",
+   "mode": "normal",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2022-02-25.htm",
+   "mode": "capture",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2023-03-01.htm",
+   "mode": "normal",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2023-03-01.htm",
+   "mode": "capture",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2024-02-29.htm",
+   "mode": "normal",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2024-02-29.htm",
+   "mode": "capture",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2026-02-27.htm",
+   "mode": "normal",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:NTRA-10-K-2026-02-27.htm",
+   "mode": "capture",
+   "items": {
+    "650": 1
+   }
+  },
+  {
+   "doc": "recent:TSLA-10-K-2022-02-07.htm",
+   "mode": "normal",
+   "items": {
+    "512": 1
+   }
+  },
+  {
+   "doc": "recent:TSLA-10-K-2022-02-07.htm",
+   "mode": "capture",
+   "items": {
+    "512": 1
+   }
+  },
+  {
+   "doc": "recent:TSLA-10-K-2023-01-31.htm",
+   "mode": "normal",
+   "items": {
+    "512": 1
+   }
+  },
+  {
+   "doc": "recent:TSLA-10-K-2023-01-31.htm",
+   "mode": "capture",
+   "items": {
+    "512": 1
+   }
+  }
+ ],
+ "fixed": [],
+ "documents": {
+  "recent:AMZN-10-K-2022-02-04.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 74,
+     "elements": 424,
+     "tables_checked": 80,
+     "output_ratio": 0.997255,
+     "seconds": 2.351
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 74,
+     "elements": 424,
+     "tables_checked": 80,
+     "output_ratio": 1.004573,
+     "seconds": 2.531
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 74,
+     "elements": 424,
+     "tables_checked": 80,
+     "output_ratio": 0.997255,
+     "seconds": 3.317
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 74,
+     "elements": 424,
+     "tables_checked": 80,
+     "output_ratio": 1.004573,
+     "seconds": 4.326
+    }
+   }
+  },
+  "recent:AMZN-10-K-2023-02-03.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 75,
+     "elements": 427,
+     "tables_checked": 80,
+     "output_ratio": 0.997409,
+     "seconds": 2.43
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 75,
+     "elements": 427,
+     "tables_checked": 80,
+     "output_ratio": 1.00431,
+     "seconds": 2.607
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 75,
+     "elements": 427,
+     "tables_checked": 80,
+     "output_ratio": 0.997409,
+     "seconds": 3.711
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 75,
+     "elements": 427,
+     "tables_checked": 80,
+     "output_ratio": 1.00431,
+     "seconds": 4.376
+    }
+   }
+  },
+  "recent:AMZN-10-K-2024-02-02.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 78,
+     "elements": 451,
+     "tables_checked": 80,
+     "output_ratio": 0.997475,
+     "seconds": 2.751
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 78,
+     "elements": 451,
+     "tables_checked": 80,
+     "output_ratio": 1.004019,
+     "seconds": 2.884
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 78,
+     "elements": 451,
+     "tables_checked": 80,
+     "output_ratio": 0.997475,
+     "seconds": 4.326
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 78,
+     "elements": 451,
+     "tables_checked": 80,
+     "output_ratio": 1.004019,
+     "seconds": 4.144
+    }
+   }
+  },
+  "recent:AMZN-10-K-2025-02-07.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 77,
+     "elements": 447,
+     "tables_checked": 78,
+     "output_ratio": 0.997481,
+     "seconds": 2.821
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 77,
+     "elements": 447,
+     "tables_checked": 78,
+     "output_ratio": 1.004093,
+     "seconds": 2.768
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 77,
+     "elements": 447,
+     "tables_checked": 78,
+     "output_ratio": 0.997481,
+     "seconds": 4.226
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 77,
+     "elements": 447,
+     "tables_checked": 78,
+     "output_ratio": 1.004093,
+     "seconds": 4.088
+    }
+   }
+  },
+  "recent:AMZN-10-K-2026-02-06.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 79,
+     "elements": 457,
+     "tables_checked": 79,
+     "output_ratio": 0.99745,
+     "seconds": 2.906
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 79,
+     "elements": 457,
+     "tables_checked": 79,
+     "output_ratio": 1.00436,
+     "seconds": 3.158
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 79,
+     "elements": 457,
+     "tables_checked": 79,
+     "output_ratio": 0.99745,
+     "seconds": 4.378
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 79,
+     "elements": 457,
+     "tables_checked": 79,
+     "output_ratio": 1.00436,
+     "seconds": 4.206
+    }
+   }
+  },
+  "recent:BABA-20-F-2022-07-26.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 321,
+     "elements": 2181,
+     "tables_checked": 341,
+     "output_ratio": 1.011193,
+     "seconds": 10.098
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 321,
+     "elements": 2181,
+     "tables_checked": 341,
+     "output_ratio": 1.012867,
+     "seconds": 10.008
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 321,
+     "elements": 2181,
+     "tables_checked": 341,
+     "output_ratio": 1.011193,
+     "seconds": 13.041
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 321,
+     "elements": 2181,
+     "tables_checked": 341,
+     "output_ratio": 1.012867,
+     "seconds": 12.822
+    }
+   }
+  },
+  "recent:BABA-20-F-2023-07-21.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 292,
+     "elements": 1775,
+     "tables_checked": 110,
+     "output_ratio": 0.998484,
+     "seconds": 11.852
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 292,
+     "elements": 1775,
+     "tables_checked": 110,
+     "output_ratio": 1.012378,
+     "seconds": 12.379
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 292,
+     "elements": 1775,
+     "tables_checked": 110,
+     "output_ratio": 0.998484,
+     "seconds": 17.734
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 292,
+     "elements": 1775,
+     "tables_checked": 110,
+     "output_ratio": 1.012378,
+     "seconds": 17.736
+    }
+   }
+  },
+  "recent:BABA-20-F-2024-05-23.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 285,
+     "elements": 1747,
+     "tables_checked": 107,
+     "output_ratio": 0.9984,
+     "seconds": 12.289
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 285,
+     "elements": 1747,
+     "tables_checked": 107,
+     "output_ratio": 1.008808,
+     "seconds": 12.558
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 285,
+     "elements": 1747,
+     "tables_checked": 107,
+     "output_ratio": 0.9984,
+     "seconds": 17.577
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 285,
+     "elements": 1747,
+     "tables_checked": 107,
+     "output_ratio": 1.008808,
+     "seconds": 17.557
+    }
+   }
+  },
+  "recent:BABA-20-F-2026-05-20.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 299,
+     "elements": 1739,
+     "tables_checked": 114,
+     "output_ratio": 0.998547,
+     "seconds": 12.063
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 299,
+     "elements": 1739,
+     "tables_checked": 114,
+     "output_ratio": 1.008706,
+     "seconds": 15.011
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 299,
+     "elements": 1739,
+     "tables_checked": 114,
+     "output_ratio": 0.998547,
+     "seconds": 19.413
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 299,
+     "elements": 1739,
+     "tables_checked": 114,
+     "output_ratio": 1.008706,
+     "seconds": 19.935
+    }
+   }
+  },
+  "recent:BAC-10-K-2022-02-22.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 181,
+     "elements": 1162,
+     "tables_checked": 350,
+     "output_ratio": 0.994352,
+     "seconds": 17.662
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 181,
+     "elements": 1162,
+     "tables_checked": 350,
+     "output_ratio": 1.032989,
+     "seconds": 17.955
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 181,
+     "elements": 1162,
+     "tables_checked": 350,
+     "output_ratio": 0.994352,
+     "seconds": 30.244
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 181,
+     "elements": 1162,
+     "tables_checked": 350,
+     "output_ratio": 1.032989,
+     "seconds": 30.386
+    }
+   }
+  },
+  "recent:BAC-10-K-2023-02-22.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 178,
+     "elements": 1138,
+     "tables_checked": 350,
+     "output_ratio": 0.994433,
+     "seconds": 17.331
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 178,
+     "elements": 1138,
+     "tables_checked": 350,
+     "output_ratio": 1.034678,
+     "seconds": 17.603
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 178,
+     "elements": 1138,
+     "tables_checked": 350,
+     "output_ratio": 0.994433,
+     "seconds": 30.639
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 178,
+     "elements": 1138,
+     "tables_checked": 350,
+     "output_ratio": 1.034678,
+     "seconds": 30.435
+    }
+   }
+  },
+  "recent:BAC-10-K-2024-02-20.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 182,
+     "elements": 1141,
+     "tables_checked": 354,
+     "output_ratio": 0.99464,
+     "seconds": 19.221
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 182,
+     "elements": 1141,
+     "tables_checked": 354,
+     "output_ratio": 1.034263,
+     "seconds": 21.11
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 182,
+     "elements": 1141,
+     "tables_checked": 354,
+     "output_ratio": 0.99464,
+     "seconds": 31.954
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 182,
+     "elements": 1141,
+     "tables_checked": 354,
+     "output_ratio": 1.034263,
+     "seconds": 32.95
+    }
+   }
+  },
+  "recent:BAC-10-K-2026-02-25.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 184,
+     "elements": 1126,
+     "tables_checked": 355,
+     "output_ratio": 0.994394,
+     "seconds": 18.933
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 184,
+     "elements": 1126,
+     "tables_checked": 355,
+     "output_ratio": 1.034838,
+     "seconds": 20.809
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 184,
+     "elements": 1126,
+     "tables_checked": 355,
+     "output_ratio": 0.994394,
+     "seconds": 31.937
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 184,
+     "elements": 1126,
+     "tables_checked": 355,
+     "output_ratio": 1.034838,
+     "seconds": 31.924
+    }
+   }
+  },
+  "recent:CAT-10-K-2022-02-16.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 144,
+     "elements": 646,
+     "tables_checked": 124,
+     "output_ratio": 0.997657,
+     "seconds": 9.895
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 144,
+     "elements": 646,
+     "tables_checked": 124,
+     "output_ratio": 1.02522,
+     "seconds": 8.566
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 144,
+     "elements": 646,
+     "tables_checked": 124,
+     "output_ratio": 0.997657,
+     "seconds": 14.625
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 144,
+     "elements": 646,
+     "tables_checked": 124,
+     "output_ratio": 1.02522,
+     "seconds": 14.972
+    }
+   }
+  },
+  "recent:CAT-10-K-2023-02-15.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 135,
+     "elements": 615,
+     "tables_checked": 116,
+     "output_ratio": 0.997529,
+     "seconds": 7.897
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 135,
+     "elements": 615,
+     "tables_checked": 116,
+     "output_ratio": 1.026061,
+     "seconds": 8.127
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 135,
+     "elements": 615,
+     "tables_checked": 116,
+     "output_ratio": 0.997529,
+     "seconds": 13.801
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 135,
+     "elements": 615,
+     "tables_checked": 116,
+     "output_ratio": 1.026061,
+     "seconds": 13.695
+    }
+   }
+  },
+  "recent:CAT-10-K-2024-02-16.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 132,
+     "elements": 612,
+     "tables_checked": 113,
+     "output_ratio": 0.997869,
+     "seconds": 8.071
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 132,
+     "elements": 612,
+     "tables_checked": 113,
+     "output_ratio": 1.026499,
+     "seconds": 9.733
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 132,
+     "elements": 612,
+     "tables_checked": 113,
+     "output_ratio": 0.997869,
+     "seconds": 14.28
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 132,
+     "elements": 612,
+     "tables_checked": 113,
+     "output_ratio": 1.026499,
+     "seconds": 14.529
+    }
+   }
+  },
+  "recent:CAT-10-K-2026-02-13.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 136,
+     "elements": 623,
+     "tables_checked": 118,
+     "output_ratio": 0.997579,
+     "seconds": 7.018
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 136,
+     "elements": 623,
+     "tables_checked": 118,
+     "output_ratio": 1.02391,
+     "seconds": 8.835
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 136,
+     "elements": 623,
+     "tables_checked": 118,
+     "output_ratio": 0.997579,
+     "seconds": 15.129
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 136,
+     "elements": 623,
+     "tables_checked": 118,
+     "output_ratio": 1.02391,
+     "seconds": 16.044
+    }
+   }
+  },
+  "recent:CRDO-10-K-2022-06-08.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 121,
+     "elements": 573,
+     "tables_checked": 55,
+     "output_ratio": 0.999193,
+     "seconds": 2.307
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 121,
+     "elements": 573,
+     "tables_checked": 55,
+     "output_ratio": 1.003505,
+     "seconds": 2.55
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 121,
+     "elements": 573,
+     "tables_checked": 55,
+     "output_ratio": 0.999193,
+     "seconds": 3.499
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 121,
+     "elements": 573,
+     "tables_checked": 55,
+     "output_ratio": 1.003505,
+     "seconds": 3.4
+    }
+   }
+  },
+  "recent:CRDO-10-K-2023-06-23.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 120,
+     "elements": 560,
+     "tables_checked": 57,
+     "output_ratio": 0.998849,
+     "seconds": 2.227
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 120,
+     "elements": 560,
+     "tables_checked": 57,
+     "output_ratio": 1.00251,
+     "seconds": 2.3
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 120,
+     "elements": 560,
+     "tables_checked": 57,
+     "output_ratio": 0.998849,
+     "seconds": 3.549
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 120,
+     "elements": 560,
+     "tables_checked": 57,
+     "output_ratio": 1.00251,
+     "seconds": 3.355
+    }
+   }
+  },
+  "recent:CRDO-10-K-2024-06-24.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 111,
+     "elements": 521,
+     "tables_checked": 58,
+     "output_ratio": 0.998956,
+     "seconds": 2.255
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 111,
+     "elements": 521,
+     "tables_checked": 58,
+     "output_ratio": 1.002977,
+     "seconds": 2.179
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 111,
+     "elements": 521,
+     "tables_checked": 58,
+     "output_ratio": 0.998956,
+     "seconds": 3.257
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 111,
+     "elements": 521,
+     "tables_checked": 58,
+     "output_ratio": 1.002977,
+     "seconds": 3.332
+    }
+   }
+  },
+  "recent:CRDO-10-K-2026-06-15.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 112,
+     "elements": 519,
+     "tables_checked": 63,
+     "output_ratio": 0.998694,
+     "seconds": 2.248
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 112,
+     "elements": 519,
+     "tables_checked": 63,
+     "output_ratio": 1.002664,
+     "seconds": 2.165
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 112,
+     "elements": 519,
+     "tables_checked": 63,
+     "output_ratio": 0.998694,
+     "seconds": 3.422
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 112,
+     "elements": 519,
+     "tables_checked": 63,
+     "output_ratio": 1.002664,
+     "seconds": 3.46
+    }
+   }
+  },
+  "recent:CRM-10-K-2022-03-11.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 105,
+     "elements": 628,
+     "tables_checked": 83,
+     "output_ratio": 0.997777,
+     "seconds": 3.041
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 105,
+     "elements": 628,
+     "tables_checked": 83,
+     "output_ratio": 1.006536,
+     "seconds": 3.264
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 105,
+     "elements": 628,
+     "tables_checked": 83,
+     "output_ratio": 0.997777,
+     "seconds": 4.511
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 105,
+     "elements": 628,
+     "tables_checked": 83,
+     "output_ratio": 1.006536,
+     "seconds": 5.027
+    }
+   }
+  },
+  "recent:CRM-10-K-2023-03-08.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 102,
+     "elements": 615,
+     "tables_checked": 79,
+     "output_ratio": 0.997512,
+     "seconds": 3.302
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 102,
+     "elements": 615,
+     "tables_checked": 79,
+     "output_ratio": 1.006938,
+     "seconds": 3.326
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 102,
+     "elements": 615,
+     "tables_checked": 79,
+     "output_ratio": 0.997512,
+     "seconds": 4.651
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 102,
+     "elements": 615,
+     "tables_checked": 79,
+     "output_ratio": 1.006938,
+     "seconds": 4.994
+    }
+   }
+  },
+  "recent:CRM-10-K-2024-03-06.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 100,
+     "elements": 590,
+     "tables_checked": 75,
+     "output_ratio": 0.997562,
+     "seconds": 2.994
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 100,
+     "elements": 590,
+     "tables_checked": 75,
+     "output_ratio": 1.007186,
+     "seconds": 4.061
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 100,
+     "elements": 590,
+     "tables_checked": 75,
+     "output_ratio": 0.997562,
+     "seconds": 4.462
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 100,
+     "elements": 590,
+     "tables_checked": 75,
+     "output_ratio": 1.007186,
+     "seconds": 5.61
+    }
+   }
+  },
+  "recent:CRM-10-K-2026-03-02.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 101,
+     "elements": 594,
+     "tables_checked": 89,
+     "output_ratio": 0.997681,
+     "seconds": 3.227
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 101,
+     "elements": 594,
+     "tables_checked": 89,
+     "output_ratio": 1.007348,
+     "seconds": 3.452
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 101,
+     "elements": 594,
+     "tables_checked": 89,
+     "output_ratio": 0.997681,
+     "seconds": 4.947
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 101,
+     "elements": 594,
+     "tables_checked": 89,
+     "output_ratio": 1.007348,
+     "seconds": 5.628
+    }
+   }
+  },
+  "recent:GOOGL-10-K-2022-02-02.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 95,
+     "elements": 619,
+     "tables_checked": 81,
+     "output_ratio": 0.998996,
+     "seconds": 3.285
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 95,
+     "elements": 619,
+     "tables_checked": 81,
+     "output_ratio": 1.012986,
+     "seconds": 3.542
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 95,
+     "elements": 619,
+     "tables_checked": 81,
+     "output_ratio": 0.998996,
+     "seconds": 4.673
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 95,
+     "elements": 619,
+     "tables_checked": 81,
+     "output_ratio": 1.012986,
+     "seconds": 5.085
+    }
+   }
+  },
+  "recent:GOOGL-10-K-2023-02-03.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 92,
+     "elements": 607,
+     "tables_checked": 79,
+     "output_ratio": 0.999094,
+     "seconds": 3.167
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 92,
+     "elements": 607,
+     "tables_checked": 79,
+     "output_ratio": 1.012452,
+     "seconds": 3.484
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 92,
+     "elements": 607,
+     "tables_checked": 79,
+     "output_ratio": 0.999094,
+     "seconds": 4.694
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 92,
+     "elements": 607,
+     "tables_checked": 79,
+     "output_ratio": 1.012452,
+     "seconds": 4.965
+    }
+   }
+  },
+  "recent:GOOGL-10-K-2024-01-31.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 97,
+     "elements": 634,
+     "tables_checked": 78,
+     "output_ratio": 0.998705,
+     "seconds": 2.94
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 97,
+     "elements": 634,
+     "tables_checked": 78,
+     "output_ratio": 1.010396,
+     "seconds": 4.058
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 97,
+     "elements": 634,
+     "tables_checked": 78,
+     "output_ratio": 0.998705,
+     "seconds": 4.612
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 97,
+     "elements": 634,
+     "tables_checked": 78,
+     "output_ratio": 1.010396,
+     "seconds": 5.833
+    }
+   }
+  },
+  "recent:GOOGL-10-K-2025-02-05.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 99,
+     "elements": 647,
+     "tables_checked": 78,
+     "output_ratio": 0.99868,
+     "seconds": 3.119
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 99,
+     "elements": 647,
+     "tables_checked": 78,
+     "output_ratio": 1.009293,
+     "seconds": 3.436
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 99,
+     "elements": 647,
+     "tables_checked": 78,
+     "output_ratio": 0.99868,
+     "seconds": 4.664
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 99,
+     "elements": 647,
+     "tables_checked": 78,
+     "output_ratio": 1.009293,
+     "seconds": 5.323
+    }
+   }
+  },
+  "recent:GOOGL-10-K-2026-02-05.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 99,
+     "elements": 642,
+     "tables_checked": 79,
+     "output_ratio": 0.998575,
+     "seconds": 3.139
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 99,
+     "elements": 642,
+     "tables_checked": 79,
+     "output_ratio": 1.008838,
+     "seconds": 3.34
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 99,
+     "elements": 642,
+     "tables_checked": 79,
+     "output_ratio": 0.998575,
+     "seconds": 5.008
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 99,
+     "elements": 642,
+     "tables_checked": 79,
+     "output_ratio": 1.008838,
+     "seconds": 5.254
+    }
+   }
+  },
+  "recent:JPM-10-K-2022-02-22.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 314,
+     "elements": 1682,
+     "tables_checked": 603,
+     "output_ratio": 0.99208,
+     "seconds": 17.225
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 314,
+     "elements": 1682,
+     "tables_checked": 603,
+     "output_ratio": 1.013264,
+     "seconds": 18.215
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 314,
+     "elements": 1682,
+     "tables_checked": 603,
+     "output_ratio": 0.99208,
+     "seconds": 28.574
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 314,
+     "elements": 1682,
+     "tables_checked": 603,
+     "output_ratio": 1.013264,
+     "seconds": 29.643
+    }
+   }
+  },
+  "recent:JPM-10-K-2023-02-21.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 306,
+     "elements": 1684,
+     "tables_checked": 596,
+     "output_ratio": 0.992012,
+     "seconds": 17.221
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 306,
+     "elements": 1684,
+     "tables_checked": 596,
+     "output_ratio": 1.01308,
+     "seconds": 17.781
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 306,
+     "elements": 1684,
+     "tables_checked": 596,
+     "output_ratio": 0.992012,
+     "seconds": 27.817
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 306,
+     "elements": 1684,
+     "tables_checked": 596,
+     "output_ratio": 1.01308,
+     "seconds": 28.935
+    }
+   }
+  },
+  "recent:JPM-10-K-2024-02-16.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 324,
+     "elements": 1836,
+     "tables_checked": 626,
+     "output_ratio": 0.992272,
+     "seconds": 17.33
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 324,
+     "elements": 1836,
+     "tables_checked": 626,
+     "output_ratio": 1.01273,
+     "seconds": 18.339
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 324,
+     "elements": 1836,
+     "tables_checked": 626,
+     "output_ratio": 0.992272,
+     "seconds": 28.964
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 324,
+     "elements": 1836,
+     "tables_checked": 626,
+     "output_ratio": 1.01273,
+     "seconds": 29.644
+    }
+   }
+  },
+  "recent:JPM-10-K-2026-02-13.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 330,
+     "elements": 1767,
+     "tables_checked": 638,
+     "output_ratio": 0.991391,
+     "seconds": 16.522
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 330,
+     "elements": 1767,
+     "tables_checked": 638,
+     "output_ratio": 1.011851,
+     "seconds": 17.848
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 330,
+     "elements": 1767,
+     "tables_checked": 638,
+     "output_ratio": 0.991391,
+     "seconds": 29.274
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 330,
+     "elements": 1767,
+     "tables_checked": 638,
+     "output_ratio": 1.011851,
+     "seconds": 31.413
+    }
+   }
+  },
+  "recent:KO-10-K-2022-02-22.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 142,
+     "elements": 721,
+     "tables_checked": 119,
+     "output_ratio": 0.998271,
+     "seconds": 6.642
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 142,
+     "elements": 721,
+     "tables_checked": 119,
+     "output_ratio": 1.002678,
+     "seconds": 6.34
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 142,
+     "elements": 721,
+     "tables_checked": 119,
+     "output_ratio": 0.998271,
+     "seconds": 7.444
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 142,
+     "elements": 721,
+     "tables_checked": 119,
+     "output_ratio": 1.002678,
+     "seconds": 8.732
+    }
+   }
+  },
+  "recent:KO-10-K-2023-02-21.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 143,
+     "elements": 709,
+     "tables_checked": 121,
+     "output_ratio": 0.999059,
+     "seconds": 5.371
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 143,
+     "elements": 709,
+     "tables_checked": 121,
+     "output_ratio": 1.003425,
+     "seconds": 6.152
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 143,
+     "elements": 709,
+     "tables_checked": 121,
+     "output_ratio": 0.999059,
+     "seconds": 7.762
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 143,
+     "elements": 709,
+     "tables_checked": 121,
+     "output_ratio": 1.003425,
+     "seconds": 8.297
+    }
+   }
+  },
+  "recent:KO-10-K-2024-02-20.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 142,
+     "elements": 703,
+     "tables_checked": 122,
+     "output_ratio": 0.999257,
+     "seconds": 4.991
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 142,
+     "elements": 703,
+     "tables_checked": 122,
+     "output_ratio": 1.003842,
+     "seconds": 6.527
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 142,
+     "elements": 703,
+     "tables_checked": 122,
+     "output_ratio": 0.999257,
+     "seconds": 7.934
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 142,
+     "elements": 703,
+     "tables_checked": 122,
+     "output_ratio": 1.003842,
+     "seconds": 8.09
+    }
+   }
+  },
+  "recent:KO-10-K-2026-02-20.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 139,
+     "elements": 675,
+     "tables_checked": 116,
+     "output_ratio": 0.999306,
+     "seconds": 5.595
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 139,
+     "elements": 675,
+     "tables_checked": 116,
+     "output_ratio": 1.003431,
+     "seconds": 5.477
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 139,
+     "elements": 675,
+     "tables_checked": 116,
+     "output_ratio": 0.999306,
+     "seconds": 7.111
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 139,
+     "elements": 675,
+     "tables_checked": 116,
+     "output_ratio": 1.003431,
+     "seconds": 7.299
+    }
+   }
+  },
+  "recent:MSFT-10-K-2022-07-28.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 110,
+     "elements": 661,
+     "tables_checked": 144,
+     "output_ratio": 0.993115,
+     "seconds": 7.876
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 110,
+     "elements": 661,
+     "tables_checked": 144,
+     "output_ratio": 0.999343,
+     "seconds": 8.54
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 110,
+     "elements": 661,
+     "tables_checked": 144,
+     "output_ratio": 0.993115,
+     "seconds": 13.618
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 110,
+     "elements": 661,
+     "tables_checked": 144,
+     "output_ratio": 0.999343,
+     "seconds": 13.831
+    }
+   }
+  },
+  "recent:MSFT-10-K-2023-07-27.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-7127118d:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 109,
+     "elements": 657,
+     "tables_checked": 84,
+     "output_ratio": 0.992689,
+     "seconds": 10.798
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-785613fd:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 109,
+     "elements": 657,
+     "tables_checked": 84,
+     "output_ratio": 0.999114,
+     "seconds": 11.508
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-7127118d:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 109,
+     "elements": 657,
+     "tables_checked": 84,
+     "output_ratio": 0.992689,
+     "seconds": 15.976
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-785613fd:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 109,
+     "elements": 657,
+     "tables_checked": 84,
+     "output_ratio": 0.999114,
+     "seconds": 16.208
+    }
+   }
+  },
+  "recent:MSFT-10-K-2024-07-30.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-7127118d:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 111,
+     "elements": 674,
+     "tables_checked": 87,
+     "output_ratio": 0.993135,
+     "seconds": 8.881
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-785613fd:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 111,
+     "elements": 674,
+     "tables_checked": 87,
+     "output_ratio": 0.999374,
+     "seconds": 9.691
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-7127118d:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 111,
+     "elements": 674,
+     "tables_checked": 87,
+     "output_ratio": 0.993135,
+     "seconds": 13.116
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-785613fd:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 111,
+     "elements": 674,
+     "tables_checked": 87,
+     "output_ratio": 0.999374,
+     "seconds": 13.243
+    }
+   }
+  },
+  "recent:MSFT-10-K-2026-07-29.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-7127118d:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 101,
+     "elements": 612,
+     "tables_checked": 83,
+     "output_ratio": 0.992904,
+     "seconds": 9.253
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-785613fd:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 101,
+     "elements": 612,
+     "tables_checked": 83,
+     "output_ratio": 0.999719,
+     "seconds": 10.428
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-7127118d:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 101,
+     "elements": 612,
+     "tables_checked": 83,
+     "output_ratio": 0.992904,
+     "seconds": 14.455
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-785613fd:425",
+     "trace_failures": [
+      "425"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 101,
+     "elements": 612,
+     "tables_checked": 83,
+     "output_ratio": 0.999719,
+     "seconds": 15.05
+    }
+   }
+  },
+  "recent:MU-10-K-2021-10-08.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 94,
+     "elements": 475,
+     "tables_checked": 68,
+     "output_ratio": 0.997754,
+     "seconds": 2.494
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 94,
+     "elements": 475,
+     "tables_checked": 68,
+     "output_ratio": 1.001052,
+     "seconds": 2.93
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 94,
+     "elements": 475,
+     "tables_checked": 68,
+     "output_ratio": 0.997754,
+     "seconds": 3.882
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 94,
+     "elements": 475,
+     "tables_checked": 68,
+     "output_ratio": 1.001052,
+     "seconds": 4.158
+    }
+   }
+  },
+  "recent:MU-10-K-2022-10-07.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 97,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 0.997794,
+     "seconds": 2.64
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 97,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 1.001057,
+     "seconds": 3.183
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 97,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 0.997794,
+     "seconds": 3.981
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 97,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 1.001057,
+     "seconds": 4.201
+    }
+   }
+  },
+  "recent:MU-10-K-2023-10-06.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 101,
+     "elements": 458,
+     "tables_checked": 68,
+     "output_ratio": 0.997835,
+     "seconds": 2.638
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 101,
+     "elements": 458,
+     "tables_checked": 68,
+     "output_ratio": 1.001964,
+     "seconds": 3.443
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 101,
+     "elements": 458,
+     "tables_checked": 68,
+     "output_ratio": 0.997835,
+     "seconds": 3.908
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 101,
+     "elements": 458,
+     "tables_checked": 68,
+     "output_ratio": 1.001964,
+     "seconds": 5.204
+    }
+   }
+  },
+  "recent:MU-10-K-2024-10-04.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 102,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 0.997943,
+     "seconds": 2.709
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 102,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 1.001874,
+     "seconds": 3.55
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 102,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 0.997943,
+     "seconds": 3.896
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 102,
+     "elements": 451,
+     "tables_checked": 67,
+     "output_ratio": 1.001874,
+     "seconds": 5.047
+    }
+   }
+  },
+  "recent:NFLX-10-K-2022-01-27.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 69,
+     "elements": 308,
+     "tables_checked": 62,
+     "output_ratio": 0.994967,
+     "seconds": 2.462
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 69,
+     "elements": 308,
+     "tables_checked": 62,
+     "output_ratio": 1.02302,
+     "seconds": 2.385
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 69,
+     "elements": 308,
+     "tables_checked": 62,
+     "output_ratio": 0.994967,
+     "seconds": 3.551
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 69,
+     "elements": 308,
+     "tables_checked": 62,
+     "output_ratio": 1.02302,
+     "seconds": 3.5
+    }
+   }
+  },
+  "recent:NFLX-10-K-2023-01-26.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 68,
+     "elements": 323,
+     "tables_checked": 62,
+     "output_ratio": 0.995228,
+     "seconds": 2.417
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 68,
+     "elements": 323,
+     "tables_checked": 62,
+     "output_ratio": 1.023562,
+     "seconds": 2.395
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 68,
+     "elements": 323,
+     "tables_checked": 62,
+     "output_ratio": 0.995228,
+     "seconds": 3.644
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 68,
+     "elements": 323,
+     "tables_checked": 62,
+     "output_ratio": 1.023562,
+     "seconds": 3.587
+    }
+   }
+  },
+  "recent:NFLX-10-K-2024-01-26.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 72,
+     "elements": 347,
+     "tables_checked": 75,
+     "output_ratio": 0.995817,
+     "seconds": 2.564
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 72,
+     "elements": 347,
+     "tables_checked": 75,
+     "output_ratio": 1.026114,
+     "seconds": 2.645
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 72,
+     "elements": 347,
+     "tables_checked": 75,
+     "output_ratio": 0.995817,
+     "seconds": 4.148
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 72,
+     "elements": 347,
+     "tables_checked": 75,
+     "output_ratio": 1.026114,
+     "seconds": 3.894
+    }
+   }
+  },
+  "recent:NFLX-10-K-2026-01-23.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 77,
+     "elements": 378,
+     "tables_checked": 79,
+     "output_ratio": 0.995718,
+     "seconds": 2.642
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 77,
+     "elements": 378,
+     "tables_checked": 79,
+     "output_ratio": 1.024555,
+     "seconds": 3.471
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 77,
+     "elements": 378,
+     "tables_checked": 79,
+     "output_ratio": 0.995718,
+     "seconds": 4.253
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 77,
+     "elements": 378,
+     "tables_checked": 79,
+     "output_ratio": 1.024555,
+     "seconds": 5.436
+    }
+   }
+  },
+  "recent:NTRA-10-K-2022-02-25.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-bdaba9cd:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 145,
+     "elements": 925,
+     "tables_checked": 106,
+     "output_ratio": 1.015566,
+     "seconds": 4.764
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-bdaba9cd:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 145,
+     "elements": 925,
+     "tables_checked": 106,
+     "output_ratio": 1.006849,
+     "seconds": 4.968
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-bdaba9cd:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 145,
+     "elements": 925,
+     "tables_checked": 106,
+     "output_ratio": 1.015566,
+     "seconds": 6.118
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-bdaba9cd:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 145,
+     "elements": 925,
+     "tables_checked": 106,
+     "output_ratio": 1.006849,
+     "seconds": 6.132
+    }
+   }
+  },
+  "recent:NTRA-10-K-2023-03-01.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 136,
+     "elements": 892,
+     "tables_checked": 98,
+     "output_ratio": 1.015105,
+     "seconds": 4.044
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 136,
+     "elements": 892,
+     "tables_checked": 98,
+     "output_ratio": 1.007447,
+     "seconds": 4.384
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 136,
+     "elements": 892,
+     "tables_checked": 98,
+     "output_ratio": 1.015105,
+     "seconds": 5.579
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 136,
+     "elements": 892,
+     "tables_checked": 98,
+     "output_ratio": 1.007447,
+     "seconds": 5.717
+    }
+   }
+  },
+  "recent:NTRA-10-K-2024-02-29.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 135,
+     "elements": 894,
+     "tables_checked": 86,
+     "output_ratio": 1.013444,
+     "seconds": 3.706
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 135,
+     "elements": 894,
+     "tables_checked": 86,
+     "output_ratio": 1.00616,
+     "seconds": 3.709
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 135,
+     "elements": 894,
+     "tables_checked": 86,
+     "output_ratio": 1.013444,
+     "seconds": 4.922
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 135,
+     "elements": 894,
+     "tables_checked": 86,
+     "output_ratio": 1.00616,
+     "seconds": 5.163
+    }
+   }
+  },
+  "recent:NTRA-10-K-2026-02-27.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 141,
+     "elements": 890,
+     "tables_checked": 83,
+     "output_ratio": 1.0135,
+     "seconds": 3.685
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 141,
+     "elements": 890,
+     "tables_checked": 83,
+     "output_ratio": 1.004881,
+     "seconds": 3.835
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 141,
+     "elements": 890,
+     "tables_checked": 83,
+     "output_ratio": 1.0135,
+     "seconds": 5.092
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t5-8e8afb72:650",
+     "trace_failures": [
+      "650"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 141,
+     "elements": 890,
+     "tables_checked": 83,
+     "output_ratio": 1.004881,
+     "seconds": 5.339
+    }
+   }
+  },
+  "recent:NVO-20-F-2022-02-02.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 39,
+     "elements": 281,
+     "tables_checked": 83,
+     "output_ratio": 0.991196,
+     "seconds": 1.846
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 39,
+     "elements": 281,
+     "tables_checked": 83,
+     "output_ratio": 0.99302,
+     "seconds": 1.943
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 39,
+     "elements": 281,
+     "tables_checked": 83,
+     "output_ratio": 0.991196,
+     "seconds": 1.921
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 39,
+     "elements": 281,
+     "tables_checked": 83,
+     "output_ratio": 0.99302,
+     "seconds": 1.852
+    }
+   }
+  },
+  "recent:NVO-20-F-2023-02-01.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 37,
+     "elements": 269,
+     "tables_checked": 80,
+     "output_ratio": 0.991314,
+     "seconds": 1.894
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 37,
+     "elements": 269,
+     "tables_checked": 80,
+     "output_ratio": 0.993177,
+     "seconds": 2.015
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 37,
+     "elements": 269,
+     "tables_checked": 80,
+     "output_ratio": 0.991314,
+     "seconds": 2.078
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 37,
+     "elements": 269,
+     "tables_checked": 80,
+     "output_ratio": 0.993177,
+     "seconds": 2.009
+    }
+   }
+  },
+  "recent:NVO-20-F-2024-01-31.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 38,
+     "elements": 272,
+     "tables_checked": 82,
+     "output_ratio": 0.991118,
+     "seconds": 1.737
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 38,
+     "elements": 272,
+     "tables_checked": 82,
+     "output_ratio": 0.992956,
+     "seconds": 1.609
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 38,
+     "elements": 272,
+     "tables_checked": 82,
+     "output_ratio": 0.991118,
+     "seconds": 1.954
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 38,
+     "elements": 272,
+     "tables_checked": 82,
+     "output_ratio": 0.992956,
+     "seconds": 1.458
+    }
+   }
+  },
+  "recent:NVO-20-F-2026-02-04.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 42,
+     "elements": 303,
+     "tables_checked": 96,
+     "output_ratio": 0.992043,
+     "seconds": 1.933
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 42,
+     "elements": 303,
+     "tables_checked": 96,
+     "output_ratio": 0.993666,
+     "seconds": 2.129
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 42,
+     "elements": 303,
+     "tables_checked": 96,
+     "output_ratio": 0.992043,
+     "seconds": 2.217
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 42,
+     "elements": 303,
+     "tables_checked": 96,
+     "output_ratio": 0.993666,
+     "seconds": 2.173
+    }
+   }
+  },
+  "recent:TSLA-10-K-2022-02-07.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t7-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 117,
+     "elements": 676,
+     "tables_checked": 88,
+     "output_ratio": 0.999801,
+     "seconds": 8.044
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t7-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 117,
+     "elements": 676,
+     "tables_checked": 88,
+     "output_ratio": 1.00872,
+     "seconds": 9.05
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t7-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 117,
+     "elements": 676,
+     "tables_checked": 88,
+     "output_ratio": 0.999801,
+     "seconds": 12.983
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t7-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 117,
+     "elements": 676,
+     "tables_checked": 88,
+     "output_ratio": 1.00872,
+     "seconds": 13.446
+    }
+   }
+  },
+  "recent:TSLA-10-K-2023-01-31.htm": {
+   "normal": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t8-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 107,
+     "elements": 613,
+     "tables_checked": 85,
+     "output_ratio": 0.999757,
+     "seconds": 7.704
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t8-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 107,
+     "elements": 613,
+     "tables_checked": 85,
+     "output_ratio": 1.008673,
+     "seconds": 7.649
+    }
+   },
+   "capture": {
+    "transition": "fail->fail-same",
+    "main": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t8-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 107,
+     "elements": 613,
+     "tables_checked": 85,
+     "output_ratio": 0.999757,
+     "seconds": 12.154
+    },
+    "branch": {
+     "passed": false,
+     "error": "untraceable normalized number: sec2md-p1-t8-62f0bd75:512",
+     "trace_failures": [
+      "512"
+     ],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 107,
+     "elements": 613,
+     "tables_checked": 85,
+     "output_ratio": 1.008673,
+     "seconds": 12.774
+    }
+   }
+  },
+  "recent:TSLA-10-K-2024-01-29.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 113,
+     "elements": 515,
+     "tables_checked": 83,
+     "output_ratio": 0.998836,
+     "seconds": 3.479
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 113,
+     "elements": 515,
+     "tables_checked": 83,
+     "output_ratio": 1.008295,
+     "seconds": 3.808
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 113,
+     "elements": 515,
+     "tables_checked": 83,
+     "output_ratio": 0.998836,
+     "seconds": 5.784
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 113,
+     "elements": 515,
+     "tables_checked": 83,
+     "output_ratio": 1.008295,
+     "seconds": 6.141
+    }
+   }
+  },
+  "recent:TSLA-10-K-2026-01-29.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 105,
+     "elements": 519,
+     "tables_checked": 74,
+     "output_ratio": 0.999375,
+     "seconds": 2.816
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 105,
+     "elements": 519,
+     "tables_checked": 74,
+     "output_ratio": 1.006276,
+     "seconds": 3.811
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 105,
+     "elements": 519,
+     "tables_checked": 74,
+     "output_ratio": 0.999375,
+     "seconds": 4.57
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 105,
+     "elements": 519,
+     "tables_checked": 74,
+     "output_ratio": 1.006276,
+     "seconds": 5.956
+    }
+   }
+  },
+  "recent:TSM-20-F-2022-04-14.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 154,
+     "elements": 1035,
+     "tables_checked": 293,
+     "output_ratio": 0.996936,
+     "seconds": 11.701
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 154,
+     "elements": 1035,
+     "tables_checked": 293,
+     "output_ratio": 1.015504,
+     "seconds": 13.203
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 154,
+     "elements": 1035,
+     "tables_checked": 293,
+     "output_ratio": 0.996936,
+     "seconds": 21.036
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 154,
+     "elements": 1035,
+     "tables_checked": 293,
+     "output_ratio": 1.015504,
+     "seconds": 22.183
+    }
+   }
+  },
+  "recent:TSM-20-F-2023-04-20.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 158,
+     "elements": 1040,
+     "tables_checked": 304,
+     "output_ratio": 0.997197,
+     "seconds": 11.505
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 158,
+     "elements": 1040,
+     "tables_checked": 304,
+     "output_ratio": 1.018069,
+     "seconds": 13.397
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 158,
+     "elements": 1040,
+     "tables_checked": 304,
+     "output_ratio": 0.997197,
+     "seconds": 21.556
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 158,
+     "elements": 1040,
+     "tables_checked": 304,
+     "output_ratio": 1.018069,
+     "seconds": 21.993
+    }
+   }
+  },
+  "recent:TSM-20-F-2024-04-18.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 163,
+     "elements": 1073,
+     "tables_checked": 310,
+     "output_ratio": 0.993018,
+     "seconds": 15.417
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 163,
+     "elements": 1073,
+     "tables_checked": 310,
+     "output_ratio": 1.025736,
+     "seconds": 17.529
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 163,
+     "elements": 1073,
+     "tables_checked": 310,
+     "output_ratio": 0.993018,
+     "seconds": 33.0
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 163,
+     "elements": 1073,
+     "tables_checked": 310,
+     "output_ratio": 1.025736,
+     "seconds": 34.37
+    }
+   }
+  },
+  "recent:TSM-20-F-2026-04-16.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 1,
+     "elements": 986,
+     "tables_checked": 171,
+     "output_ratio": 1.000042,
+     "seconds": 14.249
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 1,
+     "elements": 986,
+     "tables_checked": 171,
+     "output_ratio": 1.017534,
+     "seconds": 13.399
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 1,
+     "elements": 986,
+     "tables_checked": 171,
+     "output_ratio": 1.000042,
+     "seconds": 18.771
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 1,
+     "elements": 986,
+     "tables_checked": 171,
+     "output_ratio": 1.017534,
+     "seconds": 19.73
+    }
+   }
+  },
+  "recent:UNH-10-K-2022-02-15.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 83,
+     "elements": 454,
+     "tables_checked": 64,
+     "output_ratio": 0.998304,
+     "seconds": 4.081
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 83,
+     "elements": 454,
+     "tables_checked": 64,
+     "output_ratio": 1.003002,
+     "seconds": 3.809
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 83,
+     "elements": 454,
+     "tables_checked": 64,
+     "output_ratio": 0.998304,
+     "seconds": 5.265
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 83,
+     "elements": 454,
+     "tables_checked": 64,
+     "output_ratio": 1.003002,
+     "seconds": 5.651
+    }
+   }
+  },
+  "recent:UNH-10-K-2023-02-24.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 82,
+     "elements": 448,
+     "tables_checked": 68,
+     "output_ratio": 0.998049,
+     "seconds": 4.024
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 82,
+     "elements": 448,
+     "tables_checked": 68,
+     "output_ratio": 1.003207,
+     "seconds": 3.889
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 82,
+     "elements": 448,
+     "tables_checked": 68,
+     "output_ratio": 0.998049,
+     "seconds": 5.877
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 82,
+     "elements": 448,
+     "tables_checked": 68,
+     "output_ratio": 1.003207,
+     "seconds": 6.038
+    }
+   }
+  },
+  "recent:UNH-10-K-2024-02-28.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 82,
+     "elements": 452,
+     "tables_checked": 67,
+     "output_ratio": 0.998229,
+     "seconds": 3.297
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 82,
+     "elements": 452,
+     "tables_checked": 67,
+     "output_ratio": 1.003134,
+     "seconds": 3.668
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 82,
+     "elements": 452,
+     "tables_checked": 67,
+     "output_ratio": 0.998229,
+     "seconds": 5.225
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 82,
+     "elements": 452,
+     "tables_checked": 67,
+     "output_ratio": 1.003134,
+     "seconds": 5.668
+    }
+   }
+  },
+  "recent:UNH-10-K-2026-03-02.htm": {
+   "normal": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 86,
+     "elements": 493,
+     "tables_checked": 68,
+     "output_ratio": 0.998093,
+     "seconds": 3.485
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 86,
+     "elements": 493,
+     "tables_checked": 68,
+     "output_ratio": 1.002681,
+     "seconds": 3.773
+    }
+   },
+   "capture": {
+    "transition": "pass->pass",
+    "main": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": null,
+     "pages": 86,
+     "elements": 493,
+     "tables_checked": 68,
+     "output_ratio": 0.998093,
+     "seconds": 5.717
+    },
+    "branch": {
+     "passed": true,
+     "error": null,
+     "trace_failures": [],
+     "other_warnings": [],
+     "header_accounting_misses": [],
+     "pages": 86,
+     "elements": 493,
+     "tables_checked": 68,
+     "output_ratio": 1.002681,
+     "seconds": 6.167
+    }
+   }
+  }
+ },
+ "run": {
+  "wall_seconds": 217.3,
+  "workers_per_side": 6,
+  "sequential": false,
+  "images": true,
+  "side_dir": "C:\\Users\\einstein\\AppData\\Local\\Temp\\claude\\C--Users-einstein-kelab5am-sec2md\\95c5be76-e581-42c1-84d7-0b7535f959cc\\scratchpad\\corpus-task4\\sides",
+  "python": "C:\\Users\\einstein\\kelab5am\\sec2md\\.worktrees\\tmh-proto\\venv\\Scripts\\python.exe"
+ }
+}

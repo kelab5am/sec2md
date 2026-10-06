@@ -2,6 +2,8 @@
 
     PYTHONPATH=<side>/src python run_side.py --side main|candidate --expect-src <side>/src \
         --fixtures-root <checkout with tests/fixtures/sec> --edgar-cache <cache> --out-dir <dir> [--workers N]
+    PYTHONPATH=<side>/src python run_side.py --side main|candidate --expect-src <side>/src \
+        --corpus recent --recent-cache <recent filings cache> --out-dir <dir> [--workers N]
 
 For every document and mode it runs `Parser(html, capture_tables=mode).get_pages(include_images=False)`
 (table checks on, as Phase A) and writes <out-dir>/<document>.json.gz with:
@@ -19,7 +21,8 @@ For every document and mode it runs `Parser(html, capture_tables=mode).get_pages
   element content, which table rendering changes), plus its status.
 
 It also writes <out-dir>/_run.json: sec2md.__file__, the document hash check against
-results.json and edgar_manifest.json, and the run time.
+results.json and edgar_manifest.json (--corpus recent: against the recent corpus's
+manifest.json, and `"corpus": "recent"`), and the run time.
 """
 from __future__ import annotations
 
@@ -166,17 +169,18 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--side", required=True, choices=("main", "candidate"))
     ap.add_argument("--expect-src", required=True)
-    ap.add_argument("--fixtures-root", required=True)
-    ap.add_argument("--edgar-cache", required=True)
+    acc_common.add_document_arguments(ap)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--only", nargs="*")
     args = ap.parse_args()
+    acc_common.check_document_arguments(ap, args)
     os.makedirs(args.out_dir, exist_ok=True)
     location = acc_common.sec2md_location(args.expect_src)
     started = time.perf_counter()
-    docs, duplicates = acc_common.load_documents(args.edgar_cache, args.fixtures_root)
-    hashes = acc_common.verify_hashes(docs)
+    docs, duplicates = acc_common.load_documents(args.edgar_cache, args.fixtures_root, args.corpus,
+                                                 args.recent_cache)
+    hashes = acc_common.verify_hashes(docs, args.corpus)
     print(json.dumps({"sec2md": location, "hash_check_ok": hashes["ok"]}), flush=True)
     if args.only:
         docs = [d for d in docs if d[0] in args.only]
@@ -187,7 +191,8 @@ def main():
         for doc_id, seconds in pool.imap_unordered(work, order):
             times[doc_id] = seconds
             print(f"{doc_id}: {seconds:.1f}s", file=sys.stderr, flush=True)
-    run = {"side": args.side, "sec2md_file": location, "hash_check": hashes, "duplicates_skipped": duplicates,
+    run = {**acc_common.corpus_record(args.corpus),
+           "side": args.side, "sec2md_file": location, "hash_check": hashes, "duplicates_skipped": duplicates,
            "documents": [d[0] for d in docs], "document_seconds": times,
            "wall_seconds": round(time.perf_counter() - started, 1), "workers": args.workers}
     with open(os.path.join(args.out_dir, "_run.json"), "w", encoding="utf-8") as handle:

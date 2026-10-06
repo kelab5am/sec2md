@@ -1,0 +1,2176 @@
+{
+ "main": {
+  "with_output|tableparser": 608,
+  "with_output|one_row": 8,
+  "no_output|no_output": 2135
+ },
+ "candidate": {
+  "with_output|one_row": 4,
+  "with_output|tableparser": 62,
+  "no_output|no_output": 2135
+ },
+ "genuine_main_tableparser_class1": "not applicable: class 1's tables are Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+ "genuine_main_tables": "not applicable: class 1's tables are Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+ "genuine_still_failing": "not applicable: class 1's tables are Phase A evidence (../2026-10-04-table-merge-header-evidence/events.json)",
+ "residual_genuine": [
+  {
+   "doc": "recent:BABA-20-F-2023-07-21.htm",
+   "table": 41,
+   "tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:BABA-20-F-2024-05-23.htm",
+   "table": 40,
+   "tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:BABA-20-F-2026-05-20.htm",
+   "table": 39,
+   "tokens": [
+    [
+     "116.70",
+     "body",
+     false
+    ],
+    [
+     "152.69",
+     "body",
+     false
+    ],
+    [
+     "68.00",
+     "body",
+     false
+    ],
+    [
+     "78.37",
+     "body",
+     false
+    ],
+    [
+     "79.96",
+     "body",
+     false
+    ],
+    [
+     "84.60",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-1",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:BABA-20-F-2026-05-20.htm",
+   "table": 108,
+   "tokens": [
+    [
+     "000",
+     "label",
+     false
+    ],
+    [
+     "100",
+     "label",
+     false
+    ],
+    [
+     "400",
+     "label",
+     false
+    ],
+    [
+     "500",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "000",
+     "label",
+     false
+    ],
+    [
+     "100",
+     "label",
+     false
+    ],
+    [
+     "31",
+     "label",
+     false
+    ],
+    [
+     "400",
+     "label",
+     false
+    ],
+    [
+     "500",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:CAT-10-K-2022-02-16.htm",
+   "table": 17,
+   "tokens": [
+    [
+     "3",
+     "body",
+     false
+    ],
+    [
+     "3",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "3",
+     "body",
+     false
+    ],
+    [
+     "3",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:CAT-10-K-2023-02-15.htm",
+   "table": 59,
+   "tokens": [
+    [
+     "11",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "11",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:CAT-10-K-2024-02-16.htm",
+   "table": 59,
+   "tokens": [
+    [
+     "11",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "11",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:CAT-10-K-2026-02-13.htm",
+   "table": 60,
+   "tokens": [
+    [
+     "11",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "11",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:JPM-10-K-2022-02-22.htm",
+   "table": 360,
+   "tokens": [
+    [
+     "4",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "4",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:JPM-10-K-2023-02-21.htm",
+   "table": 360,
+   "tokens": [
+    [
+     "12",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "12",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:JPM-10-K-2024-02-16.htm",
+   "table": 367,
+   "tokens": [
+    [
+     "3",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "3",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:JPM-10-K-2026-02-13.htm",
+   "table": 359,
+   "tokens": [
+    [
+     "6",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "6",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 32,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 43,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 44,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 50,
+   "tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 54,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 61,
+   "tokens": [
+    [
+     "20982",
+     "label",
+     false
+    ],
+    [
+     "5",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20982",
+     "label",
+     false
+    ],
+    [
+     "5",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2022-02-22.htm",
+   "table": 65,
+   "tokens": [
+    [
+     "20212",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20212",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 32,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 43,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 44,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 50,
+   "tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 61,
+   "tokens": [
+    [
+     "209823",
+     "label",
+     false
+    ],
+    [
+     "6",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "209823",
+     "label",
+     false
+    ],
+    [
+     "6",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 65,
+   "tokens": [
+    [
+     "20222",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20222",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 114,
+   "tokens": [
+    [
+     "2",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2023-02-21.htm",
+   "table": 116,
+   "tokens": [
+    [
+     "3",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "3",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 32,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 43,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 44,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 50,
+   "tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 57,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 61,
+   "tokens": [
+    [
+     "20982",
+     "label",
+     false
+    ],
+    [
+     "5",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20982",
+     "label",
+     false
+    ],
+    [
+     "5",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 65,
+   "tokens": [
+    [
+     "20232",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20232",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2024-02-20.htm",
+   "table": 117,
+   "tokens": [
+    [
+     "2",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 29,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 40,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 41,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 47,
+   "tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "311",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 56,
+   "tokens": [
+    [
+     "20982",
+     "label",
+     false
+    ],
+    [
+     "5",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20982",
+     "label",
+     false
+    ],
+    [
+     "5",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 60,
+   "tokens": [
+    [
+     "20252",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20252",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:KO-10-K-2026-02-20.htm",
+   "table": 87,
+   "tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "2",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NVO-20-F-2022-02-02.htm",
+   "table": 32,
+   "tokens": [
+    [
+     "20274",
+     "body",
+     false
+    ],
+    [
+     "20332",
+     "body",
+     false
+    ],
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20274",
+     "body",
+     false
+    ],
+    [
+     "20332",
+     "body",
+     false
+    ],
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NVO-20-F-2023-02-01.htm",
+   "table": 32,
+   "tokens": [
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20342",
+     "body",
+     false
+    ],
+    [
+     "20357",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20395",
+     "body",
+     false
+    ],
+    [
+     "20406",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20342",
+     "body",
+     false
+    ],
+    [
+     "20357",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20395",
+     "body",
+     false
+    ],
+    [
+     "20406",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NVO-20-F-2024-01-31.htm",
+   "table": 32,
+   "tokens": [
+    [
+     "20218",
+     "body",
+     false
+    ],
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20342",
+     "body",
+     false
+    ],
+    [
+     "20357",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20395",
+     "body",
+     false
+    ],
+    [
+     "20396",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20218",
+     "body",
+     false
+    ],
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20342",
+     "body",
+     false
+    ],
+    [
+     "20357",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20363",
+     "body",
+     false
+    ],
+    [
+     "20395",
+     "body",
+     false
+    ],
+    [
+     "20396",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NVO-20-F-2026-02-04.htm",
+   "table": 35,
+   "tokens": [
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20372",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20341",
+     "body",
+     false
+    ],
+    [
+     "20372",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NVO-20-F-2026-02-04.htm",
+   "table": 38,
+   "tokens": [
+    [
+     "20295",
+     "body",
+     false
+    ],
+    [
+     "20356",
+     "body",
+     false
+    ],
+    [
+     "20372",
+     "body",
+     false
+    ],
+    [
+     "20393",
+     "body",
+     false
+    ],
+    [
+     "20404",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "20295",
+     "body",
+     false
+    ],
+    [
+     "20356",
+     "body",
+     false
+    ],
+    [
+     "20372",
+     "body",
+     false
+    ],
+    [
+     "20393",
+     "body",
+     false
+    ],
+    [
+     "20404",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 192,
+   "tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-2",
+     "label",
+     false
+    ],
+    [
+     "-3",
+     "label",
+     false
+    ],
+    [
+     "-4",
+     "label",
+     false
+    ],
+    [
+     "-5",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-8",
+     "label",
+     false
+    ],
+    [
+     "-9",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-2",
+     "label",
+     false
+    ],
+    [
+     "-3",
+     "label",
+     false
+    ],
+    [
+     "-4",
+     "label",
+     false
+    ],
+    [
+     "-5",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-8",
+     "label",
+     false
+    ],
+    [
+     "-9",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 193,
+   "tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-11",
+     "label",
+     false
+    ],
+    [
+     "-11",
+     "label",
+     false
+    ],
+    [
+     "-11",
+     "label",
+     false
+    ],
+    [
+     "-2",
+     "label",
+     false
+    ],
+    [
+     "-4",
+     "label",
+     false
+    ],
+    [
+     "-4",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-8",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-11",
+     "label",
+     false
+    ],
+    [
+     "-11",
+     "label",
+     false
+    ],
+    [
+     "-11",
+     "label",
+     false
+    ],
+    [
+     "-4",
+     "label",
+     false
+    ],
+    [
+     "-4",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-6",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-7",
+     "label",
+     false
+    ],
+    [
+     "-8",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 194,
+   "tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-5",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-1",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ],
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 272,
+   "tokens": [
+    [
+     "328.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 314,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "table": 315,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 278,
+   "tokens": [
+    [
+     "132734.5",
+     "body",
+     false
+    ],
+    [
+     "1448.4",
+     "body",
+     false
+    ],
+    [
+     "2009.1",
+     "body",
+     false
+    ],
+    [
+     "752.5",
+     "body",
+     false
+    ],
+    [
+     "79610.6",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 288,
+   "tokens": [
+    [
+     "328.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 328,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 329,
+   "tokens": [
+    [
+     "1000.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "table": 330,
+   "tokens": [
+    [
+     "750.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": null
+  },
+  {
+   "doc": "recent:TSM-20-F-2026-04-16.htm",
+   "table": 82,
+   "tokens": [
+    [
+     "096.0",
+     "body",
+     false
+    ],
+    [
+     "234.0",
+     "body",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "096.0",
+     "body",
+     false
+    ],
+    [
+     "234.0",
+     "body",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:UNH-10-K-2023-02-24.htm",
+   "table": 69,
+   "tokens": [
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:UNH-10-K-2024-02-28.htm",
+   "table": 68,
+   "tokens": [
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ]
+  },
+  {
+   "doc": "recent:UNH-10-K-2026-03-02.htm",
+   "table": 69,
+   "tokens": [
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ],
+   "main_tokens": [
+    [
+     "-10",
+     "label",
+     false
+    ]
+   ]
+  }
+ ],
+ "one_row": {
+  "main": [
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    678,
+    [
+     [
+      "082",
+      "body",
+      false
+     ],
+     [
+      "333",
+      "body",
+      false
+     ],
+     [
+      "341",
+      "body",
+      false
+     ],
+     [
+      "387",
+      "body",
+      false
+     ],
+     [
+      "681",
+      "body",
+      false
+     ],
+     [
+      "997",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    684,
+    [
+     [
+      "943",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    767,
+    [
+     [
+      "945",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    774,
+    [
+     [
+      "945",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:CAT-10-K-2022-02-16.htm",
+    7,
+    [
+     [
+      "120",
+      "body",
+      false
+     ],
+     [
+      "2022",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:CAT-10-K-2023-02-15.htm",
+    7,
+    [
+     [
+      "120",
+      "body",
+      false
+     ],
+     [
+      "2023",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:CAT-10-K-2024-02-16.htm",
+    7,
+    [
+     [
+      "120",
+      "body",
+      false
+     ],
+     [
+      "2024",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:CAT-10-K-2026-02-13.htm",
+    7,
+    [
+     [
+      "120",
+      "body",
+      false
+     ],
+     [
+      "2026",
+      "body",
+      false
+     ]
+    ]
+   ]
+  ],
+  "candidate": [
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    678,
+    [
+     [
+      "082",
+      "body",
+      false
+     ],
+     [
+      "333",
+      "body",
+      false
+     ],
+     [
+      "341",
+      "body",
+      false
+     ],
+     [
+      "387",
+      "body",
+      false
+     ],
+     [
+      "681",
+      "body",
+      false
+     ],
+     [
+      "997",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    684,
+    [
+     [
+      "943",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    767,
+    [
+     [
+      "945",
+      "body",
+      false
+     ]
+    ]
+   ],
+   [
+    "recent:BABA-20-F-2022-07-26.htm",
+    774,
+    [
+     [
+      "945",
+      "body",
+      false
+     ]
+    ]
+   ]
+  ]
+ },
+ "furniture_unchanged": true,
+ "furniture_changes": [],
+ "false_positives": "not applicable: the false positives are Phase A's (FALSE_POSITIVES); residual_genuine lists every candidate TableParser value failure with output"
+}

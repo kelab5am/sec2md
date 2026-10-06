@@ -1,0 +1,1099 @@
+{
+ "identities_hold": true,
+ "production_match": true,
+ "deterministic_candidate_outputs": true,
+ "coverage": {
+  "main": {
+   "tables_total": 13105,
+   "table_no_output": 2385,
+   "table_no_separator": 3645,
+   "table_unreliable_grid": 0,
+   "table_no_header": 366,
+   "table_no_data": 703,
+   "tables_evaluated": 6006,
+   "rows_data": 59479,
+   "row_below_repeated_header": 4607,
+   "row_unpaired": 15450,
+   "rows_paired": 39422,
+   "values_total": 141861,
+   "value_nil": 13887,
+   "value_no_discriminating_header": 4123,
+   "value_missing_in_output": 5,
+   "value_ambiguous_position": 10605,
+   "value_ambiguous_header": 1986,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 111255,
+   "values_aligned": 53568,
+   "values_misaligned": 57687
+  },
+  "candidate": {
+   "tables_total": 13105,
+   "table_no_output": 2385,
+   "table_no_separator": 3645,
+   "table_unreliable_grid": 0,
+   "table_no_header": 366,
+   "table_no_data": 703,
+   "tables_evaluated": 6006,
+   "rows_data": 59479,
+   "row_below_repeated_header": 4607,
+   "row_unpaired": 15362,
+   "rows_paired": 39510,
+   "values_total": 142107,
+   "value_nil": 13897,
+   "value_no_discriminating_header": 4159,
+   "value_missing_in_output": 5,
+   "value_ambiguous_position": 10672,
+   "value_ambiguous_header": 0,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 113374,
+   "values_aligned": 113374,
+   "values_misaligned": 0
+  },
+  "main_capture": {
+   "tables_total": 13105,
+   "table_no_output": 2385,
+   "table_no_separator": 3645,
+   "table_unreliable_grid": 0,
+   "table_no_header": 366,
+   "table_no_data": 703,
+   "tables_evaluated": 6006,
+   "rows_data": 59479,
+   "row_below_repeated_header": 4607,
+   "row_unpaired": 15450,
+   "rows_paired": 39422,
+   "values_total": 141861,
+   "value_nil": 13887,
+   "value_no_discriminating_header": 4123,
+   "value_missing_in_output": 5,
+   "value_ambiguous_position": 10605,
+   "value_ambiguous_header": 1986,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 111255,
+   "values_aligned": 53568,
+   "values_misaligned": 57687
+  },
+  "candidate_capture": {
+   "tables_total": 13105,
+   "table_no_output": 2385,
+   "table_no_separator": 3645,
+   "table_unreliable_grid": 0,
+   "table_no_header": 366,
+   "table_no_data": 703,
+   "tables_evaluated": 6006,
+   "rows_data": 59479,
+   "row_below_repeated_header": 4607,
+   "row_unpaired": 15362,
+   "rows_paired": 39510,
+   "values_total": 142107,
+   "value_nil": 13897,
+   "value_no_discriminating_header": 4159,
+   "value_missing_in_output": 5,
+   "value_ambiguous_position": 10672,
+   "value_ambiguous_header": 0,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 113374,
+   "values_aligned": 113374,
+   "values_misaligned": 0
+  }
+ },
+ "findings_lines": {
+  "main": 18734,
+  "candidate": 0
+ },
+ "candidate_findings": [],
+ "values_listed": 222099,
+ "evaluated_main": 111255,
+ "evaluated_candidate": 113374,
+ "evaluated_on_main_not_candidate": 0,
+ "evaluated_on_candidate_not_main": 2119,
+ "transitions": [
+  [
+   "row_unpaired",
+   "row_unpaired",
+   58539
+  ],
+  [
+   "misaligned",
+   "aligned",
+   57687
+  ],
+  [
+   "aligned",
+   "aligned",
+   53568
+  ],
+  [
+   "row_below_repeated_header",
+   "row_below_repeated_header",
+   17398
+  ],
+  [
+   "value_nil",
+   "value_nil",
+   13887
+  ],
+  [
+   "value_ambiguous_position",
+   "value_ambiguous_position",
+   10605
+  ],
+  [
+   "value_no_discriminating_header",
+   "value_no_discriminating_header",
+   4123
+  ],
+  [
+   "table_no_header",
+   "table_no_header",
+   3508
+  ],
+  [
+   "value_ambiguous_header",
+   "aligned",
+   1986
+  ],
+  [
+   "table_no_output",
+   "table_no_output",
+   547
+  ],
+  [
+   "row_unpaired",
+   "aligned",
+   133
+  ],
+  [
+   "row_unpaired",
+   "value_ambiguous_position",
+   67
+  ],
+  [
+   "row_unpaired",
+   "value_no_discriminating_header",
+   36
+  ],
+  [
+   "row_unpaired",
+   "value_nil",
+   10
+  ],
+  [
+   "value_missing_in_output",
+   "value_missing_in_output",
+   5
+  ]
+ ],
+ "loss_transitions": {},
+ "documents": {
+  "recent:AMZN-10-K-2022-02-04.htm": {
+   "main": {
+    "values_evaluated": 875,
+    "values_aligned": 784,
+    "values_misaligned": 91
+   },
+   "candidate": {
+    "values_evaluated": 875,
+    "values_aligned": 875,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:AMZN-10-K-2023-02-03.htm": {
+   "main": {
+    "values_evaluated": 875,
+    "values_aligned": 786,
+    "values_misaligned": 89
+   },
+   "candidate": {
+    "values_evaluated": 875,
+    "values_aligned": 875,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:AMZN-10-K-2024-02-02.htm": {
+   "main": {
+    "values_evaluated": 880,
+    "values_aligned": 789,
+    "values_misaligned": 91
+   },
+   "candidate": {
+    "values_evaluated": 880,
+    "values_aligned": 880,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:AMZN-10-K-2025-02-07.htm": {
+   "main": {
+    "values_evaluated": 858,
+    "values_aligned": 768,
+    "values_misaligned": 90
+   },
+   "candidate": {
+    "values_evaluated": 858,
+    "values_aligned": 858,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:AMZN-10-K-2026-02-06.htm": {
+   "main": {
+    "values_evaluated": 890,
+    "values_aligned": 772,
+    "values_misaligned": 118
+   },
+   "candidate": {
+    "values_evaluated": 890,
+    "values_aligned": 890,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BABA-20-F-2022-07-26.htm": {
+   "main": {
+    "values_evaluated": 2610,
+    "values_aligned": 0,
+    "values_misaligned": 2610
+   },
+   "candidate": {
+    "values_evaluated": 2610,
+    "values_aligned": 2610,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BABA-20-F-2023-07-21.htm": {
+   "main": {
+    "values_evaluated": 2501,
+    "values_aligned": 87,
+    "values_misaligned": 2414
+   },
+   "candidate": {
+    "values_evaluated": 2501,
+    "values_aligned": 2501,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BABA-20-F-2024-05-23.htm": {
+   "main": {
+    "values_evaluated": 2371,
+    "values_aligned": 18,
+    "values_misaligned": 2353
+   },
+   "candidate": {
+    "values_evaluated": 2397,
+    "values_aligned": 2397,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BABA-20-F-2026-05-20.htm": {
+   "main": {
+    "values_evaluated": 2394,
+    "values_aligned": 39,
+    "values_misaligned": 2355
+   },
+   "candidate": {
+    "values_evaluated": 2394,
+    "values_aligned": 2394,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BAC-10-K-2022-02-22.htm": {
+   "main": {
+    "values_evaluated": 4760,
+    "values_aligned": 1502,
+    "values_misaligned": 3258
+   },
+   "candidate": {
+    "values_evaluated": 4762,
+    "values_aligned": 4762,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BAC-10-K-2023-02-22.htm": {
+   "main": {
+    "values_evaluated": 4856,
+    "values_aligned": 1587,
+    "values_misaligned": 3269
+   },
+   "candidate": {
+    "values_evaluated": 4856,
+    "values_aligned": 4856,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BAC-10-K-2024-02-20.htm": {
+   "main": {
+    "values_evaluated": 4820,
+    "values_aligned": 1606,
+    "values_misaligned": 3214
+   },
+   "candidate": {
+    "values_evaluated": 4820,
+    "values_aligned": 4820,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:BAC-10-K-2026-02-25.htm": {
+   "main": {
+    "values_evaluated": 4654,
+    "values_aligned": 1548,
+    "values_misaligned": 3106
+   },
+   "candidate": {
+    "values_evaluated": 4654,
+    "values_aligned": 4654,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CAT-10-K-2022-02-16.htm": {
+   "main": {
+    "values_evaluated": 2225,
+    "values_aligned": 882,
+    "values_misaligned": 1343
+   },
+   "candidate": {
+    "values_evaluated": 2225,
+    "values_aligned": 2225,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CAT-10-K-2023-02-15.htm": {
+   "main": {
+    "values_evaluated": 2189,
+    "values_aligned": 740,
+    "values_misaligned": 1449
+   },
+   "candidate": {
+    "values_evaluated": 2189,
+    "values_aligned": 2189,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CAT-10-K-2024-02-16.htm": {
+   "main": {
+    "values_evaluated": 2179,
+    "values_aligned": 754,
+    "values_misaligned": 1425
+   },
+   "candidate": {
+    "values_evaluated": 2179,
+    "values_aligned": 2179,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CAT-10-K-2026-02-13.htm": {
+   "main": {
+    "values_evaluated": 2036,
+    "values_aligned": 705,
+    "values_misaligned": 1331
+   },
+   "candidate": {
+    "values_evaluated": 2036,
+    "values_aligned": 2036,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRDO-10-K-2022-06-08.htm": {
+   "main": {
+    "values_evaluated": 492,
+    "values_aligned": 460,
+    "values_misaligned": 32
+   },
+   "candidate": {
+    "values_evaluated": 513,
+    "values_aligned": 513,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRDO-10-K-2023-06-23.htm": {
+   "main": {
+    "values_evaluated": 487,
+    "values_aligned": 460,
+    "values_misaligned": 27
+   },
+   "candidate": {
+    "values_evaluated": 510,
+    "values_aligned": 510,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRDO-10-K-2024-06-24.htm": {
+   "main": {
+    "values_evaluated": 514,
+    "values_aligned": 482,
+    "values_misaligned": 32
+   },
+   "candidate": {
+    "values_evaluated": 535,
+    "values_aligned": 535,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRDO-10-K-2026-06-15.htm": {
+   "main": {
+    "values_evaluated": 482,
+    "values_aligned": 468,
+    "values_misaligned": 14
+   },
+   "candidate": {
+    "values_evaluated": 495,
+    "values_aligned": 495,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRM-10-K-2022-03-11.htm": {
+   "main": {
+    "values_evaluated": 853,
+    "values_aligned": 798,
+    "values_misaligned": 55
+   },
+   "candidate": {
+    "values_evaluated": 853,
+    "values_aligned": 853,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRM-10-K-2023-03-08.htm": {
+   "main": {
+    "values_evaluated": 879,
+    "values_aligned": 811,
+    "values_misaligned": 68
+   },
+   "candidate": {
+    "values_evaluated": 879,
+    "values_aligned": 879,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRM-10-K-2024-03-06.htm": {
+   "main": {
+    "values_evaluated": 908,
+    "values_aligned": 811,
+    "values_misaligned": 97
+   },
+   "candidate": {
+    "values_evaluated": 908,
+    "values_aligned": 908,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:CRM-10-K-2026-03-02.htm": {
+   "main": {
+    "values_evaluated": 947,
+    "values_aligned": 816,
+    "values_misaligned": 131
+   },
+   "candidate": {
+    "values_evaluated": 947,
+    "values_aligned": 947,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:GOOGL-10-K-2022-02-02.htm": {
+   "main": {
+    "values_evaluated": 863,
+    "values_aligned": 699,
+    "values_misaligned": 164
+   },
+   "candidate": {
+    "values_evaluated": 863,
+    "values_aligned": 863,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:GOOGL-10-K-2023-02-03.htm": {
+   "main": {
+    "values_evaluated": 905,
+    "values_aligned": 668,
+    "values_misaligned": 237
+   },
+   "candidate": {
+    "values_evaluated": 905,
+    "values_aligned": 905,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:GOOGL-10-K-2024-01-31.htm": {
+   "main": {
+    "values_evaluated": 904,
+    "values_aligned": 692,
+    "values_misaligned": 212
+   },
+   "candidate": {
+    "values_evaluated": 904,
+    "values_aligned": 904,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:GOOGL-10-K-2025-02-05.htm": {
+   "main": {
+    "values_evaluated": 945,
+    "values_aligned": 784,
+    "values_misaligned": 161
+   },
+   "candidate": {
+    "values_evaluated": 945,
+    "values_aligned": 945,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:GOOGL-10-K-2026-02-05.htm": {
+   "main": {
+    "values_evaluated": 972,
+    "values_aligned": 838,
+    "values_misaligned": 134
+   },
+   "candidate": {
+    "values_evaluated": 972,
+    "values_aligned": 972,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:JPM-10-K-2022-02-22.htm": {
+   "main": {
+    "values_evaluated": 6620,
+    "values_aligned": 2593,
+    "values_misaligned": 4027
+   },
+   "candidate": {
+    "values_evaluated": 6620,
+    "values_aligned": 6620,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:JPM-10-K-2023-02-21.htm": {
+   "main": {
+    "values_evaluated": 6568,
+    "values_aligned": 2568,
+    "values_misaligned": 4000
+   },
+   "candidate": {
+    "values_evaluated": 6568,
+    "values_aligned": 6568,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:JPM-10-K-2024-02-16.htm": {
+   "main": {
+    "values_evaluated": 6721,
+    "values_aligned": 2641,
+    "values_misaligned": 4080
+   },
+   "candidate": {
+    "values_evaluated": 6729,
+    "values_aligned": 6729,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:JPM-10-K-2026-02-13.htm": {
+   "main": {
+    "values_evaluated": 6741,
+    "values_aligned": 2906,
+    "values_misaligned": 3835
+   },
+   "candidate": {
+    "values_evaluated": 6750,
+    "values_aligned": 6750,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:KO-10-K-2022-02-22.htm": {
+   "main": {
+    "values_evaluated": 1364,
+    "values_aligned": 1072,
+    "values_misaligned": 292
+   },
+   "candidate": {
+    "values_evaluated": 1407,
+    "values_aligned": 1407,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:KO-10-K-2023-02-21.htm": {
+   "main": {
+    "values_evaluated": 1404,
+    "values_aligned": 1116,
+    "values_misaligned": 288
+   },
+   "candidate": {
+    "values_evaluated": 1422,
+    "values_aligned": 1422,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:KO-10-K-2024-02-20.htm": {
+   "main": {
+    "values_evaluated": 1417,
+    "values_aligned": 1129,
+    "values_misaligned": 288
+   },
+   "candidate": {
+    "values_evaluated": 1437,
+    "values_aligned": 1437,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:KO-10-K-2026-02-20.htm": {
+   "main": {
+    "values_evaluated": 1402,
+    "values_aligned": 1154,
+    "values_misaligned": 248
+   },
+   "candidate": {
+    "values_evaluated": 1440,
+    "values_aligned": 1440,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MSFT-10-K-2022-07-28.htm": {
+   "main": {
+    "values_evaluated": 946,
+    "values_aligned": 739,
+    "values_misaligned": 207
+   },
+   "candidate": {
+    "values_evaluated": 955,
+    "values_aligned": 955,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MSFT-10-K-2023-07-27.htm": {
+   "main": {
+    "values_evaluated": 1000,
+    "values_aligned": 778,
+    "values_misaligned": 222
+   },
+   "candidate": {
+    "values_evaluated": 1007,
+    "values_aligned": 1007,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MSFT-10-K-2024-07-30.htm": {
+   "main": {
+    "values_evaluated": 1020,
+    "values_aligned": 782,
+    "values_misaligned": 238
+   },
+   "candidate": {
+    "values_evaluated": 1027,
+    "values_aligned": 1027,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MSFT-10-K-2026-07-29.htm": {
+   "main": {
+    "values_evaluated": 979,
+    "values_aligned": 762,
+    "values_misaligned": 217
+   },
+   "candidate": {
+    "values_evaluated": 986,
+    "values_aligned": 986,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MU-10-K-2021-10-08.htm": {
+   "main": {
+    "values_evaluated": 688,
+    "values_aligned": 576,
+    "values_misaligned": 112
+   },
+   "candidate": {
+    "values_evaluated": 793,
+    "values_aligned": 793,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MU-10-K-2022-10-07.htm": {
+   "main": {
+    "values_evaluated": 674,
+    "values_aligned": 559,
+    "values_misaligned": 115
+   },
+   "candidate": {
+    "values_evaluated": 780,
+    "values_aligned": 780,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MU-10-K-2023-10-06.htm": {
+   "main": {
+    "values_evaluated": 681,
+    "values_aligned": 579,
+    "values_misaligned": 102
+   },
+   "candidate": {
+    "values_evaluated": 783,
+    "values_aligned": 783,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:MU-10-K-2024-10-04.htm": {
+   "main": {
+    "values_evaluated": 662,
+    "values_aligned": 556,
+    "values_misaligned": 106
+   },
+   "candidate": {
+    "values_evaluated": 762,
+    "values_aligned": 762,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NFLX-10-K-2022-01-27.htm": {
+   "main": {
+    "values_evaluated": 473,
+    "values_aligned": 332,
+    "values_misaligned": 141
+   },
+   "candidate": {
+    "values_evaluated": 639,
+    "values_aligned": 639,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NFLX-10-K-2023-01-26.htm": {
+   "main": {
+    "values_evaluated": 470,
+    "values_aligned": 340,
+    "values_misaligned": 130
+   },
+   "candidate": {
+    "values_evaluated": 640,
+    "values_aligned": 640,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NFLX-10-K-2024-01-26.htm": {
+   "main": {
+    "values_evaluated": 516,
+    "values_aligned": 366,
+    "values_misaligned": 150
+   },
+   "candidate": {
+    "values_evaluated": 695,
+    "values_aligned": 695,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NFLX-10-K-2026-01-23.htm": {
+   "main": {
+    "values_evaluated": 575,
+    "values_aligned": 375,
+    "values_misaligned": 200
+   },
+   "candidate": {
+    "values_evaluated": 727,
+    "values_aligned": 727,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NTRA-10-K-2022-02-25.htm": {
+   "main": {
+    "values_evaluated": 754,
+    "values_aligned": 0,
+    "values_misaligned": 754
+   },
+   "candidate": {
+    "values_evaluated": 754,
+    "values_aligned": 754,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NTRA-10-K-2023-03-01.htm": {
+   "main": {
+    "values_evaluated": 738,
+    "values_aligned": 0,
+    "values_misaligned": 738
+   },
+   "candidate": {
+    "values_evaluated": 738,
+    "values_aligned": 738,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NTRA-10-K-2024-02-29.htm": {
+   "main": {
+    "values_evaluated": 684,
+    "values_aligned": 0,
+    "values_misaligned": 684
+   },
+   "candidate": {
+    "values_evaluated": 684,
+    "values_aligned": 684,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NTRA-10-K-2026-02-27.htm": {
+   "main": {
+    "values_evaluated": 661,
+    "values_aligned": 4,
+    "values_misaligned": 657
+   },
+   "candidate": {
+    "values_evaluated": 661,
+    "values_aligned": 661,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NVO-20-F-2022-02-02.htm": {
+   "main": {
+    "values_evaluated": 63,
+    "values_aligned": 59,
+    "values_misaligned": 4
+   },
+   "candidate": {
+    "values_evaluated": 63,
+    "values_aligned": 63,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NVO-20-F-2023-02-01.htm": {
+   "main": {
+    "values_evaluated": 61,
+    "values_aligned": 59,
+    "values_misaligned": 2
+   },
+   "candidate": {
+    "values_evaluated": 61,
+    "values_aligned": 61,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NVO-20-F-2024-01-31.htm": {
+   "main": {
+    "values_evaluated": 65,
+    "values_aligned": 61,
+    "values_misaligned": 4
+   },
+   "candidate": {
+    "values_evaluated": 65,
+    "values_aligned": 65,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:NVO-20-F-2026-02-04.htm": {
+   "main": {
+    "values_evaluated": 51,
+    "values_aligned": 36,
+    "values_misaligned": 15
+   },
+   "candidate": {
+    "values_evaluated": 51,
+    "values_aligned": 51,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSLA-10-K-2022-02-07.htm": {
+   "main": {
+    "values_evaluated": 1062,
+    "values_aligned": 598,
+    "values_misaligned": 464
+   },
+   "candidate": {
+    "values_evaluated": 1071,
+    "values_aligned": 1071,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSLA-10-K-2023-01-31.htm": {
+   "main": {
+    "values_evaluated": 1009,
+    "values_aligned": 556,
+    "values_misaligned": 453
+   },
+   "candidate": {
+    "values_evaluated": 1009,
+    "values_aligned": 1009,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSLA-10-K-2024-01-29.htm": {
+   "main": {
+    "values_evaluated": 972,
+    "values_aligned": 814,
+    "values_misaligned": 158
+   },
+   "candidate": {
+    "values_evaluated": 972,
+    "values_aligned": 972,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSLA-10-K-2026-01-29.htm": {
+   "main": {
+    "values_evaluated": 964,
+    "values_aligned": 799,
+    "values_misaligned": 165
+   },
+   "candidate": {
+    "values_evaluated": 964,
+    "values_aligned": 964,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSM-20-F-2022-04-14.htm": {
+   "main": {
+    "values_evaluated": 1626,
+    "values_aligned": 807,
+    "values_misaligned": 819
+   },
+   "candidate": {
+    "values_evaluated": 1842,
+    "values_aligned": 1842,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSM-20-F-2023-04-20.htm": {
+   "main": {
+    "values_evaluated": 1745,
+    "values_aligned": 850,
+    "values_misaligned": 895
+   },
+   "candidate": {
+    "values_evaluated": 1965,
+    "values_aligned": 1965,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSM-20-F-2024-04-18.htm": {
+   "main": {
+    "values_evaluated": 1945,
+    "values_aligned": 514,
+    "values_misaligned": 1431
+   },
+   "candidate": {
+    "values_evaluated": 2015,
+    "values_aligned": 2015,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:TSM-20-F-2026-04-16.htm": {
+   "main": {
+    "values_evaluated": 1777,
+    "values_aligned": 1210,
+    "values_misaligned": 567
+   },
+   "candidate": {
+    "values_evaluated": 1948,
+    "values_aligned": 1948,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:UNH-10-K-2022-02-15.htm": {
+   "main": {
+    "values_evaluated": 957,
+    "values_aligned": 734,
+    "values_misaligned": 223
+   },
+   "candidate": {
+    "values_evaluated": 979,
+    "values_aligned": 979,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:UNH-10-K-2023-02-24.htm": {
+   "main": {
+    "values_evaluated": 1038,
+    "values_aligned": 807,
+    "values_misaligned": 231
+   },
+   "candidate": {
+    "values_evaluated": 1060,
+    "values_aligned": 1060,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:UNH-10-K-2024-02-28.htm": {
+   "main": {
+    "values_evaluated": 976,
+    "values_aligned": 749,
+    "values_misaligned": 227
+   },
+   "candidate": {
+    "values_evaluated": 997,
+    "values_aligned": 997,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "recent:UNH-10-K-2026-03-02.htm": {
+   "main": {
+    "values_evaluated": 1062,
+    "values_aligned": 834,
+    "values_misaligned": 228
+   },
+   "candidate": {
+    "values_evaluated": 1078,
+    "values_aligned": 1078,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  }
+ }
+}
