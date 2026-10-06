@@ -8,12 +8,12 @@
 
 **Tech Stack:** Python `>=3.10,<3.13`, BeautifulSoup 4 with lxml, pytest, ruff (rules `E4`, `E7`, `E9`, `F`), optional openpyxl for the XLSX tests. No new dependencies.
 
-**Spec:** [`../specs/2026-10-05-sec2md-table-merge-header-rules-design.md`](../specs/2026-10-05-sec2md-table-merge-header-rules-design.md) (revision 15). Its review record is [`../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md`](../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md). Evidence: [`../audits/2026-10-04-table-merge-header-evidence/REPORT.md`](../audits/2026-10-04-table-merge-header-evidence/REPORT.md). Acceptance records of the prototype: [`../audits/2026-10-06-table-merge-header-acceptance/`](../audits/2026-10-06-table-merge-header-acceptance/).
+**Spec:** [`../specs/2026-10-05-sec2md-table-merge-header-rules-design.md`](../specs/2026-10-05-sec2md-table-merge-header-rules-design.md) (revision 16). Its review record is [`../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md`](../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md). Evidence: [`../audits/2026-10-04-table-merge-header-evidence/REPORT.md`](../audits/2026-10-04-table-merge-header-evidence/REPORT.md). Acceptance records of the prototype: [`../audits/2026-10-06-table-merge-header-acceptance/`](../audits/2026-10-06-table-merge-header-acceptance/).
 
 ## Global Constraints
 
 - **Markdown only.** `TableParser` under the `EXTENDED` policy and the one-row path in `Parser` change. The XLSX export keeps the `LEGACY` policy: its prepared tables (values, column groups, source coordinates, headers and issues) must stay identical to unchanged `main` on every corpus document.
-  - The one accepted XLSX difference is `display_page`, which the parser guesses from Markdown page text. It changes on 4 pages in 2 documents and each change is listed (see Open decisions).
+  - The one XLSX difference, accepted by the user on 2026-10-06, is `display_page`, which the parser guesses from Markdown page text. It changes on 4 pages in 2 documents, and each change is listed (Decisions and open items, item 1).
 - **No value is lost and none is invented.** Strict's numeric trace accounts for each table's header line separately (R6a). There are no new strict failures in either rendering mode.
 - **The alignment check is report-only.** It never raises and never fails strict.
   - `quality_policy="off"` and `Parser(table_checks=False)` skip it.
@@ -34,7 +34,7 @@
 
 ## How this plan works
 
-The usual plan carries full code. This one does not, by the user's choice on 2026-10-06. The code was built first as a prototype, test-first, with one commit per task. It was then run end to end on the Phase A corpus in five acceptance rounds, and the spec was corrected from what those rounds found (revisions 6–13). Round 5 checked the fixes from reviewing the code against the spec while this plan was drafted (revision 14). Revision 15 applies a read-only Codex review of the spec. The prototype branch becomes the implementation branch in Task 0.
+The usual plan carries full code. This one does not, by the user's choice on 2026-10-06. The code was built first as a prototype, test-first, with one commit per task. It was then run end to end on the Phase A corpus in five acceptance rounds, and the spec was corrected from what those rounds found (revisions 6–13). Round 5 checked the fixes from reviewing the code against the spec while this plan was drafted (revision 14). Revision 15 applies a read-only Codex review of the spec, and revision 16 records the user's acceptance of the XLSX display-page exception. The prototype branch becomes the implementation branch in Task 0.
 
 Each of Tasks 1–10 describes one existing commit:
 - the spec rules it covers;
@@ -125,7 +125,7 @@ The baseline at `c674828` is 798 passed, 14 deselected. The 14 deselected tests 
 
 - [ ] **Step 1: Confirm the preconditions.**
   - The user and Astra have approved this plan.
-  - The spec (revision 15) and this plan are committed on `main`.
+  - The spec (revision 16) and this plan are committed on `main`.
   - `git -C .worktrees/tmh-proto status` is clean at `b229b8d`.
 - [ ] **Step 2: Rename the branch.**
 
@@ -783,7 +783,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   | 2 | Other findings | F7 gone. New findings only F9 (TSM 344), F10 (15 tables) and F11 (BAC 260, 293, 336, 338). Tables with findings 937 → 633. |
   | 3 | Strict | 0 new failures in either mode. `header_accounting_misses` 0. The same 14 pre-existing trace failures on both sides. |
   | 4 | Sections | 872 of 872 identical. |
-  | 5 | XLSX | 3,707 prepared tables identical, apart from `display_page` in 9 snapshots of NTRA and TSM (Open decision 1). |
+  | 5 | XLSX | 3,707 prepared tables identical, apart from `display_page` in 9 snapshots of NTRA and TSM, the accepted S3 exception. |
   | 6 | Modes | 109 of 109 agree. |
   | 7 | Alignment | Candidate: 52,954 values evaluated, all aligned, 0 findings. 0 identities lost against `main`; 3,295 gained. |
   | 8 | Assignment audit | 6,616 of 6,616. |
@@ -816,7 +816,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   - the summary;
   - the rendering changes;
   - the acceptance summary from Task 11;
-  - the open decisions;
+  - the decisions and open items;
   - the documented residuals;
   - the test counts.
 
@@ -829,22 +829,21 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
 - [ ] **Step 4: Hand over.** Give the user the push and `gh pr create` commands and the path of the PR body. Do not run them.
 - [ ] **Step 5: Ask before committing in the main checkout.** Ask the user before committing the Task 11 record and any other docs to `main`.
 
-## Open decisions
+## Decisions and open items
 
-1. **XLSX display pages (S3).** Every prepared XLSX table is identical to `main`'s. But `display_page`, which the workbook's contents sheet prints, is guessed from the Markdown page text, and the guess reads numbers out of table lines.
-   - The new rendering changes it on 4 pages in 2 documents:
+1. **XLSX display pages (S3): accepted by the user on 2026-10-06.** Every prepared XLSX table is identical to `main`'s. But `display_page`, which the workbook's contents sheet prints, is guessed from the Markdown page text, and the guess reads numbers out of table lines.
+   - The new rendering changes it on 4 pages in 2 documents (9 snapshots):
      - NTRA page 76: worse.
      - TSM page 47: better.
      - TSM pages 146 and 160: wrong before and after.
-   - **This plan assumes the changes are accepted and listed.**
-   - The guess is a bug already on `main` (TSM page 46 reads 118 from `2,608,118 |`). Fixing it is offered as a separate task.
-   - The user may choose otherwise. Fixing the guess here, or freezing `main`'s display pages, would each add a task.
+   - Task 11 lists each change. Any change beyond these 9 snapshots fails.
+   - The guess is a bug already on `main` (TSM page 46 reads 118 from `2,608,118 |`). Fixing it is a separate task.
 2. **Golden files.** `tests/golden/` is used only by the deselected EDGAR integration tests, and it already differs from `main`. Regenerating it needs a download from sec.gov, which needs the user's approval. This plan does not regenerate it.
 3. **Commits 1–9 fail tests on their own** (see "How this plan works"). Splitting Task 10's updates into the commits that cause each failure is optional.
 
 ## Reviewer notes
 
-**The spec was corrected from the prototype's corpus runs.** Revisions 6–15 add the corrections and interpretations, each in its own table at the top of the spec. The ones that change behaviour:
+**The spec was corrected from the prototype's corpus runs.** Revisions 6–16 add the corrections and interpretations, each in its own table at the top of the spec. The ones that change behaviour:
 
 - **R0 counts footnoted values and ranges as complete numbers.** Footnoted bare years and fiscal-year ranges are year-like.
 - **A year run is never a data row.** R0 has its own caption patterns, which add the corpus's dollar captions and `(Unaudited)`.
@@ -857,7 +856,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   - value columns leave out the label column;
   - two missing test groups were added: the header-retention audit on the matching controls, and `header_row_count` next to R0.
 - **Revision 15,** from a read-only Codex review of the spec:
-  - the XLSX `display_page` exception is an open decision (Open decision 1);
+  - the XLSX `display_page` exception is written into the spec, and the user accepted it on 2026-10-06 (revision 16);
   - label-only is decided by origin, so a full-width caption that starts in the label column is a body row;
   - the checker's emitted path collapses entries only when their link destinations are equal too;
   - repeated headers are detected with year-like values;

@@ -1,8 +1,8 @@
 # sec2md Table Merge and Header Rules Design
 
-Date: 2026-10-06 (revision 15)
+Date: 2026-10-06 (revision 16)
 
-Status: Approved for planning (Astra, round 4). Revisions 6–15 add the plan
+Status: Approved for planning (Astra, round 4). Revisions 6–16 add the plan
 prototype's corrections and interpretations, for Astra to confirm with the plan.
 
 Evidence: `../audits/2026-10-04-table-merge-header-evidence/REPORT.md`
@@ -165,6 +165,9 @@ found:
 | P3. Check 1's acceptance said "294 tables to 0", conflating class-1 losses with all value failures. | 294 class-1 tables restored; 305 → the documented false positives (13 in round 5). |
 | P3. R3's body-start note and the checker's introduction kept superseded wording. | R3 defers to R0's roles. The introduction names the shared cell-text extraction. |
 
+**User decision** (revision 15 → 16): the S3 exception for the workbook's
+`display_page` is accepted (2026-10-06).
+
 **Prototype interpretations, round 2,** recorded for Astra:
 
 | Point | Interpretation |
@@ -193,7 +196,7 @@ source-token and marker fixes, and the page-furniture class.
 
 | Question | Decision |
 |---|---|
-| Scope | The Markdown renderer only: `TableParser` and the one-row path in `Parser`. XLSX output must not change. One exception is open for the user's decision (S3, below): the workbook's `display_page`, which the parser guesses from Markdown page text. |
+| Scope | The Markdown renderer only: `TableParser` and the one-row path in `Parser`. XLSX output must not change, with one exception the user accepted on 2026-10-06 (S3, below): the workbook's `display_page`, which the parser guesses from Markdown page text. |
 | Layout stability | Readers are LLMs and RAG chunking; nothing parses tables by column position. Layout may change wherever it keeps every value and puts it under the right header. CHANGELOG entry and minor version bump. |
 | Currency cells | Merged into the amount, as `$` is today: `€ 1,234`, `RMB 941,168`. |
 | Multi-row headers | Fused per output column into one header line, top to bottom, joined with ` — `. A spanning header repeats in every column it spans. |
@@ -681,11 +684,11 @@ under `EXTENDED`. XLSX's sentinel-header construction is untouched.
   any other. Their output can therefore change, for example keeping an outer
   cell's `12` that was dropped before. Nested-table structure stays deferred.
 - Cell text extraction is unchanged apart from removing zero-width characters.
-- XLSX prepared tables, and XLSX workbooks apart from the open S3 exception:
+- XLSX prepared tables, and XLSX workbooks apart from the accepted S3 exception:
   - The contents sheet prints `display_page`.
   - `Parser._extract_page_number_from_content` guesses it from the first and last lines of each Markdown page, table lines included.
   - So a changed table line can change the guess. The corpus has 9 such snapshots in 2 documents: NTRA page 76, and TSM pages 47, 146 and 160.
-  - **Open decision (user).** The proposal is to accept these changes and list each one; the guess is a bug already on `main`, offered as a separate task. Until the user decides, acceptance marks XLSX as needing review.
+  - **Accepted by the user on 2026-10-06.** These changes are allowed, and each one is listed. The guess is a bug already on `main`, offered as a separate task.
 - The completeness checks 1–3 and their definitions.
 
 ## Header-alignment check
@@ -1098,8 +1101,9 @@ identified by `results.json`'s document hashes and the EDGAR manifest.
   mode.
 - **XLSX:** prepared tables are identical to unchanged `main` for every corpus
   document: values, column groups, source coordinates, headers and issues.
-  Workbook `display_page` changes are listed one by one. They are allowed only
-  if the user accepts the S3 exception ("What does not change").
+  Workbook `display_page` changes are listed one by one. The user accepted
+  them on 2026-10-06 (S3, "What does not change"). Any change beyond the
+  listed snapshots fails.
 - **Check 1:** every one of the 294 class-1 tables has its lost content
   restored. Tables with value failures in `TableParser` output fall from 305 to
   the documented false positives: F1, F2, F3, F5, F8 and F9 (13 tables in the
