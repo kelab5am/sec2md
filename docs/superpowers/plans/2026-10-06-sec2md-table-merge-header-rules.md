@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python `>=3.10,<3.13`, BeautifulSoup 4 with lxml, pytest, ruff (rules `E4`, `E7`, `E9`, `F`), optional openpyxl for the XLSX tests. No new dependencies.
 
-**Spec:** [`../specs/2026-10-05-sec2md-table-merge-header-rules-design.md`](../specs/2026-10-05-sec2md-table-merge-header-rules-design.md) (revision 14). Its review record is [`../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md`](../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md). Evidence: [`../audits/2026-10-04-table-merge-header-evidence/REPORT.md`](../audits/2026-10-04-table-merge-header-evidence/REPORT.md). Acceptance records of the prototype: [`../audits/2026-10-06-table-merge-header-acceptance/`](../audits/2026-10-06-table-merge-header-acceptance/).
+**Spec:** [`../specs/2026-10-05-sec2md-table-merge-header-rules-design.md`](../specs/2026-10-05-sec2md-table-merge-header-rules-design.md) (revision 15). Its review record is [`../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md`](../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md). Evidence: [`../audits/2026-10-04-table-merge-header-evidence/REPORT.md`](../audits/2026-10-04-table-merge-header-evidence/REPORT.md). Acceptance records of the prototype: [`../audits/2026-10-06-table-merge-header-acceptance/`](../audits/2026-10-06-table-merge-header-acceptance/).
 
 ## Global Constraints
 
@@ -34,7 +34,7 @@
 
 ## How this plan works
 
-The usual plan carries full code. This one does not, by the user's choice on 2026-10-06. The code was built first as a prototype, test-first, with one commit per task. It was then run end to end on the Phase A corpus in five acceptance rounds, and the spec was corrected from what those rounds found (revisions 6–14). A fifth round checked the fixes from reviewing the code against the spec while this plan was drafted. The prototype branch becomes the implementation branch in Task 0.
+The usual plan carries full code. This one does not, by the user's choice on 2026-10-06. The code was built first as a prototype, test-first, with one commit per task. It was then run end to end on the Phase A corpus in five acceptance rounds, and the spec was corrected from what those rounds found (revisions 6–13). Round 5 checked the fixes from reviewing the code against the spec while this plan was drafted (revision 14). Revision 15 applies a read-only Codex review of the spec. The prototype branch becomes the implementation branch in Task 0.
 
 Each of Tasks 1–10 describes one existing commit:
 - the spec rules it covers;
@@ -108,16 +108,16 @@ Commits 1–9 also show one environment-only failure, `tests/test_models.py::tes
 
 | Task | Prototype commit | Full suite on the commit's tree |
 |---|---|---|
-| 1 | `bd43897` | 1136 passed, 1 failed (environment only) |
-| 2 | `7be36c4` | 1157 passed, 1 failed (environment only) |
-| 3 | `ad8a9c1` | 1191 passed, 3 failed |
-| 4 | `a8012b9` | 1214 passed, 19 failed, 1 error |
-| 5 | `73a2cf9` | 1289 passed, 18 failed, 1 error |
-| 6 | `a3ec603` | 1295 passed, 18 failed, 1 error |
-| 7 | `77e3023` | 1414 passed, 17 failed |
-| 8 | `1dcf4ad` | 1457 passed, 17 failed |
-| 9 | `8f4991e` | 1533 passed, 17 failed |
-| 10 | `27889db` | **1604 passed, 14 deselected**; ruff clean |
+| 1 | `6a5f29f` | 1138 passed, 1 failed (environment only) |
+| 2 | `c249876` | 1159 passed, 1 failed (environment only) |
+| 3 | `d239a9d` | 1193 passed, 3 failed |
+| 4 | `fa1055e` | 1216 passed, 19 failed, 1 error |
+| 5 | `6680c47` | 1293 passed, 18 failed, 1 error |
+| 6 | `129218b` | 1299 passed, 18 failed, 1 error |
+| 7 | `9041958` | 1418 passed, 17 failed |
+| 8 | `8a26ae4` | 1461 passed, 17 failed |
+| 9 | `ac2b1f0` | 1540 passed, 17 failed |
+| 10 | `b229b8d` | **1611 passed, 14 deselected**; ruff clean |
 
 The baseline at `c674828` is 798 passed, 14 deselected. The 14 deselected tests are the EDGAR `integration` tests. Do not run them, because they download from sec.gov.
 
@@ -125,8 +125,8 @@ The baseline at `c674828` is 798 passed, 14 deselected. The 14 deselected tests 
 
 - [ ] **Step 1: Confirm the preconditions.**
   - The user and Astra have approved this plan.
-  - The spec (revision 14) and this plan are committed on `main`.
-  - `git -C .worktrees/tmh-proto status` is clean at `27889db`.
+  - The spec (revision 15) and this plan are committed on `main`.
+  - `git -C .worktrees/tmh-proto status` is clean at `b229b8d`.
 - [ ] **Step 2: Rename the branch.**
 
   ```bash
@@ -168,20 +168,20 @@ The baseline at `c674828` is 798 passed, 14 deselected. The 14 deselected tests 
   ```
 
 - [ ] **Step 4: Check that nothing but the subjects changed.**
-  - `git diff 27889db HEAD` is empty.
+  - `git diff b229b8d HEAD` is empty.
   - `git log --format=%s c674828..HEAD` lists the ten final subjects in order.
-  - The full suite at HEAD gives 1604 passed, 14 deselected.
+  - The full suite at HEAD gives 1611 passed, 14 deselected.
   - Record the new SHAs in the commit table above.
 
-Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on a `git archive` tree of each commit with the worktree venv, the ten full suites one at a time. The full suite's "3 warnings" are the existing `XMLParsedAsHTMLWarning`s. The version-test failure on Tasks 1–9 is environment-only.
+Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b`. Revision 15 adds a table near the top, which shifts later lines; open `git show 92da51b:docs/superpowers/specs/2026-10-05-sec2md-table-merge-header-rules-design.md` to follow them. Every count was rerun on a `git archive` tree of each commit with the worktree venv, the ten full suites one at a time. The full suite's "3 warnings" are the existing `XMLParsedAsHTMLWarning`s. The version-test failure on Tasks 1–9 is environment-only.
 
-## Task 1: Row roles (R0) in `table_roles` (commit `bd43897`, prototype `proto T1`)
+## Task 1: Row roles (R0) in `table_roles` (commit `6a5f29f`, prototype `proto T1`)
 
 **Spec:** Definitions (Visible cell text, Origin text, Label column, Identifier column, Complete number with revision 14's one currency marker, thousands in groups of three and one `%`, footnoted values, ranges and year-like values, Bare year, Nil value, Period text and unit text, Year run, Explicit header row, Data row with its three further rules and the named limitation, Header zone with header-like rows, label-only rows, `main`'s sparse-row fusion without marker-only columns (revision 13) and trailing label-only rows, "R0 is a rule on visible content", Row role, Currency markers); R0; Testing, "Row roles"; interpretation round 2, "R0's unit captions".
 
 **Files:**
 - Create: `src/sec2md/table_roles.py` — R0, shared by the renderer and the checker: visible text, the closed currency list, the number, year and nil predicates, split-negative rebuild, R0's caption patterns, year runs, header-like and label-only rows, the sparse-row fusion and `row_roles`.
-- Test: `tests/test_table_roles.py` — new, 339 tests (module-level functions, no classes; expected roles written out literally).
+- Test: `tests/test_table_roles.py` — new, 341 tests (module-level functions, no classes; expected roles written out literally).
 
 **Interfaces:**
 - Consumes: `sec2md.quality._MARKDOWN_LINK_RE`; `table_completeness._PERIOD_TEXT` and `xlsx_tables._UNIT_LINE`, imported lazily inside `_caption_patterns()` (lru_cache) because both modules import `table_parser`, which imports this module.
@@ -210,12 +210,13 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - Marker-only columns (revision 13): AMZN 10-Q 21 → header, body ×3, `fuses_like_main` false; JPM 207 → header, header, body ×4, true; the NVDA 10-K 38 control (`$` columns that also hold dates and values) → header, header, body, body, true; `test_main_sparse_row_fusion` ×17 (exhibit title, payments span, … currency columns, percent columns, close-percent columns, open columns, currency codes: no fusion; unknown codes, currency column holding values, marker under a heading: fusion).
 - Number predicates: 35 complete numbers (`9,943`, `(29)`, `36.5 %`, `$ 1,234`, `RMB 941,168`, `.75`, `3.1`, `9`, `(3.2)%`, `€ (1,234)`, `NT$ 1,329.2`, `−5`, `(.62)`, `$(120)`, `( 29)`, `2,191,446,233`, `2.1(1)`, `3,984 *`, `104**`, `1,234 (1)`, `10.1(10)`, `36.5 %(a)`, `$ 1,234 †`, `9‡`, `4.3 [1]`, `(29)(1)`, `1,234 (a)(2)`, `3.5 %- 4.3 %`, `0.2 - 1.0`, `0.1 - 2.0`, `26 %- 96 %`, `1 – 2`, `$ 10 to $ 20`, `(5)—(3)`, `RMB 1.2 - RMB 1.5`); 28 non-numbers (`2025`, `1999`, `—`, `(29`, `29)`, `abc`, `XYZ 100`, `$`, `5, 24`, `""`, `Jan 25, 2026`, `1,`, `Item 7 and 120`, `1,234 (123)`, `1,234 (ab)`, `1,234 [a]`, `*`, `(1)(2)x`, `2025 (1)`, `2024(a)`, `2024 – 2026`, `2023-2024`, `2024–25`, `1 - 2 - 3`, `1 to`, `0.1 - 2.0 (1)`, `Note 2`, `5 or 6`); bare years are 1900–2099 (`1899` and `$ 2025` are complete numbers); `is_year_like` ×18 (`2024–25`, `2024 – 25`, `2024-25`, `2024 — 25` true; `2024–5`, `2024–255`, `24–25`, `Fiscal 2025` false); nil values ×9; the 27 currency markers; 8 non-markers (`ABC`, `XYZ`, `rmb`, `$$`, `US`, `RMB 1`, `(`, `%`); `visible_text`; `row_values` rebuilds split negatives at the digit column and skips span-covered and empty slots.
 - Revision 14's grammar: `test_standalone_numbers_have_one_marker_one_percent_and_groups_of_three` ×14 rejects `$ $ 5`, `USD $ 5`, `$ ($ 120)`, `RMB (€ 5)`, `5 % %`, `(3.2 %)%`, `$ 1,234 % %`, `1,,2`, `12,34`, `(12,34)`, `1,00,000`, `12,345,6`, `0,5`, `1,2345`; `test_standalone_numbers_keep_every_form_with_one_marker_and_one_percent` ×17 keeps `US$ 1,250.0`, `$ (120)`, `($ 120)`, `( $ 120 )`, `(3.2 %)`, `(3.2) %`, `$ 5 %`, `$-5`, `+5`, `– 5`, `(−5)`, `1234`, `1,234.5`, `1,234,567.89`, `0.000`, `RMB(1,234)`, `($ 120 %)`; `test_split_negatives_rebuild_only_standalone_amounts`: `Loss | (12,34 | )` keeps `(12,34` and `)` apart (neither is a value), `Loss | (1,234 | )` rebuilds `(1,234)`.
+- Revision 15's control: `test_full_width_caption_starting_in_the_label_column_before_the_data_is_a_body_row` ×2 (a unit caption and a period caption). The grid `["", "2025", "2024"]`, `[caption, None, None]`, then a data row gives header, body, body. The label-only test is true for the caption that starts in the label column and false for `["", caption, None]`. It sits next to `test_caption_spanning_the_value_columns_before_the_data_stays_header`.
 
 **Tests changed:** none (new file).
 
 **Verification:**
-- Task tests: `venv/Scripts/python -m pytest -q tests/test_table_roles.py` → 339 passed in 0.37 s (wall 1.2 s)
-- Full suite at `bd43897` (`git archive` tree): 1136 passed, 1 failed, 14 deselected, 3 warnings in 148.87 s (wall 149.8 s). Real failures: none. Environment-only: `tests/test_models.py::test_internal_version_matches_distribution` (`'0.1.22+rcq.4' == '0.1.22+rcq.3'`: the venv's editable metadata is rcq.4; the tree pins rcq.3 until Task 10).
+- Task tests: `venv/Scripts/python -m pytest -q tests/test_table_roles.py` → 341 passed
+- Full suite at `6a5f29f` (`git archive` tree): 1138 passed, 1 failed, 14 deselected, 3 warnings. Real failures: none. Environment-only: `tests/test_models.py::test_internal_version_matches_distribution` (`'0.1.22+rcq.4' == '0.1.22+rcq.3'`: the venv's editable metadata is rcq.4; the tree pins rcq.3 until Task 10).
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
@@ -233,7 +234,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 2: Structural policy (R9) and zero-width cell text (commit `7be36c4`, prototype `proto T2`)
+## Task 2: Structural policy (R9) and zero-width cell text (commit `c249876`, prototype `proto T2`)
 
 **Spec:** R9; Definitions (Visible cell text: zero-width removal; Structural policy; Explicit header row's th markup); "What does not change" (cell text extraction apart from zero-width characters; XLSX); Testing, "XLSX boundary (R9)".
 
@@ -262,7 +263,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 
 **Verification:**
 - Task tests: `venv/Scripts/python -m pytest -q tests/test_table_merge_headers.py tests/test_xlsx_tables.py` → 90 passed in 1.84 s (wall 2.6 s)
-- Full suite at `7be36c4`: 1157 passed, 1 failed, 14 deselected, 3 warnings in 148.63 s (wall 149.6 s). Real failures: none. Environment-only: `tests/test_models.py::test_internal_version_matches_distribution` (rcq.4 metadata against the tree's rcq.3; Task 10).
+- Full suite at `c249876`: 1159 passed, 1 failed, 14 deselected, 3 warnings. Real failures: none. Environment-only: `tests/test_models.py::test_internal_version_matches_distribution` (rcq.4 metadata against the tree's rcq.3; Task 10).
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
@@ -277,7 +278,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 3: EXTENDED careful-merge rules and currency markers (commit `ad8a9c1`, prototype `proto T3`)
+## Task 3: EXTENDED careful-merge rules and currency markers (commit `d239a9d`, prototype `proto T3`)
 
 **Spec:** R3 steps 1–4; R4; R9 (the `EXTENDED` branches); Testing, "Currency, parametrized" and "Other synthetic cases" (helper level), "XLSX boundary".
 
@@ -309,7 +310,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 
 **Verification:**
 - Task tests: `venv/Scripts/python -m pytest -q tests/test_table_merge_headers.py tests/test_table_parser.py tests/test_table_completeness_parser.py` → 167 passed in 0.49 s (wall 1.3 s)
-- Full suite at `ad8a9c1`: 1191 passed, 3 failed, 14 deselected, 3 warnings in 152.68 s (wall 153.7 s). Real failures: `tests/test_table_completeness_fixtures.py::test_fixture_reports_exactly_the_pinned_failures[nvda-2002-10k-normal]` and `[nvda-2002-10k-capture]`: `assert {} == {19: ('1997', '1998', '31', '31')}` — R3.2/R3.3 merge table 19's `$` columns, so its period headers are no longer lost; Task 10 empties the pin. Environment-only: the version test.
+- Full suite at `d239a9d`: 1193 passed, 3 failed, 14 deselected, 3 warnings. Real failures: `tests/test_table_completeness_fixtures.py::test_fixture_reports_exactly_the_pinned_failures[nvda-2002-10k-normal]` and `[nvda-2002-10k-capture]`: `assert {} == {19: ('1997', '1998', '31', '31')}` — R3.2/R3.3 merge table 19's `$` columns, so its period headers are no longer lost; Task 10 empties the pin. Environment-only: the version test.
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
@@ -324,7 +325,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 4: Source grid, membership, R1, R2 and the header veto (commit `a8012b9`, prototype `proto T4`)
+## Task 4: Source grid, membership, R1, R2 and the header veto (commit `fa1055e`, prototype `proto T4`)
 
 **Spec:** Definitions (Source cell, Grid-hidden with the all-hidden row rule, Source grid, Slot, Header cell of a slot, Membership: owning and marker members); R1; R2 (body, header, currency-only marker exception); R3 steps 5–6; Testing, "Provenance and the guard".
 
@@ -363,7 +364,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 
 **Verification:**
 - Task tests: `venv/Scripts/python -m pytest -q tests/test_table_merge_headers.py tests/test_table_parser.py` → 111 passed in 2.43 s (wall 3.2 s)
-- Full suite at `a8012b9`: 1214 passed, 19 failed, 1 error, 14 deselected, 3 warnings in 95.30 s (wall 96.3 s). Real failures:
+- Full suite at `fa1055e`: 1216 passed, 19 failed, 1 error, 14 deselected, 3 warnings. Real failures:
   - Strict `ParseQualityError: untraceable normalized number` (repeated spanning header numbers, for example `sec2md-p38-t0-…:2023` ×6 on aapl), fixed by Task 7: `tests/accuracy/test_sec_accuracy.py::test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]`, `[nvda-2026-q2-10q]`, `::test_apple_trace_has_no_failures`, `::test_legacy_character_normalization_has_no_c1_controls`, `tests/test_chunker.py::TestChunkSectionIsolation::test_real_filing_item_1b_chunks_match_section_text`, and ERROR at setup of `tests/accuracy/test_sec_accuracy.py::test_rcq_release_contract`. After Task 7 the four contracts, the apple trace and the release contract still fail on the accuracy harness's own trace (and q2's financial rows) until Task 10.
   - `tests/test_table_completeness_fixtures.py::test_fixture_reports_exactly_the_pinned_failures[...]` ×10 (aapl-2023-10k, nvda-2002-10k, nvda-2026-q2-10q, nvda-2026-ex99-1, nvda-2026-ex99-2; normal and capture): `assert {} == {13: ('-1',), …}` — R1 keeps every pinned loss; Task 10 empties `PINNED_FAILURES`.
   - `tests/test_table_completeness_fixtures.py::test_row_structure_mutations_are_detected[swap_first_body_rows-appears before an earlier source row-48]`: `assert 44 == 48` (the swap mutation is still detected, in 4 fewer aapl tables at this layout); passes again from Task 5.
@@ -385,13 +386,13 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 5: Header line (R5–R7) and the per-render header record (commit `73a2cf9`, prototype `proto T5`)
+## Task 5: Header line (R5–R7) and the per-render header record (commit `6680c47`, prototype `proto T5`)
 
 **Spec:** R5; R6 (with link-aware equality, revision 11, and step 2's normalized equality as revision 14 words it); R7; R6a step 1 (the header record: header line, `header_source` tokenized once as the pool is, `header_capacity`); Testing, "One rendering test per class", the row-role cases' expected output headers, "Other synthetic cases" (U+200B, `.75`, the nil residual), and the header-zone cases of revisions 11–13.
 
 **Files:**
 - Modify: `src/sec2md/table_parser.py` — `_process_headers` from the R0 header zone, R6 step 2 with link-aware equality, R7's `_kept_columns`, `Cell.node`, `TableHeaderRecord` and `_header_record`, set by `to_markdown`.
-- Test: `tests/test_table_merge_headers.py` — 74 additions (82 → 156).
+- Test: `tests/test_table_merge_headers.py` — 76 additions (82 → 158).
 - Test: `tests/test_table_completeness_parser.py` — 1 case and 1 test changed.
 
 **Interfaces:**
@@ -413,14 +414,17 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - Grid-hidden renders: CAT 34 → `| Millions of dollars | Twelve Months Ended December 31, — 2024 | Twelve Months Ended December 31, — 2023 |`; BAC 336 → three columns; JPM 606 keeps `| Balance at December 31, 2021 | $ 2,640 | $ (131) |`.
 - Header record: JPM 482 → `header_source == (("2024", 1), ("31", 1))`, `header_capacity == (("2024", 5), ("31", 1))`; Astra's source → `(("2025", 2),)` and `(("2025", 3),)`; headerless → `header_line is None`, both counts empty; link destinations are not read (`(("2025", 1),)`); a rowspan cell counts once (`("2025", 2)`, capacity `("2025", 3)`); a list table → `header_record is None`; th `Item | ( | 29 | )` → `header_source == (("-29", 1),)`, as the table text tokenizes, and per-cell `header_capacity == (("29", 1),)`.
 - Revision 6 renders: `| Item | 2026 | 2025 |` over `| Revenue | 2000 | 1900 |`; th `| Denomination | €1 | €2 |` stays the header line.
+- Revision 15's rendering cases in the header-zone table:
+  - `full-width-caption-from-the-label-column` renders `|  | 2025 | 2024 |`, `| (In millions) |  |  |`, `| Revenue | 100 | 90 |`;
+  - `caption-from-a-value-column` renders `|  | 2025 — (In millions) | 2024 — (In millions) |`, `| Revenue | 100 | 90 |`.
 
 **Tests changed:**
 - `tests/test_table_completeness_parser.py` case "unlabelled rows, amount deleted": R7 keeps the `Item` column (header text, empty body), so rows read `|  | 9 |`; the mutation now targets `"|  | 9 |\n|  | 9 |"` (finding unchanged).
 - `tests/test_table_completeness_parser.py::test_nested_table_follows_each_rendering_mode`: normal mode now `{}` (was `lost("12")`): R1 and R7 keep the outer cell's `12` (spec 663-666: nested tables get no special handling and their output can change).
 
 **Verification:**
-- Task tests: `venv/Scripts/python -m pytest -q tests/test_table_merge_headers.py tests/test_table_completeness_parser.py` → 252 passed in 2.78 s (wall 3.6 s)
-- Full suite at `73a2cf9`: 1289 passed, 18 failed, 1 error, 14 deselected, 3 warnings in 96.67 s (wall 97.7 s). Real failures (Task 4's list without the swap-mutation count, which passes again):
+- Task tests: `venv/Scripts/python -m pytest -q tests/test_table_merge_headers.py tests/test_table_completeness_parser.py` → 254 passed
+- Full suite at `6680c47`: 1293 passed, 18 failed, 1 error, 14 deselected, 3 warnings. Real failures (Task 4's list without the swap-mutation count, which passes again):
   - Strict `untraceable normalized number` (Task 7; then the harness trace and q2's financial rows until Task 10): `tests/accuracy/test_sec_accuracy.py::test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]`, `[nvda-2026-q2-10q]`, `::test_apple_trace_has_no_failures`, `::test_legacy_character_normalization_has_no_c1_controls`, `tests/test_chunker.py::TestChunkSectionIsolation::test_real_filing_item_1b_chunks_match_section_text`, and ERROR at setup of `tests/accuracy/test_sec_accuracy.py::test_rcq_release_contract`.
   - `tests/test_table_completeness_fixtures.py::test_fixture_reports_exactly_the_pinned_failures[...]` ×10 (aapl-2023-10k, nvda-2002-10k, nvda-2026-q2-10q, nvda-2026-ex99-1, nvda-2026-ex99-2; normal and capture): `assert {} == {…}` (Task 10).
   - Environment-only: the version test.
@@ -438,7 +442,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 6: Keep every cell of a one-row PART table (R8) (commit `a3ec603`, prototype `proto T6`)
+## Task 6: Keep every cell of a one-row PART table (R8) (commit `129218b`, prototype `proto T6`)
 
 **Spec:** R8; Testing, "Integration" (CAT 7 through `Parser` and the section extractor); Acceptance, "Sections" (R8 can keep a short part-only stub).
 
@@ -461,7 +465,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 
 **Verification:**
 - Task tests: `venv/Scripts/python -m pytest -q tests/test_parser.py tests/test_section_extractor.py` → 98 passed in 0.20 s (wall 1.0 s)
-- Full suite at `a3ec603`: 1295 passed, 18 failed, 1 error, 14 deselected, 3 warnings in 96.92 s (wall 98.0 s). Real failures: identical to Task 5's list: the 7 strict failures (`test_audited_document_meets_baseline_contract` ×4, `test_apple_trace_has_no_failures`, `test_legacy_character_normalization_has_no_c1_controls`, the chunker's `test_real_filing_item_1b_chunks_match_section_text`) and the setup error of `test_rcq_release_contract` (Task 7, then Task 10), and the 10 `test_fixture_reports_exactly_the_pinned_failures` pins (Task 10). Environment-only: the version test.
+- Full suite at `129218b`: 1299 passed, 18 failed, 1 error, 14 deselected, 3 warnings. Real failures: identical to Task 5's list: the 7 strict failures (`test_audited_document_meets_baseline_contract` ×4, `test_apple_trace_has_no_failures`, `test_legacy_character_normalization_has_no_c1_controls`, the chunker's `test_real_filing_item_1b_chunks_match_section_text`) and the setup error of `test_rcq_release_contract` (Task 7, then Task 10), and the 10 `test_fixture_reports_exactly_the_pinned_failures` pins (Task 10). Environment-only: the version test.
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
@@ -473,7 +477,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 7: Header accounting in strict's numeric trace (R6a) (commit `77e3023`, prototype `proto T7`)
+## Task 7: Header accounting in strict's numeric trace (R6a) (commit `9041958`, prototype `proto T7`)
 
 **Spec:** R6a steps 2–4 (the render that supplied content, the exact table-to-output association, header capacity, misses incl. tables inside list items or inline wrappers, the remainders and multiset subtraction); "Interaction with strict and the completeness checks", "Strict"; Testing, "Strict (R6a)".
 
@@ -483,7 +487,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - Modify: `src/sec2md/table_parser.py` — `TableParser.__init__` sets `header_record = None`.
 - Test: `tests/test_quality.py` — 99 additions (46 → 145).
 - Test: `tests/test_parser.py` — 17 additions in `TestHeaderRecordBinding` (36 → 53) and constants `REPEATED_HEADER_TABLE`, `LABELS_TABLE`, `LINKED_LABELS_TABLE`, `EQUAL_TABLE`, `LABELS_HEADER`.
-- Test: `tests/test_table_merge_headers.py` — 1 addition (156 → 157).
+- Test: `tests/test_table_merge_headers.py` — 1 addition (158 → 159).
 
 **Interfaces:**
 - Consumes: `TableHeaderRecord` and `TableParser.header_record` (Task 5); `quality._normalized_numbers`.
@@ -516,8 +520,8 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 **Tests changed:** none.
 
 **Verification:**
-- Task tests: `venv/Scripts/python -m pytest -q tests/test_quality.py tests/test_parser.py tests/test_table_merge_headers.py` → 355 passed in 3.22 s (wall 4.0 s)
-- Full suite at `77e3023`: 1414 passed, 17 failed, 14 deselected, 3 warnings in 158.98 s (wall 160.1 s). Real failures, all fixed by Task 10:
+- Task tests: `venv/Scripts/python -m pytest -q tests/test_quality.py tests/test_parser.py tests/test_table_merge_headers.py` → 357 passed
+- Full suite at `9041958`: 1418 passed, 17 failed, 14 deselected, 3 warnings. Real failures, all fixed by Task 10:
   - The accuracy harness's own trace (`tests/accuracy/metrics.py::_oracle_trace_numeric_failures`, deliberately independent of production) has no header accounting yet and reports the repeated header tokens: `tests/accuracy/test_sec_accuracy.py::test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]` (`assert not ('sec2md-p…:2023', …)`), `::test_apple_trace_has_no_failures`, `::test_rcq_release_contract` (now a failure, no longer a setup error).
   - `tests/accuracy/test_sec_accuracy.py::test_audited_document_meets_baseline_contract[nvda-2026-q2-10q]`: `assert 0.988929889298893 >= 0.99` (financial-row recall; the amended metric is Task 10's).
   - The 10 pins (Task 10).
@@ -537,7 +541,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 8: Header-alignment source side and Markdown cell parser (commit `1dcf4ad`, prototype `proto T8`)
+## Task 8: Header-alignment source side and Markdown cell parser (commit `8a26ae4`, prototype `proto T8`)
 
 **Spec:** Header-alignment check, "Source side" steps 1–6 (placed grid, R0 on visible text, value columns without the label column as revision 14 words step 3, discriminating headers with step 15, repeated headers, values, source and emitted paths, required entries, and the conflicting siblings of step 13) and "Output side" steps 7–9; interpretations round 1 ("Source cell text in the checker", "Year-like values", "Step 15's siblings", "Repeated-header detection"); revision 11's link-aware emitted path.
 
@@ -568,7 +572,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 
 **Verification:**
 - Task tests: `venv/Scripts/python -m pytest -q tests/test_table_alignment.py tests/test_table_completeness.py` → 108 passed, 1 warning in 4.62 s (wall 5.4 s); the warning is the existing `XMLParsedAsHTMLWarning` of `tests/test_table_completeness.py::test_header_row_count_matches_snapshots_on_a_fixture`
-- Full suite at `1dcf4ad`: 1457 passed, 17 failed, 14 deselected, 3 warnings in 152.92 s (wall 154.0 s). Real failures: identical to Task 7's list, all fixed by Task 10: `tests/accuracy/test_sec_accuracy.py::test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]` (the harness's own trace), `[nvda-2026-q2-10q]` (financial-row recall 0.9889 < 0.99), `::test_apple_trace_has_no_failures`, `::test_rcq_release_contract` (harness trace), and the 10 `test_fixture_reports_exactly_the_pinned_failures` pins. Environment-only: the version test.
+- Full suite at `8a26ae4`: 1461 passed, 17 failed, 14 deselected, 3 warnings. Real failures: identical to Task 7's list, all fixed by Task 10: `tests/accuracy/test_sec_accuracy.py::test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]` (the harness's own trace), `[nvda-2026-q2-10q]` (financial-row recall 0.9889 < 0.99), `::test_apple_trace_has_no_failures`, `::test_rcq_release_contract` (harness trace), and the 10 `test_fixture_reports_exactly_the_pinned_failures` pins. Environment-only: the version test.
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
@@ -587,7 +591,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 9: Header-alignment matching, coverage and diagnostics (commit `8f4991e`, prototype `proto T9`)
+## Task 9: Header-alignment matching, coverage and diagnostics (commit `ac2b1f0`, prototype `proto T9`)
 
 **Spec:** Header-alignment check, "Matching" steps 10–15 with "Evaluation is bounded", the failing and passing controls; "Findings and coverage" (finding format, at most 10 per table plus the total, the two trailing `ParseDiagnostics` fields, the 21 keys, precedence, reconciliation, an empty tuple meaning the check did not run, plumbing inside the guarded `check_tables()` call, policy `off`); Testing, "The alignment check" with the header-retention audit on the matching controls (spec 1010-1011); "Interaction with strict and the completeness checks", check 1's header role next to R0 (spec 916-917); revision 14's global early stop (spec 790-791); interpretations round 2 ("Cell texts in the checker", "Link-aware equality" with the same base URL).
 
@@ -597,7 +601,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - Modify: `src/sec2md/quality.py` — the two trailing `ParseDiagnostics` fields and their `build_diagnostics` pass-through.
 - Modify: `src/sec2md/parser.py` — `_cell_texts` recorded by `_render_table` (checks on only) and passed with `base_url=self.source_url` to `check_tables`.
 - Modify: `src/sec2md/table_roles.py` — `visible_text` ASCII fast path (performance only).
-- Test: `tests/test_table_alignment.py` — 68 additions (43 → 111).
+- Test: `tests/test_table_alignment.py` — 71 additions (43 → 114).
 - Test: `tests/test_quality.py` — 1 addition (145 → 146) and 2 tests extended.
 - Test: `tests/test_table_completeness_fixtures.py` — 7 additions (26 → 33).
 - Test: `tests/test_table_completeness.py` — 2 tests changed.
@@ -629,21 +633,25 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
   - A forced exception inside `align_table` leaves `table_report` `None` and both fields `()`; policy `off` never runs the check and leaves `()`.
 - `tests/test_quality.py::test_build_diagnostics_carries_header_alignment_findings_and_coverage`: a report with one finding and 21 coverage pairs passes through unchanged, no warnings.
 - `tests/test_table_completeness_fixtures.py::test_header_alignment_reports_nothing_on_the_fixtures` ×7: no findings in either mode, coverage pinned per fixture in `ALIGNMENT_COVERAGE` and equal across modes (for example aapl-2023-10k `(66, 8, 1, 0, 5, 5, 47, 423, 15, 159, 249, 758, 51, 30, 0, 30, 0, 0, 647, 647, 0)`), `tables_total` equal to the visible outermost tables.
+- Repeated headers by year-like value (revision 15):
+  - `test_year_like_mid_table_row_is_a_repeated_header[footnoted|fiscal-range]`: a mid-table `2024(a) | 2023(a)` or `2024–25 | 2023–24` row at row 2 is a repeated header, so rows 3 and 4 are `row_below_repeated_header` (3 data rows, 2 below, 1 paired, 2 values aligned).
+  - The control `test_mid_table_row_with_an_amount_beside_a_fiscal_year_range_is_not_a_repeated_header`: `Fiscal 2024–25 adjustment | 15 | 13` is a data row, and all 8 values are aligned.
+  - The link-aware emitted path is pinned by Task 8's `test_adjacent_equal_labels_with_different_links_stay_separate_entries` and this task's `test_equal_labels_with_different_links_need_both_occurrences`.
 
 **Tests changed:**
 - `tests/test_table_completeness.py::test_check_tables_excludes_header_rows_from_row_structure` and `::test_check_tables_skips_hidden_and_token_free_tables`: compared the whole report with `TableCompletenessReport(n, ())`; the report now also carries alignment coverage, so they compare `(tables_checked, findings)` (the second also asserts the text table counts as `table_no_output`).
 - `tests/test_quality.py::test_parse_diagnostics_positional_construction_keeps_working` and `::test_build_diagnostics_without_table_report_skips_all_three_checks`: extended with the two `()` assertions for the new fields.
 
 **Verification:**
-- Task tests: `venv/Scripts/python -m pytest -q tests/test_table_alignment.py tests/test_quality.py tests/test_table_completeness.py tests/test_table_completeness_fixtures.py` → 345 passed, 10 failed, 1 warning in 55.85 s (wall 56.6 s). The 10 failures are the `test_fixture_reports_exactly_the_pinned_failures` cases (the pins Task 10 empties); the warning is the existing `XMLParsedAsHTMLWarning` of `tests/test_table_completeness.py::test_header_row_count_matches_snapshots_on_a_fixture`. With `tests/test_table_completeness_fixtures.py::test_header_alignment_reports_nothing_on_the_fixtures` in place of the whole fixtures file: 329 passed, 1 warning in 22.24 s (wall 23.1 s)
-- Full suite at `8f4991e`: 1533 passed, 17 failed, 14 deselected, 3 warnings in 176.96 s (wall 178.1 s). Real failures: identical to Task 7's and Task 8's list, all fixed by Task 10: `test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]` (harness trace), `[nvda-2026-q2-10q]` (financial-row recall), `test_apple_trace_has_no_failures`, `test_rcq_release_contract` (all in `tests/accuracy/test_sec_accuracy.py`), and the 10 `test_fixture_reports_exactly_the_pinned_failures` pins. Environment-only: the version test.
+- Task tests: `venv/Scripts/python -m pytest -q tests/test_table_alignment.py tests/test_quality.py tests/test_table_completeness.py tests/test_table_completeness_fixtures.py` → 348 passed, 10 failed, 1 warning. The 10 failures are the `test_fixture_reports_exactly_the_pinned_failures` cases (the pins Task 10 empties); the warning is the existing `XMLParsedAsHTMLWarning` of `tests/test_table_completeness.py::test_header_row_count_matches_snapshots_on_a_fixture`. With `tests/test_table_completeness_fixtures.py::test_header_alignment_reports_nothing_on_the_fixtures` in place of the whole fixtures file: 332 passed, 1 warning in 22.24 s (wall 23.1 s)
+- Full suite at `ac2b1f0`: 1540 passed, 17 failed, 14 deselected, 3 warnings. Real failures: identical to Task 7's and Task 8's list, all fixed by Task 10: `test_audited_document_meets_baseline_contract[aapl-2023-10k]`, `[nvda-2026-10k]`, `[nvda-2002-10k]` (harness trace), `[nvda-2026-q2-10q]` (financial-row recall), `test_apple_trace_has_no_failures`, `test_rcq_release_contract` (all in `tests/accuracy/test_sec_accuracy.py`), and the 10 `test_fixture_reports_exactly_the_pinned_failures` pins. Environment-only: the version test.
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
 - Exact path rendering (spec 748-752) is `label_text_key(header) == label_text_key(expectation.rendering())`.
 - Segmentations (spec 753-758): the header's visible text, whitespace collapsed and case folded, splits at every ` — `; only the relevant labels (required and conflicting-sibling keys) are looked up, which is what the verdict depends on, and a segment longer than the longest relevant key is skipped.
 - Search (spec 782-797): an iterative depth-first search over `(position, capped counts)` with counts capped at `need + 1`; a state is counted when created, the start and the terminals included; creating state `max_states + 1` abandons the search as `Verdict("budget", max_states)`, never aligned.
-- Global early stop (spec 790-791; resolved in round 5): `judge` (`table_alignment.py:605-638`) ORs every verdict it meets, at a terminal or a memo hit, into `seen` and returns `ambiguous` as soon as `seen` holds both; every visited state is reachable from the start, so this is the spec's stop. The per-frame `reachable == _BOTH` pop and the final `memo[start] == _BOTH` branch are gone; without both, `memo[start]` holds exactly one verdict (`table_alignment.py:639-642`). My differential check (`plan-checks/judge_diff.py` in the acceptance folder: 5,000 random headers and expectations, `28298ff`'s judge against `8f4991e`'s, at bounds 200 and 100,000) found no changed outcome or conflicting text, and the new judge never created more states; on the round-4 probe (`plan-checks/early_stop_probe.py`) it now equals my independent global-stop search state for state (10,269 and 97,250). The 19-sibling case lands 2.75% under the bound (97,250): the search finishes the all-inconsistent subtree under `A` before it tries `A — B`. The corpus still has no budget value (REPORT-round5.md).
+- Global early stop (spec 790-791; resolved in round 5): `judge` (`table_alignment.py:605-638`) ORs every verdict it meets, at a terminal or a memo hit, into `seen` and returns `ambiguous` as soon as `seen` holds both; every visited state is reachable from the start, so this is the spec's stop. The per-frame `reachable == _BOTH` pop and the final `memo[start] == _BOTH` branch are gone; without both, `memo[start]` holds exactly one verdict (`table_alignment.py:639-642`). My differential check (`plan-checks/judge_diff.py` in the acceptance folder: 5,000 random headers and expectations, `28298ff`'s judge against `8f4991e`'s (round 6 changed tests only, so `ac2b1f0`'s judge is the same code), at bounds 200 and 100,000) found no changed outcome or conflicting text, and the new judge never created more states; on the round-4 probe (`plan-checks/early_stop_probe.py`) it now equals my independent global-stop search state for state (10,269 and 97,250). The 19-sibling case lands 2.75% under the bound (97,250): the search finishes the all-inconsistent subtree under `A` before it tries `A — B`. The corpus still has no budget value (REPORT-round5.md).
 - Header-retention audit tests (spec 1010-1011): the audit is a test helper, not production code (acceptance has its own implementation in `analyze_candidate.py`). It counts a header-zone cell as represented when a column the cell covers has an emitted-path rendering equal to some output header, which allows R6's adjacent suppression and nothing else.
 - Check 1's header role (spec 916-917): the pins sit in Task 9, beside the `check_tables` integration, and assert both R0 zones, so a renderer-checker difference would also fail them.
 - Verdicts are cached per (source value column, output column) inside a table: values of one column under one header share one search, and each still counts under its own key.
@@ -658,7 +666,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
 - [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
-## Task 10: Regressions, accuracy guards, chunking tests and release notes (commit `27889db`, prototype `proto T10`)
+## Task 10: Regressions, accuracy guards, chunking tests and release notes (commit `b229b8d`, prototype `proto T10`)
 
 **Spec:** Acceptance criteria, "Fixtures" (`PINNED_FAILURES` empty, check 2, mutations, rendering with checks on and off) and "Accuracy suite" (R6a accounting in the suite's own trace with its own tokenizer from the records' header-zone cell texts; the financial-row metric treating header rows as R6 renders them; "Body rows must not drop" over every row with origin text, each move listed and checked as header-zone); "Interaction with strict and the completeness checks", "Pinned failures"; Testing, "Integration" (chunked tables) and "Regression guards"; "Release", with revision 14's release-text point (marker-only columns in the fusion count); interpretations round 1 ("Header cell texts for the accuracy suite", "Body-row guard baseline", "Golden files", "RCQ version") and round 2 ("Body-row guard": per-signature counts).
 
@@ -673,7 +681,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - Modify: `CHANGELOG.md` (new `## 0.1.22+rcq.4 (unreleased, pending review)`), `README.md` (version line, quality section, "Complex Table Handling"), `docs/usage/direct-conversion.md` ("Table header lines", "Header alignment"); revision 14's wording: marker-only columns leave the second-row fusion count, and equal header texts compare ignoring case and spacing.
 - Test: `tests/accuracy/test_sec_accuracy.py` — 32 additions (41 → 73) and `HEADER_ZONE_MOVES` (172 rows: nvda-2026-10k 51, nvda-2002-10k 43, nvda-2026-q2-10q 38, nvda-2026-ex99-1 26, nvda-2026-ex99-2 14).
 - Test: `tests/test_chunker.py` — 5 additions in `TestChunkedFusedHeaderTables` (50 → 55).
-- Test: `tests/test_table_merge_headers.py` — 15 additions (157 → 172).
+- Test: `tests/test_table_merge_headers.py` — 15 additions (159 → 174).
 - Test: `tests/test_parser.py` — 2 additions (53 → 55) and 2 tests changed.
 - Test: `tests/test_models.py`, `tests/test_table_completeness_fixtures.py` — changed (below).
 
@@ -706,8 +714,8 @@ Spec line numbers in Tasks 1–10 refer to revision 14. Every count was rerun on
 - `tests/accuracy/test_sec_accuracy.py` and `tests/accuracy/metrics.py`: the existing contract tests keep their thresholds and baseline numbers, but measure through the amended harness: the trace applies R6a with the parser's records, and financial-row recall credits header lines (spec 1040-1061).
 
 **Verification:**
-- Task tests: `venv/Scripts/python -m pytest -q tests/accuracy/test_sec_accuracy.py tests/test_chunker.py tests/test_table_merge_headers.py tests/test_parser.py tests/test_models.py tests/test_table_completeness_fixtures.py` → 409 passed, 2 warnings in 159.45 s (wall 160.3 s); both warnings are the existing `XMLParsedAsHTMLWarning`s of `tests/test_chunker.py::TestChunkSectionIsolation::test_real_filing_item_1b_chunks_match_section_text`
-- Full suite at `27889db`: 1604 passed, 14 deselected, 3 warnings in 189.73 s (wall 190.8 s). No failure: the six accuracy failures, the ten pins and the version test (the tree now pins rcq.4, as the venv's metadata says) pass.
+- Task tests: `venv/Scripts/python -m pytest -q tests/accuracy/test_sec_accuracy.py tests/test_chunker.py tests/test_table_merge_headers.py tests/test_parser.py tests/test_models.py tests/test_table_completeness_fixtures.py` → 411 passed, 2 warnings; both warnings are the existing `XMLParsedAsHTMLWarning`s of `tests/test_chunker.py::TestChunkSectionIsolation::test_real_filing_item_1b_chunks_match_section_text`
+- Full suite at `b229b8d`: 1611 passed, 14 deselected, 3 warnings. No failure: the six accuracy failures, the ten pins and the version test (the tree now pins rcq.4, as the venv's metadata says) pass.
 - `venv/Scripts/python -m ruff check src tests` → All checks passed!
 
 **Review points:**
@@ -801,7 +809,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   - `README.md` and `docs/usage/direct-conversion.md` describe the header line, the alignment fields and what the alignment check does not cover.
   - Fold any fix into Task 10's commit.
 - [ ] **Step 2: Final checks at HEAD.**
-  - The full suite gives 1604 passed, 14 deselected, unless review changes added tests; record the new count.
+  - The full suite gives 1611 passed, 14 deselected, unless review changes added tests; record the new count.
   - `venv/Scripts/python -m ruff check src tests` is clean.
   - `git status` is clean.
 - [ ] **Step 3: Write the PR body** to the main checkout's ignored `outputs/table-merge-header-pr.md`. Include:
@@ -836,7 +844,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
 
 ## Reviewer notes
 
-**The spec was corrected from the prototype's corpus runs.** Revisions 6–14 add the corrections and interpretations, each in its own table at the top of the spec. The ones that change behaviour:
+**The spec was corrected from the prototype's corpus runs.** Revisions 6–15 add the corrections and interpretations, each in its own table at the top of the spec. The ones that change behaviour:
 
 - **R0 counts footnoted values and ranges as complete numbers.** Footnoted bare years and fiscal-year ranges are year-like.
 - **A year run is never a data row.** R0 has its own caption patterns, which add the corpus's dollar captions and `(Unaudited)`.
@@ -848,6 +856,13 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   - `judge` stops as soon as both verdicts are reachable;
   - value columns leave out the label column;
   - two missing test groups were added: the header-retention audit on the matching controls, and `header_row_count` next to R0.
+- **Revision 15,** from a read-only Codex review of the spec:
+  - the XLSX `display_page` exception is an open decision (Open decision 1);
+  - label-only is decided by origin, so a full-width caption that starts in the label column is a body row;
+  - the checker's emitted path collapses entries only when their link destinations are equal too;
+  - repeated headers are detected with year-like values;
+  - check 1's acceptance distinguishes the 294 class-1 tables from the 305 → 13 value-failure tables;
+  - two older passages were updated, and control tests were added.
 - **The accuracy suite** applies R6a with its own tokenizer, amends the financial-row metric for header lines, and guards every row `main` rendered as a body row (172 listed header-zone moves on the fixtures).
 - **Documented residuals:**
   - MSFT 69 (a value span over its year header);

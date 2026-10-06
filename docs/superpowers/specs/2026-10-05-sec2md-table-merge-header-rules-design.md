@@ -1,8 +1,8 @@
 # sec2md Table Merge and Header Rules Design
 
-Date: 2026-10-06 (revision 14)
+Date: 2026-10-06 (revision 15)
 
-Status: Approved for planning (Astra, round 4). Revisions 6–14 add the plan
+Status: Approved for planning (Astra, round 4). Revisions 6–15 add the plan
 prototype's corrections and interpretations, for Astra to confirm with the plan.
 
 Evidence: `../audits/2026-10-04-table-merge-header-evidence/REPORT.md`
@@ -153,6 +153,18 @@ while the plan was drafted found:
 | The header-retention audit on the matching controls, and check 1's `header_row_count` role differences on named tables, had no suite tests. | Tests are added. |
 | The release notes did not say that marker-only columns are left out of the sparse-row count. | They do now. |
 
+**Codex review** (revision 14 → 15). A read-only Codex review of revision 14
+found:
+
+| Finding | Change |
+|---|---|
+| P2. "XLSX output must not change" contradicted the recorded `display_page` changes (S3). | S3 is written as an open exception for the user to decide, in Scope, "What does not change" and the XLSX acceptance criterion. |
+| P2. "A caption that spans the value columns stays header" contradicted the origin-only label-only rule for a caption that starts in the label column. | Label-only is decided by origin. A full-width caption that starts in the label column is label-only. A control test pins it. |
+| P2. The checker's emitted path collapsed equal normalized texts, but normalization drops link destinations, which R6 compares. | Collapsing also needs equal link destinations. The prototype already does this, and a test pins it. |
+| P2. Repeated-header detection still said "bare year". | It says year-like value. Controls for footnoted years and fiscal-year ranges are added. |
+| P3. Check 1's acceptance said "294 tables to 0", conflating class-1 losses with all value failures. | 294 class-1 tables restored; 305 → the documented false positives (13 in round 5). |
+| P3. R3's body-start note and the checker's introduction kept superseded wording. | R3 defers to R0's roles. The introduction names the shared cell-text extraction. |
+
 **Prototype interpretations, round 2,** recorded for Astra:
 
 | Point | Interpretation |
@@ -181,7 +193,7 @@ source-token and marker fixes, and the page-furniture class.
 
 | Question | Decision |
 |---|---|
-| Scope | The Markdown renderer only: `TableParser` and the one-row path in `Parser`. XLSX output must not change. |
+| Scope | The Markdown renderer only: `TableParser` and the one-row path in `Parser`. XLSX output must not change. One exception is open for the user's decision (S3, below): the workbook's `display_page`, which the parser guesses from Markdown page text. |
 | Layout stability | Readers are LLMs and RAG chunking; nothing parses tables by column position. Layout may change wherever it keeps every value and puts it under the right header. CHANGELOG entry and minor version bump. |
 | Currency cells | Merged into the amount, as `$` is today: `€ 1,234`, `RMB 941,168`. |
 | Multi-row headers | Fused per output column into one header line, top to bottom, joined with ` — `. A spanning header repeats in every column it spans. |
@@ -370,8 +382,11 @@ carries a dated correction.
   - Label-only rows right before the first data row are section labels, such as
     `Accounts Receivable:`, so they are body rows.
   - This includes a unit or period caption written in the label column only,
-    such as `(In millions)`, which `main` also renders in the body. A caption
-    that spans the value columns is not label-only, so it stays header.
+    such as `(In millions)`, which `main` also renders in the body.
+  - Label-only is decided by origin. A caption whose cell starts in the label
+    column is label-only even when its colspan covers the value columns, so a
+    full-width caption right before the data is a body row. A caption whose
+    cell starts in a value column is not label-only, so it stays header.
   - When no row is a data row, the header zone is the first row with origin
     text alone.
   - When the first row with origin text is a data row, the header zone is
@@ -459,8 +474,9 @@ attribution. It does not require the old number of merges.
 complete rebuilt token is a valid number. Under `EXTENDED`:
 
 1. **Visible text.** Zero-width characters are whitespace (NTRA).
-2. **Body start.** The body is the R0 body rows, so a row of bare years or
-   period text is not body (MSFT 24, TSM 312).
+2. **Body start.** The body is the R0 body rows, exactly as R0 classifies
+   them. A header-zone row of period text or a year run is not body (MSFT 24,
+   TSM 312), while a data row such as `Revenue | 2000 | 1900` is.
 3. **Leading-dot decimals.** Fragment recognition and final validation both
    accept `.75` and `(.62)`. Both are local to `TableParser`; strict's
    `quality.normalize_numeric_token` does not change.
@@ -665,15 +681,21 @@ under `EXTENDED`. XLSX's sentinel-header construction is untouched.
   any other. Their output can therefore change, for example keeping an outer
   cell's `12` that was dropped before. Nested-table structure stays deferred.
 - Cell text extraction is unchanged apart from removing zero-width characters.
-- XLSX workbooks and prepared tables.
+- XLSX prepared tables, and XLSX workbooks apart from the open S3 exception:
+  - The contents sheet prints `display_page`.
+  - `Parser._extract_page_number_from_content` guesses it from the first and last lines of each Markdown page, table lines included.
+  - So a changed table line can change the guess. The corpus has 9 such snapshots in 2 documents: NTRA page 76, and TSM pages 47, 146 and 160.
+  - **Open decision (user).** The proposal is to accept these changes and list each one; the guess is a bug already on `main`, offered as a separate task. Until the user decides, acceptance marks XLSX as needing review.
 - The completeness checks 1–3 and their definitions.
 
 ## Header-alignment check
 
 A report-only check that each value sits under the header its source column
 carries. It compares the source HTML with the Markdown text, like check 1. It
-shares only the R0 helper with the renderer, and never reads the renderer's
-merge decisions or output-column mapping. So it can measure today's `main` and
+shares the R0 helper and the renderer's cell-text extraction with the renderer.
+For cells without links it reuses the text the render already extracted (see
+the interpretation tables). It never reads the renderer's merge decisions or
+output-column mapping. So it can measure today's `main` and
 would catch a later renderer regression.
 
 ### Source side
@@ -699,8 +721,9 @@ would catch a later renderer regression.
    subset of all value columns. Captions that span every value column are never
    required.
 4. **Repeated headers.** A body row after the first data row that holds no
-   complete number outside the label column, and holds period text or a bare
-   year, is a repeated header. Values below the first repeated header are not
+   complete number outside the label column, and holds period text or a
+   year-like value (a bare year, a footnoted year, a range of years or a
+   fiscal-year range), is a repeated header. Values below the first repeated header are not
    evaluated (reason `row_below_repeated_header`). The check does not judge stacked
    blocks against the top header.
 5. **Values.** In each data row, rebuild split negatives. Each complete number
@@ -711,8 +734,10 @@ would catch a later renderer regression.
    - **Source path:** the header-zone cells covering its column, top to bottom.
      A cell that spans several header rows (rowspan) appears once, by
      source-cell identity, and cells with empty normalized text are dropped.
-   - **Emitted path:** the source path with adjacent entries of equal
-     normalized text collapsed into one entry, exactly as R6 writes a header.
+   - **Emitted path:** the source path with adjacent entries collapsed into
+     one entry when their normalized texts are equal and their link
+     destinations are equal, exactly as R6 writes a header. Two `Plan` cells
+     linking to different exhibits stay two entries.
      Each emitted entry keeps the set of source cells and levels it represents.
      Non-adjacent equal texts stay separate entries, so `A — B — A` has three.
    - **Required entries:** emitted entries that represent at least one
@@ -1073,9 +1098,13 @@ identified by `results.json`'s document hashes and the EDGAR manifest.
   mode.
 - **XLSX:** prepared tables are identical to unchanged `main` for every corpus
   document: values, column groups, source coordinates, headers and issues.
-- **Check 1:** value failures in `TableParser` output fall from 294 tables to 0.
-  Any residual is individually documented, reviewed and given its Phase B
-  consequence. Page-furniture tables (573) are unchanged and reported
+  Workbook `display_page` changes are listed one by one. They are allowed only
+  if the user accepts the S3 exception ("What does not change").
+- **Check 1:** every one of the 294 class-1 tables has its lost content
+  restored. Tables with value failures in `TableParser` output fall from 305 to
+  the documented false positives: F1, F2, F3, F5, F8 and F9 (13 tables in the
+  prototype's round 5). Any other residual is individually documented, reviewed
+  and given its Phase B consequence. Page-furniture tables (573) are unchanged and reported
   separately.
 - **Other findings:** no new check-1 or check-2 finding, unless individually
   documented. The F7 change and any other change to F1–F8 are recorded.
