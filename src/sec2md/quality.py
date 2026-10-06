@@ -86,6 +86,9 @@ class ElementHeaderRecord:
     header-zone cells' tokens, and each cell's tokens times the output columns it heads.
     header_cells are those cells with text, in document order, as (text, columns headed),
     for consumers with their own tokenizer, such as the accuracy suite's trace.
+    wrapped marks a table rendered inside a list item or an inline wrapper (revision 18): its
+    segment may share its first line with the wrapper's leading content and its last line
+    with trailing content.
     """
 
     segment: str
@@ -93,6 +96,7 @@ class ElementHeaderRecord:
     header_source: tuple[tuple[str, int], ...] = ()
     header_capacity: tuple[tuple[str, int], ...] = ()
     header_cells: tuple[tuple[str, int], ...] = ()
+    wrapped: bool = False
 
 
 HeaderMiss = Literal["missing", "ambiguous"]
@@ -103,9 +107,9 @@ class HeaderLineLocation:
     """Where a record's header line sits in element content, or why it was not located.
 
     span is the line's [start, end) offsets. miss is "missing" when the segment does not
-    occur on whole lines or its first line is not the recorded header line, and
-    "ambiguous" when the segment occurs more than once or another record claims the same
-    header line.
+    occur on whole lines (for a wrapped record, at all) or its first line is not the
+    recorded header line, and "ambiguous" when the segment occurs more than once or another
+    record claims the same header line.
     """
 
     span: tuple[int, int] | None
@@ -125,6 +129,25 @@ def _whole_line_occurrences(content: str, segment: str) -> list[int]:
     return starts
 
 
+def _wrapped_occurrences(content: str, segment: str) -> list[int]:
+    """Start offsets of a wrapped table's segment in content, overlaps included (revision 18).
+
+    The wrapper may share the segment's first line with leading content and its last line
+    with trailing content. Any occurrence of a segment that holds a line break keeps its
+    other lines whole, so only those two boundaries are relaxed. A segment without a line
+    break would share its only line on both sides, so it is never located.
+    """
+
+    if "\n" not in segment:
+        return []
+    starts: list[int] = []
+    start = content.find(segment)
+    while start != -1:
+        starts.append(start)
+        start = content.find(segment, start + 1)
+    return starts
+
+
 def locate_header_lines(
     content: str, records: Sequence[ElementHeaderRecord]
 ) -> tuple[HeaderLineLocation, ...]:
@@ -132,11 +155,19 @@ def locate_header_lines(
 
     The header line is never searched for on its own, so an identical prose or body line
     elsewhere in the element is never taken for it. Each header line is consumed once.
+    A wrapped record's segment may share its first and last lines with the wrapper's
+    content (revision 18); everything else is the same: exactly one occurrence, the header
+    line first, and the span is the header line only.
     """
 
     spans: list[tuple[int, int] | HeaderMiss] = []
     for record in records:
-        starts = _whole_line_occurrences(content, record.segment) if record.segment else []
+        if not record.segment:
+            starts = []
+        elif record.wrapped:
+            starts = _wrapped_occurrences(content, record.segment)
+        else:
+            starts = _whole_line_occurrences(content, record.segment)
         if len(starts) > 1:
             spans.append("ambiguous")
         elif not starts or record.segment.split("\n", 1)[0] != record.header_line:

@@ -223,17 +223,38 @@ def _oracle_whole_line_starts(content: str, segment: str) -> list[int]:
     return starts
 
 
+def _oracle_wrapped_starts(content: str, segment: str) -> list[int]:
+    """Offsets of a wrapped table's segment: its first and last lines may be shared.
+
+    Only a segment of two lines or more qualifies; its interior lines are then whole.
+    """
+
+    if not segment or "\n" not in segment:
+        return []
+    starts: list[int] = []
+    start = content.find(segment)
+    while start != -1:
+        starts.append(start)
+        start = content.find(segment, start + 1)
+    return starts
+
+
 def _oracle_header_line_spans(content: str, records: Sequence) -> list[tuple[int, int] | None]:
     """Locate each record's header line in element content, independently of production.
 
     A header line is located only as the first line of its own table segment: the segment
     must occupy whole lines exactly once and start with the recorded header line. A line
     two records would claim is located for neither, so each is consumed once (spec R6a).
+    A wrapped record's segment (revision 18) may share its first line with the wrapper's
+    leading content and its last line with trailing content; it must still occur once.
     """
 
     spans: list[tuple[int, int] | None] = []
     for record in records:
-        starts = _oracle_whole_line_starts(content, record.segment)
+        if getattr(record, "wrapped", False):
+            starts = _oracle_wrapped_starts(content, record.segment)
+        else:
+            starts = _oracle_whole_line_starts(content, record.segment)
         first_line = record.segment.split("\n", 1)[0]
         located = len(starts) == 1 and first_line == record.header_line
         spans.append((starts[0], starts[0] + len(first_line)) if located else None)

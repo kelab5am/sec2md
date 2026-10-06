@@ -44,6 +44,36 @@ MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
 logger = logging.getLogger(__name__)
 
 
+def _wrapped_copy_survives(
+    raw: str, content: str, rendered: str, segment: str, links: Sequence[tuple[int, int, int]]
+) -> bool:
+    """Whether a wrapper's final segment holds a table's own copy (spec R6a, revision 18).
+
+    raw is the wrapper segment's text, content its final segment (raw with link syntax
+    reduced to labels), rendered the table's normal render, and links the reduction's
+    matches in raw as (start, end, characters removed). A wrapper only adds text around a
+    table's render, so the table's copy is one of rendered's occurrences in raw; any other
+    occurrence is another table that renders the same text. Every occurrence must keep its
+    boundaries, crossed by no link reduction, and its reduced text must be exactly the
+    record's segment. So a copy that the reduction damaged is never taken for intact, and
+    the record is never left to be located on other text that only reduces to its segment.
+    """
+
+    start = raw.find(rendered)
+    if start == -1:
+        return False
+    while start != -1:
+        end = start + len(rendered)
+        if any(first < boundary < last for first, last, _ in links for boundary in (start, end)):
+            return False
+        image_start = start - sum(removed for _, last, removed in links if last <= start)
+        image_end = end - sum(removed for _, last, removed in links if last <= end)
+        if content[image_start:image_end] != segment:
+            return False
+        start = raw.find(rendered, start + 1)
+    return True
+
+
 @dataclass
 class TextBlockInfo:
     """Tracks XBRL TextBlock context during parsing."""
@@ -102,6 +132,13 @@ class Parser:
         # that render supplies element content, then the record bound to the node.
         self._render_header_records: dict[int, tuple[Tag, TableHeaderRecord | None]] = {}
         self._header_records: dict[int, ElementHeaderRecord] = {}
+        # Revision 18: tables rendered inside a list item or an inline wrapper. While a wrapper
+        # renders, _render_table collects its tables and their normal renders; the wrapper's
+        # segment position is noted when it is appended; after streaming, each record is bound
+        # from the wrapper's final segment, and the wrapper maps to its bound tables.
+        self._table_collector: list[tuple[Tag, str]] | None = None
+        self._wrapped_renders: list[tuple[int, int, Tag, list[tuple[Tag, str]]]] = []
+        self._wrapped_tables: dict[int, list[Tag]] = {}
         self.header_accounting_misses: tuple[str, ...] = ()
         self.diagnostics: Optional[ParseDiagnostics] = None
         self._last_pages: Optional[List[Page]] = None
@@ -375,28 +412,33 @@ class Parser:
         if source_node is not None and id(source_node) in self._unreliable_tables:
             return self._unreliable_tables[id(source_node)].original_text
 
-        if (
-            source_node is not None
-            and source_node.name == "table"
-            and source_node.find("a") is not None
-        ):
-            legacy_table = deepcopy(source_node)
+        if source_node is not None and source_node.name == "table":
+            content, record = self._table_segment(source_node, text)
+            self._render_header_records.pop(id(source_node), None)
+            self._bind_header_record(source_node, content, record)
+            return content
+
+        return MARKDOWN_LINK_RE.sub(r"\1", text)
+
+    def _table_segment(self, table: Tag, rendered: str) -> tuple[str, TableHeaderRecord | None]:
+        """A table's own segment, and the record of the render that supplies it (R6a step 2).
+
+        For a table with links, the anchor-stripped re-render and its record. Otherwise the
+        normal render ``rendered`` with link syntax reduced to labels, and that render's
+        pending record. Nothing is bound or discarded here.
+        """
+
+        if table.find("a") is not None:
+            legacy_table = deepcopy(table)
             for anchor in legacy_table.find_all("a"):
                 anchor.unwrap()
             legacy_parser = TableParser(legacy_table)
-            content = legacy_parser.md().strip()
-            self._render_header_records.pop(id(source_node), None)
-            self._bind_header_record(source_node, content, legacy_parser.header_record)
-            return content
-
-        content = MARKDOWN_LINK_RE.sub(r"\1", text)
-        if source_node is not None and source_node.name == "table":
-            _, record = self._render_header_records.pop(id(source_node), (source_node, None))
-            self._bind_header_record(source_node, content, record)
-        return content
+            return legacy_parser.md().strip(), legacy_parser.header_record
+        _, record = self._render_header_records.get(id(table), (table, None))
+        return MARKDOWN_LINK_RE.sub(r"\1", rendered), record
 
     def _bind_header_record(
-        self, table: Tag, segment: str, record: TableHeaderRecord | None
+        self, table: Tag, segment: str, record: TableHeaderRecord | None, *, wrapped: bool = False
     ) -> None:
         """Bind a render's header record to its original table node (spec R6a).
 
@@ -411,20 +453,80 @@ class Parser:
             header_source=record.header_source,
             header_capacity=record.header_capacity,
             header_cells=record.header_cells,
+            wrapped=wrapped,
         )
+
+    def _process_wrapper(self, wrapper: Tag) -> tuple[str, list[tuple[Tag, str]]]:
+        """Render a list or an inline wrapper, with the tables rendered inside it.
+
+        Each table that left a pending header record comes with its normal render, which the
+        wrapper's text holds verbatim (revision 18).
+        """
+
+        previous, self._table_collector = self._table_collector, []
+        try:
+            return self._process_element(wrapper), self._table_collector
+        finally:
+            self._table_collector = previous
+
+    def _note_wrapped_tables(self, page_num: int, wrapper: Tag, tables: list[tuple[Tag, str]]) -> None:
+        """Note where the wrapper just appended (or merged) its segment, to bind its tables.
+
+        ``_append`` adds a segment or merges into the last one in place, so the position
+        stays the wrapper's segment while later appends merge into it or follow it.
+        """
+
+        if tables:
+            index = len(self.page_segments[page_num]) - 1
+            self._wrapped_renders.append((page_num, index, wrapper, tables))
+
+    def _bind_wrapped_header_records(self) -> None:
+        """Bind the header records of tables rendered inside wrappers (spec R6a, revision 18).
+
+        Each table takes its record by the step-2 rule, as a table segment does. It is bound,
+        marked wrapped, only when the wrapper's final segment still holds the table's own
+        copy (``_wrapped_copy_survives``). Otherwise its record stays unbound, so it is a
+        missing association and strict keeps the ordinary trace. Runs once, after streaming,
+        when no later append can merge into a wrapper's segment.
+        """
+
+        for page_num, index, wrapper, tables in self._wrapped_renders:
+            raw = self.pages[page_num][index]
+            content = self.page_segments[page_num][index][0]
+            links = [
+                (match.start(), match.end(), len(match.group(0)) - len(match.group(1)))
+                for match in MARKDOWN_LINK_RE.finditer(raw)
+            ]
+            # The final segment must be the link reduction of the wrapper's text and nothing else.
+            only_reduced = MARKDOWN_LINK_RE.sub(r"\1", raw) == content
+            for table, rendered in tables:
+                segment, record = self._table_segment(table, rendered)
+                if record is None or record.header_line is None:
+                    self._render_header_records.pop(id(table), None)
+                elif only_reduced and _wrapped_copy_survives(raw, content, rendered, segment, links):
+                    self._render_header_records.pop(id(table), None)
+                    self._bind_header_record(table, segment, record, wrapped=True)
+                    self._wrapped_tables.setdefault(id(wrapper), []).append(table)
+                else:
+                    self._render_header_records[id(table)] = (table, record)
 
     def element_header_records(self, element_id: str) -> tuple[ElementHeaderRecord, ...]:
         """The bound header records (spec R6a) of the tables mapped to one element.
 
-        In mapped-node order; empty for an unknown element or one without a table record.
-        Valid after ``get_pages(include_elements=True)``.
+        A mapped table's own record, and for a mapped list or inline wrapper the records of
+        the tables rendered inside it (revision 18), in document order. In mapped-node
+        order; empty for an unknown element or one without a table record. Valid after
+        ``get_pages(include_elements=True)``.
         """
 
-        return tuple(
-            self._header_records[id(node)]
-            for node in self.block_nodes_map.get(element_id, ())
-            if id(node) in self._header_records
-        )
+        records: list[ElementHeaderRecord] = []
+        for node in self.block_nodes_map.get(element_id, ()):
+            if id(node) in self._header_records:
+                records.append(self._header_records[id(node)])
+            records.extend(
+                self._header_records[id(table)] for table in self._wrapped_tables.get(id(node), ())
+            )
+        return tuple(records)
 
     @staticmethod
     def _img_to_markdown(el: Tag) -> str:
@@ -458,6 +560,8 @@ class Parser:
             )
         rendered = table_parser.md().strip()
         self._render_header_records[id(element)] = (element, table_parser.header_record)
+        if self._table_collector is not None:
+            self._table_collector.append((element, rendered))
         return rendered
 
     def _process_element(self, element: Union[Tag, NavigableString]) -> str:
@@ -860,9 +964,14 @@ class Parser:
                 # including nested descendants outside direct-cell validation.
                 if snapshot.issues:
                     self._unreliable_tables[id(root)] = snapshot
-            t = self._process_element(root)
+            # A table's record is bound with its own segment; a list's tables, from its segment.
+            if root.name == "table":
+                t, tables = self._process_element(root), []
+            else:
+                t, tables = self._process_wrapper(root)
             if t:
                 self._append(page_num, t, source_node=root)
+                self._note_wrapped_tables(page_num, root, tables)
             self._blankline_after(page_num)
             if self._has_break_after(root):
                 page_num += 1
@@ -872,9 +981,10 @@ class Parser:
 
         wrap = self._wrap_markdown(root)
         if wrap and not is_block:
-            t = self._process_element(root)
+            t, tables = self._process_wrapper(root)
             if t:
                 self._append(page_num, t + " ", source_node=root)
+                self._note_wrapped_tables(page_num, root, tables)
             if self._has_break_after(root):
                 page_num += 1
             self._restore_text_block(text_block_started, text_block_has_continuation,
@@ -1031,6 +1141,9 @@ class Parser:
         self.trace_numeric_failures = ()
         self._render_header_records = {}
         self._header_records = {}
+        self._table_collector = None
+        self._wrapped_renders = []
+        self._wrapped_tables = {}
         self.header_accounting_misses = ()
         self.table_snapshots = []
         self._snapshot_nodes = []
@@ -1044,6 +1157,7 @@ class Parser:
         self.table_report = None
         root = self.soup.body if self.soup.body else self.soup
         self._stream_pages(root, page_num=1)
+        self._bind_wrapped_header_records()
 
         result: List[Page] = []
         for page_num in sorted(self.pages.keys()):
@@ -1142,11 +1256,14 @@ class Parser:
         self.header_accounting_misses = tuple(misses)
 
     def _unbound_header_tables(self) -> Counter[str]:
-        """Per element, the tables whose header line reached it outside a table segment.
+        """Per element, the tables whose header record was never bound: missing associations.
 
-        A table rendered inside a list item or an inline wrapper has no segment of its
-        own in the element, so its header record cannot be associated: a missing
-        association. Each is counted against the element mapped to its nearest ancestor.
+        A table rendered inside a list item or an inline wrapper is bound from the wrapper's
+        segment (revision 18), unless that segment's final text lost the table's own copy:
+        a link reduction ran across the table's boundaries, or the reduced copy is not the
+        record's segment (a padded link label). Such a table, or one whose header line
+        reached content outside any table segment, is counted against the element mapped to
+        its nearest ancestor.
         """
 
         unbound: Counter[str] = Counter()
