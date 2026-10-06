@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import logging
 from copy import deepcopy
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, replace
 from typing import List, Dict, Union, Optional, Tuple, Sequence
 
@@ -12,7 +12,7 @@ from bs4.element import NavigableString, Tag
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
-from sec2md.table_parser import TableParser, render_cell_content
+from sec2md.table_parser import TableHeaderRecord, TableParser, render_cell_content
 from sec2md.models import Page, Element
 from sec2md.xlsx_tables import (
     TableSnapshot, native_metadata, snapshot_html_table, snapshot_positioned_table,
@@ -25,8 +25,10 @@ from sec2md.element_builder import (
 from sec2md.encoding import DecodeDiagnostics, normalize_legacy_characters
 from sec2md.table_completeness import TableCompletenessReport, check_tables
 from sec2md.quality import (
+    ElementHeaderRecord,
     ParseDiagnostics,
     build_diagnostics,
+    locate_header_lines,
     trace_numeric_failures as compute_trace_numeric_failures,
 )
 
@@ -70,6 +72,8 @@ class Parser:
         self.table_checks = table_checks
         # Table completeness inputs, recorded during rendering without changing it.
         self.table_outputs: dict[int, str] = {}
+        # Link-free cell texts of the Markdown render by id(td), reused by the alignment check.
+        self._cell_texts: dict[int, str] = {}
         self._table_pages: dict[int, int] = {}
         self._snapshot_ordinals: dict[int, int] = {}
         self._snapshot_ordinal = 0
@@ -94,6 +98,11 @@ class Parser:
         self.footer_page_numbers: Dict[int, int] = {}
         self.block_nodes_map: Dict[str, List[Tag]] = {}
         self.trace_numeric_failures: tuple[str, ...] = ()
+        # R6a header accounting: the normal render's header record per table node until
+        # that render supplies element content, then the record bound to the node.
+        self._render_header_records: dict[int, tuple[Tag, TableHeaderRecord | None]] = {}
+        self._header_records: dict[int, ElementHeaderRecord] = {}
+        self.header_accounting_misses: tuple[str, ...] = ()
         self.diagnostics: Optional[ParseDiagnostics] = None
         self._last_pages: Optional[List[Page]] = None
 
@@ -357,7 +366,11 @@ class Parser:
         return text
 
     def _element_segment_content(self, text: str, source_node: Optional[Tag] = None) -> str:
-        """Keep link labels in citation content but exclude non-visible destinations."""
+        """Keep link labels in citation content but exclude non-visible destinations.
+
+        A table's header record is bound here, from the render that supplies the content:
+        the anchor-stripped re-render for a table with links, else the normal render.
+        """
 
         if source_node is not None and id(source_node) in self._unreliable_tables:
             return self._unreliable_tables[id(source_node)].original_text
@@ -370,9 +383,48 @@ class Parser:
             legacy_table = deepcopy(source_node)
             for anchor in legacy_table.find_all("a"):
                 anchor.unwrap()
-            return TableParser(legacy_table).md().strip()
+            legacy_parser = TableParser(legacy_table)
+            content = legacy_parser.md().strip()
+            self._render_header_records.pop(id(source_node), None)
+            self._bind_header_record(source_node, content, legacy_parser.header_record)
+            return content
 
-        return MARKDOWN_LINK_RE.sub(r"\1", text)
+        content = MARKDOWN_LINK_RE.sub(r"\1", text)
+        if source_node is not None and source_node.name == "table":
+            _, record = self._render_header_records.pop(id(source_node), (source_node, None))
+            self._bind_header_record(source_node, content, record)
+        return content
+
+    def _bind_header_record(
+        self, table: Tag, segment: str, record: TableHeaderRecord | None
+    ) -> None:
+        """Bind a render's header record to its original table node (spec R6a).
+
+        A table without a written header line has nothing to account for.
+        """
+
+        if record is None or record.header_line is None:
+            return
+        self._header_records[id(table)] = ElementHeaderRecord(
+            segment=segment,
+            header_line=record.header_line,
+            header_source=record.header_source,
+            header_capacity=record.header_capacity,
+            header_cells=record.header_cells,
+        )
+
+    def element_header_records(self, element_id: str) -> tuple[ElementHeaderRecord, ...]:
+        """The bound header records (spec R6a) of the tables mapped to one element.
+
+        In mapped-node order; empty for an unknown element or one without a table record.
+        Valid after ``get_pages(include_elements=True)``.
+        """
+
+        return tuple(
+            self._header_records[id(node)]
+            for node in self.block_nodes_map.get(element_id, ())
+            if id(node) in self._header_records
+        )
 
     @staticmethod
     def _img_to_markdown(el: Tag) -> str:
@@ -396,7 +448,17 @@ class Parser:
             return self._one_row_table_to_text(cells)
 
         self.includes_table = True
-        return TableParser(element, base_url=self.source_url).md().strip()
+        table_parser = TableParser(element, base_url=self.source_url)
+        if self.table_checks:
+            # A cell with a link is extracted by the check itself, against the same base URL.
+            self._cell_texts.update(
+                (id(cell.node), cell.text)
+                for row in table_parser.cells for cell in row
+                if cell.node is not None and "](" not in cell.text
+            )
+        rendered = table_parser.md().strip()
+        self._render_header_records[id(element)] = (element, table_parser.header_record)
+        return rendered
 
     def _process_element(self, element: Union[Tag, NavigableString]) -> str:
         if isinstance(element, NavigableString):
@@ -967,10 +1029,14 @@ class Parser:
         self.includes_table = False
         self.block_nodes_map = {}
         self.trace_numeric_failures = ()
+        self._render_header_records = {}
+        self._header_records = {}
+        self.header_accounting_misses = ()
         self.table_snapshots = []
         self._snapshot_nodes = []
         self._unreliable_tables = {}
         self.table_outputs = {}
+        self._cell_texts = {}
         self._table_pages = {}
         self._snapshot_ordinals = {}
         self._snapshot_ordinal = 0
@@ -1004,15 +1070,7 @@ class Parser:
 
         if include_elements:
             result = self._add_elements_to_pages(result)
-
-            self.trace_numeric_failures = tuple(
-                failure
-                for page in result
-                for element in page.elements or ()
-                for failure in compute_trace_numeric_failures(
-                    element, self.block_nodes_map.get(element.id, ())
-                )
-            )
+            self._trace_elements(result)
 
         if self.capture_tables:
             node_elements = {
@@ -1032,7 +1090,8 @@ class Parser:
         if self.table_checks:
             try:
                 self.table_report = check_tables(
-                    self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals
+                    self.soup, self.table_outputs, self._table_pages, self._snapshot_ordinals,
+                    cell_texts=self._cell_texts, base_url=self.source_url,
                 )
             except Exception:
                 # Phase A is report-only: a defect in the checks must never fail a conversion.
@@ -1057,6 +1116,56 @@ class Parser:
 
         return result
 
+    def _trace_elements(self, pages: List[Page]) -> None:
+        """Run strict's numeric trace per element, with its tables' header records (R6a).
+
+        A record whose header line cannot be located grants no exemption and is recorded
+        in ``header_accounting_misses`` as ``<element id>:<missing|ambiguous>``.
+        """
+
+        unbound = self._unbound_header_tables()
+        failures: list[str] = []
+        misses: list[str] = []
+        for page in pages:
+            for element in page.elements or ():
+                nodes = self.block_nodes_map.get(element.id, ())
+                records = list(self.element_header_records(element.id))
+                if records:
+                    misses.extend(
+                        f"{element.id}:{location.miss}"
+                        for location in locate_header_lines(element.content, records)
+                        if location.miss is not None
+                    )
+                misses.extend([f"{element.id}:missing"] * unbound[element.id])
+                failures.extend(compute_trace_numeric_failures(element, nodes, records))
+        self.trace_numeric_failures = tuple(failures)
+        self.header_accounting_misses = tuple(misses)
+
+    def _unbound_header_tables(self) -> Counter[str]:
+        """Per element, the tables whose header line reached it outside a table segment.
+
+        A table rendered inside a list item or an inline wrapper has no segment of its
+        own in the element, so its header record cannot be associated: a missing
+        association. Each is counted against the element mapped to its nearest ancestor.
+        """
+
+        unbound: Counter[str] = Counter()
+        if not self._render_header_records:
+            return unbound
+        node_elements = {
+            id(node): element_id for element_id, nodes in self.block_nodes_map.items() for node in nodes
+        }
+        for table, record in self._render_header_records.values():
+            if record is None or record.header_line is None:
+                continue
+            element_id = next(
+                (node_elements[id(parent)] for parent in table.parents if id(parent) in node_elements),
+                None,
+            )
+            if element_id is not None:
+                unbound[element_id] += 1
+        return unbound
+
     def _effective_rows(self, table: Tag) -> list[list[Tag]]:
         rows = []
         for tr in table.find_all('tr', recursive=True):
@@ -1067,6 +1176,12 @@ class Parser:
         return rows
 
     def _one_row_table_to_text(self, cells: list[Tag]) -> str:
+        """Flatten a one-row table to one line.
+
+        An ITEM label keeps its first non-empty later cell as the title. A PART label is
+        normalized and keeps every non-empty later cell (spec R8). Other rows join their
+        non-empty cells.
+        """
         texts = [
             render_cell_content(c, base_url=self.source_url)
             if c.find("a")
@@ -1084,7 +1199,7 @@ class Parser:
 
         if (m := PART_HEADER_CELL_RE.match(first)):
             roman = m.group(1).upper()
-            return f"PART {roman}"
+            return " ".join([f"PART {roman}", *(t for t in texts[1:] if t)])
 
         return " ".join(t for t in texts if t).strip()
 

@@ -9,12 +9,16 @@ from sec2md.core import convert_to_markdown, parse_filing
 from sec2md.models import Element, Page
 from sec2md.parser import Parser
 from sec2md.quality import (
+    ElementHeaderRecord,
+    HeaderLineLocation,
     ParseQualityError,
     build_diagnostics,
     enforce_quality,
+    locate_header_lines,
     normalize_numeric_token,
     trace_numeric_failures,
 )
+from sec2md.table_parser import TableParser
 
 
 def test_untraceable_normalized_number_is_reported():
@@ -338,6 +342,8 @@ def test_parse_diagnostics_positional_construction_keeps_working():
     assert diagnostics.table_structure_differences == ()
     assert diagnostics.tables_checked == 0
     assert diagnostics.numeric_recall is None
+    assert diagnostics.table_header_alignment == ()
+    assert diagnostics.table_header_alignment_coverage == ()
 
 
 def test_diagnostics_with_table_findings_survive_pickling(lossy_renderer):
@@ -374,6 +380,25 @@ def test_build_diagnostics_without_table_report_skips_all_three_checks():
     )
     assert diagnostics.tables_checked == 0
     assert diagnostics.numeric_recall is None
+    # An empty tuple means the header-alignment check did not run.
+    assert diagnostics.table_header_alignment == ()
+    assert diagnostics.table_header_alignment_coverage == ()
+
+
+def test_build_diagnostics_carries_header_alignment_findings_and_coverage():
+    from sec2md.table_alignment import COVERAGE_KEYS
+    from sec2md.table_completeness import TableCompletenessReport
+
+    coverage = tuple((key, 1 if key == "tables_total" else 0) for key in COVERAGE_KEYS)
+    finding = 'table 1 (snapshot 1, page 1): "Revenue" 100 under "2024"; expected "2025"'
+    diagnostics = build_diagnostics(
+        "<p>Revenue 100.</p>", "Revenue 100.", [],
+        mapped_element_ids=(), trace_failures=(), enforce_mappings=False,
+        table_report=TableCompletenessReport(1, (), (finding,), coverage),
+    )
+    assert diagnostics.table_header_alignment == (finding,)
+    assert diagnostics.table_header_alignment_coverage == coverage
+    assert diagnostics.warnings == ()
 
 
 def table_completeness_logs(caplog, level):
@@ -418,6 +443,395 @@ def test_off_policy_skips_table_checks(monkeypatch, caplog):
         convert_to_markdown(LOSSY_TABLE, quality_policy="off")
         parse_filing(LOSSY_TABLE, quality_policy="off")
     assert "table completeness" not in caplog.text
+
+
+# --- R6a: header accounting in strict's numeric trace ----------------------------------------
+
+ASTRA_HEADER = "| Metric | 2025 | 2025 — Budget |"
+ASTRA_SEGMENT = f"{ASTRA_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |"
+ASTRA_TABLE = ('<table><tr><th>Metric</th><th colspan="2">2025</th></tr>'
+               "<tr><th></th><th>2025</th><th>Budget</th></tr>"
+               "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>")
+ASTRA_RECORD = ElementHeaderRecord(
+    segment=ASTRA_SEGMENT,
+    header_line=ASTRA_HEADER,
+    header_source=(("2025", 2),),
+    header_capacity=(("2025", 3),),
+)
+LABELS_HEADER = "| Metric | 2025 — Actual | 2025 — Budget |"
+LABELS_SEGMENT = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |"
+LABELS_TABLE = ('<table><tr><th>Metric</th><th colspan="2">2025</th></tr>'
+                "<tr><th></th><th>Actual</th><th>Budget</th></tr>"
+                "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>")
+LABELS_RECORD = ElementHeaderRecord(LABELS_SEGMENT, LABELS_HEADER, (("2025", 1),), (("2025", 2),))
+
+
+def _element(content: str) -> Element:
+    return Element(id="e1", content=content, kind="table", page_start=1, page_end=1)
+
+
+def _node(html: str):
+    return BeautifulSoup(html, "lxml").body.contents[0]
+
+
+def test_trace_without_header_records_is_unchanged():
+    element = _element(LABELS_SEGMENT)
+    nodes = [_node(LABELS_TABLE)]
+    assert trace_numeric_failures(element, nodes) == ("e1:2025",)
+    assert trace_numeric_failures(element, nodes, None) == ("e1:2025",)
+    assert trace_numeric_failures(element, nodes, ()) == ("e1:2025",)
+
+
+def test_located_header_line_is_checked_against_capacity_and_leaves_both_pools():
+    assert trace_numeric_failures(_element(LABELS_SEGMENT), [_node(LABELS_TABLE)], [LABELS_RECORD]) == ()
+    nodes = [_node(ASTRA_TABLE)]
+    assert trace_numeric_failures(_element(ASTRA_SEGMENT), nodes, [ASTRA_RECORD]) == ()
+    # Astra's counterexample: both source 2025s are header occurrences, so a body 2025 has none.
+    mutated = _element(ASTRA_SEGMENT.replace("| 100 |", "| 100 2025 |"))
+    assert trace_numeric_failures(mutated, nodes) == ("e1:2025",)
+    assert trace_numeric_failures(mutated, nodes, [ASTRA_RECORD]) == ("e1:2025",)
+
+
+def test_header_excess_is_reported_per_token():
+    header = "| Metric | 2025 2025 2024 | 2025 — Budget 2025 |"
+    segment = ASTRA_SEGMENT.replace(ASTRA_HEADER, header)
+    record = ElementHeaderRecord(segment, header, (("2025", 2),), (("2025", 3),))
+    assert trace_numeric_failures(_element(segment), [_node(ASTRA_TABLE)], [record]) == (
+        "e1:header:2024",
+        "e1:header:2025",
+    )
+
+
+def test_header_source_never_covers_prose_numbers():
+    nodes = [_node("<p>Revenue was reviewed against plan.</p>"), _node(ASTRA_TABLE)]
+    element = _element(f"Revenue was reviewed against plan for 2025.\n\n{ASTRA_SEGMENT}")
+    assert trace_numeric_failures(element, nodes, [ASTRA_RECORD]) == ("e1:2025",)
+
+
+def test_header_source_subtraction_is_a_multiset_difference():
+    # Exactly the header-zone occurrences leave the pool: the prose's own 2025 still traces.
+    nodes = [_node("<p>Plan for 2025.</p>"), _node(ASTRA_TABLE)]
+    assert trace_numeric_failures(_element(f"Plan for 2025.\n\n{ASTRA_SEGMENT}"), nodes, [ASTRA_RECORD]) == ()
+    # A recorded token the pool lacks removes nothing and leaves no negative count behind.
+    nodes = [_node("<p>Plan for days.</p>"), _node(ASTRA_TABLE)]
+    record = ElementHeaderRecord(ASTRA_SEGMENT, ASTRA_HEADER, (("2025", 2), ("7", 1)), (("2025", 3),))
+    assert trace_numeric_failures(_element(f"Plan for 7 days.\n\n{ASTRA_SEGMENT}"), nodes, [record]) == ("e1:7",)
+
+
+def test_header_line_is_located_only_as_the_first_line_of_its_own_segment():
+    # An identical line elsewhere in the element is never taken for the header line.
+    content = f"{ASTRA_HEADER}\n\n{ASTRA_SEGMENT}"
+    start = content.index(ASTRA_SEGMENT, 1)
+    assert locate_header_lines(content, [ASTRA_RECORD]) == (
+        HeaderLineLocation((start, start + len(ASTRA_HEADER))),
+    )
+    nodes = [_node(f"<p>{ASTRA_HEADER}</p>"), _node(ASTRA_TABLE)]
+    assert trace_numeric_failures(_element(content), nodes, [ASTRA_RECORD]) == ()
+
+
+def test_segment_occurrence_must_occupy_whole_lines():
+    wrapped = f"**{ASTRA_SEGMENT}**"
+    assert locate_header_lines(wrapped, [ASTRA_RECORD]) == (HeaderLineLocation(None, "missing"),)
+    content = f"{wrapped}\n\n{ASTRA_SEGMENT}"
+    start = len(wrapped) + 2
+    assert locate_header_lines(content, [ASTRA_RECORD]) == (
+        HeaderLineLocation((start, start + len(ASTRA_HEADER))),
+    )
+
+
+# (content, table, record, ordinary failures): the faithful repeated 2025 balances without
+# accounting (no excess); the repetition over two labels does not (a genuine ordinary excess).
+@pytest.mark.parametrize("content, table, record, ordinary", [
+    (ASTRA_SEGMENT, ASTRA_TABLE, ASTRA_RECORD, ()),
+    (LABELS_SEGMENT, LABELS_TABLE, LABELS_RECORD, ("e1:2025",)),
+], ids=["no-excess", "ordinary-excess"])
+@pytest.mark.parametrize("change, miss", [
+    (lambda segment, header: (segment.replace("| --- |", "|---|"), header), "missing"),
+    (lambda segment, header: (segment, header.replace("Metric", "Item")), "missing"),
+    (lambda segment, header: (f"{segment}\n\n{segment}", header), "ambiguous"),
+], ids=["segment-not-found", "first-line-differs", "segment-twice"])
+def test_failed_association_grants_no_exemption(content, table, record, ordinary, change, miss):
+    new_content, header_line = change(content, record.header_line)
+    copies = 2 if miss == "ambiguous" else 1
+    nodes = [_node(table) for _ in range(copies)]
+    record = ElementHeaderRecord(record.segment, header_line, record.header_source, record.header_capacity)
+    assert locate_header_lines(new_content, [record]) == (HeaderLineLocation(None, miss),)
+    element = _element(new_content)
+    assert trace_numeric_failures(element, nodes, [record]) == trace_numeric_failures(element, nodes)
+    assert trace_numeric_failures(element, nodes, [record]) == ordinary * copies
+
+
+def test_a_header_line_is_consumed_once():
+    # Two records whose segments start on the same line both claim one header line.
+    longer = ElementHeaderRecord(f"{ASTRA_SEGMENT}\n| Cost | 50 | 60 |", ASTRA_HEADER,
+                                 (("2025", 2),), (("2025", 3),))
+    assert locate_header_lines(longer.segment, [ASTRA_RECORD, longer]) == (
+        HeaderLineLocation(None, "ambiguous"),
+        HeaderLineLocation(None, "ambiguous"),
+    )
+    assert locate_header_lines(ASTRA_SEGMENT, [ASTRA_RECORD, ASTRA_RECORD]) == (
+        HeaderLineLocation(None, "ambiguous"),
+        HeaderLineLocation(None, "ambiguous"),
+    )
+
+
+def test_each_table_of_an_element_is_accounted_separately():
+    element = _element(f"{ASTRA_SEGMENT}\n\n{LABELS_SEGMENT}")
+    nodes = [_node(ASTRA_TABLE), _node(LABELS_TABLE)]
+    assert trace_numeric_failures(element, nodes, [ASTRA_RECORD, LABELS_RECORD]) == ()
+    # Without the second table's record, its repeated 2025 stays in the ordinary pools.
+    assert trace_numeric_failures(element, nodes, [ASTRA_RECORD]) == ("e1:2025",)
+
+
+# --- R6a through Parser: both modes, with and without links, alone or grouped with prose --------
+
+R6A_TABLES = {
+    # Astra's R6a source: a spanning 2025 over a lower 2025 and "Budget".
+    "equal": ('<table><tr><th>Metric</th><th colspan="2">{top}</th></tr>'
+              "<tr><th></th><th>2025</th><th>Budget</th></tr>"
+              "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"),
+    # Legitimate repetition: a spanning 2025 over two labels.
+    "labels": ('<table><tr><th>Metric</th><th colspan="2">{top}</th></tr>'
+               "<tr><th></th><th>Actual</th><th>Budget</th></tr>"
+               "<tr><td>Revenue</td><td>100</td><td>200</td></tr></table>"),
+    # A lower 2025 equal to the one above is written once: one source 2025 the header never uses.
+    "surplus": ("<table><tr><th>Metric</th><th>{top}</th></tr>"
+                "<tr><th></th><th>2025</th></tr>"
+                "<tr><td>Revenue</td><td>100</td></tr></table>"),
+}
+R6A_HEADERS = {
+    "equal": ASTRA_HEADER,
+    "labels": LABELS_HEADER,
+    "surplus": "| Metric | 2025 |",
+}
+PROSE = "<p>Revenue was reviewed against plan.</p>"
+R6A_MODES = [
+    pytest.param(capture, link, grouped,
+                 id=f"{'capture' if capture else 'normal'}-{'links' if link else 'plain'}-"
+                    f"{'with-prose' if grouped else 'alone'}")
+    for capture in (False, True) for link in (False, True) for grouped in (False, True)
+]
+
+
+def _r6a_document(source: str, *, link: bool, grouped: bool, copies: int = 1) -> str:
+    top = '<a href="#fy2025">2025</a>' if link else "2025"
+    table = R6A_TABLES[source].format(top=top)
+    return f"<html><body>{PROSE if grouped else ''}{table * copies}</body></html>"
+
+
+def _r6a_parse(html: str, capture_tables: bool):
+    """Parse with elements; return the parser, its single element and the element's mapped nodes."""
+    parser = Parser(html, capture_tables=capture_tables)
+    pages = parser.get_pages()
+    (element,) = [element for page in pages for element in page.elements or ()]
+    return parser, element, parser.block_nodes_map[element.id]
+
+
+@pytest.fixture
+def mutated_render(monkeypatch):
+    """Rewrite TableParser's header cells or body rows before it writes them, as a renderer defect
+    would. The render records the header line it actually writes."""
+
+    def install(mutate):
+        original = TableParser._process_headers
+
+        def process_headers(self, matrix):
+            headers, data = original(self, matrix)
+            return mutate(list(headers), [list(row) for row in data])
+
+        monkeypatch.setattr(TableParser, "_process_headers", process_headers)
+
+    return install
+
+
+@pytest.mark.parametrize("capture_tables, link, grouped", R6A_MODES)
+def test_r6a_legitimate_repetition_passes_strict(capture_tables, link, grouped):
+    parser, element, nodes = _r6a_parse(_r6a_document("labels", link=link, grouped=grouped), capture_tables)
+    assert LABELS_HEADER in element.content.splitlines()
+    assert parser.trace_numeric_failures == ()
+    assert parser.header_accounting_misses == ()
+    assert parser.diagnostics.warnings == ()
+    # Without header accounting the repeated 2025 is untraceable, as before R6a.
+    assert trace_numeric_failures(element, nodes) == (f"{element.id}:2025",)
+
+
+@pytest.mark.parametrize("capture_tables, link, grouped", R6A_MODES)
+def test_r6a_astras_counterexample_fails(mutated_render, capture_tables, link, grouped):
+    mutated_render(lambda headers, data: (headers, [[data[0][0], f"{data[0][1]} 2025", *data[0][2:]]]))
+    parser, element, _ = _r6a_parse(_r6a_document("equal", link=link, grouped=grouped), capture_tables)
+    assert ASTRA_HEADER in element.content.splitlines()
+    assert "| Revenue | 100 2025 | 200 |" in element.content.splitlines()
+    assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.mark.parametrize("capture_tables, link, grouped", R6A_MODES)
+def test_r6a_invented_header_year_fails_as_a_header_excess(mutated_render, capture_tables, link, grouped):
+    mutated_render(lambda headers, data: ([*headers[:-1], f"{headers[-1]} 2024"], data))
+    parser, element, _ = _r6a_parse(_r6a_document("labels", link=link, grouped=grouped), capture_tables)
+    assert "| Metric | 2025 — Actual | 2025 — Budget 2024 |" in element.content.splitlines()
+    assert parser.trace_numeric_failures == (f"{element.id}:header:2024",)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.mark.parametrize("source, amount, ordinary", [
+    ("surplus", "2025", ()),
+    ("labels", "300", ("2025", "300")),
+], ids=["header-number", "new-amount"])
+@pytest.mark.parametrize("capture_tables, link, grouped", R6A_MODES)
+def test_r6a_extra_body_amount_fails(mutated_render, capture_tables, link, grouped, source, amount, ordinary):
+    mutated_render(lambda headers, data: (headers, [[*data[0][:-1], f"{data[0][-1]} {amount}"]]))
+    parser, element, nodes = _r6a_parse(_r6a_document(source, link=link, grouped=grouped), capture_tables)
+    assert R6A_HEADERS[source] in element.content.splitlines()
+    assert parser.trace_numeric_failures == (f"{element.id}:{amount}",)
+    assert parser.header_accounting_misses == ()
+    # For the header number, the old trace let the unused header 2025 cover the body's copy.
+    assert trace_numeric_failures(element, nodes) == tuple(f"{element.id}:{token}" for token in ordinary)
+
+
+@pytest.mark.parametrize("capture_tables, link", [
+    pytest.param(capture, link, id=f"{'capture' if capture else 'normal'}-{'links' if link else 'plain'}")
+    for capture in (False, True) for link in (False, True)
+])
+def test_r6a_prose_number_matching_only_a_header_number_fails(monkeypatch, capture_tables, link):
+    original = Parser._process_text_node
+    monkeypatch.setattr(Parser, "_process_text_node",
+                        lambda self, node: original(self, node).replace("plan.", "plan for 2025."))
+    parser, element, nodes = _r6a_parse(_r6a_document("surplus", link=link, grouped=True), capture_tables)
+    assert element.content.startswith("Revenue was reviewed against plan for 2025.\n\n")
+    assert R6A_HEADERS["surplus"] in element.content.splitlines()
+    assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+    assert parser.header_accounting_misses == ()
+    assert trace_numeric_failures(element, nodes) == ()
+
+
+@pytest.mark.parametrize("capture_tables, failures", [
+    pytest.param(False, ("header:2024",) * 2, id="normal"),
+    pytest.param(True, (), id="capture"),
+])
+def test_r6a_a_table_nested_in_a_header_cell_credits_its_source_once(capture_tables, failures):
+    # The nested cells are read for the outer row and for their own row, so the normal render
+    # writes 2024 three times; the source holds one. The record counts each source cell once,
+    # so the two extra copies are a header excess, as main reports them as untraceable (they
+    # passed when the record counted the nested cells too). Capture mode writes the cell
+    # text once and passes, as on main.
+    html = ("<html><body><table><tr><th>Item</th><th>Period<table><tr><th>Fiscal</th><th>2024</th></tr>"
+            "</table></th></tr><tr><td>Revenue</td><td>100</td></tr></table></body></html>")
+    parser, element, _ = _r6a_parse(html, capture_tables)
+    if not capture_tables:
+        assert "| Item — Fiscal | Period Fiscal 2024 — 2024 | Fiscal | 2024 |" in element.content.splitlines()
+    assert parser.trace_numeric_failures == tuple(f"{element.id}:{failure}" for failure in failures)
+    assert parser.header_accounting_misses == ()
+
+
+NESTED_IN_HEADER_ROW = {
+    "tr-direct": "<table><tr><th>Fiscal</th><th>2024</th></tr></table>",
+    "div-wrapped": "<div><table><tr><th>Fiscal</th><th>2024</th></tr></table></div>",
+}
+
+
+@pytest.mark.parametrize("grouped", [False, True], ids=["alone", "with-prose"])
+@pytest.mark.parametrize("capture_tables, failures", [
+    pytest.param(False, ("header:2024",), id="normal"),
+    pytest.param(True, (), id="capture"),
+])
+@pytest.mark.parametrize("layout", sorted(NESTED_IN_HEADER_ROW))
+def test_r6a_a_table_nested_in_a_header_row_credits_its_source_once(layout, capture_tables, failures, grouped):
+    # lxml keeps the nested table inside the outer <tr>, so its cells are read for the outer row
+    # and again for their own row: the normal render writes 2024 twice from one source 2024.
+    # The record reads each cell once, so the second copy is a header excess, and prose citing
+    # 2024 keeps its own source (it was blamed when the record counted both reads). Capture
+    # mode writes the text once and passes, as on main.
+    prose = "<p>Results for fiscal 2024 follow.</p>" if grouped else ""
+    html = (f"<html><body>{prose}<table><tr><th>Item</th><th>Period</th>{NESTED_IN_HEADER_ROW[layout]}</tr>"
+            "<tr><td>Revenue</td><td>100</td></tr></table></body></html>")
+    parser, element, _ = _r6a_parse(html, capture_tables)
+    if not capture_tables:
+        assert "| Item — Fiscal | Period — 2024 | Fiscal | 2024 |" in element.content.splitlines()
+    assert parser.trace_numeric_failures == tuple(f"{element.id}:{failure}" for failure in failures)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.fixture
+def rewritten_elements(monkeypatch):
+    """Rewrite the built elements, as a change to element building could."""
+    import sec2md.parser as parser_module
+
+    def install(rewrite):
+        original = parser_module.build_elements_for_pages
+
+        def build(pages, page_segments):
+            result, nodes_map = original(pages, page_segments)
+            for page in result:
+                page.elements = rewrite(page.elements or [], nodes_map) or None
+            return result, nodes_map
+
+        monkeypatch.setattr(parser_module, "build_elements_for_pages", build)
+
+    return install
+
+
+def _merge_elements(elements, nodes_map):
+    """Group a page's elements into one, as an element builder that grouped tables would."""
+    first = elements[0]
+    nodes_map[first.id] = [node for element in elements for node in nodes_map.pop(element.id)]
+    return [first.model_copy(update={"content": "\n\n".join(element.content for element in elements)})]
+
+
+def _drop_separators(elements, nodes_map):
+    return [element.model_copy(update={"content": element.content.replace("| --- |", "|---|")})
+            for element in elements]
+
+
+# The faithful repeated 2025 balances without accounting; repetition over labels does not.
+ASSOCIATION_SOURCES = [
+    pytest.param("equal", (), id="no-excess"),
+    pytest.param("labels", ("2025",), id="ordinary-excess"),
+]
+
+
+@pytest.mark.parametrize("source, ordinary", ASSOCIATION_SOURCES)
+@pytest.mark.parametrize("capture_tables, link, grouped", R6A_MODES)
+def test_r6a_missing_association_keeps_the_ordinary_trace(rewritten_elements, capture_tables, link, grouped,
+                                                          source, ordinary):
+    rewritten_elements(_drop_separators)
+    parser, element, nodes = _r6a_parse(_r6a_document(source, link=link, grouped=grouped), capture_tables)
+    assert "|---|" in element.content
+    assert parser.header_accounting_misses == (f"{element.id}:missing",)
+    assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary)
+    assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+
+
+@pytest.mark.parametrize("source, ordinary", ASSOCIATION_SOURCES)
+@pytest.mark.parametrize("capture_tables, grouped", [
+    pytest.param(capture, grouped,
+                 id=f"{'capture' if capture else 'normal'}-{'with-prose' if grouped else 'alone'}")
+    for capture in (False, True) for grouped in (False, True)
+])
+def test_r6a_header_line_that_differs_from_its_record_is_a_missing_association(capture_tables, grouped,
+                                                                               source, ordinary):
+    # Literal link-shaped text in a table without anchors: element content reduces it to its
+    # label, so the segment's first line is not the header line the render recorded.
+    html = _r6a_document(source, link=False, grouped=grouped).replace("<th>Metric</th>", "<th>[Metric](basis)</th>")
+    parser, element, nodes = _r6a_parse(html, capture_tables)
+    assert R6A_HEADERS[source] in element.content.splitlines()
+    assert parser.header_accounting_misses == (f"{element.id}:missing",)
+    assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary)
+    assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+
+
+@pytest.mark.parametrize("source, ordinary", ASSOCIATION_SOURCES)
+@pytest.mark.parametrize("capture_tables, link, grouped", R6A_MODES)
+def test_r6a_ambiguous_association_keeps_the_ordinary_trace(rewritten_elements, capture_tables, link, grouped,
+                                                            source, ordinary):
+    # Two identical tables in one element: each table's segment occurs twice.
+    rewritten_elements(_merge_elements)
+    parser, element, nodes = _r6a_parse(_r6a_document(source, link=link, grouped=grouped, copies=2),
+                                        capture_tables)
+    assert element.content.count(R6A_HEADERS[source]) == 2
+    assert parser.header_accounting_misses == (f"{element.id}:ambiguous",) * 2
+    assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary) * 2
+    assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
 
 
 # --- strict's numeric trace reads emphasised numbers like the source (2026-10-07) -----------
@@ -561,3 +975,24 @@ def test_split_parentheses_glued_to_a_word_read_as_before(monkeypatch, html, ren
 def test_literal_asterisks_and_underscores_read_as_before(html):
     # Footnote stars and underscores are source text, not emphasis the renderer added.
     assert _strict_trace_tokens(html) == []
+
+
+# R6a tokenizes a located table header line on its own for header excess. It reads with the same
+# close-up as the rest of the element's output, so a line reads the same whether R6a located it
+# or left it in the pool. HTML table cells render without emphasis delimiters, so the record is
+# built by hand.
+SPLIT_HEADER = "| Item | **(** **650** **)** |"
+SPLIT_SEGMENT = f"{SPLIT_HEADER}\n| --- | --- |\n| Revenue | 100 |"
+SPLIT_TABLE = ("<table><tr><th>Item</th><th><b>(</b><b>650</b><b>)</b></th></tr>"
+               "<tr><td>Revenue</td><td>100</td></tr></table>")
+
+
+def test_located_header_line_reads_split_parentheses_like_the_rest_of_the_output():
+    nodes = [_node(SPLIT_TABLE)]
+    record = ElementHeaderRecord(SPLIT_SEGMENT, SPLIT_HEADER, (("-650", 1),), (("-650", 1),))
+    assert trace_numeric_failures(_element(SPLIT_SEGMENT), nodes) == ()
+    assert trace_numeric_failures(_element(SPLIT_SEGMENT), nodes, [record]) == ()
+    # An altered header number still fails the header excess check, with its accounting sign.
+    altered = SPLIT_SEGMENT.replace("650", "651")
+    record = ElementHeaderRecord(altered, SPLIT_HEADER.replace("650", "651"), (("-650", 1),), (("-650", 1),))
+    assert trace_numeric_failures(_element(altered), nodes, [record]) == ("e1:header:-651",)
