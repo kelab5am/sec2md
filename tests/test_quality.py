@@ -732,22 +732,22 @@ NESTED_IN_HEADER_ROW = {
 
 @pytest.mark.parametrize("grouped", [False, True], ids=["alone", "with-prose"])
 @pytest.mark.parametrize("capture_tables, failures", [
-    pytest.param(False, ("header:2024",), id="normal"),
+    # Revision 18 (C1): the nested rows are no longer read again, so no second 2024 is written.
+    pytest.param(False, (), id="normal"),
     pytest.param(True, (), id="capture"),
 ])
 @pytest.mark.parametrize("layout", sorted(NESTED_IN_HEADER_ROW))
 def test_r6a_a_table_nested_in_a_header_row_credits_its_source_once(layout, capture_tables, failures, grouped):
-    # lxml keeps the nested table inside the outer <tr>, so its cells are read for the outer row
-    # and again for their own row: the normal render writes 2024 twice from one source 2024.
-    # The record reads each cell once, so the second copy is a header excess, and prose citing
-    # 2024 keeps its own source (it was blamed when the record counted both reads). Capture
-    # mode writes the text once and passes, as on main.
+    # lxml keeps the nested table inside the outer <tr>. Its cells are read once, in that row,
+    # so the normal render writes 2024 once from one source 2024 and strict passes, as on main.
+    # The record reads each cell once, and prose citing 2024 keeps its own source (it was
+    # blamed when the record counted the cells twice). Capture mode writes the text once.
     prose = "<p>Results for fiscal 2024 follow.</p>" if grouped else ""
     html = (f"<html><body>{prose}<table><tr><th>Item</th><th>Period</th>{NESTED_IN_HEADER_ROW[layout]}</tr>"
             "<tr><td>Revenue</td><td>100</td></tr></table></body></html>")
     parser, element, _ = _r6a_parse(html, capture_tables)
     if not capture_tables:
-        assert "| Item — Fiscal | Period — 2024 | Fiscal | 2024 |" in element.content.splitlines()
+        assert "| Item | Period | Fiscal | 2024 |" in element.content.splitlines()
     assert parser.trace_numeric_failures == tuple(f"{element.id}:{failure}" for failure in failures)
     assert parser.header_accounting_misses == ()
 
