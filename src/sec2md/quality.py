@@ -76,10 +76,115 @@ def _normalized_numbers(text: str) -> tuple[str, ...]:
     return tuple(normalized)
 
 
-def trace_numeric_failures(element: Element, nodes: Sequence[Tag]) -> tuple[str, ...]:
-    """Report each expected normalized number missing from mapped source nodes."""
+@dataclass(frozen=True)
+class ElementHeaderRecord:
+    """One table's header record, bound to the segment its render supplied (spec R6a).
+
+    segment is the table's Markdown exactly as it entered element content. header_line is
+    the header line that render wrote, which must be the segment's first line.
+    header_source and header_capacity are the render's sorted (token, count) pairs: the
+    header-zone cells' tokens, and each cell's tokens times the output columns it heads.
+    header_cells are those cells with text, in document order, as (text, columns headed),
+    for consumers with their own tokenizer, such as the accuracy suite's trace.
+    """
+
+    segment: str
+    header_line: str
+    header_source: tuple[tuple[str, int], ...] = ()
+    header_capacity: tuple[tuple[str, int], ...] = ()
+    header_cells: tuple[tuple[str, int], ...] = ()
+
+
+HeaderMiss = Literal["missing", "ambiguous"]
+
+
+@dataclass(frozen=True)
+class HeaderLineLocation:
+    """Where a record's header line sits in element content, or why it was not located.
+
+    span is the line's [start, end) offsets. miss is "missing" when the segment does not
+    occur on whole lines or its first line is not the recorded header line, and
+    "ambiguous" when the segment occurs more than once or another record claims the same
+    header line.
+    """
+
+    span: tuple[int, int] | None
+    miss: HeaderMiss | None = None
+
+
+def _whole_line_occurrences(content: str, segment: str) -> list[int]:
+    """Start offsets where segment occupies whole lines of content, overlaps included."""
+
+    starts: list[int] = []
+    start = content.find(segment)
+    while start != -1:
+        end = start + len(segment)
+        if (start == 0 or content[start - 1] == "\n") and (end == len(content) or content[end] == "\n"):
+            starts.append(start)
+        start = content.find(segment, start + 1)
+    return starts
+
+
+def locate_header_lines(
+    content: str, records: Sequence[ElementHeaderRecord]
+) -> tuple[HeaderLineLocation, ...]:
+    """Locate each record's header line as the first line of its own segment (spec R6a).
+
+    The header line is never searched for on its own, so an identical prose or body line
+    elsewhere in the element is never taken for it. Each header line is consumed once.
+    """
+
+    spans: list[tuple[int, int] | HeaderMiss] = []
+    for record in records:
+        starts = _whole_line_occurrences(content, record.segment) if record.segment else []
+        if len(starts) > 1:
+            spans.append("ambiguous")
+        elif not starts or record.segment.split("\n", 1)[0] != record.header_line:
+            spans.append("missing")
+        else:
+            spans.append((starts[0], starts[0] + len(record.header_line)))
+    claims = Counter(span for span in spans if isinstance(span, tuple))
+    return tuple(
+        HeaderLineLocation(None, span) if isinstance(span, str)
+        else HeaderLineLocation(None, "ambiguous") if claims[span] > 1
+        else HeaderLineLocation(span)
+        for span in spans
+    )
+
+
+def trace_numeric_failures(
+    element: Element,
+    nodes: Sequence[Tag],
+    header_records: Sequence[ElementHeaderRecord] | None = None,
+) -> tuple[str, ...]:
+    """Report each expected normalized number missing from mapped source nodes.
+
+    With header records (spec R6a), each table header line located in the element is
+    checked on its own against its table's header capacity, an excess failing as
+    ``<element id>:header:<token>``. Located lines then leave the output pool and their
+    tables' header source tokens leave the source pool, so header-zone occurrences never
+    justify a body or prose number. A record whose header line is not located grants no
+    exemption and subtracts nothing. Without records the trace is unchanged.
+    """
 
     content = element.content
+    header_failures: list[str] = []
+    header_source: Counter[str] = Counter()
+    if header_records:
+        located = [
+            (record, location.span)
+            for record, location in zip(header_records, locate_header_lines(content, header_records))
+            if location.span is not None
+        ]
+        for record, (start, end) in located:
+            capacity = dict(record.header_capacity)
+            for token, count in sorted(Counter(_normalized_numbers(content[start:end])).items()):
+                header_failures.extend(
+                    f"{element.id}:header:{token}" for _ in range(max(0, count - capacity.get(token, 0)))
+                )
+            header_source.update(dict(record.header_source))
+        for _, (start, end) in sorted(located, key=lambda item: item[1], reverse=True):
+            content = content[:start] + content[end:]
     if any(_is_or_has_ordered_list(node) for node in nodes if isinstance(node, Tag)):
         content = _ORDERED_LIST_MARKER_RE.sub("", content)
     expected = Counter(_normalized_numbers(content))
@@ -88,12 +193,14 @@ def trace_numeric_failures(element: Element, nodes: Sequence[Tag]) -> tuple[str,
             " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
         )
     )
+    if header_source:
+        available -= header_source
     failures: list[str] = []
     for token, count in sorted(expected.items()):
         failures.extend(
             f"{element.id}:{token}" for _ in range(max(0, count - available[token]))
         )
-    return tuple(failures)
+    return tuple(header_failures + failures)
 
 
 @dataclass(frozen=True)
@@ -117,6 +224,10 @@ class ParseDiagnostics:
     table_structure_differences: tuple[str, ...] = ()
     tables_checked: int = 0
     numeric_recall: float | None = None
+    # Header alignment (report-only). An empty tuple means the check did not run (policy
+    # "off", or a failure inside check_tables()); a completed run emits every coverage key.
+    table_header_alignment: tuple[str, ...] = ()
+    table_header_alignment_coverage: tuple[tuple[str, int], ...] = ()
 
 
 def _is_or_has_ordered_list(node: Tag) -> bool:
@@ -280,6 +391,8 @@ def build_diagnostics(
         tables_checked=table_report.tables_checked if table_report else 0,
         # Checks 1-3 run together: Parser skips them all under quality_policy="off".
         numeric_recall=_numeric_recall(source_visible, output_visible) if table_report is not None else None,
+        table_header_alignment=table_report.alignment if table_report else (),
+        table_header_alignment_coverage=table_report.alignment_coverage if table_report else (),
     )
 
 

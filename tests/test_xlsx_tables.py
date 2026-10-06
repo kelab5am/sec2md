@@ -585,3 +585,133 @@ def test_duration_with_month_and_day_supports_td_year_headers(duration):
     assert table.headers[1:] == (f'{duration} — 2026', f'{duration} — 2025')
     assert [[c.value for c in row[1:]] for row in table.rows] == [
         [Decimal('56311'), Decimal('42314')], [Decimal('9975'), Decimal('7623')]]
+
+
+# --- R9: the structural helpers' LEGACY policy keeps prepared tables unchanged ----------
+# Pinned from prepare_table at main c674828, before the structural policy existed. The
+# Markdown render's EXTENDED rules (singleton markers, currency codes, leading-dot
+# decimals, ")%" closers, zero-width text, R0 body rows) must not reach these tables.
+
+_UNRESOLVED = 'Numeric role unresolved; verify the column heading and units.'
+_ITEM_HEADER = '<tr><th>Item</th><th></th><th>2025</th></tr>'
+
+
+def _own_sources(rows, width, empty=()):
+    """Each output cell sourced from its own grid slot only: no group, no structural action."""
+    return tuple(tuple(() if (row, column) in empty else ((row, column),) for column in range(width))
+                 for row in rows)
+
+
+XLSX_POLICY_CONTROLS = {
+    'singleton_dollar': (
+        f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>$</td><td>100</td></tr>'
+        '<tr><td>Costs</td><td></td><td>60</td></tr></table>',
+        ('Item', 'Column 2', '2025'),
+        [[('Revenue', '@', 'Revenue', None), ('$', '@', '$', None), ('100', '#,##0', '100', None)],
+         [('Costs', '@', 'Costs', None), (None, '@', '', None), ('60', '@', '60', _UNRESOLVED)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 2; verify its meaning.',
+         f'Source row 2, column 2: {_UNRESOLVED}'),
+    ),
+    'singleton_close': (
+        '<table><tr><th>Metric</th><th>2025</th><th></th></tr>'
+        '<tr><td>A</td><td>(29</td><td>)</td></tr><tr><td>B</td><td>40</td><td></td></tr></table>',
+        ('Metric', '2025', 'Column 3'),
+        [[('A', '@', 'A', None), ('(29', '@', '(29', _UNRESOLVED), (')', '@', ')', None)],
+         [('B', '@', 'B', None), ('40', '@', '40', _UNRESOLVED), (None, '@', '', None)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 3; verify its meaning.',
+         f'Source row 1, column 1: {_UNRESOLVED}', f'Source row 2, column 1: {_UNRESOLVED}'),
+    ),
+    'currency_euro': (
+        f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>€</td><td>1,234</td></tr>'
+        '<tr><td>Costs</td><td>€</td><td>(567)</td></tr></table>',
+        ('Item', 'Column 2', '2025'),
+        [[('Revenue', '@', 'Revenue', None), ('€', '@', '€', None), ('1234', '#,##0', '1,234', None)],
+         [('Costs', '@', 'Costs', None), ('€', '@', '€', None), ('(567)', '@', '(567)', _UNRESOLVED)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 2; verify its meaning.',
+         f'Source row 2, column 2: {_UNRESOLVED}'),
+    ),
+    'currency_iso_code': (
+        f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>RMB</td><td>941,168</td></tr>'
+        '<tr><td>Costs</td><td>RMB</td><td>12.5</td></tr></table>',
+        ('Item', 'Column 2', '2025'),
+        [[('Revenue', '@', 'Revenue', None), ('RMB', '@', 'RMB', None),
+          ('941168', '#,##0', '941,168', None)],
+         [('Costs', '@', 'Costs', None), ('RMB', '@', 'RMB', None), ('12.5', '@', '12.5', _UNRESOLVED)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 2; verify its meaning.',
+         f'Source row 2, column 2: {_UNRESOLVED}'),
+    ),
+    'currency_prefixed_dollar': (
+        f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>NT$</td><td>1,329.2</td></tr>'
+        '<tr><td>Costs</td><td>NT$</td><td>(74.7</td><td>)</td></tr></table>',
+        ('Item', 'Column 2', '2025', 'Column 4'),
+        [[('Revenue', '@', 'Revenue', None), ('NT$', '@', 'NT$', None),
+          ('1329.2', '#,##0.0', '1,329.2', None), (None, '@', '', None)],
+         [('Costs', '@', 'Costs', None), ('NT$', '@', 'NT$', None), ('(74.7', '@', '(74.7', _UNRESOLVED),
+          (')', '@', ')', None)]],
+        _own_sources((1, 2), 4, empty={(1, 3)}),
+        ('Missing source header for Column 2; verify its meaning.',
+         'Missing source header for Column 4; verify its meaning.',
+         f'Source row 2, column 2: {_UNRESOLVED}'),
+    ),
+    'leading_dot_decimals': (
+        f'<table>{_ITEM_HEADER}<tr><td>Basic</td><td>$</td><td>.75</td></tr>'
+        '<tr><td>Diluted</td><td>$</td><td>(.62)</td></tr></table>',
+        ('Item', 'Column 2', '2025'),
+        [[('Basic', '@', 'Basic', None), ('$', '@', '$', None), ('.75', '@', '.75', _UNRESOLVED)],
+         [('Diluted', '@', 'Diluted', None), ('$', '@', '$', None), ('(.62)', '@', '(.62)', _UNRESOLVED)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 2; verify its meaning.',
+         f'Source row 1, column 2: {_UNRESOLVED}', f'Source row 2, column 2: {_UNRESOLVED}'),
+    ),
+    'percent_close_marker': (
+        '<table><tr><th>Item</th><th>2025</th><th></th></tr>'
+        '<tr><td>Margin</td><td>(3.2</td><td>)%</td></tr>'
+        '<tr><td>Growth</td><td>(1.5</td><td>)%</td></tr></table>',
+        ('Item', '2025', 'Column 3'),
+        [[('Margin', '@', 'Margin', None), ('(3.2', '@', '(3.2', _UNRESOLVED), (')%', '@', ')%', None)],
+         [('Growth', '@', 'Growth', None), ('(1.5', '@', '(1.5', _UNRESOLVED), (')%', '@', ')%', None)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 3; verify its meaning.',
+         f'Source row 1, column 1: {_UNRESOLVED}', f'Source row 2, column 1: {_UNRESOLVED}'),
+    ),
+    'zero_width_marker_slot': (
+        f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>$</td><td>100</td></tr>'
+        '<tr><td>Costs</td><td>\u200b</td><td>60</td></tr></table>',
+        ('Item', 'Column 2', '2025'),
+        [[('Revenue', '@', 'Revenue', None), ('$', '@', '$', None), ('100', '#,##0', '100', None)],
+         [('Costs', '@', 'Costs', None), ('\u200b', '@', '\u200b', None), ('60', '@', '60', _UNRESOLVED)]],
+        _own_sources((1, 2), 3),
+        ('Missing source header for Column 2; verify its meaning.',
+         f'Source row 2, column 2: {_UNRESOLVED}'),
+    ),
+    # Astra's round-1 probe with td headers: prepare_table's sentinel header row starts the
+    # structural grid, and LEGACY's body start falls on the "Metric | 2025" row.
+    'sentinel_header_start': (
+        '<table><tr><td>Metric</td><td>2025</td><td></td></tr>'
+        '<tr><td>A</td><td>(29</td><td>)</td></tr><tr><td>B</td><td>40</td><td></td></tr></table>',
+        ('Column 1', 'Column 2', 'Column 3'),
+        [[('Metric', '@', 'Metric', None), ('2025', '@', '2025', _UNRESOLVED), (None, '@', '', None)],
+         [('A', '@', 'A', None), ('(29', '@', '(29', _UNRESOLVED), (')', '@', ')', None)],
+         [('B', '@', 'B', None), ('40', '@', '40', _UNRESOLVED), (None, '@', '', None)]],
+        _own_sources((0, 1, 2), 3),
+        ('No explicit headers; positional column names generated and every source row retained.',
+         f'Source row 0, column 1: {_UNRESOLVED}', f'Source row 1, column 1: {_UNRESOLVED}',
+         f'Source row 2, column 1: {_UNRESOLVED}'),
+    ),
+}
+
+
+@pytest.mark.parametrize('name', list(XLSX_POLICY_CONTROLS))
+def test_prepared_tables_keep_legacy_structural_rules(name):
+    source, headers, rows, sources, issues = XLSX_POLICY_CONTROLS[name]
+    table = prepared(source)
+    assert table.headers == headers
+    assert [[(c.value if c.value is None or isinstance(c.value, str) else str(c.value),
+              c.number_format, c.original, c.review_reason) for c in row] for row in table.rows] == rows
+    assert table.cell_sources == sources
+    assert table.issues == issues
+    assert table.status == 'needs_review'

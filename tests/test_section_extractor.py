@@ -577,3 +577,174 @@ def test_10q_with_em_dash_part_headings_keeps_its_items():
 def test_part_pattern_still_rejects_words_starting_with_part():
     assert PART_PATTERN.match("Particularly in the second quarter") is None
     assert PART_PATTERN.match("PART IVORY") is None
+
+
+# --- R8: CAT 7, a one-row PART table through Parser and the section extractor --------------
+
+CAT_7_DOCUMENT = """<html><body>
+<div style="page-break-after:always">
+<p>UNITED STATES SECURITIES AND EXCHANGE COMMISSION</p>
+<p>FORM 10-K</p>
+<p><b>Documents Incorporated by Reference</b></p>
+<p>Portions of the documents listed below have been incorporated by reference into the indicated
+parts of this Form 10-K, as specified in the responses to the item numbers involved.</p>
+{table}
+</div>
+<div style="page-break-after:always">
+<p>Table of Contents</p>
+<table>
+<tr><td></td><td></td><td></td><td>Page</td></tr>
+<tr><td><a href="#p1">Part I</a></td><td><a href="#i1">Item 1.</a></td><td><a href="#i1">Business</a></td><td><a href="#i1">1</a></td></tr>
+<tr><td><a href="#p3">Part III</a></td><td><a href="#i10">Item 10.</a></td><td><a href="#i10">Directors, Executive Officers and Corporate Governance</a></td><td><a href="#i10">3</a></td></tr>
+</table>
+</div>
+<div style="page-break-after:always">
+<p id="p1"><b>PART I</b></p>
+<p id="i1"><b>Item 1. Business.</b></p>
+<p>Caterpillar is the world's leading manufacturer of construction and mining equipment.</p>
+</div>
+<div>
+<p id="p3"><b>PART III</b></p>
+<p id="i10"><b>Item 10. Directors, Executive Officers and Corporate Governance.</b></p>
+<p>Information required by Item 10 is incorporated by reference from the Proxy Statement.</p>
+<p><b>Item 11. Executive Compensation.</b></p>
+<p>Information required by Item 11 is incorporated by reference from the Proxy Statement.</p>
+</div>
+</body></html>"""
+
+
+def _section_boundaries(sections):
+    return [(s.part, s.item, [page.number for page in s.pages]) for s in sections]
+
+
+@pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+def test_cat_7_part_table_keeps_its_cells_and_part_iii_boundaries(capture_tables):
+    from sec2md.parser import Parser
+    from tests.test_parser import CAT_7_SENTENCE, CAT_7_TABLE
+
+    parser = Parser(CAT_7_DOCUMENT.format(table=CAT_7_TABLE), capture_tables=capture_tables)
+    pages = parser.get_pages()
+    assert parser.diagnostics.warnings == ()
+    part_line = f"PART III {CAT_7_SENTENCE}"
+    assert pages[0].content.endswith(f"\n\n{part_line}")
+
+    sections = extract_sections(pages, filing_type="10-K")
+    assert _section_boundaries(sections) == [
+        ("PART III", None, [1, 2]),
+        ("PART I", "ITEM 1", [3]),
+        ("PART III", "ITEM 10", [4]),
+        ("PART III", "ITEM 11", [4]),
+    ]
+    cover = sections[0].pages[0].content
+    assert cover == part_line
+    assert "2025" in cover and "120" in cover
+
+    # The boundaries are those of the old rendering, which wrote "PART III" alone.
+    old_pages = [
+        Page(number=page.number, content=page.content.replace(part_line, "PART III"),
+             elements=page.elements, display_page=page.display_page)
+        for page in pages
+    ]
+    assert _section_boundaries(extract_sections(old_pages, filing_type="10-K")) == _section_boundaries(sections)
+
+
+RUNNING_PART_HEADER = "<table><tr><td>Part II</td><td>Annual Report 2024</td></tr></table><p>Item 7</p>"
+RUNNING_PART_BODY = "Revenue increased because of higher demand across every segment we report on. " * 3
+RUNNING_PART_HEADER_DOCUMENT = f"""<html><body>
+<div style="page-break-after:always">
+<p><b>PART II</b></p>
+<p><b>Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations</b></p>
+<p>{RUNNING_PART_BODY} Page one.</p>
+</div>
+<div style="page-break-after:always">
+{RUNNING_PART_HEADER}
+<p>{RUNNING_PART_BODY} Page two.</p>
+</div>
+<div>
+{RUNNING_PART_HEADER}
+<p>{RUNNING_PART_BODY} Page three.</p>
+<p><b>Item 8. Financial Statements and Supplementary Data</b></p>
+<p>{RUNNING_PART_BODY} Item eight.</p>
+</div>
+</body></html>"""
+
+
+@pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+def test_running_part_header_table_is_no_longer_a_page_breadcrumb_known_limitation(capture_tables):
+    """Known limitation (spec revision 17, accepted 2026-10-06), pinned as today's behaviour.
+
+    R8 keeps the title cell of a one-row PART table, so the running page header
+    `Part II | Annual Report 2024` renders `PART II Annual Report 2024`. That line is no
+    longer a bare PART label, so it is not stripped as a page breadcrumb with the bare
+    `Item 7` below it. Page 2 becomes a part-only section, and page 3's Item 7 text before
+    Item 8 falls out of every section. The previous renderer wrote `PART II` alone, the
+    breadcrumbs were stripped, and ITEM 7 ran over pages 1-3.
+    """
+    from sec2md.parser import Parser
+
+    parser = Parser(RUNNING_PART_HEADER_DOCUMENT, capture_tables=capture_tables)
+    pages = parser.get_pages()
+    assert parser.diagnostics.warnings == ()
+    assert [page.content.split("\n")[:3] for page in pages[1:]] == [["PART II Annual Report 2024", "", "Item 7"]] * 2
+
+    sections = extract_sections(pages, filing_type="10-K")
+    assert _section_boundaries(sections) == [
+        ("PART II", "ITEM 7", [1]),
+        ("PART II", None, [2]),
+        ("PART II", "ITEM 8", [3]),
+    ]
+
+    def holding(text):
+        return [(s.part, s.item) for s in sections if any(text in page.content for page in s.pages)]
+
+    assert holding("Page one.") == [("PART II", "ITEM 7")]
+    assert holding("Page two.") == [("PART II", None)]
+    assert holding("Page three.") == []
+    assert holding("Item eight.") == [("PART II", "ITEM 8")]
+
+
+PART_ONLY_STUB_SENTENCE = "Information for this part is incorporated by reference from our definitive 2025 proxy statement."
+PART_ONLY_STUB_BODY = "Our controls were effective as of the end of the period covered by this report. " * 2
+PART_ONLY_STUB_DOCUMENT = f"""<html><body>
+<div style="page-break-after:always">
+<p><b>PART II</b></p>
+<p><b>Item 9B. Other Information.</b></p>
+<p>{PART_ONLY_STUB_BODY}</p>
+<table><tr><td>Part III</td><td>{PART_ONLY_STUB_SENTENCE}</td></tr></table>
+</div>
+<div>
+<p><b>Item 10. Directors, Executive Officers and Corporate Governance.</b></p>
+<p>{PART_ONLY_STUB_BODY}</p>
+</div>
+</body></html>"""
+
+
+@pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+def test_long_part_only_stub_is_kept_and_answers_get_section_known_limitation(capture_tables):
+    """Known limitation (spec revision 17, accepted 2026-10-06), pinned as today's behaviour.
+
+    R8 keeps the sentence of a one-row `Part III | ...` table at the end of a page. The
+    section extractor drops a part-only stub of at most 80 characters, and this one is
+    longer, so it is kept as a PART III section without an item, and
+    `get_section("PART III")` returns it instead of ITEM 10. The previous renderer wrote
+    `PART III` alone: the stub was dropped, the sections were ITEM 9B and ITEM 10, and
+    `get_section("PART III")` returned ITEM 10.
+    """
+    from sec2md.parser import Parser
+
+    parser = Parser(PART_ONLY_STUB_DOCUMENT, capture_tables=capture_tables)
+    pages = parser.get_pages()
+    assert parser.diagnostics.warnings == ()
+    part_line = f"PART III {PART_ONLY_STUB_SENTENCE}"
+    assert pages[0].content.endswith(f"\n\n{part_line}")
+
+    extractor = SectionExtractor(pages, filing_type="10-K")
+    assert _section_boundaries(extractor.get_sections()) == [
+        ("PART II", "ITEM 9B", [1]),
+        ("PART III", None, [1]),
+        ("PART III", "ITEM 10", [2]),
+    ]
+    section = extractor.get_section("PART III")
+    assert (section.part, section.item, [page.number for page in section.pages]) == ("PART III", None, [1])
+    assert section.pages[0].content == part_line
+    assert extractor.get_section("PART III", "ITEM 10").item == "ITEM 10"
