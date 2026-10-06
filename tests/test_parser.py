@@ -286,6 +286,50 @@ class TestDisplayPageDetection:
         candidates = [(i, 100 - i) for i in range(1, 10)]
         assert self._make_parser()._validate_page_number_sequence(candidates) is False
 
+    def test_footer_number_after_table_row_wins(self):
+        content = "Revenue by product\n\n| Product | Amount |\n| --- | --- |\n| 304 | 1,234 |\n74"
+        assert self._make_parser()._extract_page_number_from_content(content) == 74
+
+    def test_page_ending_with_table_rows_gives_no_guess_from_them(self):
+        content = ("Revenue by product\n\n| Product | Amount |\n| --- | --- |\n"
+                   "| Products | 304 |\n| Services | 412 |")
+        assert self._make_parser()._extract_page_number_from_content(content) is None
+
+    def test_footer_with_pipes_still_read(self):
+        content = "Risk Factors\n\nThe Company's business can be affected.\n\nApple Inc. | Form 10-K | 23"
+        assert self._make_parser()._extract_page_number_from_content(content) == 23
+
+    def test_large_table_total_near_page_end_is_not_a_page_number(self):
+        content = ("Net revenue by platform\n\n| Platform | Amount |\n| --- | --- |\n"
+                   "| Total | 2,608,118 |\n\n(1) Includes other revenue.")
+        assert self._make_parser()._extract_page_number_from_content(content) is None
+
+    def test_table_lines_do_not_take_the_window_of_page_lines(self):
+        # Without its table lines the page ends "... 57", so 57 is among its last three lines.
+        content = "Alpha\nBeta\nGamma\nDelta\n57\n:--- | ---:\n| a | b |\n| c | d |"
+        assert self._make_parser()._extract_page_number_from_content(content) == 57
+
+    @pytest.mark.parametrize("line, expected", [
+        ("| Total | 2,608,118 |", True),
+        ("   | 304 | 1,234 |", True),
+        ("| --- | --- |", True),
+        (":--- | ---:", True),
+        ("---|---", True),
+        ("---", False),
+        ("Apple Inc. | Form 10-K | 23", False),
+        ("74", False),
+        ("", False),
+    ])
+    def test_markdown_table_line(self, line, expected):
+        assert Parser._is_markdown_table_line(line) is expected
+
+    def test_display_pages_follow_footers_below_tables(self):
+        parser = self._make_parser()
+        pages = [Page(number=n, content=f"Segment results\n\n| Segment | Total |\n| --- | --- |\n"
+                                        f"| {300 + 7 * n} | 1,234 |\n{70 + n}")
+                 for n in range(1, 7)]
+        assert [p.display_page for p in parser._detect_display_page_numbers(pages)] == [71, 72, 73, 74, 75, 76]
+
 
 class TestOneRowTable:
     """Single-row tables should be flattened to text."""
