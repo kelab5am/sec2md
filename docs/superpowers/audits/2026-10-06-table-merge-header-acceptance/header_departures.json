@@ -1,0 +1,5814 @@
+{
+ "rows": 219,
+ "tables": 213,
+ "data_rows": 177,
+ "non_data_rows": 42,
+ "non_data_tables": 41,
+ "non_data_label_only_rows": 24,
+ "non_data_with_value_text_rows": 18,
+ "non_data_with_value_text_tables": 17,
+ "non_data_by_document": {
+  "fixture:aapl-2023-10k": 1,
+  "fixture:nvda-2026-ex99-1": 1,
+  "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm": 1,
+  "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm": 1,
+  "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm": 1,
+  "edgar:BAC-10-K-2025-02-25.htm": 1,
+  "edgar:CAT-10-K-2025-02-14.htm": 5,
+  "edgar:CRM-10-K-2025-03-05.htm": 3,
+  "edgar:GOOGL-10-Q-2025-10-30.htm": 2,
+  "edgar:JPM-10-K-2025-02-14.htm": 7,
+  "edgar:KO-10-K-2025-02-20.htm": 2,
+  "edgar:MSFT-10-K-2025-07-30.htm": 6,
+  "edgar:MU-10-K-2025-10-03.htm": 1,
+  "edgar:NFLX-10-K-2025-01-27.htm": 2,
+  "edgar:NVO-20-F-2025-02-05.htm": 2,
+  "edgar:SPCX-10-Q-2026-08-04.htm": 1,
+  "edgar:UNH-10-K-2025-02-27.htm": 5
+ },
+ "zone_cuts": 87,
+ "zone_cuts_by_label_only_row": 0,
+ "zone_cuts_inconsistent": [],
+ "stacked_title_tables": 0,
+ "stacked_title_list": [],
+ "rows_list": [
+  {
+   "unit": 6,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "California",
+    "94-2404110"
+   ],
+   "label_only": false,
+   "main_header": [
+    "California",
+    "94-2404110"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "fixture:aapl-2023-10k"
+  },
+  {
+   "unit": 18,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Gross margin percentage:"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Gross margin percentage: — Products",
+    "36.5 %",
+    "36.3 %",
+    "35.3 %"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "fixture:aapl-2023-10k"
+  },
+  {
+   "unit": 18,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Products",
+    "36.5",
+    "%",
+    "36.3",
+    "%",
+    "35.3",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Gross margin percentage: — Products",
+    "36.5 %",
+    "36.3 %",
+    "35.3 %"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "fixture:aapl-2023-10k"
+  },
+  {
+   "unit": 3,
+   "row": 0,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2002-10k"
+  },
+  {
+   "unit": 2,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "0-23985",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "0-23985",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2026-08-26-8k"
+  },
+  {
+   "unit": 3,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2026-10k"
+  },
+  {
+   "unit": 62,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.10+",
+    "Amended and Restated 2007 Equity Incentive Plan - Global Performance-Based Restricted Stock Unit Gra",
+    "10-Q",
+    "10.3",
+    "5/29/2024"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.10+",
+    "Amended and Restated 2007 Equity Incentive Plan - Global Performance-Based Restricted Stock Unit Gra",
+    "10-Q",
+    "10.3",
+    "5/29/2024"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2026-10k"
+  },
+  {
+   "unit": 7,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Cash flows from financing activities:"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Cash flows from financing activities: — Proceeds related to issuance of debt, net of costs",
+    "24,896",
+    "—",
+    "24,896",
+    "—"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2026-ex99-1"
+  },
+  {
+   "unit": 7,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Proceeds related to issuance of debt, net of costs",
+    "24,896",
+    "—",
+    "24,896",
+    "—"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Cash flows from financing activities: — Proceeds related to issuance of debt, net of costs",
+    "24,896",
+    "—",
+    "24,896",
+    "—"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2026-ex99-1"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "fixture:nvda-2026-q2-10q"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,191,446,233",
+    "shares outstanding as of April 19, 2024"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,191,446,233",
+    "shares outstanding as of April 19, 2024"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,184,728,795",
+    "shares outstanding as of July 26, 2024"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,184,728,795",
+    "shares outstanding as of July 26, 2024"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,180,000,871",
+    "shares outstanding as of October 25, 2024"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,180,000,871",
+    "shares outstanding as of October 25, 2024"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081.htm"
+  },
+  {
+   "unit": 2,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm"
+  },
+  {
+   "unit": 6,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm"
+  },
+  {
+   "unit": 69,
+   "row": 4,
+   "data_row": false,
+   "texts": [
+    "Susan Li"
+   ],
+   "label_only": false,
+   "main_header": [
+    "META PLATFORMS, INC. — /s/ Susan Li"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "META PLATFORMS, INC."
+   ],
+   "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,171,148,098",
+    "shares outstanding as of April 25, 2025"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,171,148,098",
+    "shares outstanding as of April 25, 2025"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,168,962,480",
+    "shares outstanding as of July 25, 2025"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,168,962,480",
+    "shares outstanding as of July 25, 2025"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,177,889,269",
+    "shares outstanding as of October 24, 2025"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,177,889,269",
+    "shares outstanding as of October 24, 2025"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm"
+  },
+  {
+   "unit": 2,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm"
+  },
+  {
+   "unit": 6,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm"
+  },
+  {
+   "unit": 60,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "U.S. federal statutory income tax rate",
+    "$",
+    "18,046",
+    "21.0",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "U.S. federal statutory income tax rate",
+    "Year Ended December 31, 2025 — $ 18,046",
+    "21.0 %"
+   ],
+   "candidate_header": [
+    "",
+    "Year Ended December 31, 2025",
+    "Year Ended December 31, 2025"
+   ],
+   "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm"
+  },
+  {
+   "unit": 71,
+   "row": 4,
+   "data_row": false,
+   "texts": [
+    "Susan Li"
+   ],
+   "label_only": false,
+   "main_header": [
+    "META PLATFORMS, INC. — /s/ Susan Li"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "META PLATFORMS, INC."
+   ],
+   "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,196,045,588",
+    "shares outstanding as of April 24, 2026"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,196,045,588",
+    "shares outstanding as of April 24, 2026"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526.htm"
+  },
+  {
+   "unit": 1,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "20-1665019"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Class A Common Stock",
+    "$0.000006 par value",
+    "2,205,128,509",
+    "shares outstanding as of July 24, 2026"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Class — Class A Common Stock",
+    "$0.000006 par value",
+    "Number of Shares Outstanding — 2,205,128,509",
+    "shares outstanding as of July 24, 2026"
+   ],
+   "candidate_header": [
+    "Class",
+    "Class",
+    "Number of Shares Outstanding",
+    "Number of Shares Outstanding"
+   ],
+   "doc": "rcq:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705.htm"
+  },
+  {
+   "unit": 5,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "rcq:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm"
+  },
+  {
+   "unit": 31,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "5%",
+    "7%",
+    "7%",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "5%",
+    "7%",
+    "7%",
+    "5%",
+    "7%",
+    "15%",
+    "27%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm"
+  },
+  {
+   "unit": 32,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "(1)%",
+    "2%",
+    "6%",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "Total DAUq YoY Growth:",
+    "11%",
+    "11%",
+    "7%",
+    "4%",
+    "5%",
+    "12%",
+    "21%",
+    "30%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "(1)%",
+    "2%",
+    "6%",
+    "6%",
+    "9%",
+    "19%",
+    "34%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm"
+  },
+  {
+   "unit": 33,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "1%",
+    "3%",
+    "3%",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "1%",
+    "3%",
+    "3%",
+    "2%",
+    "5%",
+    "15%",
+    "29%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm"
+  },
+  {
+   "unit": 35,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "32%",
+    "32%",
+    "6%",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "32%",
+    "32%",
+    "6%",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm"
+  },
+  {
+   "unit": 36,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "35%",
+    "36%",
+    "5%",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "YOY Growth:",
+    "47%",
+    "42%",
+    "17%",
+    "12%",
+    "9%",
+    "16%",
+    "3%",
+    "10%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "35%",
+    "36%",
+    "5%",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm"
+  },
+  {
+   "unit": 31,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "7%",
+    "7%",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "7%",
+    "7%",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm"
+  },
+  {
+   "unit": 32,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "2%",
+    "6%",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "Total DAUq YoY Growth:",
+    "11%",
+    "7%",
+    "4%",
+    "5%",
+    "12%",
+    "21%",
+    "30%",
+    "44%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "2%",
+    "6%",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm"
+  },
+  {
+   "unit": 33,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "3%",
+    "3%",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "3%",
+    "3%",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm"
+  },
+  {
+   "unit": 35,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "32%",
+    "6%",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "32%",
+    "6%",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm"
+  },
+  {
+   "unit": 36,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "36%",
+    "5%",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "YOY Growth:",
+    "42%",
+    "17%",
+    "12%",
+    "9%",
+    "16%",
+    "3%",
+    "10%",
+    "17%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "36%",
+    "5%",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm"
+  },
+  {
+   "unit": 31,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "7%",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "7%",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm"
+  },
+  {
+   "unit": 32,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "6%",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "Total DAUq YoY Growth:",
+    "7%",
+    "4%",
+    "5%",
+    "12%",
+    "21%",
+    "30%",
+    "44%",
+    "44%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "6%",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm"
+  },
+  {
+   "unit": 33,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "3%",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "3%",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm"
+  },
+  {
+   "unit": 35,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "6%",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "6%",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm"
+  },
+  {
+   "unit": 36,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "5%",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "YOY Growth:",
+    "17%",
+    "12%",
+    "9%",
+    "16%",
+    "3%",
+    "10%",
+    "17%",
+    "16%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "5%",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 9,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "5%",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 10,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "Total DAUq YoY Growth:",
+    "4%",
+    "5%",
+    "12%",
+    "21%",
+    "30%",
+    "44%",
+    "44%",
+    "46%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "6%",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 11,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "2%",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 13,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "7%",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 14,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "YOY Growth:",
+    "12%",
+    "9%",
+    "16%",
+    "3%",
+    "10%",
+    "17%",
+    "16%",
+    "25%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "5%",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 58,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Expected term (in years)",
+    "6.31"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Expected term (in years)",
+    "6.31"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 69,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "10.5(f)#",
+    "Form of Restricted Stock Award Grant Notice and Restricted Stock Award Agreement under the 2012 Stoc",
+    "S-1",
+    "2/22/2024",
+    "10.7(f)"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Exhibit Number — 10.5(f)#",
+    "Exhibit Description — Form of Restricted Stock Award Grant Notice and Restricted Stock Award Agreeme",
+    "Incorporated by Reference — S-1",
+    "2/22/2024",
+    "10.7(f)"
+   ],
+   "candidate_header": [
+    "Exhibit Number",
+    "Exhibit Description",
+    "Incorporated by Reference",
+    "Incorporated by Reference",
+    "Incorporated by Reference",
+    "Filed Herewith"
+   ],
+   "doc": "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm"
+  },
+  {
+   "unit": 33,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "7%",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm"
+  },
+  {
+   "unit": 34,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "Total DAUq YoY Growth:",
+    "5%",
+    "12%",
+    "21%",
+    "30%",
+    "44%",
+    "44%",
+    "46%",
+    "41%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "9%",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm"
+  },
+  {
+   "unit": 35,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "5%",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm"
+  },
+  {
+   "unit": 37,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "15%",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm"
+  },
+  {
+   "unit": 38,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%",
+    "YOY Growth:",
+    "9%",
+    "16%",
+    "3%",
+    "10%",
+    "17%",
+    "16%",
+    "25%",
+    "22%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "15%",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm"
+  },
+  {
+   "unit": 34,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "15%",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm"
+  },
+  {
+   "unit": 35,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "Total DAUq YoY Growth:",
+    "12%",
+    "21%",
+    "30%",
+    "44%",
+    "44%",
+    "46%",
+    "41%",
+    "32%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "19%",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm"
+  },
+  {
+   "unit": 36,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "15%",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm"
+  },
+  {
+   "unit": 38,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%",
+    "47%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "5%",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm"
+  },
+  {
+   "unit": 39,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%",
+    "59%",
+    "YoY Growth:",
+    "16%",
+    "3%",
+    "10%",
+    "17%",
+    "16%",
+    "25%",
+    "22%",
+    "40%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "—%",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm"
+  },
+  {
+   "unit": 34,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "27%",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm"
+  },
+  {
+   "unit": 35,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%",
+    "Total DAUq YoY Growth:",
+    "21%",
+    "30%",
+    "44%",
+    "44%",
+    "46%",
+    "41%",
+    "32%",
+    "31%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "34%",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm"
+  },
+  {
+   "unit": 36,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "29%",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm"
+  },
+  {
+   "unit": 38,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%",
+    "47%",
+    "41%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "(2)%",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%",
+    "47%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm"
+  },
+  {
+   "unit": 39,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%",
+    "59%",
+    "54%",
+    "YoY Growth:",
+    "3%",
+    "10%",
+    "17%",
+    "16%",
+    "25%",
+    "22%",
+    "40%",
+    "39%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "(7)%",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%",
+    "59%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 9,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%",
+    "19%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "37%",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 10,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%",
+    "9%",
+    "Total DAUq YoY Growth:",
+    "30%",
+    "44%",
+    "44%",
+    "46%",
+    "41%",
+    "32%",
+    "31%",
+    "28%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "45%",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 11,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%",
+    "24%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "40%",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 13,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%",
+    "47%",
+    "41%",
+    "42%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "8%",
+    "2%",
+    "14%",
+    "23%",
+    "23%",
+    "47%",
+    "41%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 14,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "YoY Growth:",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%",
+    "59%",
+    "54%",
+    "53%",
+    "YOY Growth:",
+    "10%",
+    "17%",
+    "16%",
+    "25%",
+    "22%",
+    "40%",
+    "39%",
+    "38%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "YoY Growth:",
+    "3%",
+    "(5)%",
+    "12%",
+    "28%",
+    "31%",
+    "59%",
+    "54%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 68,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "10.12(c)#",
+    "Form of Restricted Stock Unit Award Grant Notice and Restricted Stock Unit Award Agreement under the",
+    "S-1",
+    "2/22/2024",
+    "10.8(c)"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Exhibit Number — 10.12(c)#",
+    "Exhibit Description — Form of Restricted Stock Unit Award Grant Notice and Restricted Stock Unit Awa",
+    "Incorporated by Reference — S-1",
+    "2/22/2024",
+    "10.8(c)"
+   ],
+   "candidate_header": [
+    "Exhibit Number",
+    "Exhibit Description",
+    "Incorporated by Reference",
+    "Incorporated by Reference",
+    "Incorporated by Reference",
+    "Filed Herewith"
+   ],
+   "doc": "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069.htm"
+  },
+  {
+   "unit": 31,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%",
+    "19%",
+    "17%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "51%",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%",
+    "19%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069.htm"
+  },
+  {
+   "unit": 32,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%",
+    "9%",
+    "7%",
+    "Total DAUq YoY Growth:",
+    "44%",
+    "44%",
+    "46%",
+    "41%",
+    "32%",
+    "31%",
+    "28%",
+    "26%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "59%",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%",
+    "9%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069.htm"
+  },
+  {
+   "unit": 33,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%",
+    "24%",
+    "23%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "57%",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%",
+    "24%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "45-2546501"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100.htm"
+  },
+  {
+   "unit": 32,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%",
+    "19%",
+    "17%",
+    "18%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "47%",
+    "39%",
+    "31%",
+    "21%",
+    "19%",
+    "19%",
+    "17%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100.htm"
+  },
+  {
+   "unit": 33,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Total DAUq YoY Growth:",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%",
+    "9%",
+    "7%",
+    "6%",
+    "Total DAUq YoY Growth:",
+    "44%",
+    "46%",
+    "41%",
+    "32%",
+    "31%",
+    "28%",
+    "26%",
+    "28%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Total DAUq YoY Growth:",
+    "51%",
+    "32%",
+    "21%",
+    "11%",
+    "7%",
+    "9%",
+    "7%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100.htm"
+  },
+  {
+   "unit": 34,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "WAUq YoY Growth:",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%",
+    "24%",
+    "23%",
+    "24%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "WAUq YoY Growth:",
+    "53%",
+    "42%",
+    "31%",
+    "22%",
+    "21%",
+    "24%",
+    "23%"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100.htm"
+  },
+  {
+   "unit": 2,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "ADMINISTRATIVE INFORMATION"
+   ],
+   "label_only": true,
+   "main_header": [
+    "ADMINISTRATIVE INFORMATION",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2024-Q1__c-xae25irrvojjyzda__s-000104581023000093.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2024-Q2__c-irkqnfoquwhngml5__s-000104581023000175.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2024-Q3__c-x7j2se5j2y4gp7ca__s-000104581023000227.htm"
+  },
+  {
+   "unit": 3,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm"
+  },
+  {
+   "unit": 64,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.7+",
+    "Amended and Restated 2007 Equity Incentive Plan – Global Restricted Stock Unit Grant Notice and Glob",
+    "10-Q",
+    "10.2",
+    "5/26/2021"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.7+",
+    "Amended and Restated 2007 Equity Incentive Plan – Global Restricted Stock Unit Grant Notice and Glob",
+    "10-Q",
+    "10.2",
+    "5/26/2021"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm"
+  },
+  {
+   "unit": 3,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+  },
+  {
+   "unit": 66,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.7+",
+    "Amended and Restated 2007 Equity Incentive Plan – Global Restricted Stock Unit Grant Notice and Glob",
+    "10-Q",
+    "10.2",
+    "5/26/2021"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.7+",
+    "Amended and Restated 2007 Equity Incentive Plan – Global Restricted Stock Unit Grant Notice and Glob",
+    "10-Q",
+    "10.2",
+    "5/26/2021"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3177549"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "91-1646860"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "91-1646860"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:AMZN-10-Q-2025-10-31.htm"
+  },
+  {
+   "unit": 281,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Preferred Stock Summary"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Preferred Stock Summary",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:BAC-10-K-2025-02-25.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "37-0602744"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware — (State or other jurisdiction of incorporation)",
+    "",
+    "",
+    "37-0602744 — (IRS Employer I.D. No.)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "(State or other jurisdiction of incorporation)",
+    "(IRS Employer I.D. No.)"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware — (State or other jurisdiction of incorporation)",
+    "",
+    "",
+    "37-0602744 — (IRS Employer I.D. No.)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 9,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Part I",
+    "Item 1.",
+    "Business",
+    "1"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Part I",
+    "Item 1.",
+    "Business",
+    "Page — 1"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 92,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Amounts recognized in AOCI (pre-tax):"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Amounts recognized in AOCI (pre-tax): — Prior service cost (credit)",
+    "$ —",
+    "$ —",
+    "$ 21",
+    "$ 21",
+    "$ ( 5 )",
+    "$ ( 19 )"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 92,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Prior service cost (credit)",
+    "$",
+    "—",
+    "$",
+    "—",
+    "$",
+    "21",
+    "$",
+    "21",
+    "$",
+    "( 5 )",
+    "$",
+    "( 19 )"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Amounts recognized in AOCI (pre-tax): — Prior service cost (credit)",
+    "$ —",
+    "$ —",
+    "$ 21",
+    "$ 21",
+    "$ ( 5 )",
+    "$ ( 19 )"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 142,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Exhibits:"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Exhibits:",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 143,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.4",
+    "Form of Nonqualified Stock Options Award pursuant to the 2023 Long-Term Incentive Plan (incorporated"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.4",
+    "Form of Nonqualified Stock Options Award pursuant to the 2023 Long-Term Incentive Plan (incorporated"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 144,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.24",
+    "Caterpillar Inc. Supplemental Deferred Compensation Plan amended and restated as of May 15, 2017 (in"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.24",
+    "Caterpillar Inc. Supplemental Deferred Compensation Plan amended and restated as of May 15, 2017 (in"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 145,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.42",
+    "Third Amended and Restated Credit Agreement (3-Year Facility) dated September 1, 2022, among the Com"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.42",
+    "Third Amended and Restated Credit Agreement (3-Year Facility) dated September 1, 2022, among the Com"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 146,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.57",
+    "Form of Performance-Based Restricted Stock Unit Award pursuant to the 2014 Long-Term Incentive Plan "
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.57",
+    "Form of Performance-Based Restricted Stock Unit Award pursuant to the 2014 Long-Term Incentive Plan "
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 148,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "February 14, 2025",
+    "/s/ D. James Umpleby III"
+   ],
+   "label_only": false,
+   "main_header": [
+    "February 14, 2025",
+    "/s/ D. James Umpleby III",
+    "Chairman of the Board and Chief Executive Officer"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Chairman of the Board and Chief Executive Officer"
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 148,
+   "row": 3,
+   "data_row": false,
+   "texts": [
+    "D. James Umpleby III"
+   ],
+   "label_only": false,
+   "main_header": [
+    "February 14, 2025",
+    "/s/ D. James Umpleby III",
+    "Chairman of the Board and Chief Executive Officer"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Chairman of the Board and Chief Executive Officer"
+   ],
+   "doc": "edgar:CAT-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 60,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.11",
+    "Form of Notice of Special PSU Award and Special PSU Agreement under the 2021 Long-Term Incentive Pla",
+    "X"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.11",
+    "Form of Notice of Special PSU Award and Special PSU Agreement under the 2021 Long-Term Incentive Pla",
+    "X"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:CRDO-10-K-2025-07-02.htm"
+  },
+  {
+   "unit": 7,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "94-3320693"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "94-3320693"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CRM-10-K-2025-03-05.htm"
+  },
+  {
+   "unit": 64,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Fiscal Period:"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Fiscal Period:",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CRM-10-K-2025-03-05.htm"
+  },
+  {
+   "unit": 67,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Fiscal Period:"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Fiscal Period:",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CRM-10-K-2025-03-05.htm"
+  },
+  {
+   "unit": 73,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Fiscal Period:"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Fiscal Period:",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CRM-10-K-2025-03-05.htm"
+  },
+  {
+   "unit": 74,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Options outstanding",
+    "8"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Options outstanding",
+    "8"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:CRM-10-K-2025-03-05.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "61-1767919"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "61-1767919"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:GOOGL-10-Q-2025-10-30.htm"
+  },
+  {
+   "unit": 9,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Note About Forward-Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Note About Forward-Looking Statements",
+    "",
+    "Page No. — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page No."
+   ],
+   "doc": "edgar:GOOGL-10-Q-2025-10-30.htm"
+  },
+  {
+   "unit": 89,
+   "row": 3,
+   "data_row": false,
+   "texts": [
+    "Anat Ashkenazi"
+   ],
+   "label_only": false,
+   "main_header": [
+    "ALPHABET INC. — /s/ ANAT ASHKENAZI"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "ALPHABET INC."
+   ],
+   "doc": "edgar:GOOGL-10-Q-2025-10-30.htm"
+  },
+  {
+   "unit": 90,
+   "row": 3,
+   "data_row": false,
+   "texts": [
+    "Amie Thuener O'Toole"
+   ],
+   "label_only": false,
+   "main_header": [
+    "ALPHABET INC. — /s/ AMIE THUENER O'TOOLE"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "ALPHABET INC."
+   ],
+   "doc": "edgar:GOOGL-10-Q-2025-10-30.htm"
+  },
+  {
+   "unit": 2,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "13-2624428"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "",
+    "13-2624428"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 56,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "1",
+    "Financial statements"
+   ],
+   "label_only": false,
+   "main_header": [
+    "1",
+    "Financial statements"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 57,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "3.7",
+    "Certificate of Designations for Fixed-to-Floating Rate Non-Cumulative Preferred Stock, Series II (in"
+   ],
+   "label_only": false,
+   "main_header": [
+    "3.7",
+    "Certificate of Designations for Fixed-to-Floating Rate Non-Cumulative Preferred Stock, Series II (in"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 59,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "4.1(b)",
+    "First Supplemental Indenture, dated as of January 13, 2017, between JPMorgan Chase & Co. and Deutsch"
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.1(b)",
+    "First Supplemental Indenture, dated as of January 13, 2017, between JPMorgan Chase & Co. and Deutsch"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 60,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "4.6",
+    "Description of Securities of JPMorgan Chase & Co. registered pursuant to Section 12 of the Securitie"
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.6",
+    "Description of Securities of JPMorgan Chase & Co. registered pursuant to Section 12 of the Securitie"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 62,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.8",
+    "Bank One Corporation Supplemental Savings and Investment Plan, as amended and restated effective Dec"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.8",
+    "Bank One Corporation Supplemental Savings and Investment Plan, as amended and restated effective Dec"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 63,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.14",
+    "Form of JPMorgan Chase & Co. Long-Term Incentive Plan Terms and Conditions for stock appreciation ri"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.14",
+    "Form of JPMorgan Chase & Co. Long-Term Incentive Plan Terms and Conditions for stock appreciation ri"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 65,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "10.20",
+    "Employee Stock Purchase Plan of JPMorgan Chase & Co., as amended and restated effective as of Januar"
+   ],
+   "label_only": false,
+   "main_header": [
+    "10.20",
+    "Employee Stock Purchase Plan of JPMorgan Chase & Co., as amended and restated effective as of Januar"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 69,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "50",
+    "Three-Year Summary of Consolidated Financial Highlights",
+    "168",
+    "Management’s Report on Internal Control Over Financial Reporting"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Financial: — 50",
+    "Three-Year Summary of Consolidated Financial Highlights",
+    "Audited financial statements: — 168",
+    "Management’s Report on Internal Control Over Financial Reporting"
+   ],
+   "candidate_header": [
+    "Financial:",
+    "Financial:",
+    "Audited financial statements:",
+    "Audited financial statements:"
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 221,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "December 31, 2024",
+    "Long-term issuer",
+    "Short-term issuer",
+    "Outlook",
+    "Long-term issuer",
+    "Short-term issuer",
+    "Outlook",
+    "Long-term issuer",
+    "Short-term issuer",
+    "Outlook"
+   ],
+   "label_only": false,
+   "main_header": [
+    "December 31, 2024",
+    "JPMorgan Chase & Co. — Long-term issuer",
+    "Short-term issuer",
+    "Outlook",
+    "JPMorgan Chase Bank, N.A. — Long-term issuer",
+    "Short-term issuer",
+    "Outlook",
+    "J.P. Morgan Securities LLC J.P. Morgan Securities plc J.P. Morgan SE (a) — Long-term issuer"
+   ],
+   "candidate_header": [
+    "",
+    "JPMorgan Chase & Co.",
+    "JPMorgan Chase & Co.",
+    "JPMorgan Chase & Co.",
+    "JPMorgan Chase Bank, N.A.",
+    "JPMorgan Chase Bank, N.A.",
+    "JPMorgan Chase Bank, N.A.",
+    "J.P. Morgan Securities LLC J.P. Morgan Securities plc J.P. Morgan SE (a)"
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 326,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Standard",
+    "Summary of guidance",
+    "Effects on financial statements"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024 — Standard",
+    "Summary of guidance",
+    "Effects on financial statements"
+   ],
+   "candidate_header": [
+    "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024",
+    "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024",
+    "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024"
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 328,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Standard",
+    "Summary of guidance",
+    "Effects on financial statements"
+   ],
+   "label_only": false,
+   "main_header": [
+    "FASB Standards Issued but not yet Adopted as of December 31, 2024 — Standard",
+    "Summary of guidance",
+    "Effects on financial statements"
+   ],
+   "candidate_header": [
+    "FASB Standards Issued but not yet Adopted as of December 31, 2024",
+    "FASB Standards Issued but not yet Adopted as of December 31, 2024",
+    "FASB Standards Issued but not yet Adopted as of December 31, 2024"
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 367,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Level 3 inputs (a)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Level 3 inputs (a)",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 453,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Year ended December 31, (in millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Year ended December 31, (in millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 587,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Year ended December 31, (in millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Year ended December 31, (in millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 591,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Year ended December 31, (in millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Year ended December 31, (in millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 606,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Balance at December 31, 2021",
+    "$",
+    "2,640",
+    "$",
+    "( 934 )",
+    "$",
+    "( 131 )",
+    "$",
+    "( 296 )",
+    "$",
+    "( 210 )",
+    "$",
+    "( 1,153 )",
+    "$",
+    "( 84 )"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Year ended December 31, (in millions) — Balance at December 31, 2021",
+    "$ 2,640",
+    "",
+    "$ ( 934 )",
+    "Fair value hedges — $ ( 131 )",
+    "$ ( 296 )",
+    "$ ( 210 )",
+    "$ ( 1,153 )"
+   ],
+   "candidate_header": [
+    "Year ended December 31, (in millions)",
+    "Unrealized gains/(losses) on investment securities",
+    "Unrealized gains/(losses) on investment securities",
+    "Translation adjustments, net of hedges",
+    "Fair value hedges",
+    "Cash flow hedges",
+    "Defined benefit pension and OPEB plans",
+    "DVA on fair value option elected liabilities"
+   ],
+   "doc": "edgar:JPM-10-K-2025-02-14.htm"
+  },
+  {
+   "unit": 3,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "58-0628465"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "",
+    "58-0628465"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 6,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Forward-Looking Statements",
+    "2"
+   ],
+   "label_only": false,
+   "main_header": [
+    "",
+    "Forward-Looking Statements",
+    "Page — 2"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 26,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Consolidated Statements of Income",
+    "62"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Consolidated Statements of Income",
+    "",
+    "Page — 62"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 87,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "2023"
+   ],
+   "label_only": true,
+   "main_header": [
+    "2023",
+    "",
+    "",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 90,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Level 1",
+    "Level 2",
+    "Level 3",
+    "Other 3",
+    "Netting Adjustment",
+    "4",
+    "Fair Value Measurements"
+   ],
+   "label_only": false,
+   "main_header": [
+    "",
+    "December 31, 2024 — Level 1",
+    "Level 2",
+    "Level 3",
+    "",
+    "Other 3",
+    "Netting Adjustment",
+    "4"
+   ],
+   "candidate_header": [
+    "",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024"
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 91,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Level 1",
+    "Level 2",
+    "Level 3",
+    "Other 3",
+    "Netting Adjustment",
+    "4",
+    "Fair Value Measurements"
+   ],
+   "label_only": false,
+   "main_header": [
+    "",
+    "December 31, 2023 — Level 1",
+    "Level 2",
+    "Level 3",
+    "",
+    "Other 3",
+    "Netting Adjustment",
+    "4"
+   ],
+   "candidate_header": [
+    "",
+    "December 31, 2023",
+    "December 31, 2023",
+    "December 31, 2023",
+    "December 31, 2023",
+    "December 31, 2023",
+    "December 31, 2023",
+    "December 31, 2023"
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 93,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Level 1",
+    "Level 2",
+    "Level 3",
+    "Other",
+    "1",
+    "Total",
+    "Level 1",
+    "Level 2",
+    "Level 3",
+    "Other",
+    "1",
+    "Total"
+   ],
+   "label_only": false,
+   "main_header": [
+    "",
+    "December 31, 2024 — Level 1",
+    "Level 2",
+    "",
+    "Level 3",
+    "",
+    "Other",
+    "1"
+   ],
+   "candidate_header": [
+    "",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024",
+    "December 31, 2024"
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 100,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Year Ended December 31, 2023"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Year Ended December 31, 2023",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 106,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "3.1",
+    "Certificate of Incorporation of the Company, including Amendment of Certificate of Incorporation, da"
+   ],
+   "label_only": false,
+   "main_header": [
+    "3.1",
+    "Certificate of Incorporation of the Company, including Amendment of Certificate of Incorporation, da"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 107,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "4.21",
+    "Form of Note for 2.600% Notes due 2050 — incorporated herein by reference to Exhibit 4.7 to the Comp"
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.21",
+    "Form of Note for 2.600% Notes due 2050 — incorporated herein by reference to Exhibit 4.7 to the Comp"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 108,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "4.48",
+    "Indenture, dated as of July 30, 1991, between Coca-Cola Refreshments USA, Inc. and Deutsche Bank Tru"
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.48",
+    "Indenture, dated as of July 30, 1991, between Coca-Cola Refreshments USA, Inc. and Deutsche Bank Tru"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 115,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "101",
+    "The following financial information from The Coca-Cola Company’s Annual Report on Form 10-K for the "
+   ],
+   "label_only": false,
+   "main_header": [
+    "101",
+    "The following financial information from The Coca-Cola Company’s Annual Report on Form 10-K for the "
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:KO-10-K-2025-02-20.htm"
+  },
+  {
+   "unit": 3,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Washington",
+    "91-1144442"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Washington",
+    "91-1144442"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 4,
+   "row": 4,
+   "data_row": false,
+   "texts": [
+    "Title of each class",
+    "Trading Symbol",
+    "Name of exchange on which registered"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Securities registered pursuant to Section 12(b) of the Act: — Title of each class",
+    "Trading Symbol",
+    "Name of exchange on which registered"
+   ],
+   "candidate_header": [
+    "Securities registered pursuant to Section 12(b) of the Act:",
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 20,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(In millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(In millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 44,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(In millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(In millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 50,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(In millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(In millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 51,
+   "row": 4,
+   "data_row": true,
+   "texts": [
+    "2009 issuance of $ 3.8 billion",
+    "2039",
+    "5.20 %",
+    "5.24 %",
+    "$",
+    "520",
+    "$",
+    "520"
+   ],
+   "label_only": false,
+   "main_header": [
+    "(In millions, issuance by calendar year) — 2009 issuance of $ 3.8 billion",
+    "",
+    "",
+    "2039",
+    "",
+    "",
+    "5.20 %",
+    "Effective Interest Rate"
+   ],
+   "candidate_header": [
+    "(In millions, issuance by calendar year)",
+    "Maturities (calendar year)",
+    "Maturities (calendar year)",
+    "Maturities (calendar year)",
+    "Stated Interest Rate",
+    "Stated Interest Rate",
+    "Stated Interest Rate",
+    "Effective Interest Rate"
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 52,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(In millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(In millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 55,
+   "row": 5,
+   "data_row": true,
+   "texts": [
+    "Federal statutory rate",
+    "21.0 %",
+    "21.0 %",
+    "21.0 %"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Year Ended June 30, — Federal statutory rate",
+    "21.0 %",
+    "21.0 %",
+    "21.0 %"
+   ],
+   "candidate_header": [
+    "Year Ended June 30,",
+    "2025",
+    "2024",
+    "2023"
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 59,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(In millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(In millions)",
+    "",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 69,
+   "row": 5,
+   "data_row": true,
+   "texts": [
+    "Dividends per share (quarterly amounts)",
+    "$",
+    "0.75 – 0.83",
+    "$",
+    "0.68 – 0.75",
+    "$",
+    "0.62 – 0.68"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Year Ended June 30, — Dividends per share (quarterly amounts)",
+    "$ 0.75 – 0.83",
+    "$ 0.68 – 0.75",
+    "$ 0.62 – 0.68"
+   ],
+   "candidate_header": [
+    "Year Ended June 30,",
+    "",
+    "2025",
+    "2024",
+    "2023"
+   ],
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+  },
+  {
+   "unit": 3,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "75-1618004"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "",
+    "75-1618004"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Indicate by check mark if the registrant is not required to file reports pursuant to Section 13 or S",
+    "Yes",
+    "☐",
+    "No",
+    "☒"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+    "",
+    "",
+    "",
+    "Yes",
+    "☒ — ☐",
+    "No — No",
+    "☐ — ☒"
+   ],
+   "candidate_header": [
+    "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+    "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+    "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+    "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+    "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+    "Yes",
+    "☒",
+    "No"
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 5,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Introduction",
+    "5"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Introduction",
+    "",
+    "5"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 12,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "Revenue",
+    "$",
+    "37,378",
+    "100",
+    "%",
+    "$",
+    "25,111",
+    "100",
+    "%",
+    "$",
+    "15,540",
+    "100",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "For the year ended — Revenue",
+    "2025 — $ 37,378",
+    "100 %",
+    "2024 — $ 25,111",
+    "100 %",
+    "2023 — $ 15,540",
+    "100 %"
+   ],
+   "candidate_header": [
+    "For the year ended",
+    "2025",
+    "2025",
+    "2024",
+    "2024",
+    "2023",
+    "2023"
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 14,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "CMBU",
+    "$",
+    "13,524",
+    "36",
+    "%",
+    "$",
+    "3,792",
+    "15",
+    "%",
+    "$",
+    "1,872",
+    "12",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "For the year ended — CMBU",
+    "2025 — $ 13,524",
+    "36 %",
+    "2024 — $ 3,792",
+    "15 %",
+    "2023 — $ 1,872",
+    "12 %"
+   ],
+   "candidate_header": [
+    "For the year ended",
+    "2025",
+    "2025",
+    "2024",
+    "2024",
+    "2023",
+    "2023"
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 15,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "CMBU",
+    "$",
+    "6,129",
+    "45",
+    "%",
+    "$",
+    "244",
+    "6",
+    "%",
+    "$",
+    "(768)",
+    "(41)",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "For the year ended — CMBU",
+    "2025 — $ 6,129",
+    "45 %",
+    "2024 — $ 244",
+    "6 %",
+    "2023 — $ (768)",
+    "(41) %"
+   ],
+   "candidate_header": [
+    "For the year ended",
+    "2025",
+    "2025",
+    "2024",
+    "2024",
+    "2023",
+    "2023"
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 18,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Consolidated Statements of Operations",
+    "64"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Consolidated Statements of Operations",
+    "64"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 52,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "U.S. federal income tax (provision) benefit at statutory rate",
+    "$",
+    "( 2,027 )",
+    "21.0",
+    "%",
+    "$",
+    "( 260 )",
+    "21.0",
+    "%",
+    "$",
+    "1,188",
+    "21.0",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "For the year ended — U.S. federal income tax (provision) benefit at statutory rate",
+    "2025 — $ ( 2,027 )",
+    "21.0 %",
+    "2024 — $ ( 260 )",
+    "21.0 %",
+    "2023 — $ 1,188",
+    "21.0 %"
+   ],
+   "candidate_header": [
+    "For the year ended",
+    "2025",
+    "2025",
+    "2024",
+    "2024",
+    "2023",
+    "2023"
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 66,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "1",
+    "Financial Statements: See our consolidated financial statements under Item 8."
+   ],
+   "label_only": false,
+   "main_header": [
+    "1",
+    "Financial Statements: See our consolidated financial statements under Item 8."
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:MU-10-K-2025-10-03.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "77-0467272"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware",
+    "77-0467272"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:NFLX-10-K-2025-01-27.htm"
+  },
+  {
+   "unit": 52,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "Due in 12 month period ended December 31,"
+   ],
+   "label_only": true,
+   "main_header": [
+    "Due in 12 month period ended December 31,",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:NFLX-10-K-2025-01-27.htm"
+  },
+  {
+   "unit": 80,
+   "row": 3,
+   "data_row": false,
+   "texts": [
+    "Dated:",
+    "January 27, 2025",
+    "By:",
+    "/ S /    T ED S ARANDOS"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Dated:",
+    "January 27, 2025",
+    "Netflix, Inc. — By:",
+    "/ S / T ED S ARANDOS"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Netflix, Inc.",
+    "Netflix, Inc."
+   ],
+   "doc": "edgar:NFLX-10-K-2025-01-27.htm"
+  },
+  {
+   "unit": 3,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Title of each class:",
+    "Trading Symbol(s):",
+    "Name of each exchange on which registered:"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Securities registered or to be registered pursuant to Section 12(b) of the Act: — Title of each clas",
+    "Trading Symbol(s):",
+    "Name of each exchange on which registered:"
+   ],
+   "candidate_header": [
+    "Securities registered or to be registered pursuant to Section 12(b) of the Act:",
+    "Securities registered or to be registered pursuant to Section 12(b) of the Act:",
+    "Securities registered or to be registered pursuant to Section 12(b) of the Act:"
+   ],
+   "doc": "edgar:NVO-20-F-2025-02-05.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "A shares, nominal value DKK 0.10 each:",
+    "1,074,872,000"
+   ],
+   "label_only": false,
+   "main_header": [
+    "A shares, nominal value DKK 0.10 each:",
+    "1,074,872,000"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:NVO-20-F-2025-02-05.htm"
+  },
+  {
+   "unit": 6,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "INTRODUCTION",
+    "2"
+   ],
+   "label_only": false,
+   "main_header": [
+    "INTRODUCTION",
+    "",
+    "2"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:NVO-20-F-2025-02-05.htm"
+  },
+  {
+   "unit": 87,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "2.1 Key developments in Board remuneration in 2024",
+    "4"
+   ],
+   "label_only": false,
+   "main_header": [
+    "2.1 Key developments in Board remuneration in 2024",
+    "4"
+   ],
+   "candidate_header": [
+    "",
+    "Page(s) in the Remuneration Report"
+   ],
+   "doc": "edgar:NVO-20-F-2025-02-05.htm"
+  },
+  {
+   "unit": 93,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Name:",
+    "Lars Fruergaard Jørgensen",
+    "Name:",
+    "Karsten Munk Knudsen"
+   ],
+   "label_only": false,
+   "main_header": [
+    "/s/ Lars Fruergaard Jørgensen — Name:",
+    "Lars Fruergaard Jørgensen",
+    "/s/ Karsten Munk Knudsen — Name:",
+    "Karsten Munk Knudsen"
+   ],
+   "candidate_header": [
+    "/s/ Lars Fruergaard Jørgensen",
+    "/s/ Lars Fruergaard Jørgensen",
+    "/s/ Karsten Munk Knudsen",
+    "/s/ Karsten Munk Knudsen"
+   ],
+   "doc": "edgar:NVO-20-F-2025-02-05.htm"
+  },
+  {
+   "unit": 5,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Texas",
+    "01-0627671"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Texas",
+    "01-0627671"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:SPCX-10-Q-2026-08-04.htm"
+  },
+  {
+   "unit": 6,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "1 Rocket Road Starbase , Texas",
+    "78521"
+   ],
+   "label_only": false,
+   "main_header": [
+    "1 Rocket Road Starbase , Texas",
+    "78521"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:SPCX-10-Q-2026-08-04.htm"
+  },
+  {
+   "unit": 7,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Title of each class",
+    "Trading Symbol(s)",
+    "Name of each exchange on which registered"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Securities registered pursuant to Section 12(b) of the Act: — Title of each class",
+    "Trading Symbol(s)",
+    "Name of each exchange on which registered"
+   ],
+   "candidate_header": [
+    "Securities registered pursuant to Section 12(b) of the Act:",
+    "Securities registered pursuant to Section 12(b) of the Act:",
+    "Securities registered pursuant to Section 12(b) of the Act:"
+   ],
+   "doc": "edgar:SPCX-10-Q-2026-08-04.htm"
+  },
+  {
+   "unit": 10,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Forward Looking Statements",
+    "3"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Forward Looking Statements",
+    "",
+    "Page — 3"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "edgar:SPCX-10-Q-2026-08-04.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Texas",
+    "91-2197729"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Texas",
+    "91-2197729"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:TSLA-10-K-2025-01-30.htm"
+  },
+  {
+   "unit": 5,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "1 Tesla Road Austin , Texas",
+    "78725"
+   ],
+   "label_only": false,
+   "main_header": [
+    "1 Tesla Road Austin , Texas",
+    "78725"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:TSLA-10-K-2025-01-30.htm"
+  },
+  {
+   "unit": 10,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "CAUTIONARY STATEMENT REGARDING FORWARD-LOOKING INFORMATION",
+    "1"
+   ],
+   "label_only": false,
+   "main_header": [
+    "CAUTIONARY STATEMENT REGARDING FORWARD-LOOKING INFORMATION",
+    "",
+    "1"
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "Page"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 97,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "C.C. Wei (1)",
+    "71-75",
+    "Chairman; Chief Executive Officer",
+    "2027",
+    "27"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Name — C.C. Wei (1)",
+    "Age — 71-75",
+    "Position with our company — Chairman; Chief Executive Officer",
+    "2027",
+    "27"
+   ],
+   "candidate_header": [
+    "Name",
+    "Age",
+    "Position with our company",
+    "Term Expires",
+    "Years with our company"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 108,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "C.C. Wei, Chairman; Chief Executive Officer",
+    "6,392,834",
+    "0.02",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Name of Shareholders (1) — C.C. Wei, Chairman; Chief Executive Officer",
+    "6,392,834",
+    "0.02 %"
+   ],
+   "candidate_header": [
+    "Name of Shareholders (1)",
+    "Number of Common Shares Owned (2)",
+    "Percentage of Outstanding Common Shares (2)"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 109,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "L.C. Lu, Vice President; TSMC Fellow",
+    "180,957",
+    "0.00",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Name of Shareholders (1) — L.C. Lu, Vice President; TSMC Fellow",
+    "180,957",
+    "0.00 %"
+   ],
+   "candidate_header": [
+    "Name of Shareholders (1)",
+    "Number of Common Shares Owned (2)",
+    "Percentage of Outstanding Common Shares (2)"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 139,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "National Development Fund, Executive Yuan",
+    "1,653,709,980",
+    "6.38",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Names of Shareholders — National Development Fund, Executive Yuan",
+    "1,653,709,980",
+    "6.38 %"
+   ],
+   "candidate_header": [
+    "Names of Shareholders",
+    "Number of Common Shares Owned",
+    "Percentage of Total Outstanding Common Shares"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 217,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "4.12 (1)",
+    "Land Lease with Central Taiwan Science Park Administration relating to the fabs located in Taichung "
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.12 (1)",
+    "Land Lease with Central Taiwan Science Park Administration relating to the fabs located in Taichung "
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 218,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "4.36 (5)",
+    "Land Lease with Southern Taiwan Science Park Administration relating to Fab18 located in Southern Ta"
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.36 (5)",
+    "Land Lease with Southern Taiwan Science Park Administration relating to Fab18 located in Southern Ta"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 219,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "4.61 (1)",
+    "Land Lease with Hsinchu Science Park Administration relating to Fab20 (effective July 14, 2023 to De"
+   ],
+   "label_only": false,
+   "main_header": [
+    "4.61 (1)",
+    "Land Lease with Hsinchu Science Park Administration relating to Fab20 (effective July 14, 2023 to De"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 329,
+   "row": 4,
+   "data_row": true,
+   "texts": [
+    "Land",
+    "0.39 %- 2.30 %",
+    "0.39 %- 2.30 %"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Land",
+    "0.39 %- 2.30 %",
+    "0.39 %- 2.30 %"
+   ],
+   "candidate_header": [
+    "",
+    "December 31, 2023",
+    "December 31, 2024"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 343,
+   "row": 3,
+   "data_row": true,
+   "texts": [
+    "September 2020 to September 2025",
+    "US$ 1,000.0",
+    "0.75 %",
+    "Bullet repayment (callable at any time, in whole or in part, at the relevant redemption price accord"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Issuance Period — September 2020 to September 2025",
+    "US$ 1,000.0",
+    "0.75 %",
+    "Repayment and Interest Payment — Bullet repayment (callable at any time, in whole or in part, at the"
+   ],
+   "candidate_header": [
+    "Issuance Period",
+    "Total Issue Amount US$ (In Millions)",
+    "Coupon Rate",
+    "Repayment and Interest Payment"
+   ],
+   "doc": "edgar:TSM-20-F-2025-04-17.htm"
+  },
+  {
+   "unit": 4,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "Delaware",
+    "41-1321939"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware — (State or other jurisdiction of incorporation or organization)",
+    "",
+    "41-1321939 — (I.R.S. Employer Identification No.)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 4,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "(State or other jurisdiction of incorporation or organization)",
+    "(I.R.S. Employer Identification No.)"
+   ],
+   "label_only": false,
+   "main_header": [
+    "Delaware — (State or other jurisdiction of incorporation or organization)",
+    "",
+    "41-1321939 — (I.R.S. Employer Identification No.)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 17,
+   "row": 2,
+   "data_row": false,
+   "texts": [
+    "Ratings",
+    "Outlook",
+    "Ratings",
+    "Outlook",
+    "Ratings",
+    "Outlook",
+    "Ratings",
+    "Outlook"
+   ],
+   "label_only": false,
+   "main_header": [
+    "",
+    "Moody’s — Ratings",
+    "Outlook",
+    "S&P Global — Ratings",
+    "Outlook",
+    "Fitch — Ratings",
+    "Outlook",
+    "A.M. Best — Ratings"
+   ],
+   "candidate_header": [
+    "",
+    "Moody’s",
+    "Moody’s",
+    "S&P Global",
+    "S&P Global",
+    "Fitch",
+    "Fitch",
+    "A.M. Best"
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 39,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(in millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(in millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 43,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(in millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(in millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 46,
+   "row": 2,
+   "data_row": true,
+   "texts": [
+    "Tax provision at the U.S. federal statutory rate",
+    "$",
+    "4,215",
+    "21.0",
+    "%",
+    "$",
+    "6,114",
+    "21.0",
+    "%",
+    "$",
+    "5,532",
+    "21.0",
+    "%"
+   ],
+   "label_only": false,
+   "main_header": [
+    "(in millions, except percentages) — Tax provision at the U.S. federal statutory rate",
+    "2024 — $ 4,215",
+    "21.0 %",
+    "2023 — $ 6,114",
+    "21.0 %",
+    "2022 — $ 5,532",
+    "21.0 %"
+   ],
+   "candidate_header": [
+    "(in millions, except percentages)",
+    "2024",
+    "2024",
+    "2023",
+    "2023",
+    "2022",
+    "2022"
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 62,
+   "row": 1,
+   "data_row": true,
+   "texts": [
+    "3.1",
+    "Certificate of Incorporation of UnitedHealth Group Incorporated (incorporated by reference to Exhibi"
+   ],
+   "label_only": false,
+   "main_header": [
+    "3.1",
+    "Certificate of Incorporation of UnitedHealth Group Incorporated (incorporated by reference to Exhibi"
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  },
+  {
+   "unit": 71,
+   "row": 1,
+   "data_row": false,
+   "texts": [
+    "(in millions)"
+   ],
+   "label_only": true,
+   "main_header": [
+    "(in millions)",
+    ""
+   ],
+   "candidate_header": [
+    "",
+    ""
+   ],
+   "doc": "edgar:UNH-10-K-2025-02-27.htm"
+  }
+ ]
+}

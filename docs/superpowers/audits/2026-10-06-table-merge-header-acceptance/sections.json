@@ -1,0 +1,27 @@
+{
+ "own_type": {
+  "same": 110
+ },
+ "all_types": {
+  "same": 872
+ },
+ "differences": [],
+ "pages_differences": [
+  {
+   "doc": "edgar:NTRA-10-K-2025-02-28.htm",
+   "mode": "normal"
+  },
+  {
+   "doc": "edgar:NTRA-10-K-2025-02-28.htm",
+   "mode": "capture"
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "mode": "normal"
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "mode": "capture"
+  }
+ ]
+}

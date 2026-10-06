@@ -648,4 +648,13 @@ Changing any of these tables changes fixture Markdown. That affects:
 
 - Normal mode only. Capture mode replaces `TableParser` output only for unreliable snapshots, and Phase A found the two modes identical.
 - Positioned-div tables, page furniture (G4) and `AbsolutelyPositionedTableParser` are out of scope.
-- The XLSX path does not use `TableParser`. It uses only `_join_structural_text`.
+- The XLSX path does not render through `TableParser`, but it does reuse its
+  structural helpers.
+  - **Correction (2026-10-05, Astra round 1, finding 2).** This bullet originally
+    said XLSX uses only `_join_structural_text`. That is wrong.
+    `xlsx_tables.prepare_table()` also builds a bare `TableParser`
+    (`object.__new__`) and calls `_safe_structural_actions()` and
+    `_validated_structural_actions()`. Those helpers depend on `_body_start`,
+    `_classify_structural_column` and `_is_numeric_fragment`.
+  - The design keeps XLSX on today's rules through a structural policy (spec
+    revision 2, R9).

@@ -1,0 +1,4150 @@
+{
+ "s8": {
+  "round2_rows": 82,
+  "round2_tables": 80,
+  "status_rows": {
+   "header": 62,
+   "still_departing": 19,
+   "body_not_listed": 1
+  },
+  "status_tables": {
+   "header": 62,
+   "still_departing": 18,
+   "body_not_listed": 1
+  },
+  "rows_list": [
+   {
+    "doc": "fixture:aapl-2023-10k",
+    "unit": 61,
+    "row": 2,
+    "texts": [
+     "Exhibit Number",
+     "Exhibit Description",
+     "Form",
+     "Exhibit",
+     "Filing Date/ Period End Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "fixture:aapl-2023-10k",
+    "unit": 62,
+    "row": 2,
+    "texts": [
+     "Exhibit Number",
+     "Exhibit Description",
+     "Form",
+     "Exhibit",
+     "Filing Date/ Period End Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "fixture:aapl-2023-10k",
+    "unit": 63,
+    "row": 2,
+    "texts": [
+     "Exhibit Number",
+     "Exhibit Description",
+     "Form",
+     "Exhibit",
+     "Filing Date/ Period End Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "fixture:nvda-2002-10k",
+    "unit": 99,
+    "row": 1,
+    "texts": [
+     "(a)    1.",
+     "Consolidated Financial Statements (As Restated)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "fixture:nvda-2002-10k",
+    "unit": 151,
+    "row": 1,
+    "texts": [
+     "Range of Exercise Prices",
+     "Number Outstanding",
+     "Weighted Average Remaining Contractual Life",
+     "Weighted Average Exercise Price",
+     "Number Exercisable",
+     "Weighted Average Exercise Price"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "fixture:nvda-2026-10k",
+    "unit": 61,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "fixture:nvda-2026-q2-10q",
+    "unit": 51,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm",
+    "unit": 17,
+    "row": 2,
+    "texts": [
+     "Description",
+     "March 31, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm",
+    "unit": 18,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2023",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm",
+    "unit": 18,
+    "row": 2,
+    "texts": [
+     "Description",
+     "June 30, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm",
+    "unit": 19,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2023",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 37,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 38,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2023",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 66,
+    "row": 2,
+    "texts": [
+     "Number",
+     "Exhibit Description",
+     "Form",
+     "File No.",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 67,
+    "row": 2,
+    "texts": [
+     "Number",
+     "Exhibit Description",
+     "Form",
+     "File No.",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 68,
+    "row": 2,
+    "texts": [
+     "Number",
+     "Exhibit Description",
+     "Form",
+     "File No.",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 69,
+    "row": 4,
+    "texts": [
+     "Susan Li"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm",
+    "unit": 15,
+    "row": 2,
+    "texts": [
+     "Description",
+     "March 31, 2025",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm",
+    "unit": 16,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm",
+    "unit": 15,
+    "row": 2,
+    "texts": [
+     "Description",
+     "June 30, 2025",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm",
+    "unit": 16,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm",
+    "unit": 15,
+    "row": 2,
+    "texts": [
+     "Description",
+     "September 30, 2025",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm",
+    "unit": 16,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 36,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2025",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 37,
+    "row": 2,
+    "texts": [
+     "Description",
+     "December 31, 2024",
+     "Quoted Prices in Active Markets for Identical Assets (Level 1)",
+     "Significant Other Observable Inputs (Level 2)",
+     "Significant Unobservable Inputs (Level 3)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 68,
+    "row": 2,
+    "texts": [
+     "Number",
+     "Exhibit Description",
+     "Form",
+     "File No.",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 69,
+    "row": 2,
+    "texts": [
+     "Number",
+     "Exhibit Description",
+     "Form",
+     "File No.",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 70,
+    "row": 2,
+    "texts": [
+     "Number",
+     "Exhibit Description",
+     "Form",
+     "File No.",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 71,
+    "row": 4,
+    "texts": [
+     "Susan Li"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm",
+    "unit": 63,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm",
+    "unit": 52,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm",
+    "unit": 53,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm",
+    "unit": 65,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm",
+    "unit": 50,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm",
+    "unit": 48,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Exhibit Description",
+     "Schedule/Form",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:BABA-20-F-2025-06-26.htm",
+    "unit": 6,
+    "row": 2,
+    "texts": [
+     "LETTER FROM OUR CHAIRMAN AND OUR CEO",
+     "ii"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:BAC-10-K-2025-02-25.htm",
+    "unit": 278,
+    "row": 4,
+    "texts": [
+     "Declaration Date",
+     "Record Date",
+     "Payment Date",
+     "Dividend Per Share"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:BAC-10-K-2025-02-25.htm",
+    "unit": 360,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Description",
+     "Notes",
+     "Form",
+     "Exhibit",
+     "Filing Date",
+     "File No."
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:BAC-10-K-2025-02-25.htm",
+    "unit": 362,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Description",
+     "Notes",
+     "Form",
+     "Exhibit",
+     "Filing Date",
+     "File No."
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:BAC-10-K-2025-02-25.htm",
+    "unit": 364,
+    "row": 2,
+    "texts": [
+     "Exhibit No.",
+     "Description",
+     "Notes",
+     "Form",
+     "Exhibit",
+     "Filing Date",
+     "File No."
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:CAT-10-K-2025-02-14.htm",
+    "unit": 4,
+    "row": 2,
+    "texts": [
+     "(State or other jurisdiction of incorporation)",
+     "(IRS Employer I.D. No.)"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:CAT-10-K-2025-02-14.htm",
+    "unit": 148,
+    "row": 2,
+    "texts": [
+     "February 14, 2025",
+     "/s/ D. James Umpleby III"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:CAT-10-K-2025-02-14.htm",
+    "unit": 148,
+    "row": 3,
+    "texts": [
+     "D. James Umpleby III"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:CRDO-10-K-2025-07-02.htm",
+    "unit": 12,
+    "row": 2,
+    "texts": [
+     "Locations",
+     "Primary Use",
+     "Leased Facilities (1)"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:CRDO-10-K-2025-07-02.htm",
+    "unit": 32,
+    "row": 2,
+    "texts": [
+     "Revenue",
+     "May 3, 2025",
+     "April 27, 2024",
+     "April 29, 2023"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:CRM-10-K-2025-03-05.htm",
+    "unit": 71,
+    "row": 2,
+    "texts": [
+     "Range of Exercise Prices",
+     "Number Outstanding (in millions)",
+     "Weighted- Average Remaining Contractual Life (Years)",
+     "Weighted- Average Exercise Price",
+     "Number of Shares (in millions)",
+     "Weighted- Average Exercise Price"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:GOOGL-10-Q-2025-10-30.htm",
+    "unit": 5,
+    "row": 2,
+    "texts": [
+     "Title of each class",
+     "Trading Symbol(s)",
+     "Name of each exchange on which registered"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:GOOGL-10-Q-2025-10-30.htm",
+    "unit": 89,
+    "row": 3,
+    "texts": [
+     "Anat Ashkenazi"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:GOOGL-10-Q-2025-10-30.htm",
+    "unit": 90,
+    "row": 3,
+    "texts": [
+     "Amie Thuener O'Toole"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 13,
+    "row": 2,
+    "texts": [
+     "Region",
+     "Employees",
+     "LOB",
+     "Employees"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 52,
+    "row": 2,
+    "texts": [
+     "Name",
+     "(at December 31, 2024)",
+     "Positions and offices"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 207,
+    "row": 2,
+    "texts": [
+     "Average amount (in millions)",
+     "December 31, 2024",
+     "September 30, 2024",
+     "December 31, 2023"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 221,
+    "row": 2,
+    "texts": [
+     "December 31, 2024",
+     "Long-term issuer",
+     "Short-term issuer",
+     "Outlook",
+     "Long-term issuer",
+     "Short-term issuer",
+     "Outlook",
+     "Long-term issuer",
+     "Short-term issuer",
+     "Outlook"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 298,
+    "row": 2,
+    "texts": [
+     "Activity",
+     "Description",
+     "Sensitivity measure",
+     "December 31, 2024",
+     "December 31, 2023"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 326,
+    "row": 2,
+    "texts": [
+     "Standard",
+     "Summary of guidance",
+     "Effects on financial statements"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:JPM-10-K-2025-02-14.htm",
+    "unit": 328,
+    "row": 2,
+    "texts": [
+     "Standard",
+     "Summary of guidance",
+     "Effects on financial statements"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:KO-10-K-2025-02-20.htm",
+    "unit": 43,
+    "row": 2,
+    "texts": [
+     "Derivatives Designated as Hedging Instruments",
+     "Financial Statement Line Item Impacted 1",
+     "December 31, 2024",
+     "December 31, 2023"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:KO-10-K-2025-02-20.htm",
+    "unit": 44,
+    "row": 2,
+    "texts": [
+     "Derivatives Not Designated as Hedging Instruments",
+     "Financial Statement Line Item Impacted 1",
+     "December 31, 2024",
+     "December 31, 2023"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+    "unit": 4,
+    "row": 4,
+    "texts": [
+     "Title of each class",
+     "Trading Symbol",
+     "Name of exchange on which registered"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+    "unit": 8,
+    "row": 4,
+    "texts": [
+     "Location",
+     "Owned",
+     "Leased",
+     "Total"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+    "unit": 23,
+    "row": 4,
+    "texts": [
+     "Risk Categories",
+     "Hypothetical Change",
+     "June 30, 2025",
+     "Impact"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+    "unit": 81,
+    "row": 2,
+    "texts": [
+     "Exhibit Number",
+     "Exhibit Description",
+     "Filed Herewith",
+     "Form",
+     "Period Ending",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+    "unit": 82,
+    "row": 2,
+    "texts": [
+     "Exhibit Number",
+     "Exhibit Description",
+     "Filed Herewith",
+     "Form",
+     "Period Ending",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+    "unit": 83,
+    "row": 2,
+    "texts": [
+     "Exhibit Number",
+     "Exhibit Description",
+     "Filed Herewith",
+     "Form",
+     "Period Ending",
+     "Exhibit",
+     "Filing Date"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:MU-10-K-2025-10-03.htm",
+    "unit": 4,
+    "row": 2,
+    "texts": [
+     "Indicate by check mark if the registrant is not required to file reports pursuant to Section 13 or S",
+     "Yes",
+     "☐",
+     "No",
+     "☒"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:NFLX-10-K-2025-01-27.htm",
+    "unit": 80,
+    "row": 3,
+    "texts": [
+     "Dated:",
+     "January 27, 2025",
+     "By:",
+     "/ S /    T ED S ARANDOS"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:NVO-20-F-2025-02-05.htm",
+    "unit": 3,
+    "row": 2,
+    "texts": [
+     "Title of each class:",
+     "Trading Symbol(s):",
+     "Name of each exchange on which registered:"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:NVO-20-F-2025-02-05.htm",
+    "unit": 93,
+    "row": 2,
+    "texts": [
+     "Name:",
+     "Lars Fruergaard Jørgensen",
+     "Name:",
+     "Karsten Munk Knudsen"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:SPCX-10-Q-2026-08-04.htm",
+    "unit": 7,
+    "row": 2,
+    "texts": [
+     "Title of each class",
+     "Trading Symbol(s)",
+     "Name of each exchange on which registered"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:SPCX-10-Q-2026-08-04.htm",
+    "unit": 52,
+    "row": 4,
+    "texts": [
+     "(in metric tons)",
+     "June 30, 2026",
+     "June 30, 2025",
+     "June 30, 2026",
+     "June 30, 2025"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:SPCX-10-Q-2026-08-04.htm",
+    "unit": 53,
+    "row": 4,
+    "texts": [
+     "(number)",
+     "June 30, 2026",
+     "June 30, 2025",
+     "June 30, 2026",
+     "June 30, 2025"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:SPCX-10-Q-2026-08-04.htm",
+    "unit": 56,
+    "row": 4,
+    "texts": [
+     "(in gigawatts)",
+     "June 30, 2026",
+     "June 30, 2025"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:TSLA-10-K-2025-01-30.htm",
+    "unit": 39,
+    "row": 2,
+    "texts": [
+     "Consolidated Balance Sheets (unaudited):",
+     "March 31, 2024",
+     "June 30, 2024",
+     "September 30, 2024"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:TSLA-10-K-2025-01-30.htm",
+    "unit": 40,
+    "row": 2,
+    "texts": [
+     "Condensed Consolidated Statements of Operations (unaudited):",
+     "March 31, 2024",
+     "June 30, 2024",
+     "September 30, 2024"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:TSM-20-F-2025-04-17.htm",
+    "unit": 89,
+    "row": 2,
+    "texts": [
+     "Contractual Obligations",
+     "Total",
+     "Less than 1 Year",
+     "1-3 Years",
+     "3-5 Years",
+     "More than 5 Years"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:TSM-20-F-2025-04-17.htm",
+    "unit": 270,
+    "row": 2,
+    "texts": [
+     "Name of Investor",
+     "Name of Investee",
+     "Main Businesses and Products",
+     "Establishment and Operating Location",
+     "December 31, 2023",
+     "December 31, 2024",
+     "Note"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:TSM-20-F-2025-04-17.htm",
+    "unit": 272,
+    "row": 2,
+    "texts": [
+     "Name of Investor",
+     "Name of Investee",
+     "Main Businesses and Products",
+     "Establishment and Operating Location",
+     "December 31, 2023",
+     "December 31, 2024",
+     "Note"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:TSM-20-F-2025-04-17.htm",
+    "unit": 317,
+    "row": 2,
+    "texts": [
+     "Name of Associate",
+     "Principal Activities",
+     "Incorporation and Operation",
+     "December 31, 2023",
+     "December 31, 2024",
+     "December 31, 2023",
+     "December 31, 2024"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:UNH-10-K-2025-02-27.htm",
+    "unit": 4,
+    "row": 2,
+    "texts": [
+     "(State or other jurisdiction of incorporation or organization)",
+     "(I.R.S. Employer Identification No.)"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:UNH-10-K-2025-02-27.htm",
+    "unit": 17,
+    "row": 2,
+    "texts": [
+     "Ratings",
+     "Outlook",
+     "Ratings",
+     "Outlook",
+     "Ratings",
+     "Outlook",
+     "Ratings",
+     "Outlook"
+    ],
+    "status": "still_departing"
+   },
+   {
+    "doc": "edgar:UNH-10-K-2025-02-27.htm",
+    "unit": 20,
+    "row": 2,
+    "texts": [
+     "Increase (Decrease) in Market Interest Rate",
+     "Investment Income Per Annum",
+     "Interest Expense Per Annum",
+     "Fair Value of Financial Assets",
+     "Fair Value of Financial Liabilities"
+    ],
+    "status": "header"
+   },
+   {
+    "doc": "edgar:UNH-10-K-2025-02-27.htm",
+    "unit": 20,
+    "row": 8,
+    "texts": [
+     "Increase (Decrease) in Market Interest Rate",
+     "Investment Income Per Annum",
+     "Interest Expense Per Annum",
+     "Fair Value of Financial Assets",
+     "Fair Value of Financial Liabilities"
+    ],
+    "status": "body_not_listed"
+   }
+  ]
+ },
+ "remaining_departures": {
+  "non_data_with_value_text_rows": 19,
+  "non_data_with_value_text_tables": 18,
+  "non_data_label_only_rows": 24,
+  "rows_list": [
+   {
+    "unit": 69,
+    "row": 4,
+    "data_row": false,
+    "texts": [
+     "Susan Li"
+    ],
+    "label_only": false,
+    "main_header": [
+     "META PLATFORMS, INC. — /s/ Susan Li"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "META PLATFORMS, INC."
+    ],
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm"
+   },
+   {
+    "unit": 71,
+    "row": 4,
+    "data_row": false,
+    "texts": [
+     "Susan Li"
+    ],
+    "label_only": false,
+    "main_header": [
+     "META PLATFORMS, INC. — /s/ Susan Li"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "META PLATFORMS, INC."
+    ],
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm"
+   },
+   {
+    "unit": 4,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "(State or other jurisdiction of incorporation)",
+     "(IRS Employer I.D. No.)"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Delaware — (State or other jurisdiction of incorporation)",
+     "",
+     "",
+     "37-0602744 — (IRS Employer I.D. No.)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 148,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "February 14, 2025",
+     "/s/ D. James Umpleby III"
+    ],
+    "label_only": false,
+    "main_header": [
+     "February 14, 2025",
+     "/s/ D. James Umpleby III",
+     "Chairman of the Board and Chief Executive Officer"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "Chairman of the Board and Chief Executive Officer"
+    ],
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 148,
+    "row": 3,
+    "data_row": false,
+    "texts": [
+     "D. James Umpleby III"
+    ],
+    "label_only": false,
+    "main_header": [
+     "February 14, 2025",
+     "/s/ D. James Umpleby III",
+     "Chairman of the Board and Chief Executive Officer"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "Chairman of the Board and Chief Executive Officer"
+    ],
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 89,
+    "row": 3,
+    "data_row": false,
+    "texts": [
+     "Anat Ashkenazi"
+    ],
+    "label_only": false,
+    "main_header": [
+     "ALPHABET INC. — /s/ ANAT ASHKENAZI"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "ALPHABET INC."
+    ],
+    "doc": "edgar:GOOGL-10-Q-2025-10-30.htm"
+   },
+   {
+    "unit": 90,
+    "row": 3,
+    "data_row": false,
+    "texts": [
+     "Amie Thuener O'Toole"
+    ],
+    "label_only": false,
+    "main_header": [
+     "ALPHABET INC. — /s/ AMIE THUENER O'TOOLE"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "ALPHABET INC."
+    ],
+    "doc": "edgar:GOOGL-10-Q-2025-10-30.htm"
+   },
+   {
+    "unit": 207,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Average amount (in millions)",
+     "December 31, 2024",
+     "September 30, 2024",
+     "December 31, 2023"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Average amount (in millions)",
+     "Three months ended — December 31, 2024",
+     "September 30, 2024",
+     "December 31, 2023"
+    ],
+    "candidate_header": [
+     "",
+     "Three months ended",
+     "Three months ended",
+     "Three months ended"
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 221,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "December 31, 2024",
+     "Long-term issuer",
+     "Short-term issuer",
+     "Outlook",
+     "Long-term issuer",
+     "Short-term issuer",
+     "Outlook",
+     "Long-term issuer",
+     "Short-term issuer",
+     "Outlook"
+    ],
+    "label_only": false,
+    "main_header": [
+     "December 31, 2024",
+     "JPMorgan Chase & Co. — Long-term issuer",
+     "Short-term issuer",
+     "Outlook",
+     "JPMorgan Chase Bank, N.A. — Long-term issuer",
+     "Short-term issuer",
+     "Outlook",
+     "J.P. Morgan Securities LLC J.P. Morgan Securities plc J.P. Morgan SE (a) — Long-term issuer"
+    ],
+    "candidate_header": [
+     "",
+     "JPMorgan Chase & Co.",
+     "JPMorgan Chase & Co.",
+     "JPMorgan Chase & Co.",
+     "JPMorgan Chase Bank, N.A.",
+     "JPMorgan Chase Bank, N.A.",
+     "JPMorgan Chase Bank, N.A.",
+     "J.P. Morgan Securities LLC J.P. Morgan Securities plc J.P. Morgan SE (a)"
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 326,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Standard",
+     "Summary of guidance",
+     "Effects on financial statements"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024 — Standard",
+     "Summary of guidance",
+     "Effects on financial statements"
+    ],
+    "candidate_header": [
+     "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024",
+     "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024",
+     "Financial Accounting Standards Board (“FASB”) Standards Adopted since January 1, 2024"
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 328,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Standard",
+     "Summary of guidance",
+     "Effects on financial statements"
+    ],
+    "label_only": false,
+    "main_header": [
+     "FASB Standards Issued but not yet Adopted as of December 31, 2024 — Standard",
+     "Summary of guidance",
+     "Effects on financial statements"
+    ],
+    "candidate_header": [
+     "FASB Standards Issued but not yet Adopted as of December 31, 2024",
+     "FASB Standards Issued but not yet Adopted as of December 31, 2024",
+     "FASB Standards Issued but not yet Adopted as of December 31, 2024"
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 4,
+    "row": 4,
+    "data_row": false,
+    "texts": [
+     "Title of each class",
+     "Trading Symbol",
+     "Name of exchange on which registered"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Securities registered pursuant to Section 12(b) of the Act: — Title of each class",
+     "Trading Symbol",
+     "Name of exchange on which registered"
+    ],
+    "candidate_header": [
+     "Securities registered pursuant to Section 12(b) of the Act:",
+     "",
+     ""
+    ],
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+   },
+   {
+    "unit": 4,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Indicate by check mark if the registrant is not required to file reports pursuant to Section 13 or S",
+     "Yes",
+     "☐",
+     "No",
+     "☒"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+     "",
+     "",
+     "",
+     "Yes",
+     "☒ — ☐",
+     "No — No",
+     "☐ — ☒"
+    ],
+    "candidate_header": [
+     "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+     "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+     "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+     "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+     "Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of ",
+     "Yes",
+     "☒",
+     "No"
+    ],
+    "doc": "edgar:MU-10-K-2025-10-03.htm"
+   },
+   {
+    "unit": 80,
+    "row": 3,
+    "data_row": false,
+    "texts": [
+     "Dated:",
+     "January 27, 2025",
+     "By:",
+     "/ S /    T ED S ARANDOS"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Dated:",
+     "January 27, 2025",
+     "Netflix, Inc. — By:",
+     "/ S / T ED S ARANDOS"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "Netflix, Inc.",
+     "Netflix, Inc."
+    ],
+    "doc": "edgar:NFLX-10-K-2025-01-27.htm"
+   },
+   {
+    "unit": 3,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Title of each class:",
+     "Trading Symbol(s):",
+     "Name of each exchange on which registered:"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Securities registered or to be registered pursuant to Section 12(b) of the Act: — Title of each clas",
+     "Trading Symbol(s):",
+     "Name of each exchange on which registered:"
+    ],
+    "candidate_header": [
+     "Securities registered or to be registered pursuant to Section 12(b) of the Act:",
+     "Securities registered or to be registered pursuant to Section 12(b) of the Act:",
+     "Securities registered or to be registered pursuant to Section 12(b) of the Act:"
+    ],
+    "doc": "edgar:NVO-20-F-2025-02-05.htm"
+   },
+   {
+    "unit": 93,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Name:",
+     "Lars Fruergaard Jørgensen",
+     "Name:",
+     "Karsten Munk Knudsen"
+    ],
+    "label_only": false,
+    "main_header": [
+     "/s/ Lars Fruergaard Jørgensen — Name:",
+     "Lars Fruergaard Jørgensen",
+     "/s/ Karsten Munk Knudsen — Name:",
+     "Karsten Munk Knudsen"
+    ],
+    "candidate_header": [
+     "/s/ Lars Fruergaard Jørgensen",
+     "/s/ Lars Fruergaard Jørgensen",
+     "/s/ Karsten Munk Knudsen",
+     "/s/ Karsten Munk Knudsen"
+    ],
+    "doc": "edgar:NVO-20-F-2025-02-05.htm"
+   },
+   {
+    "unit": 7,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Title of each class",
+     "Trading Symbol(s)",
+     "Name of each exchange on which registered"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Securities registered pursuant to Section 12(b) of the Act: — Title of each class",
+     "Trading Symbol(s)",
+     "Name of each exchange on which registered"
+    ],
+    "candidate_header": [
+     "Securities registered pursuant to Section 12(b) of the Act:",
+     "Securities registered pursuant to Section 12(b) of the Act:",
+     "Securities registered pursuant to Section 12(b) of the Act:"
+    ],
+    "doc": "edgar:SPCX-10-Q-2026-08-04.htm"
+   },
+   {
+    "unit": 4,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "(State or other jurisdiction of incorporation or organization)",
+     "(I.R.S. Employer Identification No.)"
+    ],
+    "label_only": false,
+    "main_header": [
+     "Delaware — (State or other jurisdiction of incorporation or organization)",
+     "",
+     "41-1321939 — (I.R.S. Employer Identification No.)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:UNH-10-K-2025-02-27.htm"
+   },
+   {
+    "unit": 17,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Ratings",
+     "Outlook",
+     "Ratings",
+     "Outlook",
+     "Ratings",
+     "Outlook",
+     "Ratings",
+     "Outlook"
+    ],
+    "label_only": false,
+    "main_header": [
+     "",
+     "Moody’s — Ratings",
+     "Outlook",
+     "S&P Global — Ratings",
+     "Outlook",
+     "Fitch — Ratings",
+     "Outlook",
+     "A.M. Best — Ratings"
+    ],
+    "candidate_header": [
+     "",
+     "Moody’s",
+     "Moody’s",
+     "S&P Global",
+     "S&P Global",
+     "Fitch",
+     "Fitch",
+     "A.M. Best"
+    ],
+    "doc": "edgar:UNH-10-K-2025-02-27.htm"
+   }
+  ],
+  "label_only_list": [
+   {
+    "unit": 18,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Gross margin percentage:"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Gross margin percentage: — Products",
+     "36.5 %",
+     "36.3 %",
+     "35.3 %"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "fixture:aapl-2023-10k"
+   },
+   {
+    "unit": 7,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Cash flows from financing activities:"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Cash flows from financing activities: — Proceeds related to issuance of debt, net of costs",
+     "24,896",
+     "—",
+     "24,896",
+     "—"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 2,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "ADMINISTRATIVE INFORMATION"
+    ],
+    "label_only": true,
+    "main_header": [
+     "ADMINISTRATIVE INFORMATION",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm"
+   },
+   {
+    "unit": 281,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Preferred Stock Summary"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Preferred Stock Summary",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:BAC-10-K-2025-02-25.htm"
+   },
+   {
+    "unit": 92,
+    "row": 2,
+    "data_row": false,
+    "texts": [
+     "Amounts recognized in AOCI (pre-tax):"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Amounts recognized in AOCI (pre-tax): — Prior service cost (credit)",
+     "$ —",
+     "$ —",
+     "$ 21",
+     "$ 21",
+     "$ ( 5 )",
+     "$ ( 19 )"
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 142,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Exhibits:"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Exhibits:",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 64,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Fiscal Period:"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Fiscal Period:",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:CRM-10-K-2025-03-05.htm"
+   },
+   {
+    "unit": 67,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Fiscal Period:"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Fiscal Period:",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:CRM-10-K-2025-03-05.htm"
+   },
+   {
+    "unit": 73,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Fiscal Period:"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Fiscal Period:",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:CRM-10-K-2025-03-05.htm"
+   },
+   {
+    "unit": 367,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Level 3 inputs (a)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Level 3 inputs (a)",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 453,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Year ended December 31, (in millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Year ended December 31, (in millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 587,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Year ended December 31, (in millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Year ended December 31, (in millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 591,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Year ended December 31, (in millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Year ended December 31, (in millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:JPM-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 87,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "2023"
+    ],
+    "label_only": true,
+    "main_header": [
+     "2023",
+     "",
+     "",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:KO-10-K-2025-02-20.htm"
+   },
+   {
+    "unit": 100,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Year Ended December 31, 2023"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Year Ended December 31, 2023",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "doc": "edgar:KO-10-K-2025-02-20.htm"
+   },
+   {
+    "unit": 20,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(In millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(In millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+   },
+   {
+    "unit": 44,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(In millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(In millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+   },
+   {
+    "unit": 50,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(In millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(In millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+   },
+   {
+    "unit": 52,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(In millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(In millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+   },
+   {
+    "unit": 59,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(In millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(In millions)",
+     "",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:MSFT-10-K-2025-07-30.htm"
+   },
+   {
+    "unit": 52,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "Due in 12 month period ended December 31,"
+    ],
+    "label_only": true,
+    "main_header": [
+     "Due in 12 month period ended December 31,",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:NFLX-10-K-2025-01-27.htm"
+   },
+   {
+    "unit": 39,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(in millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(in millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:UNH-10-K-2025-02-27.htm"
+   },
+   {
+    "unit": 43,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(in millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(in millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:UNH-10-K-2025-02-27.htm"
+   },
+   {
+    "unit": 71,
+    "row": 1,
+    "data_row": false,
+    "texts": [
+     "(in millions)"
+    ],
+    "label_only": true,
+    "main_header": [
+     "(in millions)",
+     ""
+    ],
+    "candidate_header": [
+     "",
+     ""
+    ],
+    "doc": "edgar:UNH-10-K-2025-02-27.htm"
+   }
+  ]
+ },
+ "s7": {
+  "round2_tables": 11,
+  "value_text_rows_in_header": 5,
+  "tables": [
+   {
+    "doc": "fixture:nvda-2026-ex99-1",
+    "unit": 5,
+    "round2_header_rows": [],
+    "round3_header_rows": [
+     1,
+     2,
+     3,
+     4,
+     6,
+     7
+    ],
+    "value_text_rows": [
+     6,
+     7
+    ],
+    "value_text_rows_in_header": true,
+    "rows": [
+     "NVIDIA CORPORATION",
+     "CONDENSED CONSOLIDATED BALANCE SHEETS",
+     "(In millions)",
+     "(Unaudited)"
+    ]
+   },
+   {
+    "doc": "fixture:nvda-2026-ex99-1",
+    "unit": 6,
+    "round2_header_rows": [],
+    "round3_header_rows": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "value_text_rows": [
+     5,
+     6,
+     7
+    ],
+    "value_text_rows_in_header": true,
+    "rows": [
+     "NVIDIA CORPORATION",
+     "CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS",
+     "(In millions)",
+     "(Unaudited)",
+     "Three Months Ended | Six Months Ended"
+    ]
+   },
+   {
+    "doc": "fixture:nvda-2026-ex99-1",
+    "unit": 11,
+    "round2_header_rows": [],
+    "round3_header_rows": [
+     1,
+     2,
+     4,
+     5
+    ],
+    "value_text_rows": [
+     4,
+     5
+    ],
+    "value_text_rows_in_header": true,
+    "rows": [
+     "NVIDIA CORPORATION",
+     "RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK",
+     "Q3 FY2027 Outlook",
+     "($ in billions)"
+    ]
+   },
+   {
+    "doc": "fixture:nvda-2026-ex99-2",
+    "unit": 12,
+    "round2_header_rows": [],
+    "round3_header_rows": [
+     1,
+     2,
+     4,
+     5
+    ],
+    "value_text_rows": [
+     4,
+     5
+    ],
+    "value_text_rows_in_header": true,
+    "rows": [
+     "NVIDIA CORPORATION",
+     "RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK",
+     "Q3 FY2027 Outlook",
+     "($ in billions)"
+    ]
+   },
+   {
+    "doc": "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm",
+    "unit": 45,
+    "round2_header_rows": [
+     1,
+     2
+    ],
+    "round3_header_rows": [
+     1,
+     2
+    ],
+    "value_text_rows": [
+     4,
+     5
+    ],
+    "value_text_rows_in_header": false,
+    "rows": [
+     "December 31,",
+     "2024 | 2023",
+     "Weighted-average remaining lease term:",
+     "Finance leases | 13.7 years | 14.0 years",
+     "Operating leases | 11.5 years | 11.6 years"
+    ]
+   },
+   {
+    "doc": "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm",
+    "unit": 44,
+    "round2_header_rows": [
+     1,
+     2
+    ],
+    "round3_header_rows": [
+     1,
+     2
+    ],
+    "value_text_rows": [
+     4,
+     5
+    ],
+    "value_text_rows_in_header": false,
+    "rows": [
+     "December 31,",
+     "2025 | 2024",
+     "Weighted-average remaining lease term:",
+     "Finance leases | 15.1 years | 13.7 years",
+     "Operating leases | 12.3 years | 11.5 years"
+    ]
+   },
+   {
+    "doc": "edgar:BAC-10-K-2025-02-25.htm",
+    "unit": 233,
+    "round2_header_rows": [
+     2,
+     4,
+     5
+    ],
+    "round3_header_rows": [
+     2,
+     4,
+     5
+    ],
+    "value_text_rows": [
+     8,
+     9,
+     15,
+     16
+    ],
+    "value_text_rows_in_header": false,
+    "rows": [
+     "Financial Effect of Modified Consumer Real Estate Loans",
+     "Year Ended December 31",
+     "2024 | 2023",
+     "Forbearance and Other Payment Plans",
+     "Weighted-average duration",
+     "Residential Mortgage | 7 months | 8 months",
+     "Home Equity | n/a | 9 months",
+     "Permanent Modifications"
+    ]
+   },
+   {
+    "doc": "edgar:CAT-10-K-2025-02-14.htm",
+    "unit": 139,
+    "round2_header_rows": [],
+    "round3_header_rows": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "value_text_rows": [
+     3,
+     4,
+     5
+    ],
+    "value_text_rows_in_header": true,
+    "rows": [
+     "Enterprise-wide Disclosures:",
+     "Information about Geographic Areas:",
+     "Property, plant and equipment - net",
+     "External sales and revenues 1 | December 31,",
+     "(Millions of dollars) | 2024 | 2023 | 2022 | 2024 | 2023"
+    ]
+   },
+   {
+    "doc": "edgar:CRM-10-K-2025-03-05.htm",
+    "unit": 58,
+    "round2_header_rows": [
+     1,
+     2
+    ],
+    "round3_header_rows": [
+     1,
+     2
+    ],
+    "value_text_rows": [
+     4,
+     5
+    ],
+    "value_text_rows_in_header": false,
+    "rows": [
+     "As of January 31,",
+     "2025 | 2024",
+     "Weighted average remaining lease term",
+     "Operating leases | 7 years | 7 years",
+     "Finance leases | 3 years | 3 years"
+    ]
+   },
+   {
+    "doc": "edgar:GOOGL-10-Q-2025-10-30.htm",
+    "unit": 52,
+    "round2_header_rows": [
+     1
+    ],
+    "round3_header_rows": [
+     1
+    ],
+    "value_text_rows": [
+     3,
+     4
+    ],
+    "value_text_rows_in_header": false,
+    "rows": [
+     "As of December 31, 2024 | As of September 30, 2025",
+     "Weighted-average remaining lease term",
+     "Operating leases | 7.8 years | 7.8 years",
+     "Finance leases | 10.4 years | 8.7 years"
+    ]
+   },
+   {
+    "doc": "edgar:TSLA-10-K-2025-01-30.htm",
+    "unit": 53,
+    "round2_header_rows": [
+     1
+    ],
+    "round3_header_rows": [
+     1
+    ],
+    "value_text_rows": [
+     3,
+     4
+    ],
+    "value_text_rows_in_header": false,
+    "rows": [
+     "December 31, 2024 | December 31, 2023",
+     "Weighted-average remaining lease term:",
+     "Operating leases | 7.9 years | 7.4 years",
+     "Finance leases | 4.4 years | 2.3 years"
+    ]
+   }
+  ]
+ },
+ "moved_rows": {
+  "round2_rows": 2201,
+  "round3_rows": 2271,
+  "new_rows": 70,
+  "new_tables": 53,
+  "new_by_cause": {
+   "sparse_row_fusion_only": 46,
+   "label_only": 9,
+   "other:label_empty": 12,
+   "other:label_unit_text": 1,
+   "other:label_empty+year_run": 2
+  },
+  "new_fixture_rows": 25,
+  "gone_rows": 0,
+  "gone_tables": 0,
+  "new_list": [
+   {
+    "unit": 21,
+    "row": 2,
+    "texts": [
+     "Weighted-average remaining lease term – operating leases",
+     "10.6 years",
+     "10.0 years"
+    ],
+    "label": "Weighted-average remaining lease term – operating leases",
+    "values": [
+     "10.6 years",
+     "10.0 years"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [
+     "words_in_value_cells",
+     "value_with_unit"
+    ],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:AMZN-10-Q-2025-10-31.htm"
+   },
+   {
+    "unit": 139,
+    "row": 2,
+    "texts": [
+     "Information about Geographic Areas:"
+    ],
+    "label": "Information about Geographic Areas:",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 139,
+    "row": 3,
+    "texts": [
+     "Property, plant and equipment - net"
+    ],
+    "label": "",
+    "values": [
+     "Property, plant and equipment - net"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 139,
+    "row": 4,
+    "texts": [
+     "External sales and revenues 1",
+     "December 31,"
+    ],
+    "label": "",
+    "values": [
+     "External sales and revenues 1",
+     "December 31,"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 139,
+    "row": 5,
+    "texts": [
+     "(Millions of dollars)",
+     "2024",
+     "2023",
+     "2022",
+     "2024",
+     "2023"
+    ],
+    "label": "(Millions of dollars)",
+    "values": [
+     "2024",
+     "2023",
+     "2022",
+     "2024",
+     "2023"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_unit_text"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:CAT-10-K-2025-02-14.htm"
+   },
+   {
+    "unit": 123,
+    "row": 2,
+    "texts": [
+     "Trade Date",
+     "Natera, Inc.",
+     "Biotechnology",
+     "Composite"
+    ],
+    "label": "Trade Date",
+    "values": [
+     "Natera, Inc.",
+     "Biotechnology",
+     "Composite"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:NTRA-10-K-2025-02-28.htm"
+   },
+   {
+    "unit": 89,
+    "row": 3,
+    "texts": [
+     "(in NT$ millions)"
+    ],
+    "label": "",
+    "values": [
+     "(in NT$ millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:TSM-20-F-2025-04-17.htm"
+   },
+   {
+    "unit": 216,
+    "row": 4,
+    "texts": [
+     "(b)",
+     "Exhibits to this annual report:"
+    ],
+    "label": "(b)",
+    "values": [
+     "Exhibits to this annual report:"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:TSM-20-F-2025-04-17.htm"
+   },
+   {
+    "unit": 317,
+    "row": 3,
+    "texts": [
+     "NT$",
+     "NT$"
+    ],
+    "label": "",
+    "values": [
+     "NT$",
+     "NT$"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:TSM-20-F-2025-04-17.htm"
+   },
+   {
+    "unit": 317,
+    "row": 4,
+    "texts": [
+     "(In Millions)",
+     "(In Millions)"
+    ],
+    "label": "",
+    "values": [
+     "(In Millions)",
+     "(In Millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "edgar:TSM-20-F-2025-04-17.htm"
+   },
+   {
+    "unit": 38,
+    "row": 2,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-10k"
+   },
+   {
+    "unit": 39,
+    "row": 3,
+    "texts": [
+     "Property and Equipment:",
+     "(In millions)",
+     "(In years)"
+    ],
+    "label": "Property and Equipment:",
+    "values": [
+     "(In millions)",
+     "(In years)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-10k"
+   },
+   {
+    "unit": 40,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-10k"
+   },
+   {
+    "unit": 41,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-10k"
+   },
+   {
+    "unit": 57,
+    "row": 3,
+    "texts": [
+     "Long-lived assets:",
+     "(In millions)"
+    ],
+    "label": "Long-lived assets:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-10k"
+   },
+   {
+    "unit": 5,
+    "row": 2,
+    "texts": [
+     "CONDENSED CONSOLIDATED BALANCE SHEETS"
+    ],
+    "label": "CONDENSED CONSOLIDATED BALANCE SHEETS",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 5,
+    "row": 3,
+    "texts": [
+     "(In millions)"
+    ],
+    "label": "(In millions)",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_unit_text",
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 5,
+    "row": 4,
+    "texts": [
+     "(Unaudited)"
+    ],
+    "label": "(Unaudited)",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_unit_text",
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 5,
+    "row": 6,
+    "texts": [
+     "July 26,",
+     "January 25,"
+    ],
+    "label": "",
+    "values": [
+     "July 26,",
+     "January 25,"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 5,
+    "row": 7,
+    "texts": [
+     "2026",
+     "2026"
+    ],
+    "label": "",
+    "values": [
+     "2026",
+     "2026"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty",
+     "year_run"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 6,
+    "row": 2,
+    "texts": [
+     "CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS"
+    ],
+    "label": "CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 6,
+    "row": 3,
+    "texts": [
+     "(In millions)"
+    ],
+    "label": "(In millions)",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_unit_text",
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 6,
+    "row": 4,
+    "texts": [
+     "(Unaudited)"
+    ],
+    "label": "(Unaudited)",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_unit_text",
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 6,
+    "row": 5,
+    "texts": [
+     "Three Months Ended",
+     "Six Months Ended"
+    ],
+    "label": "",
+    "values": [
+     "Three Months Ended",
+     "Six Months Ended"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 6,
+    "row": 6,
+    "texts": [
+     "July 26,",
+     "July 27,",
+     "July 26,",
+     "July 27,"
+    ],
+    "label": "",
+    "values": [
+     "July 26,",
+     "July 27,",
+     "July 26,",
+     "July 27,"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 6,
+    "row": 7,
+    "texts": [
+     "2026",
+     "2025",
+     "2026",
+     "2025"
+    ],
+    "label": "",
+    "values": [
+     "2026",
+     "2025",
+     "2026",
+     "2025"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty",
+     "year_run"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 11,
+    "row": 2,
+    "texts": [
+     "RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK"
+    ],
+    "label": "RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 11,
+    "row": 4,
+    "texts": [
+     "Q3 FY2027 Outlook"
+    ],
+    "label": "",
+    "values": [
+     "Q3 FY2027 Outlook"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 11,
+    "row": 5,
+    "texts": [
+     "($ in billions)"
+    ],
+    "label": "",
+    "values": [
+     "($ in billions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-1"
+   },
+   {
+    "unit": 12,
+    "row": 2,
+    "texts": [
+     "RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK"
+    ],
+    "label": "RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK",
+    "values": [],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_only"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-2"
+   },
+   {
+    "unit": 12,
+    "row": 4,
+    "texts": [
+     "Q3 FY2027 Outlook"
+    ],
+    "label": "",
+    "values": [
+     "Q3 FY2027 Outlook"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-2"
+   },
+   {
+    "unit": 12,
+    "row": 5,
+    "texts": [
+     "($ in billions)"
+    ],
+    "label": "",
+    "values": [
+     "($ in billions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "label_empty"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": false,
+    "signals": [],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-ex99-2"
+   },
+   {
+    "unit": 22,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-q2-10q"
+   },
+   {
+    "unit": 23,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-q2-10q"
+   },
+   {
+    "unit": 24,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "fixture:nvda-2026-q2-10q"
+   },
+   {
+    "unit": 44,
+    "row": 3,
+    "texts": [
+     "Other assets:",
+     "(In millions)"
+    ],
+    "label": "Other assets:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm"
+   },
+   {
+    "unit": 61,
+    "row": 3,
+    "texts": [
+     "Long-lived assets:",
+     "(In millions)"
+    ],
+    "label": "Long-lived assets:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm"
+   },
+   {
+    "unit": 41,
+    "row": 2,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+   },
+   {
+    "unit": 42,
+    "row": 3,
+    "texts": [
+     "Property and Equipment:",
+     "(In millions)",
+     "(In years)"
+    ],
+    "label": "Property and Equipment:",
+    "values": [
+     "(In millions)",
+     "(In years)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [
+     "words_in_value_cells"
+    ],
+    "snapshot_header_rows": 0,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+   },
+   {
+    "unit": 43,
+    "row": 3,
+    "texts": [
+     "Other Assets (Long Term):",
+     "(In millions)"
+    ],
+    "label": "Other Assets (Long Term):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+   },
+   {
+    "unit": 44,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+   },
+   {
+    "unit": 45,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+   },
+   {
+    "unit": 61,
+    "row": 3,
+    "texts": [
+     "Long-lived assets:",
+     "(In millions)"
+    ],
+    "label": "Long-lived assets:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm"
+   },
+   {
+    "unit": 28,
+    "row": 3,
+    "texts": [
+     "Inventories (1):",
+     "(In millions)"
+    ],
+    "label": "Inventories (1):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm"
+   },
+   {
+    "unit": 29,
+    "row": 3,
+    "texts": [
+     "Other Assets:",
+     "(In millions)"
+    ],
+    "label": "Other Assets:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm"
+   },
+   {
+    "unit": 30,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm"
+   },
+   {
+    "unit": 31,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm"
+   },
+   {
+    "unit": 28,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm"
+   },
+   {
+    "unit": 29,
+    "row": 3,
+    "texts": [
+     "Other Assets (Long Term):",
+     "(In millions)"
+    ],
+    "label": "Other Assets (Long Term):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm"
+   },
+   {
+    "unit": 30,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm"
+   },
+   {
+    "unit": 31,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm"
+   },
+   {
+    "unit": 28,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm"
+   },
+   {
+    "unit": 29,
+    "row": 3,
+    "texts": [
+     "Other Assets (Long Term):",
+     "(In millions)"
+    ],
+    "label": "Other Assets (Long Term):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm"
+   },
+   {
+    "unit": 30,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm"
+   },
+   {
+    "unit": 31,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm"
+   },
+   {
+    "unit": 24,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm"
+   },
+   {
+    "unit": 25,
+    "row": 3,
+    "texts": [
+     "Other Assets (Long Term):",
+     "(In millions)"
+    ],
+    "label": "Other Assets (Long Term):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm"
+   },
+   {
+    "unit": 26,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm"
+   },
+   {
+    "unit": 27,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm"
+   },
+   {
+    "unit": 24,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm"
+   },
+   {
+    "unit": 25,
+    "row": 3,
+    "texts": [
+     "Other Assets (Long Term):",
+     "(In millions)"
+    ],
+    "label": "Other Assets (Long Term):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm"
+   },
+   {
+    "unit": 26,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm"
+   },
+   {
+    "unit": 27,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm"
+   },
+   {
+    "unit": 24,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm"
+   },
+   {
+    "unit": 25,
+    "row": 3,
+    "texts": [
+     "Other Assets (Long Term):",
+     "(In millions)"
+    ],
+    "label": "Other Assets (Long Term):",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm"
+   },
+   {
+    "unit": 26,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm"
+   },
+   {
+    "unit": 27,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm"
+   },
+   {
+    "unit": 23,
+    "row": 3,
+    "texts": [
+     "Inventories:",
+     "(In millions)"
+    ],
+    "label": "Inventories:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm"
+   },
+   {
+    "unit": 24,
+    "row": 3,
+    "texts": [
+     "Accrued and Other Current Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Accrued and Other Current Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm"
+   },
+   {
+    "unit": 25,
+    "row": 3,
+    "texts": [
+     "Other Long-Term Liabilities:",
+     "(In millions)"
+    ],
+    "label": "Other Long-Term Liabilities:",
+    "values": [
+     "(In millions)"
+    ],
+    "first_header_row": false,
+    "header_like": true,
+    "reasons": [
+     "sparse_row_fusion"
+    ],
+    "chain_ok": true,
+    "starts_ok": true,
+    "trailing_ok": true,
+    "rule_ok": true,
+    "sparse_row_fusion_only": true,
+    "signals": [],
+    "snapshot_header_rows": 2,
+    "beyond_snapshot_header": true,
+    "doc": "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm"
+   }
+  ],
+  "gone_list": []
+ }
+}

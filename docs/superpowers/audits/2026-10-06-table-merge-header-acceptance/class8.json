@@ -1,0 +1,1185 @@
+{
+ "tables": [
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 19,
+   "evidence_cells": 6,
+   "evidence_kinds": {
+    "adjacent_dedicated": 4,
+    "adjacent_shared": 2
+   },
+   "main_split_cells": 6,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 129,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 131,
+   "evidence_cells": 4,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 4,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 138,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 139,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 145,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 152,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 153,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 157,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 12,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 13,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 14,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 15,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 25,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 27,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 28,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 29,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 30,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 33,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 35,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 39,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 42,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 43,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 52,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 63,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 65,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 66,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 68,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 69,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 71,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 75,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 83,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 24,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 25,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 26,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 32,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 39,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 40,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 42,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 43,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 47,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 59,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 62,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 63,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "table": 64,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 79,
+   "evidence_cells": 20,
+   "evidence_kinds": {
+    "adjacent_dedicated": 20
+   },
+   "main_split_cells": 20,
+   "candidate_split_cells": 20,
+   "remaining": [
+    {
+     "line": 1,
+     "cell": 1,
+     "text": "(40.4",
+     "close": ")%",
+     "row": "| Cost of revenue | (40.4 | )% | (45.6 | )% | (43.9 | )% |"
+    },
+    {
+     "line": 1,
+     "cell": 3,
+     "text": "(45.6",
+     "close": ")%",
+     "row": "| Cost of revenue | (40.4 | )% | (45.6 | )% | (43.9 | )% |"
+    },
+    {
+     "line": 1,
+     "cell": 5,
+     "text": "(43.9",
+     "close": ")%",
+     "row": "| Cost of revenue | (40.4 | )% | (45.6 | )% | (43.9 | )% |"
+    },
+    {
+     "line": 4,
+     "cell": 1,
+     "text": "(7.2",
+     "close": ")%",
+     "row": "| Research and development | (7.2 | )% | (8.5 | )% | (7.1 | )% |"
+    },
+    {
+     "line": 4,
+     "cell": 3,
+     "text": "(8.5",
+     "close": ")%",
+     "row": "| Research and development | (7.2 | )% | (8.5 | )% | (7.1 | )% |"
+    },
+    {
+     "line": 4,
+     "cell": 5,
+     "text": "(7.1",
+     "close": ")%",
+     "row": "| Research and development | (7.2 | )% | (8.5 | )% | (7.1 | )% |"
+    },
+    {
+     "line": 5,
+     "cell": 1,
+     "text": "(2.4",
+     "close": ")%",
+     "row": "| General and administrative | (2.4 | )% | (2.8 | )% | (2.9 | )% |"
+    },
+    {
+     "line": 5,
+     "cell": 3,
+     "text": "(2.8",
+     "close": ")%",
+     "row": "| General and administrative | (2.4 | )% | (2.8 | )% | (2.9 | )% |"
+    },
+    {
+     "line": 5,
+     "cell": 5,
+     "text": "(2.9",
+     "close": ")%",
+     "row": "| General and administrative | (2.4 | )% | (2.8 | )% | (2.9 | )% |"
+    },
+    {
+     "line": 6,
+     "cell": 1,
+     "text": "(0.4",
+     "close": ")%",
+     "row": "| Marketing | (0.4 | )% | (0.5 | )% | (0.4 | )% |"
+    },
+    {
+     "line": 6,
+     "cell": 3,
+     "text": "(0.5",
+     "close": ")%",
+     "row": "| Marketing | (0.4 | )% | (0.5 | )% | (0.4 | )% |"
+    },
+    {
+     "line": 6,
+     "cell": 5,
+     "text": "(0.4",
+     "close": ")%",
+     "row": "| Marketing | (0.4 | )% | (0.5 | )% | (0.4 | )% |"
+    },
+    {
+     "line": 7,
+     "cell": 1,
+     "text": "(10.0",
+     "close": ")%",
+     "row": "| Total operating expenses | (10.0 | )% | (11.8 | )% | (10.4 | )% |"
+    },
+    {
+     "line": 7,
+     "cell": 3,
+     "text": "(11.8",
+     "close": ")%",
+     "row": "| Total operating expenses | (10.0 | )% | (11.8 | )% | (10.4 | )% |"
+    },
+    {
+     "line": 7,
+     "cell": 5,
+     "text": "(10.4",
+     "close": ")%",
+     "row": "| Total operating expenses | (10.0 | )% | (11.8 | )% | (10.4 | )% |"
+    },
+    {
+     "line": 8,
+     "cell": 1,
+     "text": "(0.1",
+     "close": ")%",
+     "row": "| Other operating income and expenses, net | (0.1 | )% | 0.0 | % | 0.0 | % |"
+    },
+    {
+     "line": 12,
+     "cell": 1,
+     "text": "(6.6",
+     "close": ")%",
+     "row": "| Income tax expense | (6.6 | )% | (5.9 | )% | (8.6 | )% |"
+    },
+    {
+     "line": 12,
+     "cell": 3,
+     "text": "(5.9",
+     "close": ")%",
+     "row": "| Income tax expense | (6.6 | )% | (5.9 | )% | (8.6 | )% |"
+    },
+    {
+     "line": 12,
+     "cell": 5,
+     "text": "(8.6",
+     "close": ")%",
+     "row": "| Income tax expense | (6.6 | )% | (5.9 | )% | (8.6 | )% |"
+    },
+    {
+     "line": 14,
+     "cell": 3,
+     "text": "(0.4",
+     "close": ")%",
+     "row": "| Other comprehensive income (loss) for the year, net of income tax | 1.8 | % | (0.4 | )% | 2.5 | % |"
+    }
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 80,
+   "evidence_cells": 6,
+   "evidence_kinds": {
+    "adjacent_dedicated": 6
+   },
+   "main_split_cells": 6,
+   "candidate_split_cells": 6,
+   "remaining": [
+    {
+     "line": 0,
+     "cell": 5,
+     "text": "(4.5",
+     "close": ")%",
+     "row": "| Net revenue | 2,263,891 |  | 2,161,736 |  | (4.5 | )% | 2,894,308 |  | 88,268 |  | 33.9 % |"
+    },
+    {
+     "line": 1,
+     "cell": 1,
+     "text": "(915,536",
+     "close": ")",
+     "row": "| Cost of revenue | (915,536 | ) | (986,625 | ) | 7.8 | % | (1,269,954 | ) | (38,730 | ) | 28.7 % |"
+    },
+    {
+     "line": 1,
+     "cell": 3,
+     "text": "(986,625",
+     "close": ")",
+     "row": "| Cost of revenue | (915,536 | ) | (986,625 | ) | 7.8 | % | (1,269,954 | ) | (38,730 | ) | 28.7 % |"
+    },
+    {
+     "line": 1,
+     "cell": 7,
+     "text": "(1,269,954",
+     "close": ")",
+     "row": "| Cost of revenue | (915,536 | ) | (986,625 | ) | 7.8 | % | (1,269,954 | ) | (38,730 | ) | 28.7 % |"
+    },
+    {
+     "line": 1,
+     "cell": 9,
+     "text": "(38,730",
+     "close": ")",
+     "row": "| Cost of revenue | (915,536 | ) | (986,625 | ) | 7.8 | % | (1,269,954 | ) | (38,730 | ) | 28.7 % |"
+    },
+    {
+     "line": 2,
+     "cell": 5,
+     "text": "(12.8",
+     "close": ")%",
+     "row": "| Gross profit | 1,348,355 |  | 1,175,111 |  | (12.8 | )% | 1,624,354 |  | 49,538 |  | 38.2 % |"
+    }
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 82,
+   "evidence_cells": 4,
+   "evidence_kinds": {
+    "adjacent_dedicated": 4
+   },
+   "main_split_cells": 4,
+   "candidate_split_cells": 4,
+   "remaining": [
+    {
+     "line": 5,
+     "cell": 1,
+     "text": "(368",
+     "close": ")",
+     "row": "| Other operating income and expenses, net | (368 | ) | 189 | — |  | (1,230 | ) | (38 | ) | (750.8 | %) |"
+    },
+    {
+     "line": 5,
+     "cell": 6,
+     "text": "(1,230",
+     "close": ")",
+     "row": "| Other operating income and expenses, net | (368 | ) | 189 | — |  | (1,230 | ) | (38 | ) | (750.8 | %) |"
+    },
+    {
+     "line": 5,
+     "cell": 8,
+     "text": "(38",
+     "close": ")",
+     "row": "| Other operating income and expenses, net | (368 | ) | 189 | — |  | (1,230 | ) | (38 | ) | (750.8 | %) |"
+    },
+    {
+     "line": 6,
+     "cell": 4,
+     "text": "(17.8",
+     "close": ")%",
+     "row": "| Income from operations | 1,121,279 |  | 921,466 | (17.8 | )% | 1,322,053 |  | 40,319 |  | 43.5 | % |"
+    }
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 83,
+   "evidence_cells": 5,
+   "evidence_kinds": {
+    "adjacent_dedicated": 5
+   },
+   "main_split_cells": 5,
+   "candidate_split_cells": 5,
+   "remaining": [
+    {
+     "line": 0,
+     "cell": 3,
+     "text": "(37.5",
+     "close": ")%",
+     "row": "| Share of profits of associates | 7,680 | 4,800 | (37.5 | )% | 4,881 | 149 | 1.7 | % |"
+    },
+    {
+     "line": 2,
+     "cell": 3,
+     "text": "(49.3",
+     "close": ")%",
+     "row": "| Other income | 947 | 480 | (49.3 | )% | 567 | 17 | 18.1 | % |"
+    },
+    {
+     "line": 3,
+     "cell": 3,
+     "text": "(159.6",
+     "close": ")%",
+     "row": "| Foreign exchange gain (loss), net | 4,506 | (2,686) | (159.6 | )% | 10,001 | 305 | — |  |"
+    },
+    {
+     "line": 4,
+     "cell": 7,
+     "text": "(12.5",
+     "close": ")%",
+     "row": "| Finance costs | (11,750) | (11,999) | 2.1 | % | (10,495) | (320) | (12.5 | )% |"
+    },
+    {
+     "line": 5,
+     "cell": 7,
+     "text": "(220.4",
+     "close": ")%",
+     "row": "| Other gains and losses, net | (1,012) | 6,962 | — |  | (8,380) | (256) | (220.4 | )% |"
+    }
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 84,
+   "evidence_cells": 7,
+   "evidence_kinds": {
+    "adjacent_dedicated": 7
+   },
+   "main_split_cells": 7,
+   "candidate_split_cells": 4,
+   "remaining": [
+    {
+     "line": 0,
+     "cell": 1,
+     "text": "(150,777",
+     "close": ")",
+     "row": "| Income tax expense | (150,777 | ) | (128,288 | ) | (14.9)% | (248,316 | ) | (7,573 | ) | 93.6 % |"
+    },
+    {
+     "line": 0,
+     "cell": 3,
+     "text": "(128,288",
+     "close": ")",
+     "row": "| Income tax expense | (150,777 | ) | (128,288 | ) | (14.9)% | (248,316 | ) | (7,573 | ) | 93.6 % |"
+    },
+    {
+     "line": 0,
+     "cell": 6,
+     "text": "(248,316",
+     "close": ")",
+     "row": "| Income tax expense | (150,777 | ) | (128,288 | ) | (14.9)% | (248,316 | ) | (7,573 | ) | 93.6 % |"
+    },
+    {
+     "line": 0,
+     "cell": 8,
+     "text": "(7,573",
+     "close": ")",
+     "row": "| Income tax expense | (150,777 | ) | (128,288 | ) | (14.9)% | (248,316 | ) | (7,573 | ) | 93.6 % |"
+    }
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 245,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 250,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_shared": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 251,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 255,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 300,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 305,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_shared": 2,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 306,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 308,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 310,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 311,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 312,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 1,
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 322,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 350,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_shared": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 352,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 354,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 366,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 367,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_dedicated": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 368,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 370,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_shared": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 371,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 372,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 390,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 393,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 397,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 398,
+   "evidence_cells": 3,
+   "evidence_kinds": {
+    "adjacent_dedicated": 3
+   },
+   "main_split_cells": 3,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 404,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 427,
+   "evidence_cells": 2,
+   "evidence_kinds": {
+    "adjacent_shared": 2
+   },
+   "main_split_cells": 2,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 444,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 445,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_dedicated": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 474,
+   "evidence_cells": 1,
+   "evidence_kinds": {
+    "adjacent_shared": 1
+   },
+   "main_split_cells": 1,
+   "candidate_split_cells": 0,
+   "remaining": []
+  }
+ ],
+ "fixed": 75,
+ "remaining": 5,
+ "corpus": {
+  "main": {
+   "tables": 80,
+   "cells": 180
+  },
+  "candidate": {
+   "tables": 5,
+   "cells": 39
+  }
+ },
+ "candidate_split_tables_outside_class8": []
+}

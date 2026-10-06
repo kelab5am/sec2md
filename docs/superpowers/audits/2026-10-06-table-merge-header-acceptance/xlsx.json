@@ -1,0 +1,133 @@
+{
+ "documents": 109,
+ "snapshots": 3707,
+ "status": {
+  "needs_review": 1127,
+  "source_text_only": 1685,
+  "exported": 895
+ },
+ "differences": [
+  {
+   "doc": "edgar:NTRA-10-K-2025-02-28.htm",
+   "count_main": 49,
+   "count_candidate": 49,
+   "first": [
+    [
+     {
+      "ordinal": 7,
+      "sha": "bff9b2dbf3117a4fbbb8b57d9157a2700e90ea17f065811b461f0ebf7bad54de",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 7,
+      "sha": "c34b8e7653fbc4f586e575ed63b2fa468089ee5556adc5b26c7e8d1abda6ff55",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "count_main": 172,
+   "count_candidate": 172,
+   "first": [
+    [
+     {
+      "ordinal": 20,
+      "sha": "2d6eb3b7bdc4ef91f5c850fe00676d2d258f0aaf40346a0f2888318934132740",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 7
+     },
+     {
+      "ordinal": 20,
+      "sha": "1317d4c961e803060ac4d7b736d9cd2c97efe680ffe50c4d574ea2ba17c04b23",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 7
+     }
+    ],
+    [
+     {
+      "ordinal": 21,
+      "sha": "6edb1c096e157d5d34cf3a103cc2dbb200b993193b39175f7915de6ee8ae8dc7",
+      "status": "needs_review",
+      "export": true,
+      "headers": 9,
+      "rows": 21
+     },
+     {
+      "ordinal": 21,
+      "sha": "2f1aa871a5c2bee34f53fad9b0280e3814315eb0e7cdef73de2f9e4645144242",
+      "status": "needs_review",
+      "export": true,
+      "headers": 9,
+      "rows": 21
+     }
+    ],
+    [
+     {
+      "ordinal": 131,
+      "sha": "52565a3a2dabc0241811e92689dc5c7be32db31697d8831c2373d29d5d9513ff",
+      "status": "exported",
+      "export": true,
+      "headers": 3,
+      "rows": 11
+     },
+     {
+      "ordinal": 131,
+      "sha": "8d5be7353ba3614b1f4cbfdd0674af4a6432612056fb537898767a8186cd5d74",
+      "status": "exported",
+      "export": true,
+      "headers": 3,
+      "rows": 11
+     }
+    ],
+    [
+     {
+      "ordinal": 132,
+      "sha": "86584fdc664bf15656fedf6afb51b4a83cfb3f6ac7610f4a7ac14b1a099b64d9",
+      "status": "needs_review",
+      "export": true,
+      "headers": 14,
+      "rows": 30
+     },
+     {
+      "ordinal": 132,
+      "sha": "733dcef3c67be49454227f35208a80b80369cc7959661dc106bb547ad8bf5bc9",
+      "status": "needs_review",
+      "export": true,
+      "headers": 14,
+      "rows": 30
+     }
+    ],
+    [
+     {
+      "ordinal": 133,
+      "sha": "aed608cb0c870f9e009ebe3c6e584bd33301bb3021f36ad911fd5d403d1ffa0d",
+      "status": "needs_review",
+      "export": true,
+      "headers": 15,
+      "rows": 26
+     },
+     {
+      "ordinal": 133,
+      "sha": "4825d3810525a5a15bb8c208d4f38a46cb6e784e95a8f69fcc701ffbfc5a8a19",
+      "status": "needs_review",
+      "export": true,
+      "headers": 15,
+      "rows": 26
+     }
+    ]
+   ]
+  }
+ ]
+}
