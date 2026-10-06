@@ -12,7 +12,7 @@ from typing import Literal, Mapping, Sequence
 
 from bs4 import BeautifulSoup
 from bs4 import XMLParsedAsHTMLWarning
-from bs4.element import Tag
+from bs4.element import NavigableString, Tag
 
 from sec2md.encoding import decode_html, normalize_legacy_characters
 from sec2md.models import Page
@@ -30,6 +30,10 @@ NUMBER_RE = re.compile(
 )
 _C1_RE = re.compile(r"[\x80-\x9f]")
 _MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+_MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+_MARKDOWN_ANY_LINK_RE = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+_MARKDOWN_ESCAPE_RE = re.compile(r"\\(.)")
+_MARKDOWN_EMPHASIS_RE = re.compile(r"[*_~`]")
 _ORACLE_HIDDEN_STYLE_RE = re.compile(
     r"(?:^|;)\s*(?:display\s*:\s*none\b|visibility\s*:\s*hidden\b)",
     re.IGNORECASE,
@@ -299,18 +303,220 @@ def _oracle_trace_numeric_failures(
     return tuple(header_failures + failures)
 
 
+_ORACLE_PAGE_BREAK_RE = re.compile(
+    r"(?:^|;)\s*(?:page-)?break-(before|after)\s*:\s*(?:always|page)\b", re.IGNORECASE
+)
+_ORACLE_BLOCK_TAGS = frozenset({
+    "address", "article", "aside", "blockquote", "body", "br", "caption", "center", "dd",
+    "div", "dl", "dt", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5",
+    "h6", "header", "hr", "html", "li", "main", "nav", "ol", "p", "pre", "section", "table",
+    "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
+})
+_ORACLE_INLINE_TAGS = frozenset({
+    "a", "abbr", "b", "big", "cite", "code", "em", "font", "i", "small", "span", "strong",
+    "sub", "sup", "u",
+})
+_ORACLE_RUNNING_LINE_RE = re.compile(r"(?:(.*\S)\s+)?(\d{1,4})")
+_ORACLE_RENDERED_EMPTY_TAGS = frozenset({"hr", "img"})
+
+
+def _oracle_page_ends(soup: BeautifulSoup, visible: Sequence[NavigableString]) -> list:
+    """The last visible string of each page, one entry per page, in document order.
+
+    A page ends at a break point: before an element whose inline style sets
+    ``page-break-before: always``/``break-before: page``, after one whose style sets
+    ``page-break-after: always``/``break-after: page``, and at the end of the document. A break
+    point is a position among the document's rendered leaves (its visible strings and its
+    ``hr``/``img`` elements) in document order, and break points at one position are one
+    physical break (an after-break rule followed directly by a before-break page). A page
+    whose leaves hold no visible string (a blank page with only a rule) repeats the previous
+    page's last string, so a page's index here is its ordinal.
+    """
+
+    visible_ids = {id(node) for node in visible}
+
+    def is_leaf(node) -> bool:
+        if isinstance(node, Tag):
+            return node.name in _ORACLE_RENDERED_EMPTY_TAGS
+        return id(node) in visible_ids
+
+    leaves_before: dict[int, int] = {}
+    last_string_after: list[NavigableString | None] = []
+    last: NavigableString | None = None
+    for node in soup.descendants:
+        if isinstance(node, Tag):
+            leaves_before[id(node)] = len(last_string_after)
+        if is_leaf(node):
+            if not isinstance(node, Tag):
+                last = node
+            last_string_after.append(last)
+    positions = {len(last_string_after)}
+    for tag in soup.find_all(style=_ORACLE_PAGE_BREAK_RE):
+        side = _ORACLE_PAGE_BREAK_RE.search(str(tag["style"])).group(1).casefold()
+        position = leaves_before[id(tag)]
+        if side == "after":
+            position += is_leaf(tag) + sum(1 for node in tag.descendants if is_leaf(node))
+        positions.add(position)
+    return [
+        last_string_after[position - 1]
+        for position in sorted(positions)
+        if position and last_string_after[position - 1] is not None
+    ]
+
+
+def _oracle_is_block(tag: Tag) -> bool:
+    return tag.name in _ORACLE_BLOCK_TAGS
+
+
+def _oracle_is_xbrl(tag: Tag) -> bool:
+    return tag.name.startswith("ix:")
+
+
+def _oracle_closing_block(node: NavigableString) -> Tag | None:
+    """The block that closes a page: the nearest block element around its last string, when that
+    block is outside any table, holds no other block (it is one line) and holds no inline XBRL
+    element (a tagged fact is content)."""
+
+    block = node.parent
+    while isinstance(block, Tag) and block.name not in _ORACLE_BLOCK_TAGS:
+        block = block.parent
+    if not isinstance(block, Tag) or block.name in {"body", "html"} or block.name in {
+        "caption", "table", "tbody", "td", "tfoot", "th", "thead", "tr"
+    }:
+        return None
+    if block.find_parent("table") is not None or block.find(_oracle_is_block) is not None:
+        return None
+    if block.find(_oracle_is_xbrl) is not None:
+        return None
+    return block
+
+
+def _oracle_page_footers(soup: BeautifulSoup) -> list[Tag]:
+    """Page footers by the harness's own rule (recall audit 2026-10-06), not the parser's.
+
+    A page's closing block (``_oracle_closing_block`` of its last visible string, see
+    ``_oracle_page_ends``) is a footer candidate when its whole text, whitespace collapsed, is a
+    page number of 1-4 digits, alone or after running text and whitespace: "Apple Inc. | 2023
+    Form 10-K | 23" (running text "Apple Inc. | 2023 Form 10-K |"), "47" (no running text), but
+    never the tail of a longer number ("Total 1,100", "Rate 1.5", "12345"). Candidates with the
+    same running text are page footers when they close at least two pages and at least half of
+    the document's pages, and their page numbers advance with the pages: page number minus
+    page-end ordinal (from zero, see ``_oracle_page_ends``) is one constant, so pages without a
+    footer are tolerated but skipped or unrelated numbers are not, and that constant is smaller
+    in magnitude than the number of page ends, so the numbers fall within the document's own
+    pages (the fixtures' offsets are -1 and +1) and a year series such as "Fiscal 2024 / 2025 /
+    2026" closing consecutive pages is never a footer. Anything else at a page end,
+    such as a table's last cell, a tagged XBRL fact or a paragraph ending in a number, is
+    content and stays counted.
+    """
+
+    visible = [node for node in soup.strings if node.strip()]
+    ends = _oracle_page_ends(soup, visible)
+    groups: dict[str, list[tuple[int, Tag]]] = {}
+    seen: set[int] = set()
+    for ordinal, node in enumerate(ends):
+        block = _oracle_closing_block(node)
+        if block is None or id(block) in seen:
+            continue
+        seen.add(id(block))
+        line = _SPACE_RE.sub(" ", block.get_text(" ", strip=True))
+        if match := _ORACLE_RUNNING_LINE_RE.fullmatch(line):
+            groups.setdefault(match.group(1) or "", []).append((int(match.group(2)) - ordinal, block))
+    footers: list[Tag] = []
+    for candidates in groups.values():
+        offsets = {offset for offset, _ in candidates}
+        if (len(candidates) >= 2 and 2 * len(candidates) >= len(ends) and len(offsets) == 1
+                and abs(next(iter(offsets))) < len(ends)):
+            footers.extend(block for _, block in candidates)
+    return footers
+
+
+def _oracle_splits_a_number(left: str, right: str) -> bool:
+    """Whether two touching strings are fragments of one number: digits meet digits, or a
+    decimal or thousands separator between digits."""
+
+    return bool(
+        (re.search(r"\d\Z", left) and re.match(r"[.,]?\d", right))
+        or (re.search(r"\d[.,]\Z", left) and re.match(r"\d", right))
+    )
+
+
+def _oracle_same_target_split(left: NavigableString, right: NavigableString) -> bool:
+    """Whether a number is split across consecutive links to one target (nvda-2026-10k's
+    ``<a href="#x">January 2</a><a href="#x">5</a>``), which a reader sees as one number.
+
+    The raw strings must be number fragments that touch: nothing lies between them but the
+    opening tags of the right string's own ancestors (no whitespace, comment or other element),
+    every element they close or open on the way is inline, and their nearest ``a`` ancestors
+    are two elements with one non-empty href. Any other boundary keeps its space: an untagged
+    ``3.5%-``/``4.3%`` junction never reads as -4.3.
+    """
+
+    if not _oracle_splits_a_number(left, right):
+        return False
+    first, second = left.find_parent("a"), right.find_parent("a")
+    if first is None or second is None or first is second:
+        return False
+    if not first.get("href") or first.get("href") != second.get("href"):
+        return False
+    left_ancestors = {id(tag) for tag in left.parents}
+    right_ancestors = {id(tag) for tag in right.parents}
+    node = left.next_element
+    while node is not right:
+        if node is None or id(node) not in right_ancestors:
+            return False
+        node = node.next_element
+    for start, other in ((left, right_ancestors), (right, left_ancestors)):
+        for tag in start.parents:
+            if id(tag) in other:
+                break
+            if tag.name not in _ORACLE_INLINE_TAGS:
+                return False
+    return True
+
+
 def _visible_text(soup: BeautifulSoup) -> str:
-    """Extract visible text while excluding style/script and hidden subtrees."""
+    """The source's visible text, as a reader sees the pages (see ``_source_visible``)."""
+
+    return _source_visible(soup)[0]
+
+
+def _source_visible(soup: BeautifulSoup) -> tuple[str, Counter]:
+    """The source's visible text, as a reader sees the pages, and the page-footer lines left out
+    of it (their whitespace-collapsed texts, counted).
+
+    Left out: style/script/template, hidden subtrees, the ``<head>`` (its ``<title>`` is the
+    file name, which no browser draws on the page) and page footers by the harness's own rule
+    (``_oracle_page_footers``). Strings are joined with one space, as ``get_text(" ",
+    strip=True)`` joins them, except a number split across consecutive links to one target,
+    joined as it reads (``_oracle_same_target_split``).
+    """
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         clone = BeautifulSoup(str(soup), "lxml")
+    for tag in clone.find_all("head"):
+        tag.decompose()
     for tag in clone.find_all(["script", "style", "template"]):
         tag.decompose()
     for tag in list(clone.find_all(True)):
         if _oracle_is_hidden_tag(tag) and tag.parent is not None:
             tag.decompose()
-    return clone.get_text(" ", strip=True)
+    footers = _oracle_page_footers(clone)
+    footer_lines = Counter(_SPACE_RE.sub(" ", block.get_text(" ", strip=True)) for block in footers)
+    for block in footers:
+        block.decompose()
+    parts: list[str] = []
+    previous: NavigableString | None = None
+    for node in clone.strings:
+        text = node.strip()
+        if not text:
+            continue
+        if previous is not None:
+            parts.append("" if _oracle_same_target_split(previous, node) else " ")
+        parts.append(text)
+        previous = node
+    return "".join(parts), footer_lines
 
 
 def _cell_text(cell) -> str:
@@ -471,6 +677,47 @@ def _strip_markdown_link_destinations(text: str) -> str:
     """Remove non-visible destinations while retaining rendered link labels."""
 
     return _MARKDOWN_LINK_RE.sub(r"\1", text)
+
+
+def _output_visible_text(markdown: str, footer_lines: Mapping[str, int] | None = None) -> str:
+    """The Markdown as a reader sees it, measured against ``_source_visible``.
+
+    Each Markdown line whose visible text is a page footer the source side left out (both read
+    by ``_oracle_plain_line``, so ``**2**`` is the footer ``2``) is dropped, once per such
+    footer: the parser keeps some footers (nvda-2002's page numbers) as lines of their own, and
+    those must not stand in for a lost body value with the same digits. Dropping output never hides a loss. Then each image (alt text and source)
+    becomes a space and each link reads as its label, so digits in a URL or an alt text never
+    stand in for a lost value either; the source side counts neither (it reads no attributes).
+    """
+
+    if footer_lines:
+        left: Counter = Counter()
+        for text, count in footer_lines.items():
+            left[_oracle_plain_line(text)] += count
+        kept = []
+        for line in markdown.split("\n"):
+            key = _oracle_plain_line(_markdown_visible(line))
+            if left[key] > 0:
+                left[key] -= 1
+                continue
+            kept.append(line)
+        markdown = "\n".join(kept)
+    return _markdown_visible(markdown)
+
+
+def _markdown_visible(text: str) -> str:
+    """Markdown with each image (alt text and source) as a space and each link as its label."""
+
+    return _MARKDOWN_ANY_LINK_RE.sub(r"\1", _MARKDOWN_IMAGE_RE.sub(" ", text))
+
+
+def _oracle_plain_line(text: str) -> str:
+    """A line's text as a footer line is compared on both sides: backslash escapes resolved,
+    emphasis and code marks (``*``, ``_``, ``~``, backticks) removed, whitespace collapsed. A
+    page number the parser keeps as ``**2**`` or ``*2*`` is the footer line ``2``."""
+
+    text = _MARKDOWN_EMPHASIS_RE.sub("", _MARKDOWN_ESCAPE_RE.sub(r"\1", text))
+    return _SPACE_RE.sub(" ", text).strip()
 
 
 def source_soup(source: bytes) -> BeautifulSoup:
@@ -871,8 +1118,9 @@ def audit_document(
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         source_text, _ = decode_html(source)
         source_soup = BeautifulSoup(normalize_legacy_characters(source_text), "lxml")
-    source_visible = _visible_text(source_soup)
-    output_visible = BeautifulSoup(markdown, "lxml").get_text(" ", strip=True)
+    source_visible, footer_lines = _source_visible(source_soup)
+    output_visible = _output_visible_text(markdown, footer_lines)
+    output_words = BeautifulSoup(output_visible, "lxml").get_text(" ", strip=True)
 
     element_ids = _element_ids(pages)
     counts = Counter(element_ids)
@@ -885,8 +1133,10 @@ def audit_document(
         markdown_sha256=sha256_bytes(markdown),
         pages_sha256=sha256_bytes(pages_bytes),
         annotated_html_sha256=sha256_bytes(annotated_html),
-        word_recall=multiset_recall(normalize_words(source_visible), normalize_words(output_visible)),
-        numeric_recall=multiset_recall(normalize_numbers(source_visible), normalize_numbers(markdown)),
+        word_recall=multiset_recall(normalize_words(source_visible), normalize_words(output_words)),
+        numeric_recall=multiset_recall(
+            normalize_numbers(source_visible), normalize_numbers(output_visible)
+        ),
         financial_row_recall=_link_aware_financial_row_recall(source, markdown),
         table_width_errors=_table_width_errors(markdown),
         replacement_characters=markdown.count("\ufffd"),
