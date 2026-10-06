@@ -16,7 +16,7 @@ from sec2md.xlsx import (
     export_xlsx, XlsxExportResult, XlsxTableResult, XlsxDependencyError, XlsxQualityError,
 )
 
-__version__ = "0.1.22+rcq.3"
+__version__ = "0.1.22+rcq.4"
 __all__ = [
     "export_xlsx",
     "XlsxExportResult",

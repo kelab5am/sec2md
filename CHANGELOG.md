@@ -1,5 +1,173 @@
 # Changelog
 
+## 0.1.22+rcq.4 (unreleased, pending review)
+
+- Markdown tables keep every source value and put each value under the header its
+  source column carries. Table layout changes wherever that needed it; code that
+  reads Markdown tables by column position should be re-checked.
+  - Merging columns no longer discards text. Amounts and labels in a table's first
+    row that the old merge dropped are kept, such as `$ 9,943` in a row whose `$`
+    and amount sat in separate columns, or a whole row of operating cash flows.
+  - Header rows are the rows before the first data row, through header-like rows
+    only. Past the first row, a row stays in the header when its label cell is empty
+    or holds a period or unit caption (`Year Ended June 30,`, `(Dollars in millions)`,
+    `(Unaudited)`) or a year, when it is a row of years such as
+    `Function | 2022 | 2023 | 2024`, when it is a row of `th` cells, or when it has
+    text in its label cell only, such as a second title line. The second row also
+    stays when the old renderer fused it into the header. Counting the n columns that
+    hold text, except columns holding only currency markers, `%`, `)`, `)%` or `(`
+    (which the old renderer merged before it counted), the first row must be empty in
+    at least max(2, n // 2) of those n columns, and the second row must have text in
+    at least max(2, n // 2) of them. An example is an `Exhibit Index` title over
+    `Exhibit Number | Description | Filed Herewith`. A row
+    with any other label, such as `Common Stock | AAPL` under the column headings,
+    ends the header, and it and the rows below stay in the body. So third and later header
+    rows no longer appear in the body, and a data row is no longer pulled into the
+    header. A table whose first row is data gets a header line of empty cells. A
+    label-only row right before the data, such as `Accounts Receivable:`, stays in
+    the body.
+  - Multi-row headers are fused into one header line, each column's header rows
+    joined top to bottom with ` — `, for example
+    `Year Ended — January 28, 2001 — (As restated – see Note 2)`. A text equal to
+    the one above it, ignoring case and spacing, is written once, unless the two link
+    to different places. A
+    header cell that spans several columns repeats in each of them, so a table-wide
+    title or a unit line such as `(In millions)` can appear in every column header.
+  - Rows and cells hidden with `display:none`, `visibility:hidden` or the `hidden`
+    attribute are left out of the table before its columns are laid out, so a
+    spanning header sits over the columns a reader sees and their text is not
+    written.
+  - Columns under different headers are no longer merged, and a spanning header no
+    longer slides onto the neighbouring period's values.
+  - A currency marker in its own column merges into the amount beside it, as `$`
+    already did: `€ 1,234`, `RMB 941,168`, `NT$ (1,234)`. Only a closed list of
+    symbols and ISO codes counts; other codes stay separate.
+  - Zero-width characters, leading-dot decimals (`.75`), a column with a single
+    split negative and a `)%` closing marker no longer block the merge that rebuilds
+    a split value such as `(29` + `)`. A marker column that also holds a nil value
+    (`—`) still stays separate.
+  - A column with header text and an empty body, such as a signature date or an
+    empty exhibit-index column, is kept.
+  - A one-row PART table keeps every cell after the label:
+    `PART III 2025 Annual Meeting Proxy Statement … within 120 days …`.
+  - Nested tables are flattened into the outer table as before, so their output can
+    change too, for example keeping an outer cell's value that was dropped.
+  - XLSX export keeps its own merge rules, so its prepared tables are unchanged:
+    values, column groups, source coordinates, headers and issues. One workbook value
+    can change: the page number on the contents sheet (`display_page`, the same guess
+    as `Page.display_page`). Page numbers found in absolutely positioned page footers
+    take precedence; otherwise the number is guessed from the first and last lines of
+    each Markdown page, table lines included, so a changed table line can change it.
+    On the review corpus it changes on 4 pages in 2 documents (NTRA and TSM). The
+    guess already misreads table lines in the previous release; fixing it is a
+    separate task.
+- Strict's numeric trace accounts for each table's header line on its own. A number
+  repeated in the header line because its header cell spans several columns no
+  longer fails strict, while a header number with no header cell to supply it still
+  does. Header-cell numbers no longer vouch for the same number in the table body or
+  nearby text. When a table's header line cannot be matched to its table, the miss
+  is recorded in `Parser.header_accounting_misses`, and that table's header line
+  gets no accounting of its own: its numbers are traced as in the ordinary trace,
+  which gives no credit for repeated header numbers, and strict still raises on any
+  number it cannot trace (see the next item).
+- Known limitation: a table rendered inside a list item or inside bold or italic
+  text (`<li>`, `<b>`, `<strong>`, `<i>`, `<em>`, or an inline element such as a
+  `<span>` styled bold or italic) has no Markdown segment of its own, so strict
+  cannot match its header line to the table. The miss is recorded in
+  `Parser.header_accounting_misses` as `<element id>:missing`, and that table's
+  header line gets no accounting, as in the ordinary trace. A number the header
+  line repeats from a spanning header cell can then fail strict:
+  `Year Ended December 31,` spanning `2025 | 2024` writes `31` twice from one
+  source occurrence, so strict raises
+  `untraceable normalized number: <element id>:31`, with or without
+  `Parser(capture_tables=True)` (so `export_xlsx()` under strict raises too). The
+  old renderer wrote the caption once and passed. A table directly in the page, or
+  in a `<div>`, `<p>` or plain `<span>` that is not inside such a wrapper, is not
+  affected, and no review-corpus document records such a miss. Binding header
+  records for these tables is a separate task.
+- Known limitation: a zero-width character (U+200B, U+200C, U+200D, U+2060 or
+  U+FEFF) inside a table number is now removed from the rendered cell, so `1,2`, a
+  U+200B and `34` render as `1,234`. Strict still splits the source number at the
+  zero-width character, so strict reports that number as untraceable. For the same
+  reason the report-only table completeness check can report the split parts as
+  missing values, here `missing 12 x1 [body], 34 x1 [body]`. Fixing strict's source
+  pool is a separate task, expected to cover these false completeness findings too.
+- Known limitation: currency codes that change from row to row in a column beside
+  the row labels, such as `EUR` and `JPY` under a `Forward contracts` section
+  label, look the same as a column of currency markers. They are joined to the
+  first period's amounts, so a row renders `EUR 1,234 | 987` where the old renderer
+  wrote `EUR | 1,234 | 987`. No value is lost, but the report-only completeness
+  check reports the joined amounts as missing, as for any amount joined to a
+  currency code (see below): rows `EUR 1,234` and `JPY 2,345` give
+  `missing 1234 x1 [body], 2345 x1 [body]`. Codes in the row-label column itself
+  keep their own column. A rule for this case is a separate task.
+- Known limitation: a one-row PART table now keeps its other cells, so it no longer
+  renders as a bare `PART II` line. A running page header such as
+  `Part II | Annual Report 2024` over a bare `Item 7` line is therefore no longer
+  removed from the top of each page, and the section extractor reads it as a new
+  part. A continuation page of Item 7 becomes a `PART II` section without an item,
+  and on a page where the next item's heading follows, the Item 7 text before that
+  heading falls out of every section. The old renderer kept Item 7 running across
+  those pages. Likewise, a PART line of more than 80 characters at the end of a
+  page is kept as a section without an item, so `get_section("PART III")` returns it
+  instead of `ITEM 10`. The review corpus has no such running header, and its one
+  PART table (CAT) gives the same sections as before.
+- Known limitation: in malformed markup with a `<table>` placed directly in a header
+  row's `<tr>`, or in a `<div>` there, outside any cell, the inner table's cells are
+  read twice: once for the outer row and once for their own row. The header line
+  then holds a number twice, and strict reports the second copy as a header excess
+  (`untraceable normalized number: <element id>:header:2024`). The old renderer
+  passed strict because it dropped that text from its header line. With
+  `Parser(capture_tables=True)` the text is written once and strict passes. A
+  render-side fix is a separate task.
+- A report-only header-alignment check: each table value is compared with the header
+  path its source column carries. Two `ParseDiagnostics` fields hold the results:
+  - `table_header_alignment`: one finding per misaligned value, at most 10 listed per
+    table, then the total, for example
+    `table 24 (snapshot 19, page 41): "Revenue" 941168 under "2025 — RMB"; expected "2024"`.
+  - `table_header_alignment_coverage`: (key, count) pairs that always list the same
+    21 keys in a fixed order, from `tables_total` to `values_misaligned`, so that a
+    clean result can be told apart from one where nothing was checked. An empty
+    tuple means the check did not run (`quality_policy="off"`,
+    `Parser(table_checks=False)`, or a failure in `check_tables()`).
+
+  The check is not logged, never makes strict raise, and is not part of the XLSX
+  export's per-table `completeness`.
+- The report-only table completeness findings change with the rendering, and so
+  does each `XlsxTableResult.completeness`, which lists them per table:
+  - Values the old merge dropped are kept, so they are no longer reported missing.
+    On the review corpus, rendered tables with value failures fall from 305 to 13
+    (page header and footer tables, which the parser removes, are reported as
+    before), and the 10 pinned fixture failures are gone. A headerless table's
+    first data row is no longer written as the header line, so check 2's false
+    finding on it (CAT 143) is gone too.
+  - Check 1 reads an output cell that holds letters as text, so an amount joined
+    to an ISO code or a lettered dollar prefix (`RMB 941,168`, `US$ 1,250.0`) is
+    reported missing although it is in the output (TSM 344 on the review corpus).
+    Amounts joined to `$`, `€`, `£` or `¥` are read correctly.
+  - Identifier references that now sit in the header line, such as `2` in
+    `(As restated – see Note 2)` or `3` in `(Note 3)`, are reported missing in
+    `table_completeness_reported` (15 tables on the review corpus).
+  - Check 2 reads a years row with a unit caption, such as
+    `(Dollars in millions) | 2024 | 2023`, as a data row. That row is now in the
+    header line, so check 2 pairs it with a later block's years row and reports
+    the rows below as out of order (4 BAC tables, whose rendering is correct).
+
+  These check-side false findings are left to a later task.
+- API additions:
+  - `Parser.element_header_records(element_id)` returns the header records bound
+    to an element's tables, as `quality.ElementHeaderRecord` values (`segment`,
+    `header_line`, `header_source`, `header_capacity`, `header_cells`).
+    `TableParser.header_record` holds the last render's record as a
+    `table_parser.TableHeaderRecord`, with the same fields apart from `segment`.
+    `header_cells` lists each header-zone cell with text as (text, number of
+    output columns it heads), for consumers with their own tokenizer.
+  - `quality.trace_numeric_failures()` takes `header_records=`; without it the
+    trace is unchanged.
+  - `table_completeness.check_tables()` takes keyword-only `cell_texts=` and
+    `base_url=`, and `TableCompletenessReport` gains `alignment` and
+    `alignment_coverage`, which fill the two `ParseDiagnostics` fields above.
+
 ## 0.1.22+rcq.3 (unreleased, pending review)
 
 - Table completeness checks, report-only: each visible table's Markdown is

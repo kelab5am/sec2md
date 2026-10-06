@@ -36,10 +36,7 @@ markers, references and row-order findings are not logged yet. If the
 missing-value and row-order checks (`check_tables()`) fail, the error is logged
 and the conversion continues without a table report, so the diagnostics look as
 they do with the checks off; an error in the `numeric_recall` computation still
-propagates. Passing
-strict and the table completeness checks does not prove that a value sits under
-its correct column header: a column merge can shift headers one column away from
-their values, which neither strict nor these checks detect yet.
+propagates.
 `numeric_recall` can read low when an output line starts with a number shaped
 like a list marker (`2. Summary …`).
 
@@ -51,6 +48,93 @@ for failure in diagnostics.table_completeness_failures:
     print(failure)  # table 49 (snapshot 41, page 46): missing 9943 x1 [body] (total 1)
 print(diagnostics.tables_checked, diagnostics.numeric_recall)
 ```
+
+### Table header lines
+
+Each Markdown table has one header line. When the source table has several
+header rows, each column's header rows are joined top to bottom with ` — `, a
+text equal to the one above it is written once, and a header cell that spans
+several columns repeats in each column it spans:
+
+```markdown
+|  | Year Ended June 30, — 2025 | Year Ended June 30, — 2024 |
+| --- | --- | --- |
+| Revenue | $ 1,234 | $ 1,100 |
+| Operating income | 456 | 412 |
+```
+
+Header rows are the rows before the first data row: the first row with an amount
+or a nil dash (`—`) in a value column, or with a number in the row-label column
+when that column is an identifier column (one holding a number in at least two
+rows, such as exhibit or item numbers). An amount may carry footnote markers
+(`3,984 *`, `2.1(1)`) or be a range (`0.2 - 1.0`). Years count as amounts only
+beside a row label that is not a period caption, a unit caption (`(In millions)`,
+`(Dollars in millions)`, `(Unaudited)`) or a year, and never in a row of years
+within one of each other, such as `Function | 2022 | 2023 | 2024`. A row of `th`
+cells is never a data row. Past the first row, the header continues only
+through rows like these: an empty label cell, a caption or a year in the label
+cell, a row of years, a row of `th` cells, or a row with text in its label cell
+only, such as a second title line. The second row also continues the header when
+the previous renderer fused it into the header. Let n be the number of columns that
+hold text, leaving out marker-only columns: columns whose every text is a currency
+marker, `%`, `)`, `)%` or `(`, which the previous renderer merged before it counted.
+The first row must be empty in at least max(2, n // 2) of those columns, and the
+second row must have text in at least max(2, n // 2) of them. An example is an
+`Exhibit Index` title over `Exhibit Number | Description | Filed Herewith`. A row
+with any other
+label, such as `Common Stock | AAPL` under the column headings, ends the header
+and stays in the body. A table whose first row is data gets a header line of empty cells. A
+label-only row just before the data, such as `Accounts Receivable:`, stays in the
+body. Equal header texts, ignoring case and spacing, are written once unless they
+link to different places.
+Rows and cells hidden with `display:none`, `visibility:hidden` or the `hidden`
+attribute are left out of the table. Strict's numeric trace checks each
+header line on its own against the numbers its header cells supply, so a year
+repeated over several columns does not fail strict, but cannot vouch for the
+same year written in the body.
+
+### Header alignment
+
+A report-only check compares every table's output with its source and reports
+values that sit under the wrong header. Two `ParseDiagnostics` fields carry it:
+
+- `table_header_alignment`: one line per misaligned value, at most 10 per table
+  plus the total, for example
+  `table 7 (snapshot 5, page 12): "Product" 63946 under "2025 — 2024"; expected "2025", conflicting "2024"`.
+- `table_header_alignment_coverage`: (key, count) pairs with the same 21 keys
+  in the same order on every completed run: tables, data rows and values in
+  total, each skip reason, then `values_evaluated`, `values_aligned` and
+  `values_misaligned`. An empty tuple means the check did not run, because
+  `quality_policy="off"`, `Parser(table_checks=False)`, or `check_tables()`
+  failed; it never means zero findings.
+
+```python
+markdown, diagnostics = convert_with_diagnostics(html_bytes)
+coverage = dict(diagnostics.table_header_alignment_coverage)
+print(coverage["values_evaluated"], coverage["values_misaligned"])
+for finding in diagnostics.table_header_alignment:
+    print(finding)
+```
+
+What the check does not cover:
+
+- Values it skips, each counted under its key: tables with no Markdown output
+  (`table_no_output`), tables it cannot place reliably
+  (`table_unreliable_grid`, such as nested tables or broken spans), tables
+  without header rows or data rows, one-row and plain-text renderings
+  (`table_no_separator`), rows below a header repeated mid-table, rows whose
+  label is not unique (`row_unpaired`), nil values such as `—` (`value_nil`),
+  values with no header cell that tells their column apart
+  (`value_no_discriminating_header`), values missing from the output
+  (`value_missing_in_output`; check 1 reports those), values found in more
+  than one output cell, headers it cannot read unambiguously
+  (`value_ambiguous_header`), and searches that hit their work bound
+  (`value_unevaluated_budget`).
+- Anything but numbers: text cells, years and header-only columns are not
+  evaluated.
+- Enforcement: findings are not logged, never make strict raise, and are not
+  part of the XLSX export's per-table `completeness`, because the workbook has
+  its own grid.
 
 Decoding follows a deterministic precedence: Unicode BOM, recognized HTTP
 `charset`, HTML/XML declaration in the first 8 KiB, strict UTF-8, then
