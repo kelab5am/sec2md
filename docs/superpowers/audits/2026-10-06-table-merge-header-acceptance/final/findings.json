@@ -1,0 +1,1344 @@
+{
+ "new_check1_values": [
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 344,
+   "tokens": [
+    [
+     "1250.0",
+     "body",
+     false
+    ]
+   ]
+  }
+ ],
+ "new_check1_reported": [
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 19,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ],
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 20,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ],
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 22,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ],
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 129,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 130,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ],
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 133,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ],
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 144,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "fixture:nvda-2002-10k",
+   "table": 146,
+   "tokens": [
+    [
+     "2",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 244,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 245,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 247,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 248,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 253,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 254,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "table": 255,
+   "tokens": [
+    [
+     "3",
+     "reference"
+    ]
+   ]
+  }
+ ],
+ "new_check2": [
+  {
+   "doc": "edgar:BAC-10-K-2025-02-25.htm",
+   "table": 260,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "edgar:BAC-10-K-2025-02-25.htm",
+   "table": 293,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "edgar:BAC-10-K-2025-02-25.htm",
+   "table": 336,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row"
+   ],
+   "main_rows": []
+  },
+  {
+   "doc": "edgar:BAC-10-K-2025-02-25.htm",
+   "table": 338,
+   "rows": [
+    "source row 2: appears before an earlier source row",
+    "source row 3: appears before an earlier source row",
+    "source row 4: appears before an earlier source row",
+    "source row 5: appears before an earlier source row",
+    "source row 6: appears before an earlier source row",
+    "source row 7: appears before an earlier source row",
+    "source row 8: appears before an earlier source row",
+    "source row 9: appears before an earlier source row",
+    "source row 10: appears before an earlier source row",
+    "source row 11: appears before an earlier source row",
+    "source row 12: appears before an earlier source row",
+    "source row 13: appears before an earlier source row",
+    "source row 14: appears before an earlier source row",
+    "source row 15: appears before an earlier source row",
+    "source row 16: appears before an earlier source row",
+    "source row 17: appears before an earlier source row",
+    "source row 18: appears before an earlier source row"
+   ],
+   "main_rows": []
+  }
+ ],
+ "removed": {
+  "check1_value_tokens": 440,
+  "check1_reported_tokens": 54,
+  "check2_rows": 1
+ },
+ "tables_with_findings": {
+  "main": 937,
+  "candidate": 633
+ },
+ "f_tables": [
+  {
+   "doc": "edgar:AMZN-10-Q-2025-10-31.htm",
+   "table": 52,
+   "cause": "F4",
+   "main": {
+    "table": 52,
+    "page": 47,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "101",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 9: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 52,
+    "page": 47,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "101",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 9: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 75,
+   "cause": "F2",
+   "main": {
+    "table": 75,
+    "page": 109,
+    "missing_values": [
+     [
+      "000",
+      "label",
+      false
+     ],
+     [
+      "100",
+      "label",
+      false
+     ],
+     [
+      "31",
+      "label",
+      false
+     ],
+     [
+      "400",
+      "label",
+      false
+     ],
+     [
+      "500",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [
+     "source row 9: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 75,
+    "page": 109,
+    "missing_values": [
+     [
+      "000",
+      "label",
+      false
+     ],
+     [
+      "100",
+      "label",
+      false
+     ],
+     [
+      "400",
+      "label",
+      false
+     ],
+     [
+      "500",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [
+     "source row 9: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": false
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "table": 19,
+   "cause": "F4",
+   "main": {
+    "table": 19,
+    "page": 44,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "2.18",
+      "reference"
+     ],
+     [
+      "2.19",
+      "reference"
+     ],
+     [
+      "2.24",
+      "reference"
+     ],
+     [
+      "2.27",
+      "reference"
+     ],
+     [
+      "2.28",
+      "reference"
+     ],
+     [
+      "2.29",
+      "reference"
+     ],
+     [
+      "2.34",
+      "reference"
+     ],
+     [
+      "2.35",
+      "reference"
+     ],
+     [
+      "2.36",
+      "reference"
+     ],
+     [
+      "2.37",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 2: values present but split across output rows",
+     "source row 7: values present but split across output rows",
+     "source row 8: values present but split across output rows",
+     "source row 9: values present but split across output rows",
+     "source row 15: values present but split across output rows",
+     "source row 16: values present but split across output rows",
+     "source row 17: values present but split across output rows",
+     "source row 18: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 19,
+    "page": 44,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "2.18",
+      "reference"
+     ],
+     [
+      "2.19",
+      "reference"
+     ],
+     [
+      "2.24",
+      "reference"
+     ],
+     [
+      "2.27",
+      "reference"
+     ],
+     [
+      "2.28",
+      "reference"
+     ],
+     [
+      "2.29",
+      "reference"
+     ],
+     [
+      "2.34",
+      "reference"
+     ],
+     [
+      "2.35",
+      "reference"
+     ],
+     [
+      "2.36",
+      "reference"
+     ],
+     [
+      "2.37",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 2: values present but split across output rows",
+     "source row 7: values present but split across output rows",
+     "source row 8: values present but split across output rows",
+     "source row 9: values present but split across output rows",
+     "source row 15: values present but split across output rows",
+     "source row 16: values present but split across output rows",
+     "source row 17: values present but split across output rows",
+     "source row 18: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:BAC-10-K-2025-02-25.htm",
+   "table": 358,
+   "cause": "F4",
+   "main": {
+    "table": 358,
+    "page": 177,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.17",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 4: values present but split across output rows",
+     "source row 5: values present but split across output rows",
+     "source row 6: values present but split across output rows",
+     "source row 7: values present but split across output rows",
+     "source row 8: values present but split across output rows",
+     "source row 9: values present but split across output rows",
+     "source row 10: values present but split across output rows",
+     "source row 11: values present but split across output rows",
+     "source row 20: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 358,
+    "page": 177,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.1",
+      "reference"
+     ],
+     [
+      "4.17",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 4: values present but split across output rows",
+     "source row 5: values present but split across output rows",
+     "source row 6: values present but split across output rows",
+     "source row 7: values present but split across output rows",
+     "source row 8: values present but split across output rows",
+     "source row 9: values present but split across output rows",
+     "source row 10: values present but split across output rows",
+     "source row 11: values present but split across output rows",
+     "source row 20: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:CAT-10-K-2025-02-14.htm",
+   "table": 61,
+   "cause": "F1",
+   "main": {
+    "table": 61,
+    "page": 78,
+    "missing_values": [
+     [
+      "11",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 61,
+    "page": 78,
+    "missing_values": [
+     [
+      "11",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:CAT-10-K-2025-02-14.htm",
+   "table": 25,
+   "cause": "F6",
+   "main": {
+    "table": 25,
+    "page": 46,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 8: values out of order within the row"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 25,
+    "page": 46,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 8: values out of order within the row"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:CAT-10-K-2025-02-14.htm",
+   "table": 143,
+   "cause": "F7",
+   "main": {
+    "table": 143,
+    "page": 129,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 1: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": null,
+   "same": false
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "table": 367,
+   "cause": "F8",
+   "main": {
+    "table": 367,
+    "page": 192,
+    "missing_values": [
+     [
+      "1",
+      "body",
+      false
+     ],
+     [
+      "1",
+      "body",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [
+     "source row 9: values present but split across output rows",
+     "source row 29: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 367,
+    "page": 192,
+    "missing_values": [
+     [
+      "1",
+      "body",
+      false
+     ],
+     [
+      "1",
+      "body",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [
+     "source row 9: values present but split across output rows",
+     "source row 29: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 32,
+   "cause": "F1",
+   "main": {
+    "table": 32,
+    "page": 71,
+    "missing_values": [
+     [
+      "2",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 32,
+    "page": 71,
+    "missing_values": [
+     [
+      "2",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 43,
+   "cause": "F1",
+   "main": {
+    "table": 43,
+    "page": 82,
+    "missing_values": [
+     [
+      "2",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 43,
+    "page": 82,
+    "missing_values": [
+     [
+      "2",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 44,
+   "cause": "F1",
+   "main": {
+    "table": 44,
+    "page": 82,
+    "missing_values": [
+     [
+      "2",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 44,
+    "page": 82,
+    "missing_values": [
+     [
+      "2",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 50,
+   "cause": "F1",
+   "main": {
+    "table": 50,
+    "page": 87,
+    "missing_values": [
+     [
+      "311",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 50,
+    "page": 87,
+    "missing_values": [
+     [
+      "311",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 59,
+   "cause": "F1",
+   "main": {
+    "table": 59,
+    "page": 90,
+    "missing_values": [
+     [
+      "20982",
+      "label",
+      false
+     ],
+     [
+      "5",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 59,
+    "page": 90,
+    "missing_values": [
+     [
+      "20982",
+      "label",
+      false
+     ],
+     [
+      "5",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 63,
+   "cause": "F1",
+   "main": {
+    "table": 63,
+    "page": 95,
+    "missing_values": [
+     [
+      "20242",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 63,
+    "page": 95,
+    "missing_values": [
+     [
+      "20242",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 110,
+   "cause": "F5",
+   "main": {
+    "table": 110,
+    "page": 132,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 2: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 110,
+    "page": 132,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 2: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "table": 112,
+   "cause": "F5",
+   "main": {
+    "table": 112,
+    "page": 134,
+    "missing_values": [
+     [
+      "2",
+      "body",
+      false
+     ]
+    ],
+    "missing_reported": [
+     [
+      "10.11",
+      "reference"
+     ]
+    ],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 112,
+    "page": 134,
+    "missing_values": [
+     [
+      "2",
+      "body",
+      false
+     ]
+    ],
+    "missing_reported": [
+     [
+      "10.11",
+      "reference"
+     ]
+    ],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:MU-10-K-2025-10-03.htm",
+   "table": 68,
+   "cause": "F4",
+   "main": {
+    "table": 68,
+    "page": 106,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "4.11",
+      "reference"
+     ],
+     [
+      "4.13",
+      "reference"
+     ],
+     [
+      "4.15",
+      "reference"
+     ],
+     [
+      "4.15",
+      "reference"
+     ],
+     [
+      "4.2",
+      "reference"
+     ],
+     [
+      "4.20",
+      "reference"
+     ],
+     [
+      "4.4",
+      "reference"
+     ],
+     [
+      "4.6",
+      "reference"
+     ],
+     [
+      "4.6",
+      "reference"
+     ],
+     [
+      "4.6",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 5: values present but split across output rows",
+     "source row 7: values present but split across output rows",
+     "source row 9: values present but split across output rows",
+     "source row 10: values present but split across output rows",
+     "source row 11: values present but split across output rows",
+     "source row 14: values present but split across output rows",
+     "source row 16: values present but split across output rows",
+     "source row 18: values present but split across output rows",
+     "source row 19: values present but split across output rows",
+     "source row 23: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 68,
+    "page": 106,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "4.11",
+      "reference"
+     ],
+     [
+      "4.13",
+      "reference"
+     ],
+     [
+      "4.15",
+      "reference"
+     ],
+     [
+      "4.15",
+      "reference"
+     ],
+     [
+      "4.2",
+      "reference"
+     ],
+     [
+      "4.20",
+      "reference"
+     ],
+     [
+      "4.4",
+      "reference"
+     ],
+     [
+      "4.6",
+      "reference"
+     ],
+     [
+      "4.6",
+      "reference"
+     ],
+     [
+      "4.6",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 5: values present but split across output rows",
+     "source row 7: values present but split across output rows",
+     "source row 9: values present but split across output rows",
+     "source row 10: values present but split across output rows",
+     "source row 11: values present but split across output rows",
+     "source row 14: values present but split across output rows",
+     "source row 16: values present but split across output rows",
+     "source row 18: values present but split across output rows",
+     "source row 19: values present but split across output rows",
+     "source row 23: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:MU-10-K-2025-10-03.htm",
+   "table": 69,
+   "cause": "F4",
+   "main": {
+    "table": 69,
+    "page": 107,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "4.22",
+      "reference"
+     ],
+     [
+      "4.22",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 2: values present but split across output rows",
+     "source row 3: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 69,
+    "page": 107,
+    "missing_values": [],
+    "missing_reported": [
+     [
+      "4.22",
+      "reference"
+     ],
+     [
+      "4.22",
+      "reference"
+     ]
+    ],
+    "structure": [
+     "source row 2: values present but split across output rows",
+     "source row 3: values present but split across output rows"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:NVO-20-F-2025-02-05.htm",
+   "table": 34,
+   "cause": "F1",
+   "main": {
+    "table": 34,
+    "page": 14,
+    "missing_values": [
+     [
+      "20341",
+      "body",
+      false
+     ],
+     [
+      "20355",
+      "body",
+      false
+     ],
+     [
+      "20372",
+      "body",
+      false
+     ],
+     [
+      "20372",
+      "body",
+      false
+     ],
+     [
+      "20393",
+      "body",
+      false
+     ],
+     [
+      "20404",
+      "body",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 34,
+    "page": 14,
+    "missing_values": [
+     [
+      "20341",
+      "body",
+      false
+     ],
+     [
+      "20355",
+      "body",
+      false
+     ],
+     [
+      "20372",
+      "body",
+      false
+     ],
+     [
+      "20372",
+      "body",
+      false
+     ],
+     [
+      "20393",
+      "body",
+      false
+     ],
+     [
+      "20404",
+      "body",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:SPCX-10-Q-2026-08-04.htm",
+   "table": 41,
+   "cause": "F6",
+   "main": {
+    "table": 41,
+    "page": 25,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 3: values out of order within the row"
+    ],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 41,
+    "page": 25,
+    "missing_values": [],
+    "missing_reported": [],
+    "structure": [
+     "source row 3: values out of order within the row"
+    ],
+    "produced_output": true
+   },
+   "same": true
+  },
+  {
+   "doc": "edgar:UNH-10-K-2025-02-27.htm",
+   "table": 68,
+   "cause": "F3",
+   "main": {
+    "table": 68,
+    "page": 78,
+    "missing_values": [
+     [
+      "-10",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "candidate": {
+    "table": 68,
+    "page": 78,
+    "missing_values": [
+     [
+      "-10",
+      "label",
+      false
+     ]
+    ],
+    "missing_reported": [],
+    "structure": [],
+    "produced_output": true
+   },
+   "same": true
+  }
+ ]
+}

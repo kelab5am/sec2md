@@ -1,8 +1,8 @@
 # sec2md Table Merge and Header Rules Design
 
-Date: 2026-10-06 (revision 16)
+Date: 2026-10-06 (revision 17)
 
-Status: Approved for planning (Astra, round 4). Revisions 6–16 add the plan
+Status: Approved for planning (Astra, round 4). Revisions 6–17 add the plan
 prototype's corrections and interpretations, for Astra to confirm with the plan.
 
 Evidence: `../audits/2026-10-04-table-merge-header-evidence/REPORT.md`
@@ -100,7 +100,7 @@ gaps. The fixes keep the earlier review decisions intact.
 | Step 15's "siblings" | The cells of the same header row that cover a value column. |
 | Repeated-header detection | It treats year-like values as period evidence. |
 | Header cell texts for the accuracy suite | The per-table header record gains a trailing `header_cells` field (each header-zone cell's text and the columns it covers), read through `Parser.element_header_records(element_id)`. The suite finds header lines itself with R6a's rules and tokenizes with its own normalizer. It never uses strict's token counts. |
-| Body-row guard baseline | `tests/accuracy/body_rows_main.json` records the rows unchanged `main` rendered as body rows. Since revision 11 it covers every source row with origin text: 2,492 rows across 7 fixtures, counted per text signature. It is generated from `c674828` by `tests/accuracy/generate_body_row_baseline.py`. The guard lists 172 allowed moves, each verified as header-zone. Revision 10's first version covered financial rows only, with 1,550 rows and nvda-2002's five `(As restated – see Note 2)` rows as its only moves. |
+| Body-row guard baseline | `tests/accuracy/body_rows_main.json` records the rows unchanged `main` rendered as body rows. Since revision 11 it covers every source row with origin text: 2,485 rows across 7 fixtures, counted per text signature (revision 17: the first committed file held 2,492, from the older set semantics, and listed 7 rows `main` already rendered in its header lines as moves). It is generated from `c674828` by `tests/accuracy/generate_body_row_baseline.py`. The guard lists 165 allowed moves, each verified as header-zone. Revision 10's first version covered financial rows only, with 1,550 rows and nvda-2002's five `(As restated – see Note 2)` rows as its only moves. |
 | Golden files | `tests/golden/` is used only by the deselected EDGAR integration tests. It already differs from `main`, and was not regenerated through 16 rendering commits. This work does not regenerate it. |
 | RCQ version | The minor bump is `0.1.22+rcq.4`, because rcq.3 is unreleased. |
 
@@ -167,6 +167,20 @@ found:
 
 **User decision** (revision 15 → 16): the S3 exception for the workbook's
 `display_page` is accepted (2026-10-06).
+
+**User decisions during implementation** (revision 16 → 17, 2026-10-06), from
+the plan's task reviews:
+
+| Finding | Change |
+|---|---|
+| Zero-width removal (Definitions, "Visible cell text") joins a number that the source splits with a zero-width character, such as `1,2​34`. Strict's source pool still splits it there, so strict reports `1234` as untraceable, and check 1 reports the parts as missing. `main` passes. The corpus has no such cell. | Recorded as a named limitation, pinned by a test and listed in the release notes. Strict's source pool is fixed in a separate task. |
+| Under `EXTENDED`, a label column holding only currency codes (an exchange-rate table: rows such as `EUR`, `1.08`, `1.10` under an empty corner cell) was a currency-marker column and merged into the first value column. `main` keeps it. The corpus has no such table. | R4: the label column is never a currency-marker column for a marker other than `$`. |
+| The same fusion still happens for currency codes in a sub-label column beside the label column (a `Forward contracts` section whose rows hold `EUR` and `JPY` before their amounts): it renders `EUR 1,234` where `main` keeps the code in its own column. Such a column has the shape R4 exists for (a per-row `RMB` column); only the varying codes tell them apart. The corpus has no such table. | Recorded as a named limitation, pinned by tests and listed in the release notes. A rule for it is left to a later task. |
+| R8 keeps the later cells of a one-row PART table, so a running page-top header such as `Part II \| Annual Report 2024` is no longer a bare breadcrumb and is not stripped: sections split, and a page's text before the next item can fall out of every section. A kept part-only stub also changes what `get_section` returns for a part without an item. The corpus has no such layout (CAT 7 is not at a page top). | Recorded as a named limitation, pinned by tests and listed in the release notes. |
+| A `<table>` placed directly inside a header-row `<tr>` (or a `<div>` there), outside any cell, is malformed markup whose cells are read twice: once in the outer row and once as their own rows. After R6a's record counts each source node once, the header line's second copy is a header excess, so strict reports it where `main` passed (`main`'s column cleanup dropped the duplicate columns, which R7 keeps). The corpus has no such layout. | Recorded as a named limitation, pinned by tests and listed in the release notes. Reading each cell node once at extraction is left to a later task. |
+| The body-row guard's committed baseline did not match its own generator (2,492 rows and 172 moves, from the older set semantics). | Regenerated: 2,485 rows and 165 moves. |
+| A table rendered inside a list item or an inline wrapper (`<li>`, `<b>`, `<i>`, `<em>`, `<strong>`, an inline element styled bold or italic such as `<span style="font-weight:700">`, or a `<div>` inside one of these) has no segment of its own, so R6a records a miss and strict applies the ordinary trace. R6 repeats a spanning header's numbers, so a common header such as `Year Ended December 31,` over `2025` and `2024` writes `31` twice against one source occurrence, and strict fails where `main` passed. The corpus has no such table (0 misses). | Recorded as a named limitation, pinned by tests and listed in the release notes. Binding header records for wrapped tables is the first follow-up task. |
+| The XLSX acceptance said 9 `display_page` snapshots; the data, in round 5 and in the final run, holds 8 (a miscount from round 1). | The count is 8. |
 
 **Prototype interpretations, round 2,** recorded for Astra:
 
@@ -518,6 +532,9 @@ merge: a currency-marker column merges into the amount on its right, written
 - A header-row currency label ("RMB" over an amount) is header text, assembled
   by R6. It is not a marker column.
 - An unknown code (for example `ABC` or `XYZ`) is not a marker.
+- R0's label column is never a currency-marker column for a marker other than
+  `$`, which keeps `main`'s rule. Row labels such as `EUR` or `JPY` in an
+  exchange-rate table stay their own column (revision 17).
 - The corpus has no per-row non-`$` currency column, so these cases are tested
   synthetically.
 
@@ -545,6 +562,10 @@ to bottom:
    members, by source-cell identity, in member order. R2 and R3 together
    guarantee at most one distinct cell per row. If two ever occur, their texts
    are joined with a space; the alignment check reports the conflict.
+   A source cell already collected for this column in an earlier header-zone
+   row is not collected again (revision 17). A rowspan never repeats, and
+   neither does a cell that overlapping spans place in two rows of one column.
+   This is identity deduplication; step 2's equal-text suppression is separate.
 2. Join the rows' texts with ` — `, skipping empty texts and a text equal to the
    one before it. Equality uses the checker's normalization (step 10:
    whitespace collapsed, case folded), but compares link destinations too.
@@ -574,9 +595,14 @@ everything else in the element.
      empty;
    - `header_source`, the multiset of numeric tokens in all of the table's
      header-zone source cells, each cell counted once, using strict's
-     `_normalized_numbers` over visible text;
+     `_normalized_numbers` over visible text. Each source node is counted
+     once (revision 17): a header-zone cell whose node lies inside another
+     header-zone cell's node is left out (its text is already in the outer
+     cell's), and a node that extraction reads twice (a nested table's cells
+     read in the outer row and in their own row) counts at its first read;
    - `header_capacity`, each header-zone cell's tokens multiplied by the number
-     of output columns whose header that cell covers.
+     of output columns whose header that cell covers, over the same cells as
+     `header_source`.
 2. **Which render.** The record comes from the render whose Markdown became the
    element content:
    - for a table without links, the normal render;
@@ -687,7 +713,7 @@ under `EXTENDED`. XLSX's sentinel-header construction is untouched.
 - XLSX prepared tables, and XLSX workbooks apart from the accepted S3 exception:
   - The contents sheet prints `display_page`.
   - `Parser._extract_page_number_from_content` guesses it from the first and last lines of each Markdown page, table lines included.
-  - So a changed table line can change the guess. The corpus has 9 such snapshots in 2 documents: NTRA page 76, and TSM pages 47, 146 and 160.
+  - So a changed table line can change the guess. The corpus has 8 such snapshots in 2 documents (revision 17; earlier revisions said 9, a miscount): NTRA page 76, and TSM pages 47, 146 and 160.
   - **Accepted by the user on 2026-10-06.** These changes are allowed, and each one is listed. The guess is a bug already on `main`, offered as a separate task.
 - The completeness checks 1–3 and their definitions.
 
@@ -914,7 +940,11 @@ table 7 (snapshot 5, page 12): "Product" 63946 under "2025 — 2024"; expected "
 
 - **Strict.** R6a accounts for each table's header line separately. No other
   strict behaviour
-  changes. Acceptance requires no new strict failures in either mode.
+  changes. Acceptance requires no new strict failures in either mode on the
+  fixtures and the corpus. Outside them, three of revision 17's named
+  limitations can make strict fail where `main` passed: a number split by a
+  zero-width character, a `<table>` directly inside a header-row `<tr>`, and a
+  table inside a list item or inline wrapper whose header repeats a number.
 - **Pinned failures.** All 10 pinned value failures in
   `tests/test_table_completeness_fixtures.py` are class 1, so `PINNED_FAILURES`
   is expected to become empty. Each removal is recorded with the evidence that

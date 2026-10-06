@@ -8,13 +8,14 @@
 
 **Tech Stack:** Python `>=3.10,<3.13`, BeautifulSoup 4 with lxml, pytest, ruff (rules `E4`, `E7`, `E9`, `F`), optional openpyxl for the XLSX tests. No new dependencies.
 
-**Spec:** [`../specs/2026-10-05-sec2md-table-merge-header-rules-design.md`](../specs/2026-10-05-sec2md-table-merge-header-rules-design.md) (revision 16). Its review record is [`../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md`](../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md). Evidence: [`../audits/2026-10-04-table-merge-header-evidence/REPORT.md`](../audits/2026-10-04-table-merge-header-evidence/REPORT.md). Acceptance records of the prototype: [`../audits/2026-10-06-table-merge-header-acceptance/`](../audits/2026-10-06-table-merge-header-acceptance/).
+**Spec:** [`../specs/2026-10-05-sec2md-table-merge-header-rules-design.md`](../specs/2026-10-05-sec2md-table-merge-header-rules-design.md) (revision 17). Its review record is [`../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md`](../reviews/2026-10-05-sec2md-table-merge-header-rules-review.md). Evidence: [`../audits/2026-10-04-table-merge-header-evidence/REPORT.md`](../audits/2026-10-04-table-merge-header-evidence/REPORT.md). Acceptance records of the prototype: [`../audits/2026-10-06-table-merge-header-acceptance/`](../audits/2026-10-06-table-merge-header-acceptance/).
 
 ## Global Constraints
 
 - **Markdown only.** `TableParser` under the `EXTENDED` policy and the one-row path in `Parser` change. The XLSX export keeps the `LEGACY` policy: its prepared tables (values, column groups, source coordinates, headers and issues) must stay identical to unchanged `main` on every corpus document.
   - The one XLSX difference, accepted by the user on 2026-10-06, is `display_page`, which the parser guesses from Markdown page text. It changes on 4 pages in 2 documents, and each change is listed (Decisions and open items, item 1).
-- **No value is lost and none is invented.** Strict's numeric trace accounts for each table's header line separately (R6a). There are no new strict failures in either rendering mode.
+- **No value is lost and none is invented.** Strict's numeric trace accounts for each table's header line separately (R6a). There are no new strict failures in either rendering mode on the fixtures and the corpus.
+  - The user accepted five named limitations during implementation (spec revision 17). Three can make strict fail where `main` passed, on inputs outside the corpus: a number split by a zero-width character, a `<table>` directly inside a header-row `<tr>`, and a table inside `<li>`, `<b>`, `<i>`, `<em>`, `<strong>` or an inline element styled bold or italic, whose header repeats a number. The other two change rendering only: currency codes in a sub-label column, and R8's page-top PART lines and part-only stubs.
 - **The alignment check is report-only.** It never raises and never fails strict.
   - `quality_policy="off"` and `Parser(table_checks=False)` skip it.
   - If it fails, its two fields are `()` and the conversion continues, as for checks 1 and 2.
@@ -106,34 +107,36 @@ Commits 1–9 also show one environment-only failure, `tests/test_models.py::tes
 
 ## Commits and suite counts
 
-| Task | Prototype commit | Full suite on the commit's tree |
-|---|---|---|
-| 1 | `6a5f29f` | 1138 passed, 1 failed (environment only) |
-| 2 | `c249876` | 1159 passed, 1 failed (environment only) |
-| 3 | `d239a9d` | 1193 passed, 3 failed |
-| 4 | `fa1055e` | 1216 passed, 19 failed, 1 error |
-| 5 | `6680c47` | 1293 passed, 18 failed, 1 error |
-| 6 | `129218b` | 1299 passed, 18 failed, 1 error |
-| 7 | `9041958` | 1418 passed, 17 failed |
-| 8 | `8a26ae4` | 1461 passed, 17 failed |
-| 9 | `ac2b1f0` | 1540 passed, 17 failed |
-| 10 | `b229b8d` | **1611 passed, 14 deselected**; ruff clean |
+| Task | Prototype commit | Commit (after Task 0) | Full suite on the prototype commit's tree | Commit after review fixes | Full suite after review fixes |
+|---|---|---|---|---|---|
+| 1 | `6a5f29f` | `b70399f` | 1138 passed, 1 failed (environment only) | `b70399f` | 1138 passed, 1 failed (environment only) |
+| 2 | `c249876` | `1b4d300` | 1159 passed, 1 failed (environment only) | `0b24f37` | 1162 passed, 1 failed (environment only) |
+| 3 | `d239a9d` | `99c39ad` | 1193 passed, 3 failed | `e3062f3` | 1204 passed, 3 failed |
+| 4 | `fa1055e` | `60c3938` | 1216 passed, 19 failed, 1 error | `8346dc5` | 1231 passed, 19 failed, 1 error |
+| 5 | `6680c47` | `e399f9c` | 1293 passed, 18 failed, 1 error | `372325a` | 1317 passed, 18 failed, 1 error |
+| 6 | `129218b` | `ea6d993` | 1299 passed, 18 failed, 1 error | `78a9e19` | 1327 passed, 18 failed, 1 error |
+| 7 | `9041958` | `7d1f85d` | 1418 passed, 17 failed | `1909fd1` | 1466 passed, 17 failed |
+| 8 | `8a26ae4` | `72a8392` | 1461 passed, 17 failed | `2792ccf` | 1509 passed, 17 failed |
+| 9 | `ac2b1f0` | `ea6e923` | 1540 passed, 17 failed | `14ddc63` | 1588 passed, 17 failed |
+| 10 | `b229b8d` | `b43944e` | **1611 passed, 14 deselected**; ruff clean | `1252c45` | **1660 passed, 14 deselected**; ruff clean |
+
+Every count was verified exactly on the prototype commits before any review fix. Review fixes (2026-10-06) raised the passing counts and left every commit's failing test ids unchanged. They also changed code: R4's label-column rule (Tasks 3-4), R6's once-per-column rule and the header record's node counting (Task 5), the regenerated body-row baseline and release text (Task 10). Each task's "Review changes" note lists them.
 
 The baseline at `c674828` is 798 passed, 14 deselected. The 14 deselected tests are the EDGAR `integration` tests. Do not run them, because they download from sec.gov.
 
 ## Task 0: Promote the prototype branch
 
-- [ ] **Step 1: Confirm the preconditions.**
+- [x] **Step 1: Confirm the preconditions.**
   - The user and Astra have approved this plan.
   - The spec (revision 16) and this plan are committed on `main`.
   - `git -C .worktrees/tmh-proto status` is clean at `b229b8d`.
-- [ ] **Step 2: Rename the branch.**
+- [x] **Step 2: Rename the branch.**
 
   ```bash
   git -C .worktrees/tmh-proto branch -m proto/table-merge-header feat/table-merge-header
   ```
 
-- [ ] **Step 3: Reword the commit subjects.** Map each `proto TN:` subject to its final subject, keeping each message body and its `Co-Authored-By` line:
+- [x] **Step 3: Reword the commit subjects.** Map each `proto TN:` subject to its final subject, keeping each message body and its `Co-Authored-By` line:
 
   | Prototype subject | Final subject |
   |---|---|
@@ -167,7 +170,7 @@ The baseline at `c674828` is 798 passed, 14 deselected. The 14 deselected tests 
   git -C .worktrees/tmh-proto rebase c674828 --exec "venv/Scripts/python <scratch>/reword.py"
   ```
 
-- [ ] **Step 4: Check that nothing but the subjects changed.**
+- [x] **Step 4: Check that nothing but the subjects changed.**
   - `git diff b229b8d HEAD` is empty.
   - `git log --format=%s c674828..HEAD` lists the ten final subjects in order.
   - The full suite at HEAD gives 1611 passed, 14 deselected.
@@ -230,9 +233,9 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - The trailing label-only strip runs after the zone is cut; with no data row the first row stays even when label-only (spec 375-376).
 - `visible_text` also maps U+00A0 to a space and strips the text; internal whitespace is not collapsed.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 2: Structural policy (R9) and zero-width cell text (commit `c249876`, prototype `proto T2`)
 
@@ -274,9 +277,15 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - `Cell.header = td.name == "th"` feeds R0's explicit header rows from Task 3 on; nothing reads it here.
 - The XLSX controls are characterization tests (green before and after); their discrimination was shown by a temporary `EXTENDED` leak into `prepare_table` (9 failed; the leak was not committed). Spec 995-996 asks for "values, column groups, source coordinates, headers and issues": column groups are visible only through `cell_sources` (each output cell sourced from its own slot).
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):**
+- The user accepted the zero-width conflict as a named limitation (spec revision 17). Zero-width removal joins a number that the source splits with a zero-width character (`1,2​34`); strict's source pool still splits it, so strict reports the joined token as untraceable, and check 1 can report the parts as missing. `main` passes; the corpus has no such cell.
+  - Task 2's commit gains `test_zero_width_inside_a_number_is_a_known_strict_limitation` ×3 (fails on `c674828` with "DID NOT RAISE"). Task 2's task tests: 93 passed; every later full suite: the plan's count + 3, same failing ids.
+  - Task 10's commit gains a known-limitation bullet in the `0.1.22+rcq.4` CHANGELOG section.
+  - Strict's source pool is fixed in a separate task.
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 3: EXTENDED careful-merge rules and currency markers (commit `d239a9d`, prototype `proto T3`)
 
@@ -321,9 +330,16 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Until Task 4, `_merge_structural_columns` still moves header text with `_header_merge_target` in R0 header rows; R3.5 lands with membership.
 - R3.1 matters for callers that pass raw text (XLSX, bare parsers); the Markdown path already removes zero-width characters at extraction (Task 2).
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):**
+- The user decided to fix a gap the spec did not cover (spec revision 17, R4): under `EXTENDED`, a label column holding only currency codes was a currency-marker column, so an exchange-rate table (`EUR | 1.08 | 1.10` under an empty corner cell) rendered `| EUR 1.08 | 1.10 |`. Now R0's label column is never a currency-marker column for a marker other than `$`; `$` keeps `main`'s rule and LEGACY ignores the flag.
+  - `_marker_class(..., label=...)`; the structural pass and Task 3's legacy pass pass the flag for the label column. Task 3 gains 7 tests (task tests 177 at this commit, with Task 2's 3).
+  - Task 4's pipeline passes it too, in `_merge_allowed` (R2's body test, via `_holds_label_cell`) and `_marker_exception`; Task 4 gains 3 tests.
+  - XLSX `prepare_table` output and the Markdown of the 382 fixture tables are identical before and after the fix.
+- The user accepted a related case as a named limitation (spec revision 17): currency codes in a sub-label column beside the label column still fuse into the first value column (`|  | EUR 1,234 | 987 |`, where `main` keeps `| EUR | 1,234 | 987 |`). Task 3 gains a helper-level characterization test (task tests 178), Task 4 a rendered one, and Task 10 a CHANGELOG known-limitation bullet.
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 4: Source grid, membership, R1, R2 and the header veto (commit `fa1055e`, prototype `proto T4`)
 
@@ -382,9 +398,11 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Grid-hidden (spec 221-233): the rule runs on the element and each ancestor up to, not including, the table; it is memoized per element id and per `(style, "hidden" in attrs)`, the only two attributes `xlsx_tables._hidden` reads (`xlsx_tables.py:49-51`). A `tr` whose cells are all hidden stays as an empty row; a `tr` with no cell at all is dropped as before. `_descendants_named` returns the same elements, in the same order, as `find_all`.
 - At this commit `_output_grid`'s header rows hold R6 step 1 (each column's distinct owner header cells joined with a space), but `_process_headers` is still the legacy one until Task 5.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):** Task 3's revision-17 fix reaches this commit's pipeline (`_label_column`, `_holds_label_cell`, the flag in `_merge_allowed` and `_marker_exception`) with 3 tests. After the final review, `test_header_text_is_never_concatenated_by_a_merge` asserts at most one header cell per header-zone row and output column (it compared the output with itself before). The rest of the commit is unchanged.
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 5: Header line (R5–R7) and the per-render header record (commit `6680c47`, prototype `proto T5`)
 
@@ -410,7 +428,7 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - R6: Astra's spanning `2025` over `2025` and `Budget` → `| Item | 2025 | 2025 — Budget |`; a rowspan header appears once per column (`| Item | 2025 — Actual | 2025 — Budget |`); `Total` over `TOTAL ` is written once, also when both carry the same link; equal labels with different links are both kept (`[Plan](ex101.htm) — [Plan](ex102.htm)`, `Total — [TOTAL](#t)`).
 - R7: the `(a)` header-only column stays; a single data row renders `|  |  |` over it.
 - Synthetic: a U+200B cell beside an amount (`| Revenue | $ 1,234 |`, `| Costs | 567 |`); `.75` per-share values (`| Basic | $ .75 | $ .62 |`); the recorded class-8 residual: a `)` column holding a nil value stays split (`| Loss | (29 | ) |` under `|  | 2025 | 2025 |`).
-- `test_header_zone_continues_only_through_header_like_rows` ×25: securities, values-with-units, exhibit-numbers (`| 10.5.22 | Plan A |` is the header line), linked-exhibit-pair (both links kept), column heading under a full row (body) and under a sparse row (`| Contractual obligations | Payments Due by Period — Total | …`), third column-heading row (body), exhibit-index title (`| Exhibit Index — Exhibit Number | Exhibit Index — Description | Exhibit Index — Filed Herewith |`), fair-value headings (META t37), statement title beside dates (TSLA 40), stacked titles (ex99-1 unit 5: `NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) — July 26, — 2026` over `$ 22,443`), marker columns leave the sparse-row count (AMZN 21: `|  | December 31, 2024 | September 30, 2025 |`, lease rows in the body), headings fuse without marker columns (JPM 207: `| Average amount (in millions) | Three months ended — December 31, 2024 | …`), currency columns holding values still count (NVDA 38: `| Inventories: | Jan 25, 2026 — (In millions) | Jan 26, 2025 — (In millions) |`), lease-term title (body), period-label control, unit-caption years row (`| Table 2 — (Dollars in millions) | Noninterest Income — 2024 | Noninterest Income — 2023 |`), year-like label, year run and th-row controls, three years rows, year-shaped amounts stay data, the named limitation (`| Item — Units | First — 2024 | Second — 2025 |`).
+- `test_header_zone_continues_only_through_header_like_rows` ×27 (25 plus revision 15's two): securities, values-with-units, exhibit-numbers (`| 10.5.22 | Plan A |` is the header line), linked-exhibit-pair (both links kept), column heading under a full row (body) and under a sparse row (`| Contractual obligations | Payments Due by Period — Total | …`), third column-heading row (body), exhibit-index title (`| Exhibit Index — Exhibit Number | Exhibit Index — Description | Exhibit Index — Filed Herewith |`), fair-value headings (META t37), statement title beside dates (TSLA 40), stacked titles (ex99-1 unit 5: `NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) — July 26, — 2026` over `$ 22,443`), marker columns leave the sparse-row count (AMZN 21: `|  | December 31, 2024 | September 30, 2025 |`, lease rows in the body), headings fuse without marker columns (JPM 207: `| Average amount (in millions) | Three months ended — December 31, 2024 | …`), currency columns holding values still count (NVDA 38: `| Inventories: | Jan 25, 2026 — (In millions) | Jan 26, 2025 — (In millions) |`), lease-term title (body), period-label control, unit-caption years row (`| Table 2 — (Dollars in millions) | Noninterest Income — 2024 | Noninterest Income — 2023 |`), year-like label, year run and th-row controls, three years rows, year-shaped amounts stay data, the named limitation (`| Item — Units | First — 2024 | Second — 2025 |`).
 - Grid-hidden renders: CAT 34 → `| Millions of dollars | Twelve Months Ended December 31, — 2024 | Twelve Months Ended December 31, — 2023 |`; BAC 336 → three columns; JPM 606 keeps `| Balance at December 31, 2021 | $ 2,640 | $ (131) |`.
 - Header record: JPM 482 → `header_source == (("2024", 1), ("31", 1))`, `header_capacity == (("2024", 5), ("31", 1))`; Astra's source → `(("2025", 2),)` and `(("2025", 3),)`; headerless → `header_line is None`, both counts empty; link destinations are not read (`(("2025", 1),)`); a rowspan cell counts once (`("2025", 2)`, capacity `("2025", 3)`); a list table → `header_record is None`; th `Item | ( | 29 | )` → `header_source == (("-29", 1),)`, as the table text tokenizes, and per-cell `header_capacity == (("29", 1),)`.
 - Revision 6 renders: `| Item | 2026 | 2025 |` over `| Revenue | 2000 | 1900 |`; th `| Denomination | €1 | €2 |` stays the header line.
@@ -438,9 +456,16 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Every `to_markdown()` call produces a record; binding it to the original table node is Task 7.
 - `_process_headers` reads `self.roles.header_rows` filtered to `row < len(matrix)`; the output grid has one row per source row (Task 4), so the indices match.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):**
+- R6 writes a header cell at most once per output column. With overlapping spans (a colspan overwriting a rowspan's middle row) one cell was written twice (`2025 — Budget — 2025`) against a capacity of one, so strict reported `header:2025` where `main` passes.
+- `_header_record` leaves out a header-zone cell nested inside another zone cell, then keeps one read per source node, for `header_source`, `header_capacity` and (from Task 10) `header_cells`. A table nested in a header cell had counted `2024` three times, so from Task 7 on R6a credited copies the source does not hold and strict passed.
+- Tests pin R6's adjacent-only suppression, whitespace collapse and an empty row between equal texts.
+- Task 5 gains 9 tests (task tests 278 at this commit, with earlier tasks' additions); Task 7 gains 10 Parser strict tests.
+- Named limitation (user, spec revision 17): a `<table>` directly inside a header-row `<tr>` (malformed) is read twice by extraction, so strict now reports the second copy as a header excess where `main` passed.
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 6: Keep every cell of a one-row PART table (R8) (commit `129218b`, prototype `proto T6`)
 
@@ -473,9 +498,11 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Second-order effect (spec 1071 accepts it): `_get_standard_sections` drops a part-only stub of at most 80 characters; R8's kept cells can lift such a stub over 80 characters, so it is kept as a `PART III` section without an item. CAT's stub already holds the TOC pages, so its boundaries do not change; no test pins the general case.
 - `Parser._strip_page_breadcrumbs` strips a bare `PART X` line followed by an `ITEM` line at a page top; a PART line with kept cells is no longer bare and is not stripped.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):** the user accepted R8's section-extraction side effects as a named limitation (spec revision 17): a running page-top `Part II | Annual Report 2024` table is no longer stripped as a breadcrumb, so sections split; and a kept part-only stub changes `get_section` for a part without an item. Four characterization tests in `tests/test_section_extractor.py` pin both (task tests 102).
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 7: Header accounting in strict's numeric trace (R6a) (commit `9041958`, prototype `proto T7`)
 
@@ -537,9 +564,11 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Misses (spec 579-590): `_trace_elements` runs `locate_header_lines` for misses and `trace_numeric_failures` for failures, so location runs twice per element with records. A table rendered inside a list item or an inline wrapper leaves its normal-render record unbound; `_unbound_header_tables` counts it against the element mapped to its nearest ancestor as `missing`, and discards a leftover with no mapped ancestor.
 - `TableParser.__init__` sets `header_record = None` because `tests/test_table_completeness_fixtures.py::test_blank_table_renderer_is_detected` replaces `TableParser.md` and the new `_render_table` read the attribute; XLSX's bare `object.__new__(TableParser)` is unaffected.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):** the nested-table over-count found here was fixed at its root in Task 5's `_header_record`; this commit gains the Parser strict tests for it (10). After the final review it also gains 10 characterization tests for the fifth named limitation (spec revision 17): a table inside `<li>`, `<b>`, `<i>`, `<em>`, `<strong>` or a bold- or italic-styled inline element has no segment of its own, so R6a records a miss and a spanning header's repeated number (`Year Ended December 31,` → `31` twice) fails strict where `main` passed.
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 8: Header-alignment source side and Markdown cell parser (commit `8a26ae4`, prototype `proto T8`)
 
@@ -587,9 +616,9 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Locating (spec 734-738): a cell holds a value when its token multiset contains the value's tokens; every cell, the label cell included, counts.
 - The `table_completeness` and `table_parser` refactors keep behaviour: check 1 calls the same key functions, and `has_descendant` is `node.find(name)` without bs4's filter cost.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 9: Header-alignment matching, coverage and diagnostics (commit `ac2b1f0`, prototype `proto T9`)
 
@@ -662,9 +691,9 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - `ValueOutcome` and `TableAlignment.outcomes` go beyond the spec's diagnostics; the acceptance tooling reads them for the per-value identity comparison (spec 1087-1096).
 - `visible_text`'s fast path (`text.isascii() and "[" not in text` → `text.strip()`) is behaviour-preserving: zero-width characters and U+00A0 are non-ASCII and a link needs `[`.
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 10: Regressions, accuracy guards, chunking tests and release notes (commit `b229b8d`, prototype `proto T10`)
 
@@ -677,9 +706,9 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - Modify: `src/sec2md/__init__.py`, `pyproject.toml` — version `0.1.22+rcq.4`.
 - Modify: `tests/accuracy/metrics.py` — R6a accounting in `_oracle_trace_numeric_failures` (own locator, own tokenizer), the amended financial-row metric, the body-row guard's helpers, `_parse_document`.
 - Create: `tests/accuracy/generate_body_row_baseline.py` — writes the guard's baseline by rendering with a baseline checkout's `src` and measuring with this checkout's `metrics.py`.
-- Create: `tests/accuracy/body_rows_main.json` — the baseline generated from `c674828`: 2,492 rows (aapl-2023-10k 537, nvda-2026-10k 624, nvda-2002-10k 614, nvda-2026-q2-10q 449, nvda-2026-08-26-8k 9, nvda-2026-ex99-1 168, nvda-2026-ex99-2 91).
+- Create: `tests/accuracy/body_rows_main.json` — the baseline generated from `c674828`: 2,485 rows (aapl-2023-10k 537, nvda-2026-10k 621, nvda-2002-10k 612, nvda-2026-q2-10q 449, nvda-2026-08-26-8k 9, nvda-2026-ex99-1 166, nvda-2026-ex99-2 91). Review fix: the prototype committed 2,492 rows from the older set semantics.
 - Modify: `CHANGELOG.md` (new `## 0.1.22+rcq.4 (unreleased, pending review)`), `README.md` (version line, quality section, "Complex Table Handling"), `docs/usage/direct-conversion.md` ("Table header lines", "Header alignment"); revision 14's wording: marker-only columns leave the second-row fusion count, and equal header texts compare ignoring case and spacing.
-- Test: `tests/accuracy/test_sec_accuracy.py` — 32 additions (41 → 73) and `HEADER_ZONE_MOVES` (172 rows: nvda-2026-10k 51, nvda-2002-10k 43, nvda-2026-q2-10q 38, nvda-2026-ex99-1 26, nvda-2026-ex99-2 14).
+- Test: `tests/accuracy/test_sec_accuracy.py` — 32 additions (41 → 73) and `HEADER_ZONE_MOVES` (165 rows after review: nvda-2026-10k 48, nvda-2002-10k 41, nvda-2026-q2-10q 38, nvda-2026-ex99-1 24, nvda-2026-ex99-2 14; the prototype listed 172).
 - Test: `tests/test_chunker.py` — 5 additions in `TestChunkedFusedHeaderTables` (50 → 55).
 - Test: `tests/test_table_merge_headers.py` — 15 additions (159 → 174).
 - Test: `tests/test_parser.py` — 2 additions (53 → 55) and 2 tests changed.
@@ -722,15 +751,24 @@ Spec line numbers in Tasks 1–10 refer to revision 14, as committed in `92da51b
 - `header_cells` (interpretation, spec 102): the spec says the suite "takes the header-zone cell texts from the parser's per-table header records", which held only strict-tokenized multisets, so both records gain the trailing field and `Parser.element_header_records` is the public read path. A test pins that the field reproduces production's `header_source` and `header_capacity` on all 13 per-class tables.
 - Harness independence: the harness reads only `segment`, `header_line` and `header_cells`, locates header lines itself (whole-line segment exactly once, first line equal, a span two records claim is located for neither: R6a step 3's contract, not production's code) and tokenizes with `normalize_numbers`; it never reads `header_source` or `header_capacity`.
 - Amended metric (spec 1046-1050): a header line is a Markdown table line right before a delimiter row; a source key is present when one header line holds its canonical label as a substring of `" | ".join(cells)` (whitespace collapsed, case kept) and its numbers as a sub-multiset. Without `header_lines` the function is the old metric.
-- Body-row guard (spec 1051-1060; interpretation round 2): a committed baseline of 2,492 body-rendered rows (`SourceRow(table, row, cells)`, signatures compared as multisets) and 172 listed moves. The guard runs in the normal suite without a `main` checkout; the generator renders with the baseline's `src` (main has no `element_header_records`) and measures with this checkout's `metrics.py`, with an import-location check.
-- The spec's interpretation row (spec 103, revision 14; resolved) now describes this guard: 2,492 rows counted per text signature (`tests/accuracy/body_rows_main.json`) and 172 allowed moves (`tests/accuracy/test_sec_accuracy.py:558`); revision 10's 1,550-row version is kept as history.
+- Body-row guard (spec 1051-1060; interpretation round 2): a committed baseline of 2,485 body-rendered rows (2,492 before review) (`SourceRow(table, row, cells)`, signatures compared as multisets) and 165 listed moves (172 before review). The guard runs in the normal suite without a `main` checkout; the generator renders with the baseline's `src` (main has no `element_header_records`) and measures with this checkout's `metrics.py`, with an import-location check.
+- The spec's interpretation row (spec 103, revision 14; resolved) now describes this guard: 2,485 rows counted per text signature (revision 17; 2,492 before review) (`tests/accuracy/body_rows_main.json`) and 165 allowed moves (`tests/accuracy/test_sec_accuracy.py:565` after review); revision 10's 1,550-row version is kept as history.
 - Version (interpretation, spec 105): `0.1.22+rcq.4`, changed where the rcq.3 bump changed it (`pyproject.toml`, `src/sec2md/__init__.py`, `tests/test_models.py`, README line 3). The editable install must be refreshed after the bump, including the gitignored `src/sec2md.egg-info`, which shadows the venv's dist-info under pytest's `pythonpath = ["src"]` (see "Before you start"); `git archive` trees have no egg-info, so they read the venv's rcq.4 metadata.
 - Golden files (interpretation, spec 104): `tests/golden/` is used only by the 14 deselected EDGAR integration tests and is not regenerated.
 - Release notes (spec 1126-1129; resolved in round 5): CHANGELOG, README and `docs/usage/direct-conversion.md` describe the header line, the alignment fields and what the check does not cover, and now say that marker-only columns leave the second-row fusion count (spec 342-345): `CHANGELOG.md:17-22`, `docs/usage/direct-conversion.md:75-80` (with max(2, n // 2)), `README.md:245-246`; and that equal header texts compare ignoring case and spacing (`CHANGELOG.md:31-33`, `docs/usage/direct-conversion.md:85-86`). The CHANGELOG states the threshold as max(2, n // 2), as the code and the docs page do (amended into this commit after the round-5 check; text only).
 
-- [ ] **Review** the commit against the spec sections and review points above.
-- [ ] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
-- [ ] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
+**Review changes (2026-10-06):**
+- `body_rows_main.json` regenerated with the committed generator: 2,485 rows (the prototype committed 2,492 from the older set semantics). Seven `HEADER_ZONE_MOVES` entries were rows `main` already rendered in its header lines and are dropped: 165 moves.
+- CHANGELOG and README no longer say XLSX workbooks are unchanged; they state the accepted `display_page` exception.
+- Five CHANGELOG known-limitation bullets: zero-width numbers, sub-label currency codes, R8's PART running headers and stubs, a `<table>` directly inside a header `<tr>`, and (after the final review) tables inside list items or inline wrappers.
+- After the final review: the CHANGELOG also lists the completeness-diagnostic changes (F9-F11, class-1 losses gone), the public additions and the `display_page` footer precedence; README and the usage doc describe trailing label-only rows and the full data-row rule.
+- The skip-key lists in README and `docs/usage/direct-conversion.md` are complete; "a row of `th` cells is never a data row"; an unused import is removed.
+- `test_header_cells_reproduce_the_header_source_and_capacity` gains the malformed nested case.
+- Task tests 446 passed, 2 warnings; full suite 1660 passed, 14 deselected, 3 warnings; ruff clean.
+
+- [x] **Review** the commit against the spec sections and review points above.
+- [x] **Verify** the counts above on the commit's tree (task tests, full suite, ruff).
+- [x] **Record** any review change (failing test first, folded into this commit) and the new SHAs.
 
 ## Task 11: Acceptance run on the corpus
 
@@ -747,7 +785,7 @@ Placeholders:
 
 Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
 
-- [ ] **Step 1: Run both sides.** Each `run_side.py` takes about 60 s with 7 workers.
+- [x] **Step 1: Run both sides.** Each `run_side.py` takes about 60 s with 7 workers.
 
   ```bash
   git -C C:/Users/einstein/kelab5am/sec2md archive c674828 | tar -x -C <main>
@@ -758,24 +796,24 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   PYTHONPATH=<wt>/src $PY <acc>/analyze_candidate.py --expect-src <wt>/src --fixtures-root <main> --edgar-cache <cache> --main-dir <s>/side-main --candidate-dir <s>/side-candidate --merges <s>/merges.json.gz --out-dir <s>/analysis --workers 10
   ```
 
-- [ ] **Step 2: Write the results to a fresh folder.** Use `<acc>/final/`, so the prototype's files stay untouched for comparison.
+- [x] **Step 2: Write the results to a fresh folder.** Use `<acc>/final/`, so the prototype's files stay untouched for comparison.
 
   ```bash
   $PY <acc>/report.py --main-dir <s>/side-main --candidate-dir <s>/side-candidate --analysis-dir <s>/analysis --merges <s>/merges.json.gz --out-dir <acc>/final
   $PY <acc>/shifted_tables.py --main-dir <s>/side-main --candidate-dir <s>/side-candidate --out <acc>/final/shifted_tables.json
-  PYTHONPATH=<wt>/src $PY <acc>/review_sample.py --fixtures-root <main> --edgar-cache <cache> --main-dir <s>/side-main --candidate-dir <s>/side-candidate --out <acc>/final/review_sample.txt
+  PYTHONPATH=<wt>/src $PY <acc>/review_sample.py --fixtures-root <main> --edgar-cache <cache> --main-dir <s>/side-main --candidate-dir <s>/side-candidate --out <acc>/final/review_sample.txt --lines 9
   PYTHONPATH=<main>/src $PY <acc>/xlsx_detail.py dump --fixtures-root <main> --edgar-cache <cache> --out <s>/xd_main.json edgar:NTRA-10-K-2025-02-28.htm edgar:TSM-20-F-2025-04-17.htm
   PYTHONPATH=<wt>/src $PY <acc>/xlsx_detail.py dump --fixtures-root <main> --edgar-cache <cache> --out <s>/xd_cand.json edgar:NTRA-10-K-2025-02-28.htm edgar:TSM-20-F-2025-04-17.htm
   $PY <acc>/xlsx_detail.py compare <s>/xd_main.json <s>/xd_cand.json --out <acc>/final/xlsx_detail.json
   ```
 
-- [ ] **Step 3: Measure overhead.** Run it alone on a quiet machine; it takes about 3 minutes.
+- [x] **Step 3: Measure overhead.** Run it alone on a quiet machine; it takes about 3 minutes.
 
   ```bash
   $PY <acc>/overhead.py --main-src <main>/src --candidate-src <wt>/src --fixtures-root <main> --runs 9 --out <acc>/final/overhead.json
   ```
 
-- [ ] **Step 4: Compare with round 5.** Every result file in `final/` must equal the prototype's file of the same name, apart from timing fields. Expected:
+- [x] **Step 4: Compare with round 5.** Every result file in `final/` must equal the prototype's file of the same name, apart from timing fields, the baseline's `sec2md` path, and the gzip header's mtime in `alignment_values.tsv.gz`. Expected:
 
   | # | Criterion | Expected |
   |---|---|---|
@@ -783,7 +821,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   | 2 | Other findings | F7 gone. New findings only F9 (TSM 344), F10 (15 tables) and F11 (BAC 260, 293, 336, 338). Tables with findings 937 → 633. |
   | 3 | Strict | 0 new failures in either mode. `header_accounting_misses` 0. The same 14 pre-existing trace failures on both sides. |
   | 4 | Sections | 872 of 872 identical. |
-  | 5 | XLSX | 3,707 prepared tables identical, apart from `display_page` in 9 snapshots of NTRA and TSM, the accepted S3 exception. |
+  | 5 | XLSX | 3,707 prepared tables identical, apart from `display_page` in 8 snapshots of NTRA and TSM (earlier text said 9, a miscount), the accepted S3 exception. |
   | 6 | Modes | 109 of 109 agree. |
   | 7 | Alignment | Candidate: 52,954 values evaluated, all aligned, 0 findings. 0 identities lost against `main`; 3,295 gained. |
   | 8 | Assignment audit | 6,616 of 6,616. |
@@ -797,22 +835,24 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
 
   Stop and report any other difference instead of working around it.
 
-- [ ] **Step 5: Write the record.** Write `<acc>/final/REPORT.md`, with one section per criterion, its verdict and the comparison with round 5.
+- [x] **Step 5: Write the record.** Write `<acc>/final/REPORT.md`, with one section per criterion, its verdict and the comparison with round 5.
   - Do not commit in the main checkout; Task 12 asks the user.
+
+**Result (2026-10-06):** reproduces round 5 apart from timings; all 15 criteria met; overhead 1.0904. `review_sample.py` needs `--lines 9` to match round 5 (the command above omits it). Criterion 5's count is 8 snapshots (earlier text said 9). Record: [`final/REPORT.md`](../audits/2026-10-06-table-merge-header-acceptance/final/REPORT.md).
 
 ## Task 12: Release notes and the PR
 
 **Spec:** "Acceptance criteria", Release.
 
-- [ ] **Step 1: Check the release text.**
+- [x] **Step 1: Check the release text.**
   - The `0.1.22+rcq.4` section of `CHANGELOG.md` lists each rendering change and the two new diagnostics fields.
   - `README.md` and `docs/usage/direct-conversion.md` describe the header line, the alignment fields and what the alignment check does not cover.
   - Fold any fix into Task 10's commit.
-- [ ] **Step 2: Final checks at HEAD.**
+- [x] **Step 2: Final checks at HEAD.**
   - The full suite gives 1611 passed, 14 deselected, unless review changes added tests; record the new count.
   - `venv/Scripts/python -m ruff check src tests` is clean.
   - `git status` is clean.
-- [ ] **Step 3: Write the PR body** to the main checkout's ignored `outputs/table-merge-header-pr.md`. Include:
+- [x] **Step 3: Write the PR body** to the main checkout's ignored `outputs/table-merge-header-pr.md`. Include:
   - the summary;
   - the rendering changes;
   - the acceptance summary from Task 11;
@@ -826,17 +866,19 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   🤖 Generated with [Claude Code](https://claude.com/claude-code)
   ```
 
-- [ ] **Step 4: Hand over.** Give the user the push and `gh pr create` commands and the path of the PR body. Do not run them.
-- [ ] **Step 5: Ask before committing in the main checkout.** Ask the user before committing the Task 11 record and any other docs to `main`.
+- [x] **Step 4: Hand over.** Give the user the push and `gh pr create` commands and the path of the PR body. Do not run them.
+- [x] **Step 5: Ask before committing in the main checkout.** Ask the user before committing the Task 11 record and any other docs to `main`.
+
+**Result (2026-10-06):** release text corrected and folded into Task 10 (`1252c45`); full suite at HEAD 1660 passed, 14 deselected, 3 warnings; ruff clean; `git status` clean. A final whole-branch review (one fix round, re-reviewed clean) and a read-only Codex review of spec revision 17 and this plan ran before it. PR body: `outputs/table-merge-header-pr.md`.
 
 ## Decisions and open items
 
 1. **XLSX display pages (S3): accepted by the user on 2026-10-06.** Every prepared XLSX table is identical to `main`'s. But `display_page`, which the workbook's contents sheet prints, is guessed from the Markdown page text, and the guess reads numbers out of table lines.
-   - The new rendering changes it on 4 pages in 2 documents (9 snapshots):
+   - The new rendering changes it on 4 pages in 2 documents (8 snapshots; earlier text said 9, a miscount):
      - NTRA page 76: worse.
      - TSM page 47: better.
      - TSM pages 146 and 160: wrong before and after.
-   - Task 11 lists each change. Any change beyond these 9 snapshots fails.
+   - Task 11 lists each change. Any change beyond these 8 snapshots fails.
    - The guess is a bug already on `main` (TSM page 46 reads 118 from `2,608,118 |`). Fixing it is a separate task.
 2. **Golden files.** `tests/golden/` is used only by the deselected EDGAR integration tests, and it already differs from `main`. Regenerating it needs a download from sec.gov, which needs the user's approval. This plan does not regenerate it.
 3. **Commits 1–9 fail tests on their own** (see "How this plan works"). Splitting Task 10's updates into the commits that cause each failure is optional.
@@ -862,7 +904,7 @@ Run every command with the worktree's venv and `PYTHONIOENCODING=utf-8`.
   - repeated headers are detected with year-like values;
   - check 1's acceptance distinguishes the 294 class-1 tables from the 305 → 13 value-failure tables;
   - two older passages were updated, and control tests were added.
-- **The accuracy suite** applies R6a with its own tokenizer, amends the financial-row metric for header lines, and guards every row `main` rendered as a body row (172 listed header-zone moves on the fixtures).
+- **The accuracy suite** applies R6a with its own tokenizer, amends the financial-row metric for header lines, and guards every row `main` rendered as a body row (165 listed header-zone moves on the fixtures).
 - **Documented residuals:**
   - MSFT 69 (a value span over its year header);
   - class 8's 5 TSM tables;

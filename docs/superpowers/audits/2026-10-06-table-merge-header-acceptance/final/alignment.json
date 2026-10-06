@@ -1,0 +1,1601 @@
+{
+ "identities_hold": true,
+ "production_match": true,
+ "deterministic_candidate_outputs": true,
+ "coverage": {
+  "main": {
+   "tables_total": 5332,
+   "table_no_output": 691,
+   "table_no_separator": 934,
+   "table_unreliable_grid": 0,
+   "table_no_header": 183,
+   "table_no_data": 331,
+   "tables_evaluated": 3193,
+   "rows_data": 28297,
+   "row_below_repeated_header": 1613,
+   "row_unpaired": 6950,
+   "rows_paired": 19734,
+   "values_total": 65974,
+   "value_nil": 5885,
+   "value_no_discriminating_header": 2051,
+   "value_missing_in_output": 0,
+   "value_ambiguous_position": 5115,
+   "value_ambiguous_header": 3264,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 49659,
+   "values_aligned": 26609,
+   "values_misaligned": 23050
+  },
+  "candidate": {
+   "tables_total": 5332,
+   "table_no_output": 691,
+   "table_no_separator": 934,
+   "table_unreliable_grid": 0,
+   "table_no_header": 183,
+   "table_no_data": 331,
+   "tables_evaluated": 3193,
+   "rows_data": 28297,
+   "row_below_repeated_header": 1613,
+   "row_unpaired": 6908,
+   "rows_paired": 19776,
+   "values_total": 66052,
+   "value_nil": 5885,
+   "value_no_discriminating_header": 2082,
+   "value_missing_in_output": 0,
+   "value_ambiguous_position": 5131,
+   "value_ambiguous_header": 0,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 52954,
+   "values_aligned": 52954,
+   "values_misaligned": 0
+  },
+  "main_capture": {
+   "tables_total": 5332,
+   "table_no_output": 691,
+   "table_no_separator": 934,
+   "table_unreliable_grid": 0,
+   "table_no_header": 183,
+   "table_no_data": 331,
+   "tables_evaluated": 3193,
+   "rows_data": 28297,
+   "row_below_repeated_header": 1613,
+   "row_unpaired": 6950,
+   "rows_paired": 19734,
+   "values_total": 65974,
+   "value_nil": 5885,
+   "value_no_discriminating_header": 2051,
+   "value_missing_in_output": 0,
+   "value_ambiguous_position": 5115,
+   "value_ambiguous_header": 3264,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 49659,
+   "values_aligned": 26609,
+   "values_misaligned": 23050
+  },
+  "candidate_capture": {
+   "tables_total": 5332,
+   "table_no_output": 691,
+   "table_no_separator": 934,
+   "table_unreliable_grid": 0,
+   "table_no_header": 183,
+   "table_no_data": 331,
+   "tables_evaluated": 3193,
+   "rows_data": 28297,
+   "row_below_repeated_header": 1613,
+   "row_unpaired": 6908,
+   "rows_paired": 19776,
+   "values_total": 66052,
+   "value_nil": 5885,
+   "value_no_discriminating_header": 2082,
+   "value_missing_in_output": 0,
+   "value_ambiguous_position": 5131,
+   "value_ambiguous_header": 0,
+   "value_unevaluated_budget": 0,
+   "values_evaluated": 52954,
+   "values_aligned": 52954,
+   "values_misaligned": 0
+  }
+ },
+ "findings_lines": {
+  "main": 10026,
+  "candidate": 0
+ },
+ "candidate_findings": [],
+ "values_listed": 99084,
+ "evaluated_main": 49659,
+ "evaluated_candidate": 52954,
+ "evaluated_on_main_not_candidate": 0,
+ "evaluated_on_candidate_not_main": 3295,
+ "transitions": [
+  [
+   "aligned",
+   "aligned",
+   26609
+  ],
+  [
+   "row_unpaired",
+   "row_unpaired",
+   23850
+  ],
+  [
+   "misaligned",
+   "aligned",
+   23050
+  ],
+  [
+   "row_below_repeated_header",
+   "row_below_repeated_header",
+   6715
+  ],
+  [
+   "value_nil",
+   "value_nil",
+   5885
+  ],
+  [
+   "value_ambiguous_position",
+   "value_ambiguous_position",
+   5115
+  ],
+  [
+   "value_ambiguous_header",
+   "aligned",
+   3264
+  ],
+  [
+   "value_no_discriminating_header",
+   "value_no_discriminating_header",
+   2051
+  ],
+  [
+   "table_no_header",
+   "table_no_header",
+   2035
+  ],
+  [
+   "table_no_separator",
+   "table_no_separator",
+   289
+  ],
+  [
+   "table_no_output",
+   "table_no_output",
+   143
+  ],
+  [
+   "row_unpaired",
+   "value_no_discriminating_header",
+   31
+  ],
+  [
+   "row_unpaired",
+   "aligned",
+   31
+  ],
+  [
+   "row_unpaired",
+   "value_ambiguous_position",
+   16
+  ]
+ ],
+ "loss_transitions": {},
+ "documents": {
+  "fixture:aapl-2023-10k": {
+   "main": {
+    "values_evaluated": 647,
+    "values_aligned": 647,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 647,
+    "values_aligned": 647,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "fixture:nvda-2002-10k": {
+   "main": {
+    "values_evaluated": 770,
+    "values_aligned": 339,
+    "values_misaligned": 431
+   },
+   "candidate": {
+    "values_evaluated": 781,
+    "values_aligned": 781,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "fixture:nvda-2026-08-26-8k": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "fixture:nvda-2026-10k": {
+   "main": {
+    "values_evaluated": 645,
+    "values_aligned": 552,
+    "values_misaligned": 93
+   },
+   "candidate": {
+    "values_evaluated": 728,
+    "values_aligned": 728,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "fixture:nvda-2026-ex99-1": {
+   "main": {
+    "values_evaluated": 340,
+    "values_aligned": 54,
+    "values_misaligned": 286
+   },
+   "candidate": {
+    "values_evaluated": 340,
+    "values_aligned": 340,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "fixture:nvda-2026-ex99-2": {
+   "main": {
+    "values_evaluated": 256,
+    "values_aligned": 136,
+    "values_misaligned": 120
+   },
+   "candidate": {
+    "values_evaluated": 256,
+    "values_aligned": 256,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "fixture:nvda-2026-q2-10q": {
+   "main": {
+    "values_evaluated": 582,
+    "values_aligned": 315,
+    "values_misaligned": 267
+   },
+   "candidate": {
+    "values_evaluated": 710,
+    "values_aligned": 710,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm": {
+   "main": {
+    "values_evaluated": 561,
+    "values_aligned": 351,
+    "values_misaligned": 210
+   },
+   "candidate": {
+    "values_evaluated": 561,
+    "values_aligned": 561,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm": {
+   "main": {
+    "values_evaluated": 666,
+    "values_aligned": 376,
+    "values_misaligned": 290
+   },
+   "candidate": {
+    "values_evaluated": 705,
+    "values_aligned": 705,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081.htm": {
+   "main": {
+    "values_evaluated": 671,
+    "values_aligned": 386,
+    "values_misaligned": 285
+   },
+   "candidate": {
+    "values_evaluated": 709,
+    "values_aligned": 709,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm": {
+   "main": {
+    "values_evaluated": 811,
+    "values_aligned": 656,
+    "values_misaligned": 155
+   },
+   "candidate": {
+    "values_evaluated": 834,
+    "values_aligned": 834,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm": {
+   "main": {
+    "values_evaluated": 464,
+    "values_aligned": 297,
+    "values_misaligned": 167
+   },
+   "candidate": {
+    "values_evaluated": 464,
+    "values_aligned": 464,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm": {
+   "main": {
+    "values_evaluated": 537,
+    "values_aligned": 310,
+    "values_misaligned": 227
+   },
+   "candidate": {
+    "values_evaluated": 575,
+    "values_aligned": 575,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm": {
+   "main": {
+    "values_evaluated": 603,
+    "values_aligned": 342,
+    "values_misaligned": 261
+   },
+   "candidate": {
+    "values_evaluated": 645,
+    "values_aligned": 645,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm": {
+   "main": {
+    "values_evaluated": 773,
+    "values_aligned": 619,
+    "values_misaligned": 154
+   },
+   "candidate": {
+    "values_evaluated": 793,
+    "values_aligned": 793,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526.htm": {
+   "main": {
+    "values_evaluated": 457,
+    "values_aligned": 308,
+    "values_misaligned": 149
+   },
+   "candidate": {
+    "values_evaluated": 457,
+    "values_aligned": 457,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705.htm": {
+   "main": {
+    "values_evaluated": 574,
+    "values_aligned": 344,
+    "values_misaligned": 230
+   },
+   "candidate": {
+    "values_evaluated": 618,
+    "values_aligned": 618,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049/a-5q6r23ydgpjcersy.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049/a-llzieaebbqvfft6e.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049/a-wv2lzpeoil6kz5hc.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069/a-vbntpulu4esivtpj.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069/a-vpojkotklt6jcytp.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-qlqubel52dsmcno3.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017/a-pcob7lbpdtpqplfn.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054/a-bqyvjb6qsi6wtjsy.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791/a-3xxtfn45xh6zkzu2.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791/a-vhvl522kb6ztqdik.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240/a-k3dtnsavtxcpzqq5.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942/a-4da4wbjwrk3cavpd.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526/a-k2zvkosva2n6op3z.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526/a-md3buefxuajie3eu.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526/a-spfxlcso6p4cvbqv.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705/a-my7xjond4qrp6xjw.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm": {
+   "main": {
+    "values_evaluated": 454,
+    "values_aligned": 407,
+    "values_misaligned": 47
+   },
+   "candidate": {
+    "values_evaluated": 488,
+    "values_aligned": 488,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm": {
+   "main": {
+    "values_evaluated": 543,
+    "values_aligned": 294,
+    "values_misaligned": 249
+   },
+   "candidate": {
+    "values_evaluated": 683,
+    "values_aligned": 683,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm": {
+   "main": {
+    "values_evaluated": 514,
+    "values_aligned": 277,
+    "values_misaligned": 237
+   },
+   "candidate": {
+    "values_evaluated": 652,
+    "values_aligned": 652,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm": {
+   "main": {
+    "values_evaluated": 622,
+    "values_aligned": 562,
+    "values_misaligned": 60
+   },
+   "candidate": {
+    "values_evaluated": 734,
+    "values_aligned": 734,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm": {
+   "main": {
+    "values_evaluated": 422,
+    "values_aligned": 367,
+    "values_misaligned": 55
+   },
+   "candidate": {
+    "values_evaluated": 451,
+    "values_aligned": 451,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm": {
+   "main": {
+    "values_evaluated": 535,
+    "values_aligned": 258,
+    "values_misaligned": 277
+   },
+   "candidate": {
+    "values_evaluated": 693,
+    "values_aligned": 693,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm": {
+   "main": {
+    "values_evaluated": 541,
+    "values_aligned": 256,
+    "values_misaligned": 285
+   },
+   "candidate": {
+    "values_evaluated": 699,
+    "values_aligned": 699,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm": {
+   "main": {
+    "values_evaluated": 544,
+    "values_aligned": 501,
+    "values_misaligned": 43
+   },
+   "candidate": {
+    "values_evaluated": 674,
+    "values_aligned": 674,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069.htm": {
+   "main": {
+    "values_evaluated": 331,
+    "values_aligned": 287,
+    "values_misaligned": 44
+   },
+   "candidate": {
+    "values_evaluated": 417,
+    "values_aligned": 417,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100.htm": {
+   "main": {
+    "values_evaluated": 495,
+    "values_aligned": 229,
+    "values_misaligned": 266
+   },
+   "candidate": {
+    "values_evaluated": 664,
+    "values_aligned": 664,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-45jhkpqyj3ilctlu.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-ascogzvebus2zfam.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-cruju3gdz3qhropu.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-pwy6yd25sct2mn27.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054/a-aw45edaatlwrpkm4.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102/a-agwbft6zgtsjfsed.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018/a-irmw3svfknrrnbjb.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102/a-ouc64vrzu2pnbvpu.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196/a-db7ic6jpzibkc5tv.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227/a-gt3h7cn7epdd4nhf.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-m7zw73ihru7legmn.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-sdgu24zh5deu7ty3.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069/a-l4e7jzoo2u4xr37j.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100/a-6jlzdnv4crmdcyjm.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2024-Q1__c-xae25irrvojjyzda__s-000104581023000093.htm": {
+   "main": {
+    "values_evaluated": 487,
+    "values_aligned": 240,
+    "values_misaligned": 247
+   },
+   "candidate": {
+    "values_evaluated": 548,
+    "values_aligned": 548,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2024-Q2__c-irkqnfoquwhngml5__s-000104581023000175.htm": {
+   "main": {
+    "values_evaluated": 646,
+    "values_aligned": 200,
+    "values_misaligned": 446
+   },
+   "candidate": {
+    "values_evaluated": 737,
+    "values_aligned": 737,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2024-Q3__c-x7j2se5j2y4gp7ca__s-000104581023000227.htm": {
+   "main": {
+    "values_evaluated": 627,
+    "values_aligned": 192,
+    "values_misaligned": 435
+   },
+   "candidate": {
+    "values_evaluated": 718,
+    "values_aligned": 718,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm": {
+   "main": {
+    "values_evaluated": 702,
+    "values_aligned": 585,
+    "values_misaligned": 117
+   },
+   "candidate": {
+    "values_evaluated": 797,
+    "values_aligned": 797,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm": {
+   "main": {
+    "values_evaluated": 502,
+    "values_aligned": 375,
+    "values_misaligned": 127
+   },
+   "candidate": {
+    "values_evaluated": 586,
+    "values_aligned": 586,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm": {
+   "main": {
+    "values_evaluated": 617,
+    "values_aligned": 305,
+    "values_misaligned": 312
+   },
+   "candidate": {
+    "values_evaluated": 754,
+    "values_aligned": 754,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm": {
+   "main": {
+    "values_evaluated": 596,
+    "values_aligned": 304,
+    "values_misaligned": 292
+   },
+   "candidate": {
+    "values_evaluated": 736,
+    "values_aligned": 736,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm": {
+   "main": {
+    "values_evaluated": 730,
+    "values_aligned": 619,
+    "values_misaligned": 111
+   },
+   "candidate": {
+    "values_evaluated": 824,
+    "values_aligned": 824,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm": {
+   "main": {
+    "values_evaluated": 447,
+    "values_aligned": 373,
+    "values_misaligned": 74
+   },
+   "candidate": {
+    "values_evaluated": 545,
+    "values_aligned": 545,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm": {
+   "main": {
+    "values_evaluated": 585,
+    "values_aligned": 308,
+    "values_misaligned": 277
+   },
+   "candidate": {
+    "values_evaluated": 713,
+    "values_aligned": 713,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm": {
+   "main": {
+    "values_evaluated": 564,
+    "values_aligned": 296,
+    "values_misaligned": 268
+   },
+   "candidate": {
+    "values_evaluated": 685,
+    "values_aligned": 685,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm": {
+   "main": {
+    "values_evaluated": 451,
+    "values_aligned": 367,
+    "values_misaligned": 84
+   },
+   "candidate": {
+    "values_evaluated": 523,
+    "values_aligned": 523,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2024-Q1__c-xae25irrvojjyzda__s-000104581023000093/a-3q2ysgaxbnmks77y.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2024-Q2__c-irkqnfoquwhngml5__s-000104581023000175/a-veflkighmpju36wp.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2024-Q3__c-x7j2se5j2y4gp7ca__s-000104581023000227/a-o4tfxcmwexjyx2ac.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-t6lba2puymnmk2qv.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-edclyxiber7kcojh.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264/a-dht4m3itkxjyfwd6.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316/a-rfvajjizwq7uy27b.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316/a-walml4cmkenotpwh.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023/a-it652ipldyycssve.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023/a-qojjjl7frbgl2tnq.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023/a-rhom5vow6zyepsio.htm": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116/a-tlge4phixezqx7u5.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209/a-zorvpubngrid5xjl.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230/a-z3pxdonzuuf6uu5d.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-K__2026-FY__c-ibembbpzdct6pow5__s-000104581026000021/a-4svu4aol2nas52be.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052/a-jrssazg746bt3p2f.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "rcq-exhibit:NVDA__10-Q__2027-Q2__c-3tn25vuxcduzrmbl__s-000104581026000075/a-c2xsyodt3zu3mtac.html": {
+   "main": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "candidate": {
+    "values_evaluated": 0,
+    "values_aligned": 0,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:AMZN-10-Q-2025-10-31.htm": {
+   "main": {
+    "values_evaluated": 839,
+    "values_aligned": 460,
+    "values_misaligned": 379
+   },
+   "candidate": {
+    "values_evaluated": 839,
+    "values_aligned": 839,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:BABA-20-F-2025-06-26.htm": {
+   "main": {
+    "values_evaluated": 1687,
+    "values_aligned": 6,
+    "values_misaligned": 1681
+   },
+   "candidate": {
+    "values_evaluated": 1687,
+    "values_aligned": 1687,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:BAC-10-K-2025-02-25.htm": {
+   "main": {
+    "values_evaluated": 4733,
+    "values_aligned": 1568,
+    "values_misaligned": 3165
+   },
+   "candidate": {
+    "values_evaluated": 4733,
+    "values_aligned": 4733,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:CAT-10-K-2025-02-14.htm": {
+   "main": {
+    "values_evaluated": 2096,
+    "values_aligned": 710,
+    "values_misaligned": 1386
+   },
+   "candidate": {
+    "values_evaluated": 2096,
+    "values_aligned": 2096,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:CRDO-10-K-2025-07-02.htm": {
+   "main": {
+    "values_evaluated": 508,
+    "values_aligned": 486,
+    "values_misaligned": 22
+   },
+   "candidate": {
+    "values_evaluated": 529,
+    "values_aligned": 529,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:CRM-10-K-2025-03-05.htm": {
+   "main": {
+    "values_evaluated": 949,
+    "values_aligned": 847,
+    "values_misaligned": 102
+   },
+   "candidate": {
+    "values_evaluated": 949,
+    "values_aligned": 949,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:GOOGL-10-Q-2025-10-30.htm": {
+   "main": {
+    "values_evaluated": 1213,
+    "values_aligned": 302,
+    "values_misaligned": 911
+   },
+   "candidate": {
+    "values_evaluated": 1213,
+    "values_aligned": 1213,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:JPM-10-K-2025-02-14.htm": {
+   "main": {
+    "values_evaluated": 6613,
+    "values_aligned": 2634,
+    "values_misaligned": 3979
+   },
+   "candidate": {
+    "values_evaluated": 6613,
+    "values_aligned": 6613,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:KO-10-K-2025-02-20.htm": {
+   "main": {
+    "values_evaluated": 1440,
+    "values_aligned": 1192,
+    "values_misaligned": 248
+   },
+   "candidate": {
+    "values_evaluated": 1459,
+    "values_aligned": 1459,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:MSFT-10-K-2025-07-30.htm": {
+   "main": {
+    "values_evaluated": 956,
+    "values_aligned": 718,
+    "values_misaligned": 238
+   },
+   "candidate": {
+    "values_evaluated": 963,
+    "values_aligned": 963,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:MU-10-K-2025-10-03.htm": {
+   "main": {
+    "values_evaluated": 784,
+    "values_aligned": 677,
+    "values_misaligned": 107
+   },
+   "candidate": {
+    "values_evaluated": 885,
+    "values_aligned": 885,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:NFLX-10-K-2025-01-27.htm": {
+   "main": {
+    "values_evaluated": 563,
+    "values_aligned": 394,
+    "values_misaligned": 169
+   },
+   "candidate": {
+    "values_evaluated": 757,
+    "values_aligned": 757,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:NTRA-10-K-2025-02-28.htm": {
+   "main": {
+    "values_evaluated": 685,
+    "values_aligned": 0,
+    "values_misaligned": 685
+   },
+   "candidate": {
+    "values_evaluated": 685,
+    "values_aligned": 685,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:NVO-20-F-2025-02-05.htm": {
+   "main": {
+    "values_evaluated": 65,
+    "values_aligned": 61,
+    "values_misaligned": 4
+   },
+   "candidate": {
+    "values_evaluated": 65,
+    "values_aligned": 65,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:SPCX-10-Q-2026-08-04.htm": {
+   "main": {
+    "values_evaluated": 1240,
+    "values_aligned": 692,
+    "values_misaligned": 548
+   },
+   "candidate": {
+    "values_evaluated": 1240,
+    "values_aligned": 1240,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:TSLA-10-K-2025-01-30.htm": {
+   "main": {
+    "values_evaluated": 951,
+    "values_aligned": 799,
+    "values_misaligned": 152
+   },
+   "candidate": {
+    "values_evaluated": 951,
+    "values_aligned": 951,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:TSM-20-F-2025-04-17.htm": {
+   "main": {
+    "values_evaluated": 1967,
+    "values_aligned": 602,
+    "values_misaligned": 1365
+   },
+   "candidate": {
+    "values_evaluated": 2064,
+    "values_aligned": 2064,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  },
+  "edgar:UNH-10-K-2025-02-27.htm": {
+   "main": {
+    "values_evaluated": 1058,
+    "values_aligned": 827,
+    "values_misaligned": 231
+   },
+   "candidate": {
+    "values_evaluated": 1082,
+    "values_aligned": 1082,
+    "values_misaligned": 0
+   },
+   "production_match": true
+  }
+ }
+}

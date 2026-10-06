@@ -1,0 +1,1195 @@
+===== 1. 1 header row 0 (1a): rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm table 18 (display:none cells: 120)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | Apr 27, 2025 [cs9] |  [cs3] | Jan 26, 2025 [cs9]
+   H r2:  [cs3] | Less than 12 Months [cs9] |  [cs3] | Less than 12 Months [cs9]
+   H r3:  [cs3] | Estimated Fair Value [cs3] |  [cs3] | Gross Unrealized Loss [cs3] |  [cs3] | Estimated Fair Value [cs3] |  [cs3] | Gross Unrealized Loss [cs3]
+   H r5:  [cs3] | (In millions) [cs21]
+   D r6: Debt securities issued by the U.S. Treasury [cs3] | $ | 6,854 | · |  [cs3] | $ | ( 4 ) | · |  [cs3] | $ | 6,315 | · |  [cs3] | $ | ( 22 ) | ·
+   D r7: Corporate debt securities [cs3] | 2,775 [cs2] | · |  [cs3] | ( 10 ) [cs2] | · |  [cs3] | 5,291 [cs2] | · |  [cs3] | ( 29 ) [cs2] | ·
+   D r8: Debt securities issued by U.S. government agenci… [cs3] | 321 [cs2] | · |  [cs3] | ( 1 ) [cs2] | · |  [cs3] | 816 [cs2] | · |  [cs3] | ( 5 ) [cs2] | ·
+   D r9: Total [cs3] | $ | 9,950 | · |  [cs3] | $ | ( 15 ) | · |  [cs3] | $ | 12,422 | · |  [cs3] | $ | ( 56 ) | ·
+-- main
+   |  | Apr 27, 2025 — Less than 12 Months | Less than 12 Months |  |  |
+   | --- | --- | --- | --- | --- |
+   |  | Estimated Fair Value | Gross Unrealized Loss | Estimated Fair Value | Gross Unrealized Loss |
+   |  | (In millions) |  |  |  |
+   | Debt securities issued by the U.S. Treasury | $ 6,854 | $ ( 4 ) | $ 6,315 | $ ( 22 ) |
+   | Corporate debt securities | 2,775 | ( 10 ) | 5,291 | ( 29 ) |
+   | Debt securities issued by U.S. government agencies | 321 | ( 1 ) | 816 | ( 5 ) |
+   | Total | $ 9,950 | $ ( 15 ) | $ 12,422 | $ ( 56 ) |
+-- candidate
+   |  | Apr 27, 2025 — Less than 12 Months — Estimated Fair Value — (In millions) | Apr 27, 2025 — Less than 12 Months — Gross Unrealized Loss — (In millions) | Jan 26, 2025 — Less than 12 Months — Estimated Fair Value — (In millions) | Jan 26, 2025 — Less than 12 Months — Gross Unrealized Loss — (In millions) |
+   | --- | --- | --- | --- | --- |
+   | Debt securities issued by the U.S. Treasury | $ 6,854 | $ ( 4 ) | $ 6,315 | $ ( 22 ) |
+   | Corporate debt securities | 2,775 | ( 10 ) | 5,291 | ( 29 ) |
+   | Debt securities issued by U.S. government agencies | 321 | ( 1 ) | 816 | ( 5 ) |
+   | Total | $ 9,950 | $ ( 15 ) | $ 12,422 | $ ( 56 ) |
+
+===== 2. 1 caption (1b): edgar:CRM-10-K-2025-03-05.htm table 26 (display:none cells: 22)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: 4 [cs3] | Fiscal Year Ended January 31, [cs15]
+   H r2:  [cs3] | 2025 [cs3] |  [cs3] | 2024 [cs3] |  [cs3] | 2023 [cs3]
+   D r3: Net cash provided by operating activities [cs3] | $ | 13,092 | · |  [cs3] | $ | 10,234 | · |  [cs3] | $ | 7,111 | ·
+   D r4: Net cash used in investing activities [cs3] | (3,163) [cs2] | · |  [cs3] | (1,327) [cs2] | · |  [cs3] | (1,989) [cs2] | ·
+   D r5: Net cash used in financing activities [cs3] | (9,429) [cs2] | · |  [cs3] | (7,477) [cs2] | · |  [cs3] | (3,562) [cs2] | ·
+-- main
+   | 4 | 2025 | 2024 | 2023 |
+   | --- | --- | --- | --- |
+   | Net cash provided by operating activities | $ 13,092 | $ 10,234 | $ 7,111 |
+   | Net cash used in investing activities | (3,163) | (1,327) | (1,989) |
+   | Net cash used in financing activities | (9,429) | (7,477) | (3,562) |
+-- candidate
+   | 4 | Fiscal Year Ended January 31, — 2025 | Fiscal Year Ended January 31, — 2024 | Fiscal Year Ended January 31, — 2023 |
+   | --- | --- | --- | --- |
+   | Net cash provided by operating activities | $ 13,092 | $ 10,234 | $ 7,111 |
+   | Net cash used in investing activities | (3,163) | (1,327) | (1,989) |
+   | Net cash used in financing activities | (9,429) | (7,477) | (3,562) |
+
+===== 3. 1 data row 0, G2 (1c): edgar:JPM-10-K-2025-02-14.htm table 109 (display:none cells: 16)
+-- source (checker's placed grid; H header zone, D data row)
+   D r1: Noninterest revenue –  reported (c) [cs3] | $ | 84,973 | · | $ | 68,837 | · | $ | 61,985 | ·
+   D r2: Fully taxable-equivalent adjustments (c) [cs3] | 2,560 [cs2] | · | 3,782 [cs2] | · | 3,148 [cs2] | ·
+   D r3: Noninterest revenue –  managed basis [cs3] | $ | 87,533 | · | $ | 72,619 | · | $ | 65,133 | ·
+   D r4: Less: Markets noninterest revenue (b)(d) [cs3] | 29,366 [cs2] | · | 28,258 [cs2] | · | 24,373 [cs2] | ·
+   D r5: Noninterest revenue excluding Markets [cs3] | $ | 58,167 | · | $ | 44,361 | · | $ | 40,760 | ·
+   D r7: Memo: Total Markets net revenue (b) [cs3] | $ | 30,007 | · | $ | 27,964 | · | $ | 29,162 | ·
+-- main
+   | Noninterest revenue –  reported (c) | $ | $ | $ |
+   | --- | --- | --- | --- |
+   | Fully taxable-equivalent adjustments (c) | 2,560 | 3,782 | 3,148 |
+   | Noninterest revenue –  managed basis | $ 87,533 | $ 72,619 | $ 65,133 |
+   | Less: Markets noninterest revenue (b)(d) | 29,366 | 28,258 | 24,373 |
+   | Noninterest revenue excluding Markets | $ 58,167 | $ 44,361 | $ 40,760 |
+   | Memo: Total Markets net revenue (b) | $ 30,007 | $ 27,964 | $ 29,162 |
+-- candidate
+   |  |  |  |  |
+   | --- | --- | --- | --- |
+   | Noninterest revenue –  reported (c) | $ 84,973 | $ 68,837 | $ 61,985 |
+   | Fully taxable-equivalent adjustments (c) | 2,560 | 3,782 | 3,148 |
+   | Noninterest revenue –  managed basis | $ 87,533 | $ 72,619 | $ 65,133 |
+   | Less: Markets noninterest revenue (b)(d) | 29,366 | 28,258 | 24,373 |
+   | Noninterest revenue excluding Markets | $ 58,167 | $ 44,361 | $ 40,760 |
+   | Memo: Total Markets net revenue (b) | $ 30,007 | $ 27,964 | $ 29,162 |
+
+===== 4. 2 sibling value fusion (2a): edgar:TSM-20-F-2025-04-17.htm table 248 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×2 | Notes | · | 2022 [cs2] | ·×2 | 2023 [cs2] | ·×2 | 2024 [cs6] | ·
+   H r2: ·×4 | NT$ [cs2] | ·×2 | NT$ [cs2] | ·×2 | NT$ [cs2] | ·×2 | US$ [cs2] | ·
+   H r3: ·×4 |  [cs2] | ·×2 |  [cs2] | ·×2 |  [cs2] | ·×2 | (Note 3) [cs2] | ·
+   D r5: Gain (loss) on hedging instruments | ·×3 | $ | 1,329.2 | ·×2 | $ | ( 74.7 | ) | · | $ | ( 80.2 | ) | · | $ | ( 2.4 | )
+   D r6: Share of other comprehensive income of associate… | ·×4 | 550.3 | ·×3 | 63.9 | ·×3 | 283.3 | ·×3 | 8.6 | ·
+   D r7: Income tax benefit related to items that may be … | ·×4 | 6.0 | ·×3 | - | ·×3 | - | ·×3 | - | ·
+   D r10: ·×5 | 42,628.4 | ·×3 | ( 10,352.0 | ) | ·×2 | 66,452.7 | ·×3 | 2,026.7 | ·
+   D r13: Other comprehensive income (loss), net of income… | ·×4 | 42,430.1 | ·×3 | ( 8,813.7 | ) | ·×2 | 71,585.7 | ·×3 | 2,183.2 | ·
+   D r16: TOTAL COMPREHENSIVE INCOME | ·×3 | $ | 1,035,724.8 | ·×2 | $ | 842,214.0 | ·×2 | $ | 1,229,109.6 | ·×2 | $ | 37,484.3 | ·
+   . r19: NET INCOME (LOSS) ATTRIBUTABLE TO: | ·×18
+   D r20: Shareholders of the parent | ·×3 | $ | 992,923.4 | ·×2 | $ | 851,740.0 | ·×2 | $ | 1,158,380.2 | ·×2 | $ | 35,327.2 | ·
+   D r21: Non-controlling interests | ·×4 | 371.3 | ·×3 | ( 712.3 | ) | ·×2 | ( 856.3 | ) | ·×2 | ( 26.1 | )
+-- main
+   |  | Notes — NT$ | 2023 — NT$ | 2024 — NT$ | US$ |
+   | --- | --- | --- | --- | --- |
+   |  |  |  |  | (Note 3) |
+   | Gain (loss) on hedging instruments | $ 1,329.2 | $ ( 74.7) | $ ( 80.2) | $ ( 2.4) |
+   | Share of other comprehensive income of associates | 550.3 | 63.9 | 283.3 | 8.6 |
+   | Income tax benefit related to items that may be reclassified subsequently | 6.0 | - | - | - |
+   |  | 42,628.4 | ( 10,352.0) | 66,452.7 | 2,026.7 |
+   | Other comprehensive income (loss), net of income tax | 42,430.1 | ( 8,813.7) | 71,585.7 | 2,183.2 |
+   | TOTAL COMPREHENSIVE INCOME | $ 1,035,724.8 | $ 842,214.0 | $ 1,229,109.6 | $ 37,484.3 |
+-- candidate
+   |  | Notes | 2022 — NT$ | 2023 — NT$ | 2024 — NT$ | 2024 — US$ — (Note 3) |
+   | --- | --- | --- | --- | --- | --- |
+   | Gain (loss) on hedging instruments |  | $ 1,329.2 | $ ( 74.7) | $ ( 80.2) | $ ( 2.4) |
+   | Share of other comprehensive income of associates |  | 550.3 | 63.9 | 283.3 | 8.6 |
+   | Income tax benefit related to items that may be reclassified subsequently |  | 6.0 | - | - | - |
+   |  |  | 42,628.4 | ( 10,352.0) | 66,452.7 | 2,026.7 |
+   | Other comprehensive income (loss), net of income tax |  | 42,430.1 | ( 8,813.7) | 71,585.7 | 2,183.2 |
+   | TOTAL COMPREHENSIVE INCOME |  | $ 1,035,724.8 | $ 842,214.0 | $ 1,229,109.6 | $ 37,484.3 |
+   | NET INCOME (LOSS) ATTRIBUTABLE TO: |  |  |  |  |  |
+
+===== 5. 2 X marks (2b): rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm table 52 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Exhibit Number [cs3] |  [cs3] | Exhibit Description [cs3] |  [cs3] | Incorporated by Reference [cs15] |  [cs3] | Filed Herewith [cs3]
+   H r2:  [cs3] |  [cs3] |  [cs3] |  [cs3] | Form [cs3] |  [cs3] | Filing Date [cs3] |  [cs3] | Number [cs3] |  [cs3] |  [cs3]
+   D r3: 3.1 [cs3] |  [cs3] | Amended and Restated Certificate of Incorporatio… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 3/25/2024 [cs3] |  [cs3] | 3.1 [cs3] |  [cs3] |  [cs3]
+   D r4: 3.2 [cs3] |  [cs3] | Amended and Restated Bylaws [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 3/25/2024 [cs3] |  [cs3] | 3.2 [cs3] |  [cs3] |  [cs3]
+   D r5: 4.1 [cs3] |  [cs3] | Reference is made to Exhibits 3.1 and 3.2 [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r6: 4.2 [cs3] |  [cs3] | Form of Class A Common Stock Certificate [cs3] |  [cs3] | S-1/A [cs3] |  [cs3] | 3/11/2024 [cs3] |  [cs3] | 4.2 [cs3] |  [cs3] |  [cs3]
+   D r7: 4.3 [cs3] |  [cs3] | Form of Class B Common Stock Certificate [cs3] |  [cs3] | S-8 [cs3] |  [cs3] | 3/21/2024 [cs3] |  [cs3] | 4.6 [cs3] |  [cs3] |  [cs3]
+   D r8: 4.4 [cs3] |  [cs3] | Amended and Restated Investors’ Rights Agreement… [cs3] |  [cs3] | S-1 [cs3] |  [cs3] | 2/22/2024 [cs3] |  [cs3] | 10.1 [cs3] |  [cs3] |  [cs3]
+   D r9: 31.1 [cs3] |  [cs3] | Certification of Principal Executive Officer Pur… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   D r10: 31.2 [cs3] |  [cs3] | Certification of Principal Financial Officer Pur… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   D r11: 32.1 [cs3] |  [cs3] | Certifications of Principal Executive Officer an… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r12: 101.INS [cs3] |  [cs3] | Inline XBRL Instance Document – the instance doc… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+-- main
+   | Exhibit Number | Exhibit Description | Incorporated by Reference — Form | Filing Date | Number |
+   | --- | --- | --- | --- | --- |
+   | 3.1 | [Amended and Restated Certificate of Incorporation](https://www.sec.gov/Archives/edgar/data/1713445/000162828024012880/exhibit31-8xk.htm) | 8-K | 3/25/2024 | 3.1 |
+   | 3.2 | [Amended and Restated Bylaws](https://www.sec.gov/Archives/edgar/data/1713445/000162828024012880/exhibit32-8xk.htm) | 8-K | 3/25/2024 | 3.2 |
+   | 4.1 | Reference is made to Exhibits 3.1 and 3.2 |  |  |  |
+   | 4.2 | [Form of Class A Common Stock Certificate](https://www.sec.gov/Archives/edgar/data/1713445/000162828024010137/exhibit42-sx1a1.htm) | S-1/A | 3/11/2024 | 4.2 |
+   | 4.3 | [Form of Class B Common Stock Certificate](https://www.sec.gov/Archives/edgar/data/1713445/000162828024012333/exhibit46-sx8.htm) | S-8 | 3/21/2024 | 4.6 |
+   | 4.4 | [Amended and Restated Investors’ Rights Agreement, dated September 1, 2021, by and among the Registrant and the investors listed therein](https://www.sec.gov/Archives/edgar/data/1713445/000162828024006294/exhibit101-sx1.htm) | S-1 | 2/22/2024 | 10.1 |
+   | 31.1 | [Certification of Principal Executive Officer Pursuant to Exchange Act Rules 13a-14(a) and 15d-14(a), as adopted pursuant to Section 302 of the Sarbanes-Oxley Act of 2002](exhibit311q224.htm) |  |  | X |
+-- candidate
+   | Exhibit Number | Exhibit Description | Incorporated by Reference — Form | Incorporated by Reference — Filing Date | Incorporated by Reference — Number | Filed Herewith |
+   | --- | --- | --- | --- | --- | --- |
+   | 3.1 | [Amended and Restated Certificate of Incorporation](https://www.sec.gov/Archives/edgar/data/1713445/000162828024012880/exhibit31-8xk.htm) | 8-K | 3/25/2024 | 3.1 |  |
+   | 3.2 | [Amended and Restated Bylaws](https://www.sec.gov/Archives/edgar/data/1713445/000162828024012880/exhibit32-8xk.htm) | 8-K | 3/25/2024 | 3.2 |  |
+   | 4.1 | Reference is made to Exhibits 3.1 and 3.2 |  |  |  |  |
+   | 4.2 | [Form of Class A Common Stock Certificate](https://www.sec.gov/Archives/edgar/data/1713445/000162828024010137/exhibit42-sx1a1.htm) | S-1/A | 3/11/2024 | 4.2 |  |
+   | 4.3 | [Form of Class B Common Stock Certificate](https://www.sec.gov/Archives/edgar/data/1713445/000162828024012333/exhibit46-sx8.htm) | S-8 | 3/21/2024 | 4.6 |  |
+   | 4.4 | [Amended and Restated Investors’ Rights Agreement, dated September 1, 2021, by and among the Registrant and the investors listed therein](https://www.sec.gov/Archives/edgar/data/1713445/000162828024006294/exhibit101-sx1.htm) | S-1 | 2/22/2024 | 10.1 |  |
+   | 31.1 | [Certification of Principal Executive Officer Pursuant to Exchange Act Rules 13a-14(a) and 15d-14(a), as adopted pursuant to Section 302 of the Sarbanes-Oxley Act of 2002](exhibit311q224.htm) |  |  |  | X |
+
+===== 6. 3 $ column and year (3a): edgar:MSFT-10-K-2025-07-30.htm table 24 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: (In millions, except per share amounts) | · |  [cs2] | ·×2 |  [cs2] | ·×2 |  [cs2] | ·
+   H r4: Year Ended June 30, | · | 2025 [cs2] | ·×2 | 2024 [cs2] | ·×2 | 2023 [cs2] | ·
+   . r6: Revenue: | ·×12
+   D r7: Product | · | $ | 63,946 | ·×2 | $ | 64,773 | ·×2 | $ | 64,699 | ·
+   D r8: Service and other | ·×2 | 217,778 | ·×3 | 180,349 | ·×3 | 147,216 | ·
+   D r11: Total revenue | ·×2 | 281,724 | ·×3 | 245,122 | ·×3 | 211,915 | ·
+   . r14: Cost of revenue: | ·×12
+   D r15: Product | ·×2 | 13,501 | ·×3 | 15,272 | ·×3 | 17,804 | ·
+   D r16: Service and other | ·×2 | 74,330 | ·×3 | 58,842 | ·×3 | 48,059 | ·
+   D r19: Total cost of revenue | ·×2 | 87,831 | ·×3 | 74,114 | ·×3 | 65,863 | ·
+   D r22: Gross margin | ·×2 | 193,893 | ·×3 | 171,008 | ·×3 | 146,052 | ·
+   D r23: Research and development | ·×2 | 32,488 | ·×3 | 29,510 | ·×3 | 27,195 | ·
+-- main
+   | (In millions, except per share amounts) — Year Ended June 30, | 2025 | 2024 |  | 2023 |  |
+   | --- | --- | --- | --- | --- | --- |
+   | Revenue: |  |  |  |  |  |
+   | Product | $ 63,946 | $ | 64,773 | $ | 64,699 |
+   | Service and other | 217,778 |  | 180,349 |  | 147,216 |
+   | Total revenue | 281,724 |  | 245,122 |  | 211,915 |
+   | Cost of revenue: |  |  |  |  |  |
+   | Product | 13,501 |  | 15,272 |  | 17,804 |
+   | Service and other | 74,330 |  | 58,842 |  | 48,059 |
+-- candidate
+   | (In millions, except per share amounts) — Year Ended June 30, | 2025 | 2024 | 2023 |
+   | --- | --- | --- | --- |
+   | Revenue: |  |  |  |
+   | Product | $ 63,946 | $ 64,773 | $ 64,699 |
+   | Service and other | 217,778 | 180,349 | 147,216 |
+   | Total revenue | 281,724 | 245,122 | 211,915 |
+   | Cost of revenue: |  |  |  |
+   | Product | 13,501 | 15,272 | 17,804 |
+   | Service and other | 74,330 | 58,842 | 48,059 |
+
+===== 7. 3 leading-dot decimals: fixture:nvda-2002-10k table 138 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r0: ·×2 | Consolidated Income Statements For the Years End… [cs14] | ·
+   H r1: ·×2 | January 28, 2001 [cs6] | ·×2 | January 30, 2000 [cs6] | ·
+   H r2: ·×2 | As Restated [cs2] | ·×2 | As Previously Reported [cs2] | ·×2 | As Restated [cs2] | ·×2 | As Previously Reported [cs2] | ·
+   H r3: ·×2 | (in thousands, except per share data) [cs14] | ·
+   D r4: Revenue | · | $ | 735,264 | ·×2 | $ | 735,264 | ·×2 | $ | 374,505 | ·×2 | $ | 374,505 | ·
+   D r5: Cost of revenues | ·×2 | 462,385 | ·×3 | 460,098 | ·×3 | 232,662 | ·×3 | 235,575 | ·
+   D r7: Gross profit | ·×2 | 272,879 | ·×3 | 275,166 | ·×3 | 141,843 | ·×3 | 138,930 | ·
+   . r9: Operating expenses: | ·×16
+   D r10: Research and development | ·×2 | 86,047 | ·×3 | 86,438 | ·×3 | 46,914 | ·×3 | 47,439 | ·
+   D r11: Sales, general and administrative | ·×2 | 58,697 | ·×3 | 58,437 | ·×3 | 36,312 | ·×3 | 37,079 | ·
+   D r13: Total operating expenses | ·×2 | 144,744 | ·×3 | 144,875 | ·×3 | 83,226 | ·×3 | 84,518 | ·
+   D r15: Operating income | ·×2 | 128,135 | ·×3 | 130,291 | ·×3 | 58,617 | ·×3 | 54,412 | ·
+-- main
+   |  | Consolidated Income Statements For the Years Ended |  |  |  |  |  |
+   | --- | --- | --- | --- | --- | --- | --- |
+   |  | January 28, 2001 |  | January 30, 2000 |  |  |  |
+   |  | As Restated | As Previously Reported | As Restated | As Previously Reported |  |  |
+   |  | (in thousands, except per share data) |  |  |  |  |  |
+   | Revenue | $ 735,264 | $ 735,264 | $ 374,505 | $ | 374,505 |  |
+   | Cost of revenues | 462,385 | 460,098 | 232,662 |  | 235,575 |  |
+   | Gross profit | 272,879 | 275,166 | 141,843 |  | 138,930 |  |
+   | Operating expenses: |  |  |  |  |  |  |
+-- candidate
+   |  | Consolidated Income Statements For the Years Ended — January 28, 2001 — As Restated — (in thousands, except per share data) | Consolidated Income Statements For the Years Ended — January 28, 2001 — As Previously Reported — (in thousands, except per share data) | Consolidated Income Statements For the Years Ended — January 30, 2000 — As Restated — (in thousands, except per share data) | Consol …
+   | --- | --- | --- | --- | --- |
+   | Revenue | $ 735,264 | $ 735,264 | $ 374,505 | $ 374,505 |
+   | Cost of revenues | 462,385 | 460,098 | 232,662 | 235,575 |
+   | Gross profit | 272,879 | 275,166 | 141,843 | 138,930 |
+   | Operating expenses: |  |  |  |  |
+   | Research and development | 86,047 | 86,438 | 46,914 | 47,439 |
+   | Sales, general and administrative | 58,697 | 58,437 | 36,312 | 37,079 |
+   | Total operating expenses | 144,744 | 144,875 | 83,226 | 84,518 |
+
+===== 8. 3e empty-slot shift (3b): edgar:BABA-20-F-2025-06-26.htm table 24 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×3 | Year ended March 31, [cs14] | ·
+   H r2: ·×3 | 2023 [cs2] | ·×2 | 2024 [cs2] | ·×2 | 2025 [cs6] | ·
+   H r3: ·×3 | RMB [cs2] | ·×2 | RMB [cs2] | ·×2 | RMB [cs2] | ·×2 | US$ [cs2] | ·
+   H r4: ·×3 |  [cs2] | ·×2 |  [cs2] | ·×2 |  [cs2] | ·×2 | (Note 2(a)) [cs2] | ·
+   H r5: ·×3 | (in millions, except per share data) [cs14] | ·
+   H r6: · | Notes | · |  [cs2] | ·×2 |  [cs2] | ·×2 |  [cs2] | ·×2 |  [cs2] | ·
+   D r7: Revenue | 5, 24 | ·×2 | 868,687 | ·×3 | 941,168 | ·×3 | 996,347 | ·×3 | 137,300 | ·
+   D r8: Cost of revenue | 24 | ·×2 | ( 549,695 | ) | ·×2 | ( 586,323 | ) | ·×2 | ( 598,285 | ) | ·×2 | ( 82,446 | )
+   D r9: Product development expenses | 24 | ·×2 | ( 56,744 | ) | ·×2 | ( 52,256 | ) | ·×2 | ( 57,151 | ) | ·×2 | ( 7,876 | )
+   D r10: Sales and marketing expenses | 24 | ·×2 | ( 103,496 | ) | ·×2 | ( 115,141 | ) | ·×2 | ( 144,021 | ) | ·×2 | ( 19,847 | )
+   D r11: General and administrative expenses | 24 | ·×2 | ( 42,183 | ) | ·×2 | ( 41,985 | ) | ·×2 | ( 44,239 | ) | ·×2 | ( 6,096 | )
+   D r12: Amortization and impairment of intangible assets | ·×3 | ( 13,504 | ) | ·×2 | ( 21,592 | ) | ·×2 | ( 6,336 | ) | ·×2 | ( 873 | )
+-- main
+   |  | 2023 | 2024 | 2025 |  |  |
+   | --- | --- | --- | --- | --- | --- |
+   |  | RMB | RMB | RMB | US$ |  |
+   |  |  |  |  | (Note 2(a)) |  |
+   |  | (in millions, except per share data) |  |  |  |  |
+   |  | Notes |  |  |  |  |
+   | Revenue | 5, 24 | 868,687 | 941,168 | 996,347 | 137,300 |
+   | Cost of revenue | 24 | ( 549,695) | ( 586,323) | ( 598,285) | ( 82,446) |
+   | Product development expenses | 24 | ( 56,744) | ( 52,256) | ( 57,151) | ( 7,876) |
+-- candidate
+   |  | Notes | Year ended March 31, — 2023 — RMB — (in millions, except per share data) | Year ended March 31, — 2024 — RMB — (in millions, except per share data) | Year ended March 31, — 2025 — RMB — (in millions, except per share data) | Year ended March 31, — 2025 — US$ — (Note 2(a)) — (in millions, except per share data) |
+   | --- | --- | --- | --- | --- | --- |
+   | Revenue | 5, 24 | 868,687 | 941,168 | 996,347 | 137,300 |
+   | Cost of revenue | 24 | ( 549,695) | ( 586,323) | ( 598,285) | ( 82,446) |
+   | Product development expenses | 24 | ( 56,744) | ( 52,256) | ( 57,151) | ( 7,876) |
+   | Sales and marketing expenses | 24 | ( 103,496) | ( 115,141) | ( 144,021) | ( 19,847) |
+   | General and administrative expenses | 24 | ( 42,183) | ( 41,985) | ( 44,239) | ( 6,096) |
+   | Amortization and impairment of intangible assets |  | ( 13,504) | ( 21,592) | ( 6,336) | ( 873) |
+   | Impairment of goodwill | 17 | ( 2,714) | ( 10,521) | ( 6,171) | ( 850) |
+
+===== 9. 3e TSM 79: edgar:TSM-20-F-2025-04-17.htm table 79 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×2 | For the year ended December 31, [cs10] | ·
+   H r2: ·×2 | 2022 [cs2] | ·×2 | 2023 [cs2] | ·×2 | 2024 [cs2] | ·
+   D r3: Net revenue | ·×2 | 100.0 | % | ·×2 | 100.0 | % | ·×2 | 100.0 | %
+   D r4: Cost of revenue | ·×2 | (40.4 | )% | ·×2 | (45.6 | )% | ·×2 | (43.9 | )%
+   D r5: Gross profit | ·×2 | 59.6 | % | ·×2 | 54.4 | % | ·×2 | 56.1 | %
+   . r6: Operating expenses | ·×12
+   D r7: Research and development | ·×2 | (7.2 | )% | ·×2 | (8.5 | )% | ·×2 | (7.1 | )%
+   D r8: General and administrative | ·×2 | (2.4 | )% | ·×2 | (2.8 | )% | ·×2 | (2.9 | )%
+   D r9: Marketing | ·×2 | (0.4 | )% | ·×2 | (0.5 | )% | ·×2 | (0.4 | )%
+   D r10: Total operating expenses | ·×2 | (10.0 | )% | ·×2 | (11.8 | )% | ·×2 | (10.4 | )%
+   D r11: Other operating income and expenses, net | ·×2 | (0.1 | )% | ·×2 | 0.0 | % | ·×2 | 0.0 | %
+   D r12: Income from operations | ·×2 | 49.5 | % | ·×2 | 42.6 | % | ·×2 | 45.7 | %
+-- main
+   | 2022 |  | 2023 |  | 2024 |  |  |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | Net revenue | 100.0 | % | 100.0 | % | 100.0 | % |
+   | Cost of revenue | (40.4 | )% | (45.6 | )% | (43.9 | )% |
+   | Gross profit | 59.6 | % | 54.4 | % | 56.1 | % |
+   | Operating expenses |  |  |  |  |  |  |
+   | Research and development | (7.2 | )% | (8.5 | )% | (7.1 | )% |
+   | General and administrative | (2.4 | )% | (2.8 | )% | (2.9 | )% |
+   | Marketing | (0.4 | )% | (0.5 | )% | (0.4 | )% |
+-- candidate
+   |  | For the year ended December 31, — 2022 | For the year ended December 31, | For the year ended December 31, — 2023 | For the year ended December 31, | For the year ended December 31, — 2024 |  |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | Net revenue | 100.0 | % | 100.0 | % | 100.0 | % |
+   | Cost of revenue | (40.4 | )% | (45.6 | )% | (43.9 | )% |
+   | Gross profit | 59.6 | % | 54.4 | % | 56.1 | % |
+   | Operating expenses |  |  |  |  |  |  |
+   | Research and development | (7.2 | )% | (8.5 | )% | (7.1 | )% |
+   | General and administrative | (2.4 | )% | (2.8 | )% | (2.9 | )% |
+   | Marketing | (0.4 | )% | (0.5 | )% | (0.4 | )% |
+
+===== 10. 3e footnote column (3c): edgar:JPM-10-K-2025-02-14.htm table 482 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] |  [cs3] |  [cs3] | 2024 [cs30]
+   H r2: Year ended December 31, (in millions) [cs3] |  [cs3] | Consumer, excluding credit card [cs9] | Credit card [cs9] | Wholesale [cs9] | Total [cs6]
+   D r3: Purchases [cs3] |  [cs3] |  [cs3] | $ | 647 | · | (b)(c) [cs3] |  [cs3] | $ | — | · |  [cs3] |  [cs3] | $ | 1,432 | · |  [cs3] |  [cs3] | $ | 2,079 | ·
+   D r4: Sales [cs3] |  [cs3] |  [cs3] | 10,440 [cs2] | · |  [cs3] |  [cs3] | — [cs2] | · |  [cs3] |  [cs3] | 45,147 [cs2] | · |  [cs3] |  [cs3] | 55,587 [cs2] | ·
+   D r5: Retained loans reclassified to held-for-sale (a) [cs3] |  [cs3] |  [cs3] | 1,656 [cs2] | · |  [cs3] |  [cs3] | — [cs2] | · |  [cs3] |  [cs3] | 749 [cs2] | · |  [cs3] |  [cs3] | 2,405 [cs2] | ·
+-- main
+   | Year ended December 31, (in millions) | Consumer, excluding credit card | Credit card | Wholesale | Total |  |
+   | --- | --- | --- | --- | --- | --- |
+   | Purchases | $ 647 | (b)(c) | $ — | $ 1,432 | $ 2,079 |
+   | Sales | 10,440 |  | — | 45,147 | 55,587 |
+   | Retained loans reclassified to held-for-sale (a) | 1,656 |  | — | 749 | 2,405 |
+-- candidate
+   | Year ended December 31, (in millions) | Consumer, excluding credit card | 2024 — Consumer, excluding credit card | 2024 — Consumer, excluding credit card | 2024 — Credit card | 2024 — Wholesale | 2024 — Total |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | Purchases |  | $ 647 | (b)(c) | $ — | $ 1,432 | $ 2,079 |
+   | Sales |  | 10,440 |  | — | 45,147 | 55,587 |
+   | Retained loans reclassified to held-for-sale (a) |  | 1,656 |  | — | 749 | 2,405 |
+
+===== 11. 4 US$ data cell (4b): edgar:TSM-20-F-2025-04-17.htm table 344 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Issuance Period | · | Total Issue Amount US$ (In Millions) [cs2] | ·×2 | Coupon Rate [cs2] | ·×2 | Repayment and Interest Payment
+   D r2: October 2021 to October 2031 | · | US$ | 1,250.0 | ·×3 | 2.50 % | ·×2 | Bullet repayment (callable at any time, in whole…
+   D r3: October 2021 to October 2041 | ·×2 | 1,000.0 | ·×3 | 3.125 % | ·×2 | The same as above
+   D r4: October 2021 to October 2051 | ·×2 | 1,000.0 | ·×3 | 3.25 % | ·×2 | The same as above
+   D r5: April 2022 to April 2027 | ·×2 | 1,000.0 | ·×3 | 3.875 % | ·×2 | The same as above
+   D r6: April 2022 to April 2029 | ·×2 | 500.0 | ·×3 | 4.125 % | ·×2 | The same as above
+   D r7: April 2022 to April 2032 | ·×2 | 1,000.0 | ·×3 | 4.25 % | ·×2 | The same as above
+   D r8: April 2022 to April 2052 | ·×2 | 1,000.0 | ·×3 | 4.50 % | ·×2 | The same as above
+   D r9: July 2022 to July 2027 | ·×2 | 400.0 | ·×3 | 4.375 % | ·×2 | The same as above
+   D r10: July 2022 to July 2032 | ·×2 | 600.0 | ·×3 | 4.625 % | ·×2 | The same as above
+   . r11: ·×10 | (Concluded)
+-- main
+   | Issuance Period — October 2021 to October 2031 | 1,250.0 | 2.50 % | Repayment and Interest Payment — Bullet repayment (callable at any time, in whole or in part, at the relevant redemption price according to relevant agreements); interest payable semi-annually |
+   | --- | --- | --- | --- |
+   | October 2021 to October 2041 | 1,000.0 | 3.125 % | The same as above |
+   | October 2021 to October 2051 | 1,000.0 | 3.25 % | The same as above |
+   | April 2022 to April 2027 | 1,000.0 | 3.875 % | The same as above |
+   | April 2022 to April 2029 | 500.0 | 4.125 % | The same as above |
+   | April 2022 to April 2032 | 1,000.0 | 4.25 % | The same as above |
+   | April 2022 to April 2052 | 1,000.0 | 4.50 % | The same as above |
+   | July 2022 to July 2027 | 400.0 | 4.375 % | The same as above |
+-- candidate
+   | Issuance Period | Total Issue Amount US$ (In Millions) | Coupon Rate | Repayment and Interest Payment |
+   | --- | --- | --- | --- |
+   | October 2021 to October 2031 | US$ 1,250.0 | 2.50 % | Bullet repayment (callable at any time, in whole or in part, at the relevant redemption price according to relevant agreements); interest payable semi-annually |
+   | October 2021 to October 2041 | 1,000.0 | 3.125 % | The same as above |
+   | October 2021 to October 2051 | 1,000.0 | 3.25 % | The same as above |
+   | April 2022 to April 2027 | 1,000.0 | 3.875 % | The same as above |
+   | April 2022 to April 2029 | 500.0 | 4.125 % | The same as above |
+   | April 2022 to April 2032 | 1,000.0 | 4.25 % | The same as above |
+   | April 2022 to April 2052 | 1,000.0 | 4.50 % | The same as above |
+
+===== 12. 5 fusion swallows data (5a): fixture:aapl-2023-10k table 18 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   . r1: Gross margin percentage: [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r2: Products [cs3] | 36.5 [cs2] | % |  [cs3] | 36.3 [cs2] | % |  [cs3] | 35.3 [cs2] | %
+   D r3: Services [cs3] | 70.8 [cs2] | % |  [cs3] | 71.7 [cs2] | % |  [cs3] | 69.7 [cs2] | %
+   D r4: Total gross margin percentage [cs3] | 44.1 [cs2] | % |  [cs3] | 43.3 [cs2] | % |  [cs3] | 41.8 [cs2] | %
+-- main
+   | Gross margin percentage: — Products | 36.5 % | 36.3 % | 35.3 % |
+   | --- | --- | --- | --- |
+   | Services | 70.8 % | 71.7 % | 69.7 % |
+   | Total gross margin percentage | 44.1 % | 43.3 % | 41.8 % |
+-- candidate
+   |  |  |  |  |
+   | --- | --- | --- | --- |
+   | Gross margin percentage: |  |  |  |
+   | Products | 36.5 % | 36.3 % | 35.3 % |
+   | Services | 70.8 % | 71.7 % | 69.7 % |
+   | Total gross margin percentage | 44.1 % | 43.3 % | 41.8 % |
+
+===== 13. 5 fusion swallows data (5b): rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm table 4 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Class [cs6] | Number of Shares Outstanding [cs6]
+   D r2: Class A Common Stock [cs3] | $0.000006 par value [cs3] | 2,191,446,233 [cs2] | · | shares outstanding as of April 19, 2024 [cs3]
+   D r3: Class B Common Stock [cs3] | $0.000006 par value [cs3] | 345,087,958 [cs2] | · | shares outstanding as of April 19, 2024 [cs3]
+-- main
+   | Class — Class A Common Stock | $0.000006 par value | Number of Shares Outstanding — 2,191,446,233 | shares outstanding as of April 19, 2024 |
+   | --- | --- | --- | --- |
+   | Class B Common Stock | $0.000006 par value | 345,087,958 | shares outstanding as of April 19, 2024 |
+-- candidate
+   | Class | Class | Number of Shares Outstanding | Number of Shares Outstanding |
+   | --- | --- | --- | --- |
+   | Class A Common Stock | $0.000006 par value | 2,191,446,233 | shares outstanding as of April 19, 2024 |
+   | Class B Common Stock | $0.000006 par value | 345,087,958 | shares outstanding as of April 19, 2024 |
+
+===== 14. 5 header rows k>=3 (5c): fixture:nvda-2026-10k table 17 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | Year Ended [cs9]
+   H r2:  [cs3] | Jan 25, 2026 [cs3] |  [cs3] | Jan 26, 2025 [cs3]
+   H r4:  [cs3] | (In millions) [cs9]
+   D r5: Net cash provided by operating activities [cs3] | $ | 102,718 | · |  [cs3] | $ | 64,089 | ·
+   D r6: Net cash used in investing activities [cs3] | $ | (52,228) | · |  [cs3] | $ | (20,421) | ·
+   D r7: Net cash used in financing activities [cs3] | $ | (48,474) | · |  [cs3] | $ | (42,359) | ·
+-- main
+   |  | Year Ended — Jan 25, 2026 | Jan 26, 2025 |
+   | --- | --- | --- |
+   |  | (In millions) |  |
+   | Net cash provided by operating activities | $ 102,718 | $ 64,089 |
+   | Net cash used in investing activities | $ (52,228) | $ (20,421) |
+   | Net cash used in financing activities | $ (48,474) | $ (42,359) |
+-- candidate
+   |  | Year Ended — Jan 25, 2026 — (In millions) | Year Ended — Jan 26, 2025 — (In millions) |
+   | --- | --- | --- |
+   | Net cash provided by operating activities | $ 102,718 | $ 64,089 |
+   | Net cash used in investing activities | $ (52,228) | $ (20,421) |
+   | Net cash used in financing activities | $ (48,474) | $ (42,359) |
+
+===== 15. 5 second header row (5c): fixture:nvda-2026-10k table 36 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | Jan 25, 2026 [cs3]
+   H r3:  [cs3] | (In millions) [cs3]
+   D r4: Less than one year [cs3] | $ | 20,427 | ·
+   D r5: Due in 1 - 5 years [cs3] | 19,093 [cs2] | ·
+   D r6: Total [cs3] | $ | 39,520 | ·
+-- main
+   |  | Jan 25, 2026 |
+   | --- | --- |
+   |  | (In millions) |
+   | Less than one year | $ 20,427 |
+   | Due in 1 - 5 years | 19,093 |
+   | Total | $ 39,520 |
+-- candidate
+   |  | Jan 25, 2026 — (In millions) |
+   | --- | --- |
+   | Less than one year | $ 20,427 |
+   | Due in 1 - 5 years | 19,093 |
+   | Total | $ 39,520 |
+
+===== 16. 6 signature date (6a): edgar:GOOGL-10-Q-2025-10-30.htm table 89 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] |  [cs3] | ALPHABET INC. [cs3]
+   . r2: October 29, 2025 [cs3] | By: [cs3] | /s/    ANAT ASHKENAZI [cs3]
+   . r3:  [cs3] |  [cs3] | Anat Ashkenazi [cs3]
+   . r4:  [cs3] |  [cs3] | Senior Vice President, Chief Financial Officer [cs3]
+-- main
+   | ALPHABET INC. — /s/    ANAT ASHKENAZI |
+   | --- |
+   | Anat Ashkenazi |
+   | Senior Vice President, Chief Financial Officer |
+-- candidate
+   |  |  | ALPHABET INC. |
+   | --- | --- | --- |
+   | October 29, 2025 | By: | /s/    ANAT ASHKENAZI |
+   |  |  | Anat Ashkenazi |
+   |  |  | Senior Vice President, Chief Financial Officer |
+
+===== 17. 6 exhibit-index columns (6b): fixture:aapl-2023-10k table 64 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs9] |  [cs3] | Incorporated by Reference [cs15]
+   . r2: Exhibit Number [cs3] |  [cs3] | Exhibit Description [cs3] |  [cs3] | Form [cs3] |  [cs3] | Exhibit [cs3] |  [cs3] | Filing Date/ Period End Date [cs3]
+   . r3: 104** [cs3] |  [cs3] | Inline XBRL for the cover page of this Annual Re… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+-- main
+   | Exhibit Number | Exhibit Description |
+   | --- | --- |
+   | 104** | Inline XBRL for the cover page of this Annual Report on Form 10-K, included in the Exhibit 101 Inline XBRL Document Set. |
+-- candidate
+   |  |  | Incorporated by Reference | Incorporated by Reference | Incorporated by Reference |
+   | --- | --- | --- | --- | --- |
+   | Exhibit Number | Exhibit Description | Form | Exhibit | Filing Date/ Period End Date |
+   | 104** | Inline XBRL for the cover page of this Annual Report on Form 10-K, included in the Exhibit 101 Inline XBRL Document Set. |  |  |  |
+
+===== 18. 7 one-row PART (7a): edgar:CAT-10-K-2025-02-14.htm table 7 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Part III [cs3] | 2025 Annual Meeting Proxy Statement (Proxy State… [cs3]
+-- main
+   PART III
+-- candidate
+   PART III 2025 Annual Meeting Proxy Statement (Proxy Statement) to be filed with the Securities and Exchange Commission (SEC) within 120 days after the end of the fiscal year.
+
+===== 19. 8 single negative (8b): edgar:BABA-20-F-2025-06-26.htm table 69 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×2 | As of March 31, [cs6] | ·
+   H r2: ·×2 | 2024 [cs2] | ·×2 | 2025 [cs2] | ·
+   H r3: ·×2 | RMB [cs2] | ·×2 | RMB [cs2] | ·
+   H r4: ·×2 | (in millions) [cs6] | ·
+   D r5: Deferred revenue | ·×2 | 37,142 | ·×3 | 44,138 | ·
+   D r6: Customer advances | ·×2 | 39,745 | ·×3 | 28,733 | ·
+   D r7: ·×3 | 76,887 | ·×3 | 72,871 | ·
+   D r8: Less: current portion | ·×2 | ( 72,818 | ) | ·×2 | ( 68,335 | )
+   D r9: Non-current portion | ·×2 | 4,069 | ·×3 | 4,536 | ·
+-- main
+   | 2024 |  | 2025 |  |  |
+   | --- | --- | --- | --- | --- |
+   | RMB |  | RMB |  |  |
+   | (in millions) |  |  |  |  |
+   | Deferred revenue | 37,142 |  | 44,138 |  |
+   | Customer advances | 39,745 |  | 28,733 |  |
+   |  | 76,887 |  | 72,871 |  |
+   | Less: current portion | ( 72,818 | ) | ( 68,335 | ) |
+   | Non-current portion | 4,069 |  | 4,536 |  |
+-- candidate
+   |  | As of March 31, — 2024 — RMB — (in millions) | As of March 31, — 2025 — RMB — (in millions) |
+   | --- | --- | --- |
+   | Deferred revenue | 37,142 | 44,138 |
+   | Customer advances | 39,745 | 28,733 |
+   |  | 76,887 | 72,871 |
+   | Less: current portion | ( 72,818) | ( 68,335) |
+   | Non-current portion | 4,069 | 4,536 |
+
+===== 20. 8 ) column shares $ (8c): edgar:MSFT-10-K-2025-07-30.htm table 43 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: (In millions) [cs8] | ·
+   H r4: June 30, | · | 2025 [cs2] | ·×2 | 2024 [cs2] | ·
+   D r6: Land | · | $ | 9,338 | ·×2 | $ | 8,163 | ·
+   D r7: Buildings and improvements | ·×2 | 137,921 | ·×3 | 93,943 | ·
+   D r8: Leasehold improvements | ·×2 | 12,117 | ·×3 | 9,594 | ·
+   D r9: Computer equipment and software | ·×2 | 132,836 | ·×3 | 93,780 | ·
+   D r10: Furniture and equipment | ·×2 | 6,407 | ·×3 | 6,532 | ·
+   D r13: Total, at cost | ·×2 | 298,619 | ·×3 | 212,012 | ·
+   D r14: Accumulated depreciation | ·×2 | ( 93,653 | ) | ·×2 | ( 76,421 | )
+   D r17: Total, net | · | $ | 204,966 | ·×2 | $ | 135,591 | ·
+-- main
+   | (In millions) — June 30, | 2025 | 2024 |  |  |
+   | --- | --- | --- | --- | --- |
+   | Land | $ 9,338 | $ | 8,163 |  |
+   | Buildings and improvements | 137,921 |  | 93,943 |  |
+   | Leasehold improvements | 12,117 |  | 9,594 |  |
+   | Computer equipment and software | 132,836 |  | 93,780 |  |
+   | Furniture and equipment | 6,407 |  | 6,532 |  |
+   | Total, at cost | 298,619 |  | 212,012 |  |
+   | Accumulated depreciation | ( 93,653 | ) | ( 76,421 | ) |
+-- candidate
+   | (In millions) — June 30, | (In millions) — 2025 | (In millions) — 2024 |
+   | --- | --- | --- |
+   | Land | $ 9,338 | $ 8,163 |
+   | Buildings and improvements | 137,921 | 93,943 |
+   | Leasehold improvements | 12,117 | 9,594 |
+   | Computer equipment and software | 132,836 | 93,780 |
+   | Furniture and equipment | 6,407 | 6,532 |
+   | Total, at cost | 298,619 | 212,012 |
+   | Accumulated depreciation | ( 93,653) | ( 76,421) |
+
+===== 21. 8 dedicated split (8a): fixture:nvda-2002-10k table 157 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r0: ·×2 | January 27, 2002 [cs2] | ·×2 | January 28, 2001 [cs2]
+   H r1: ·×2 | (in thousands) [cs6]
+   D r2: Net operating loss carryforwards | · | $ | 141,882 | ·×2 | $ | 3,216
+   D r3: Accruals and reserves, not currently deductible … | ·×2 | 202 | ·×3 | 10,008
+   D r4: Property, equipment and intangible assets | ·×2 | 226 | ·×3 | 9,820
+   D r5: Research and other tax credit carryforwards | ·×2 | 46,060 | ·×3 | 9,376
+   D r7: Total gross deferred tax assets | ·×2 | 188,370 | ·×3 | 32,420
+   D r8: Less valuation allowance | ·×2 | (104,036 | ) | ·×2 | —
+   D r10: Net deferred tax assets | · | $ | 84,334 | ·×2 | $ | 32,420
+-- main
+   |  | January 27, 2002 |  | January 28, 2001 |
+   | --- | --- | --- | --- |
+   |  | (in thousands) |  |  |
+   | Net operating loss carryforwards | $ 141,882 |  | $ 3,216 |
+   | Accruals and reserves, not currently deductible for tax purposes | 202 |  | 10,008 |
+   | Property, equipment and intangible assets | 226 |  | 9,820 |
+   | Research and other tax credit carryforwards | 46,060 |  | 9,376 |
+   | Total gross deferred tax assets | 188,370 |  | 32,420 |
+   | Less valuation allowance | (104,036 | ) | — |
+-- candidate
+   |  | January 27, 2002 — (in thousands) | January 28, 2001 — (in thousands) |
+   | --- | --- | --- |
+   | Net operating loss carryforwards | $ 141,882 | $ 3,216 |
+   | Accruals and reserves, not currently deductible for tax purposes | 202 | 10,008 |
+   | Property, equipment and intangible assets | 226 | 9,820 |
+   | Research and other tax credit carryforwards | 46,060 | 9,376 |
+   | Total gross deferred tax assets | 188,370 | 32,420 |
+   | Less valuation allowance | (104,036) | — |
+   | Net deferred tax assets | $ 84,334 | $ 32,420 |
+
+===== 22. U+200B cells: edgar:NTRA-10-K-2025-02-28.htm table 141 (display:none cells: 1)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×2 | December 31, [cs5]
+   H r2: ·×2 | 2024 [cs2] | · | 2023 [cs2]
+   H r3: ·×2 | (in thousands) [cs5]
+   D r4: Beginning balance | · | $ | 872 | · | $ | 748
+   D r5: Write-offs | ·×2 | ( 454 ) | ·×2 | ( 2,175 )
+   D r6: Net additions to reserve | ·×2 | 141 | ·×2 | 2,299
+   D r7: Ending balance | · | $ | 559 | · | $ | 872
+-- main
+   | ​ | ​ | ​ | ​ | ​ | ​ | ​ |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | ​ |  | December 31, |  |  |  |  |
+   | ​ | ​ | 2024 |  | ​ | 2023 |  |
+   | ​ | ​ | (in thousands) |  |  |  |  |
+   | Beginning balance | ​ | $ | 872 | ​ | $ | 748 |
+   | Write-offs | ​ | ​ | ( 454 ) | ​ | ​ | ( 2,175 ) |
+   | Net additions to reserve | ​ | ​ | 141 | ​ | ​ | 2,299 |
+   | Ending balance | ​ | $ | 559 | ​ | $ | 872 |
+-- candidate
+   |  | December 31, — 2024 — (in thousands) | December 31, — 2023 — (in thousands) |
+   | --- | --- | --- |
+   | Beginning balance | $ 872 | $ 748 |
+   | Write-offs | ( 454 ) | ( 2,175 ) |
+   | Net additions to reserve | 141 | 2,299 |
+   | Ending balance | $ 559 | $ 872 |
+
+===== 23. new: display:none cells, value split: edgar:BAC-10-K-2025-02-25.htm table 336 (display:none cells: 793)
+-- source (checker's placed grid; H header zone, D data row)
+   H r2: Results of Business Segments and All Other (1) [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   H r4: At and for the year ended December 31 [cs3] | Total Corporation (2) [cs15] |  [cs3] | Consumer Banking [cs15]
+   H r6: (Dollars in millions) [cs3] | 2024 [cs3] |  [cs3] | 2023 [cs3] |  [cs3] | 2022 [cs3] |  [cs3] | 2024 [cs3] |  [cs3] | 2023 [cs3] |  [cs3] | 2022 [cs3]
+   D r7: Net interest income [cs3] | $ | 56,679 | · |  [cs3] | $ | 57,498 | · |  [cs3] | $ | 52,900 | · |  [cs3] | $ | 33,078 | · |  [cs3] | $ | 33,689 | · |  [cs3] | $ | 30,045 | ·
+   D r8: Noninterest income [cs3] | 45,827 [cs2] | · |  [cs3] | 41,650 [cs2] | · |  [cs3] | 42,488 [cs2] | · |  [cs3] | 8,358 [cs2] | · |  [cs3] | 8,342 [cs2] | · |  [cs3] | 8,590 [cs2] | ·
+   D r9: Total revenue, net of interest expense [cs3] | 102,506 [cs2] | · |  [cs3] | 99,148 [cs2] | · |  [cs3] | 95,388 [cs2] | · |  [cs3] | 41,436 [cs2] | · |  [cs3] | 42,031 [cs2] | · |  [cs3] | 38,635 [cs2] | ·
+   D r10: Provision for credit losses [cs3] | 5,821 [cs2] | · |  [cs3] | 4,394 [cs2] | · |  [cs3] | 2,543 [cs2] | · |  [cs3] | 4,987 [cs2] | · |  [cs3] | 5,158 [cs2] | · |  [cs3] | 1,980 [cs2] | ·
+   . r11: Noninterest expense [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r12: Compensation and benefits (3) [cs3] | 40,182 [cs2] | · |  [cs3] | 38,330 [cs2] | · |  [cs3] | 36,447 [cs2] | · |  [cs3] | 6,422 [cs2] | · |  [cs3] | 6,490 [cs2] | · |  [cs3] | 6,218 [cs2] | ·
+   D r13: Other noninterest expense [cs3] | 26,630 [cs2] | · |  [cs3] | 27,515 [cs2] | · |  [cs3] | 24,991 [cs2] | · |  [cs3] | 15,682 [cs2] | · |  [cs3] | 14,926 [cs2] | · |  [cs3] | 13,859 [cs2] | ·
+   D r14: Total noninterest expense [cs3] | 66,812 [cs2] | · |  [cs3] | 65,845 [cs2] | · |  [cs3] | 61,438 [cs2] | · |  [cs3] | 22,104 [cs2] | · |  [cs3] | 21,416 [cs2] | · |  [cs3] | 20,077 [cs2] | ·
+   D r15: Income before income taxes [cs3] | 29,873 [cs2] | · |  [cs3] | 28,909 [cs2] | · |  [cs3] | 31,407 [cs2] | · |  [cs3] | 14,345 [cs2] | · |  [cs3] | 15,457 [cs2] | · |  [cs3] | 16,578 [cs2] | ·
+-- main
+   | Results of Business Segments and All Other (1) — At and for the year ended December 31 | Total Corporation (2) |  | Consumer Banking |  |  |  |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | (Dollars in millions) | 2024 | 2023 | 2022 | 2024 | 2023 | 2022 |
+   | Net interest income | $ 56,679 | $ 57,498 | $ 52,900 | $ 33,078 | $ 33,689 | $ 30,045 |
+   | Noninterest income | 45,827 | 41,650 | 42,488 | 8,358 | 8,342 | 8,590 |
+   | Total revenue, net of interest expense | 102,506 | 99,148 | 95,388 | 41,436 | 42,031 | 38,635 |
+   | Provision for credit losses | 5,821 | 4,394 | 2,543 | 4,987 | 5,158 | 1,980 |
+   | Noninterest expense |  |  |  |  |  |  |
+   | Compensation and benefits (3) | 40,182 | 38,330 | 36,447 | 6,422 | 6,490 | 6,218 |
+-- candidate
+   | Results of Business Segments and All Other (1) — At and for the year ended December 31 — (Dollars in millions) | Total Corporation (2) — 2024 | Total Corporation (2) — 2023 | Total Corporation (2) — 2022 | Consumer Banking — 2024 | Consumer Banking — 2023 | Consumer Banking — 2022 |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | Net interest income | $ 56,679 | $ 57,498 | $ 52,900 | $ 33,078 | $ 33,689 | $ 30,045 |
+   | Noninterest income | 45,827 | 41,650 | 42,488 | 8,358 | 8,342 | 8,590 |
+   | Total revenue, net of interest expense | 102,506 | 99,148 | 95,388 | 41,436 | 42,031 | 38,635 |
+   | Provision for credit losses | 5,821 | 4,394 | 2,543 | 4,987 | 5,158 | 1,980 |
+   | Noninterest expense |  |  |  |  |  |  |
+   | Compensation and benefits (3) | 40,182 | 38,330 | 36,447 | 6,422 | 6,490 | 6,218 |
+   | Other noninterest expense | 26,630 | 27,515 | 24,991 | 15,682 | 14,926 | 13,859 |
+
+===== 24. new: body rows promoted (text values): fixture:aapl-2023-10k table 8 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Title of each class [cs3] | Trading symbol(s) [cs3] | Name of each exchange on which registered [cs3]
+   . r2: Common Stock, $0.00001 par value per share [cs3] | AAPL [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r3: 1.375% Notes due 2024 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r4: 0.000% Notes due 2025 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r5: 0.875% Notes due 2025 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r6: 1.625% Notes due 2026 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r7: 2.000% Notes due 2027 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r8: 1.375% Notes due 2029 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r9: 3.050% Notes due 2029 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r10: 0.500% Notes due 2031 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+   D r11: 3.600% Notes due 2042 [cs3] | — [cs3] | The Nasdaq Stock Market LLC [cs3]
+-- main
+   | Title of each class | Trading symbol(s) | Name of each exchange on which registered |
+   | --- | --- | --- |
+   | Common Stock, $0.00001 par value per share | AAPL | The Nasdaq Stock Market LLC |
+   | 1.375% Notes due 2024 | — | The Nasdaq Stock Market LLC |
+   | 0.000% Notes due 2025 | — | The Nasdaq Stock Market LLC |
+   | 0.875% Notes due 2025 | — | The Nasdaq Stock Market LLC |
+   | 1.625% Notes due 2026 | — | The Nasdaq Stock Market LLC |
+   | 2.000% Notes due 2027 | — | The Nasdaq Stock Market LLC |
+   | 1.375% Notes due 2029 | — | The Nasdaq Stock Market LLC |
+-- candidate
+   | Title of each class | Trading symbol(s) | Name of each exchange on which registered |
+   | --- | --- | --- |
+   | Common Stock, $0.00001 par value per share | AAPL | The Nasdaq Stock Market LLC |
+   | 1.375% Notes due 2024 | — | The Nasdaq Stock Market LLC |
+   | 0.000% Notes due 2025 | — | The Nasdaq Stock Market LLC |
+   | 0.875% Notes due 2025 | — | The Nasdaq Stock Market LLC |
+   | 1.625% Notes due 2026 | — | The Nasdaq Stock Market LLC |
+   | 2.000% Notes due 2027 | — | The Nasdaq Stock Market LLC |
+   | 1.375% Notes due 2029 | — | The Nasdaq Stock Market LLC |
+
+===== 25. new: body rows promoted (values with units): rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm table 44 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | December 31, [cs9]
+   H r2:  [cs3] | 2025 [cs3] |  [cs3] | 2024 [cs3]
+   . r3: Weighted-average remaining lease term: [cs3] |  [cs3] |  [cs3] |  [cs3]
+   . r4: Finance leases [cs3] | 15.1 years [cs3] |  [cs3] | 13.7 years [cs3]
+   . r5: Operating leases [cs3] | 12.3 years [cs3] |  [cs3] | 11.5 years [cs3]
+   . r6: Weighted-average discount rate: [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r7: Finance leases [cs3] | 4.1 [cs2] | % |  [cs3] | 3.6 [cs2] | %
+   D r8: Operating leases [cs3] | 4.3 [cs2] | % |  [cs3] | 3.9 [cs2] | %
+-- main
+   |  | December 31, — 2025 | 2024 |
+   | --- | --- | --- |
+   | Weighted-average remaining lease term: |  |  |
+   | Finance leases | 15.1 years | 13.7 years |
+   | Operating leases | 12.3 years | 11.5 years |
+   | Weighted-average discount rate: |  |  |
+   | Finance leases | 4.1 % | 3.6 % |
+   | Operating leases | 4.3 % | 3.9 % |
+-- candidate
+   |  | December 31, — 2025 | December 31, — 2024 |
+   | --- | --- | --- |
+   | Weighted-average remaining lease term: |  |  |
+   | Finance leases | 15.1 years | 13.7 years |
+   | Operating leases | 12.3 years | 11.5 years |
+   | Weighted-average discount rate: |  |  |
+   | Finance leases | 4.1 % | 3.6 % |
+   | Operating leases | 4.3 % | 3.9 % |
+
+===== 26. named limitation: years row: edgar:TSM-20-F-2025-04-17.htm table 136 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×2 | As of December 31, [cs11]
+   H r2: Function | · | 2022 [cs3] | · | 2023 [cs3] | · | 2024 [cs3]
+   D r3: Managers | ·×2 | 7,295 | ·×3 | 7,861 | ·×3 | 8,737 | ·
+   D r4: Professionals | ·×2 | 35,189 | ·×3 | 36,807 | ·×3 | 40,477 | ·
+   D r5: Assistant Engineers/Clericals | ·×2 | 8,665 | ·×3 | 9,235 | ·×3 | 10,207 | ·
+   D r6: Technicians | ·×2 | 21,941 | ·×3 | 22,575 | ·×3 | 24,404 | ·
+   D r8: Total | ·×2 | 73,090 | ·×3 | 76,478 | ·×3 | 83,825 | ·
+-- main
+   | Function | As of December 31, — 2022 | 2023 | 2024 |
+   | --- | --- | --- | --- |
+   | Managers | 7,295 | 7,861 | 8,737 |
+   | Professionals | 35,189 | 36,807 | 40,477 |
+   | Assistant Engineers/Clericals | 8,665 | 9,235 | 10,207 |
+   | Technicians | 21,941 | 22,575 | 24,404 |
+   | Total | 73,090 | 76,478 | 83,825 |
+-- candidate
+   | Function | As of December 31, — 2022 | As of December 31, — 2023 | As of December 31, — 2024 |
+   | --- | --- | --- | --- |
+   | Managers | 7,295 | 7,861 | 8,737 |
+   | Professionals | 35,189 | 36,807 | 40,477 |
+   | Assistant Engineers/Clericals | 8,665 | 9,235 | 10,207 |
+   | Technicians | 21,941 | 22,575 | 24,404 |
+   | Total | 73,090 | 76,478 | 83,825 |
+
+===== 27. F7 headerless continuation: edgar:CAT-10-K-2025-02-14.htm table 143 (display:none cells: 21)
+-- source (checker's placed grid; H header zone, D data row)
+   D r1:  [cs3] | 10.4 [cs3] | Form of Nonqualified Stock Options Award pursuan… [cs3] |  [cs3]
+   D r2:  [cs3] | 10.5 [cs3] | Form of Performance-Based Restricted Stock Unit … [cs3] |  [cs3]
+   D r3:  [cs3] | 10.6 [cs3] | Form of Nonqualified Stock Options Award pursuan… [cs3] |  [cs3]
+   D r4:  [cs3] | 10.7 [cs3] | Caterpillar Inc. Supplemental Retirement Plan (f… [cs3] |  [cs3]
+   D r5:  [cs3] | 10.8 [cs3] | First Amendment to the Caterpillar Inc. Suppleme… [cs3] |  [cs3]
+   D r6:  [cs3] | 10.9 [cs3] | Second Amendment to the Caterpillar Inc. Supplem… [cs3] |  [cs3]
+   D r7:  [cs3] | 10.10 [cs3] | Caterpillar Inc. Supplemental Employees’ Investm… [cs3] |  [cs3]
+   D r8:  [cs3] | 10.11 [cs3] | First Amendment to the Caterpillar Inc. Suppleme… [cs3] |  [cs3]
+   D r9:  [cs3] | 10.12 [cs3] | Second Amendment to the Caterpillar Inc. Supplem… [cs3] |  [cs3]
+   D r10:  [cs3] | 10.13 [cs3] | Third Amendment to the Caterpillar Inc. Suppleme… [cs3] |  [cs3]
+   D r11:  [cs3] | 10.14 [cs3] | Fourth Amendment to the Caterpillar Inc. Supplem… [cs3] |  [cs3]
+   D r12:  [cs3] | 10.15 [cs3] | Caterpillar Inc. Directors' Deferred Compensatio… [cs3] |  [cs3]
+-- main
+   | 10.4 | [Form of Nonqualified Stock Options Award pursuant to the 2023 Long-Term Incentive Plan (incorporated by reference from Exhibit 10.3 to the Company's Quarterly Report on Form 10-Q for the quarter ended March 31, 2024)*](https://www.sec.gov/Archives/edgar/data/18230/000001823024000020/ex103_xformofnqsoawardpurs.htm) |
+   | --- | --- |
+   | 10.5 | [Form of Performance-Based Restricted Stock Unit Award pursuant to the 2023 Long-Term Incentive Plan (incorporated by reference from Exhibit 10.4 to the Company's Quarterly Report on Form 10-Q for the quarter ended March 31, 2024)*](https://www.sec.gov/Archives/edgar/data/18230/000001823024000020/ex104_xformofprsuawardpurs.htm) |
+   | 10.6 | [Form of Nonqualified Stock Options Award pursuant to the 2023 Long-Term Incentive Plan (China Payroll Addendum) (incorporated by reference from Exhibit 10.5 to the Company's Quarterly Report on Form 10-Q for the quarter ended June 30, 2023)*](https://www.sec.gov/Archives/edgar/data/18230/000001823023000047/ex105_xformofnqsoawardpurs.htm) |
+   | 10.7 | [Caterpillar Inc. Supplemental Retirement Plan (formerly known as the Caterpillar Inc. Supplemental Pension Benefit Plan), amended and restated effective January 1, 2020 (incorporated by reference from Exhibit 10.17 to the Company's Annual report on Form 10-K for the year ended December 31, 2020)*](https://www.sec.gov/Archives/edgar/data/18230/000001823021000063/ex_1017xsupplementalretire …
+   | 10.8 | [First Amendment to the Caterpillar Inc. Supplemental Retirement Plan, effective January 1, 2022 (incorporated by reference from Exhibit 10.17 to the Company’s Annual Report on Form 10-K for the year ended December 31, 2021)*](https://www.sec.gov/Archives/edgar/data/18230/000001823022000050/cat_exx1017x12312021x1stam.htm) |
+   | 10.9 | [Second Amendment to the Caterpillar Inc. Supplemental Retirement Plan, effective July 1, 2022 (incorporated by reference from Exhibit 10.3 to the Company’s Quarterly Report on Form 10-Q for the quarter ended September 30, 2022)*](https://www.sec.gov/Archives/edgar/data/18230/000001823022000223/ex103_secondamendmenttothe.htm) |
+   | 10.10 | [Caterpillar Inc. Supplemental Employees’ Investment Plan, amended and restated as of May 15, 2017 (incorporated by reference from Exhibit 10.3 to the Company's Quarterly Report on Form 10-Q for the quarter ended June 30, 2017)*](https://www.sec.gov/Archives/edgar/data/18230/000001823017000245/exhibit103.htm) |
+   | 10.11 | [First Amendment to the Caterpillar Inc. Supplemental Employees' Investment Plan, effective as of July 24, 2017 (incorporated by reference from Exhibit 10.22 to the Company's Annual Report on Form 10-K for the year ended December 31, 2017)*](https://www.sec.gov/Archives/edgar/data/18230/000001823018000042/cat_exx1022x12312017.htm) |
+-- candidate
+   |  |  |
+   | --- | --- |
+   | 10.4 | [Form of Nonqualified Stock Options Award pursuant to the 2023 Long-Term Incentive Plan (incorporated by reference from Exhibit 10.3 to the Company's Quarterly Report on Form 10-Q for the quarter ended March 31, 2024)*](https://www.sec.gov/Archives/edgar/data/18230/000001823024000020/ex103_xformofnqsoawardpurs.htm) |
+   | 10.5 | [Form of Performance-Based Restricted Stock Unit Award pursuant to the 2023 Long-Term Incentive Plan (incorporated by reference from Exhibit 10.4 to the Company's Quarterly Report on Form 10-Q for the quarter ended March 31, 2024)*](https://www.sec.gov/Archives/edgar/data/18230/000001823024000020/ex104_xformofprsuawardpurs.htm) |
+   | 10.6 | [Form of Nonqualified Stock Options Award pursuant to the 2023 Long-Term Incentive Plan (China Payroll Addendum) (incorporated by reference from Exhibit 10.5 to the Company's Quarterly Report on Form 10-Q for the quarter ended June 30, 2023)*](https://www.sec.gov/Archives/edgar/data/18230/000001823023000047/ex105_xformofnqsoawardpurs.htm) |
+   | 10.7 | [Caterpillar Inc. Supplemental Retirement Plan (formerly known as the Caterpillar Inc. Supplemental Pension Benefit Plan), amended and restated effective January 1, 2020 (incorporated by reference from Exhibit 10.17 to the Company's Annual report on Form 10-K for the year ended December 31, 2020)*](https://www.sec.gov/Archives/edgar/data/18230/000001823021000063/ex_1017xsupplementalretire …
+   | 10.8 | [First Amendment to the Caterpillar Inc. Supplemental Retirement Plan, effective January 1, 2022 (incorporated by reference from Exhibit 10.17 to the Company’s Annual Report on Form 10-K for the year ended December 31, 2021)*](https://www.sec.gov/Archives/edgar/data/18230/000001823022000050/cat_exx1017x12312021x1stam.htm) |
+   | 10.9 | [Second Amendment to the Caterpillar Inc. Supplemental Retirement Plan, effective July 1, 2022 (incorporated by reference from Exhibit 10.3 to the Company’s Quarterly Report on Form 10-Q for the quarter ended September 30, 2022)*](https://www.sec.gov/Archives/edgar/data/18230/000001823022000223/ex103_secondamendmenttothe.htm) |
+   | 10.10 | [Caterpillar Inc. Supplemental Employees’ Investment Plan, amended and restated as of May 15, 2017 (incorporated by reference from Exhibit 10.3 to the Company's Quarterly Report on Form 10-Q for the quarter ended June 30, 2017)*](https://www.sec.gov/Archives/edgar/data/18230/000001823017000245/exhibit103.htm) |
+
+===== 28. new: value span over the header column: edgar:MSFT-10-K-2025-07-30.htm table 69 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r3: Year Ended June 30, [cs2] | ·×4 | 2025 | ·×5 | 2024 | ·×5 | 2023 | ·
+   D r5: Dividends per share (quarterly amounts) [cs2] | · | $ | 0.75 – 0.83 [cs3] | ·×2 | $ | 0.68 – 0.75 [cs3] | ·×2 | $ | 0.62 – 0.68 [cs3] | ·
+   D r6: Interest rates [cs2] | ·×2 | 3.4 % – 5.5 % [cs3] | ·×3 | 3.8 % – 5.6 % [cs3] | ·×3 | 2.0 % – 5.4 % [cs3] | ·
+-- main
+   | Year Ended June 30, — Dividends per share (quarterly amounts) | $ 0.75 – 0.83 | $ 0.68 – 0.75 | $ 0.62 – 0.68 |
+   | --- | --- | --- | --- |
+   | Interest rates | 3.4 % – 5.5 % | 3.8 % – 5.6 % | 2.0 % – 5.4 % |
+-- candidate
+   | Year Ended June 30, |  | 2025 | 2024 | 2023 |
+   | --- | --- | --- | --- | --- |
+   | Dividends per share (quarterly amounts) | $ 0.75 – 0.83 | $ 0.68 – 0.75 | $ 0.62 – 0.68 |  |
+   | Interest rates | 3.4 % – 5.5 % | 3.8 % – 5.6 % | 2.0 % – 5.4 % |  |
+
+===== 29. r2: S1 exhibit pair with different links: rcq:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526.htm table 39 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Exhibit Number [cs3] |  [cs3] |  [cs3] |  [cs3] | Incorporated by Reference [cs21] |  [cs3] | Filed Herewith [cs3]
+   H r2: ^ | ^ | ^ |  [cs3] | Exhibit Description [cs3] |  [cs3] | Form [cs3] |  [cs3] | File No. [cs3] |  [cs3] | Exhibit [cs3] |  [cs3] | Filing Date [cs3] |  [cs3] | ^ | ^ | ^
+   . r4: 10.1+ [cs3] |  [cs3] | 2025 Equity Incentive Plan forms of award agreem… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r6: 10.2+ [cs3] |  [cs3] | 2025 Equity Incentive Plan forms of award agreem… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   D r8: 10.3+ [cs3] |  [cs3] | Amended and Restated Bonus Plan, effective Janua… [cs3] |  [cs3] | 10-K [cs3] |  [cs3] | 001-35551 [cs3] |  [cs3] | 10.4 [cs3] |  [cs3] | January 29, 2026 [cs3] |  [cs3] |  [cs3]
+   D r10: 31.1 [cs3] |  [cs3] | Certification of Mark Zuckerberg, Chief Executiv… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   D r12: 31.2 [cs3] |  [cs3] | Certification of Susan Li, Chief Financial Offic… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r14: 32.1# [cs3] |  [cs3] | Certification of Mark Zuckerberg, Chief Executiv… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r16: 32.2# [cs3] |  [cs3] | Certification of Susan Li, Chief Financial Offic… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r18: 101.INS [cs3] |  [cs3] | Inline XBRL Instance Document (the instance docu… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r20: 101.SCH [cs3] |  [cs3] | Inline XBRL Taxonomy Extension Schema Document. [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+   . r22: 101.CAL [cs3] |  [cs3] | Inline XBRL Taxonomy Extension Calculation Linkb… [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | X [cs3]
+-- main
+   | Exhibit Number | Exhibit Description | Incorporated by Reference — Form | File No. | Exhibit | Filing Date |
+   | --- | --- | --- | --- | --- | --- |
+   | 10.1+ | [2025 Equity Incentive Plan forms of award agreements.](meta03312026-ex101.htm) |  |  |  | X |
+   | 10.2+ | [2025 Equity Incentive Plan forms of award agreements.](meta03312026-ex102.htm) |  |  |  | X |
+   | 10.3+ | [Amended and Restated Bonus Plan, effective January 1, 2026.](https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-12312025x10kexhibit104.htm) | 10-K | 001-35551 | 10.4 | January 29, 2026 |
+   | 31.1 | [Certification of Mark Zuckerberg, Chief Executive Officer, pursuant to Rule 13a-14(a)/15d-14(a), as adopted pursuant to Section 302 of the Sarbanes-Oxley Act of 2002](meta03312026-ex311.htm). |  |  |  | X |
+   | 31.2 | [Certification of Susan Li, Chief Financial Officer, pursuant to Rule 13a-14(a)/15d-14(a), as adopted pursuant to Section 302 of the Sarbanes-Oxley Act of 2002.](meta03312026-ex312.htm) |  |  |  | X |
+   | 32.1# | [Certification of Mark Zuckerberg, Chief Executive Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002](meta03312026-ex321.htm). |  |  |  | X |
+   | 32.2# | [Certification of Susan Li, Chief Financial Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002.](meta03312026-ex322.htm) |  |  |  | X |
+-- candidate
+   | Exhibit Number | Exhibit Description | Incorporated by Reference — Form | Incorporated by Reference — File No. | Incorporated by Reference — Exhibit | Incorporated by Reference — Filing Date | Filed Herewith |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | 10.1+ | [2025 Equity Incentive Plan forms of award agreements.](meta03312026-ex101.htm) |  |  |  |  | X |
+   | 10.2+ | [2025 Equity Incentive Plan forms of award agreements.](meta03312026-ex102.htm) |  |  |  |  | X |
+   | 10.3+ | [Amended and Restated Bonus Plan, effective January 1, 2026.](https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-12312025x10kexhibit104.htm) | 10-K | 001-35551 | 10.4 | January 29, 2026 |  |
+   | 31.1 | [Certification of Mark Zuckerberg, Chief Executive Officer, pursuant to Rule 13a-14(a)/15d-14(a), as adopted pursuant to Section 302 of the Sarbanes-Oxley Act of 2002](meta03312026-ex311.htm). |  |  |  |  | X |
+   | 31.2 | [Certification of Susan Li, Chief Financial Officer, pursuant to Rule 13a-14(a)/15d-14(a), as adopted pursuant to Section 302 of the Sarbanes-Oxley Act of 2002.](meta03312026-ex312.htm) |  |  |  |  | X |
+   | 32.1# | [Certification of Mark Zuckerberg, Chief Executive Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002](meta03312026-ex321.htm). |  |  |  |  | X |
+   | 32.2# | [Certification of Susan Li, Chief Financial Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002.](meta03312026-ex322.htm) |  |  |  |  | X |
+
+===== 30. r2: stacked titles end the zone (S7): fixture:nvda-2026-ex99-1 table 5 (display:none cells: 43)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: NVIDIA CORPORATION [cs18]
+   H r2: CONDENSED CONSOLIDATED BALANCE SHEETS [cs18]
+   H r3: (In millions) [cs18]
+   H r4: (Unaudited) [cs18]
+   H r6:  [cs3] |  [cs3] |  [cs3] | July 26, [cs3] |  [cs3] | January 25, [cs3]
+   H r7:  [cs3] |  [cs3] |  [cs3] | 2026 [cs3] |  [cs3] | 2026 [cs3]
+   . r8: ASSETS [cs9] |  [cs3] |  [cs3] |  [cs3]
+   . r10: Current assets: [cs9] |  [cs3] |  [cs3] |  [cs3]
+   D r11:  [cs3] | Cash and cash equivalents [cs6] | $ | 22,443 | · |  [cs3] | $ | 10,605 | ·
+   D r12:  [cs3] | Marketable debt securities [cs6] | 34,143 [cs2] | · |  [cs3] | 39,065 [cs2] | ·
+   D r13:  [cs3] | Marketable equity securities [cs6] | 42,783 [cs2] | · |  [cs3] | 12,886 [cs2] | ·
+   D r14:  [cs3] | Accounts receivable, net [cs6] | 63,059 [cs2] | · |  [cs3] | 38,466 [cs2] | ·
+-- main
+   | NVIDIA CORPORATION |  |  |
+   | --- | --- | --- |
+   | CONDENSED CONSOLIDATED BALANCE SHEETS |  |  |
+   | (In millions) |  |  |
+   | (Unaudited) |  |  |
+   |  | July 26, | January 25, |
+   |  | 2026 | 2026 |
+   | ASSETS |  |  |
+   | Current assets: |  |  |
+-- candidate
+   | NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) | NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) — July 26, — 2026 | NVIDIA CORPORATION — CONDENSED CONSOLIDATED BALANCE SHEETS — (In millions) — (Unaudited) — January 25, — 2026 |
+   | --- | --- | --- |
+   | ASSETS |  |  |
+   | Current assets: |  |  |
+   | Cash and cash equivalents | $ 22,443 | $ 10,605 |
+   | Marketable debt securities | 34,143 | 39,065 |
+   | Marketable equity securities | 42,783 | 12,886 |
+   | Accounts receivable, net | 63,059 | 38,466 |
+   | Inventories | 31,575 | 21,403 |
+
+===== 31. r2: stacked titles end the zone (S7), outlook: fixture:nvda-2026-ex99-1 table 11 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: NVIDIA CORPORATION [cs12]
+   H r2: RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK [cs12]
+   H r4:  [cs3] |  [cs3] |  [cs3] | Q3 FY2027 Outlook [cs3]
+   H r5:  [cs3] |  [cs3] |  [cs3] | ($ in billions) [cs3]
+   D r6: GAAP gross margin [cs6] |  [cs3] | 74.0 [cs2] | %
+   D r7:  [cs3] | Impact of acquisition-related costs and other co… [cs3] |  [cs3] | — [cs2] | ·
+   D r8: Non-GAAP gross margin [cs6] |  [cs3] | 74.0 [cs2] | %
+   D r10: GAAP operating expenses [cs6] |  [cs3] | $ | 9.2 | ·
+   D r11:  [cs3] | Acquisition-related costs and other costs [cs3] |  [cs3] | (0.2) [cs2] | ·
+   D r12: Non-GAAP operating expenses [cs6] |  [cs3] | $ | 9.0 | ·
+-- main
+   | NVIDIA CORPORATION |  |
+   | --- | --- |
+   | RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK |  |
+   |  | Q3 FY2027 Outlook |
+   |  | ($ in billions) |
+   | GAAP gross margin | 74.0 % |
+   | Impact of acquisition-related costs and other costs | — |
+   | Non-GAAP gross margin | 74.0 % |
+   | GAAP operating expenses | $ 9.2 |
+-- candidate
+   | NVIDIA CORPORATION — RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK | NVIDIA CORPORATION — RECONCILIATION OF GAAP TO NON-GAAP OUTLOOK — Q3 FY2027 Outlook — ($ in billions) |
+   | --- | --- |
+   | GAAP gross margin | 74.0 % |
+   | Impact of acquisition-related costs and other costs | — |
+   | Non-GAAP gross margin | 74.0 % |
+   | GAAP operating expenses | $ 9.2 |
+   | Acquisition-related costs and other costs | (0.2) |
+   | Non-GAAP operating expenses | $ 9.0 |
+
+===== 32. r2: column-heading second row holding dates: rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm table 37 (display:none cells: 9)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] |  [cs3] |  [cs3] |  [cs3] | Fair Value Measurement at Reporting Date Using [cs15]
+   H r2: Description [cs3] |  [cs3] | December 31, 2024 [cs3] |  [cs3] | Quoted Prices in Active Markets for Identical As… [cs3] |  [cs3] | Significant Other Observable Inputs (Level 2) [cs3] |  [cs3] | Significant Unobservable Inputs (Level 3) [cs3]
+   . r4: Cash equivalents: [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r5: Money market funds [cs3] |  [cs3] | $ | 36,165 | · |  [cs3] | $ | 36,165 | · |  [cs3] | $ | — | · |  [cs3] | $ | — | ·
+   D r6: U.S. government and agency securities [cs3] |  [cs3] | 23 [cs2] | · |  [cs3] | 23 [cs2] | · |  [cs3] | — [cs2] | · |  [cs3] | — [cs2] | ·
+   D r7: Time deposits [cs3] |  [cs3] | 369 [cs2] | · |  [cs3] | — [cs2] | · |  [cs3] | 369 [cs2] | · |  [cs3] | — [cs2] | ·
+   D r8: Corporate debt securities [cs3] |  [cs3] | 114 [cs2] | · |  [cs3] | — [cs2] | · |  [cs3] | 114 [cs2] | · |  [cs3] | — [cs2] | ·
+   D r9: Total cash equivalents [cs3] |  [cs3] | 36,671 [cs2] | · |  [cs3] | 36,188 [cs2] | · |  [cs3] | 483 [cs2] | · |  [cs3] | — [cs2] | ·
+   . r10: Marketable securities: [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r11: U.S. government securities [cs3] |  [cs3] | 14,889 [cs2] | · |  [cs3] | 14,889 [cs2] | · |  [cs3] | — [cs2] | · |  [cs3] | — [cs2] | ·
+   D r12: U.S. government agency securities [cs3] |  [cs3] | 3,053 [cs2] | · |  [cs3] | 3,053 [cs2] | · |  [cs3] | — [cs2] | · |  [cs3] | — [cs2] | ·
+   D r13: Corporate debt securities [cs3] |  [cs3] | 14,758 [cs2] | · |  [cs3] | — [cs2] | · |  [cs3] | 14,758 [cs2] | · |  [cs3] | — [cs2] | ·
+-- main
+   | Description | December 31, 2024 | Fair Value Measurement at Reporting Date Using — Quoted Prices in Active Markets for Identical Assets (Level 1) | Significant Other Observable Inputs (Level 2) | Significant Unobservable Inputs (Level 3) |
+   | --- | --- | --- | --- | --- |
+   | Cash equivalents: |  |  |  |  |
+   | Money market funds | $ 36,165 | $ 36,165 | $ — | $ — |
+   | U.S. government and agency securities | 23 | 23 | — | — |
+   | Time deposits | 369 | — | 369 | — |
+   | Corporate debt securities | 114 | — | 114 | — |
+   | Total cash equivalents | 36,671 | 36,188 | 483 | — |
+   | Marketable securities: |  |  |  |  |
+-- candidate
+   | Description | December 31, 2024 | Fair Value Measurement at Reporting Date Using — Quoted Prices in Active Markets for Identical Assets (Level 1) | Fair Value Measurement at Reporting Date Using — Significant Other Observable Inputs (Level 2) | Fair Value Measurement at Reporting Date Using — Significant Unobservable Inputs (Level 3) |
+   | --- | --- | --- | --- | --- |
+   | Cash equivalents: |  |  |  |  |
+   | Money market funds | $ 36,165 | $ 36,165 | $ — | $ — |
+   | U.S. government and agency securities | 23 | 23 | — | — |
+   | Time deposits | 369 | — | 369 | — |
+   | Corporate debt securities | 114 | — | 114 | — |
+   | Total cash equivalents | 36,671 | 36,188 | 483 | — |
+   | Marketable securities: |  |  |  |  |
+
+===== 33. r2: statement-title label beside dates: edgar:TSLA-10-K-2025-01-30.htm table 40 (display:none cells: 46)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | Three Months Ended [cs15]
+   H r2: Condensed Consolidated Statements of Operations … [cs3] | March 31, 2024 [cs3] |  [cs3] | June 30, 2024 [cs3] |  [cs3] | September 30, 2024 [cs3]
+   . r3: Other income (expense), net [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r4: Before adoption [cs3] | $ | 108 | · |  [cs3] | $ | 20 | · |  [cs3] | $ | ( 270 ) | ·
+   D r5: Adjustments [cs3] | 335 [cs2] | · |  [cs3] | ( 100 ) [cs2] | · |  [cs3] | 7 [cs2] | ·
+   D r6: As adjusted [cs3] | $ | 443 | · |  [cs3] | $ | ( 80 ) | · |  [cs3] | $ | ( 263 ) | ·
+   . r7: Provision for (benefit from) income taxes [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r8: Before adoption [cs3] | $ | 409 | · |  [cs3] | $ | 393 | · |  [cs3] | $ | 601 | ·
+   D r9: Adjustments [cs3] | 74 [cs2] | · |  [cs3] | ( 22 ) [cs2] | · |  [cs3] | 1 [cs2] | ·
+   D r10: As adjusted [cs3] | $ | 483 | · |  [cs3] | $ | 371 | · |  [cs3] | $ | 602 | ·
+   . r11: Net income attributable to common stockholders [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r12: Before adoption [cs3] | $ | 1,129 | · |  [cs3] | $ | 1,478 | · |  [cs3] | $ | 2,167 | ·
+-- main
+   | Condensed Consolidated Statements of Operations (unaudited): | Three Months Ended — March 31, 2024 | June 30, 2024 | September 30, 2024 |
+   | --- | --- | --- | --- |
+   | Other income (expense), net |  |  |  |
+   | Before adoption | $ 108 | $ 20 | $ ( 270 ) |
+   | Adjustments | 335 | ( 100 ) | 7 |
+   | As adjusted | $ 443 | $ ( 80 ) | $ ( 263 ) |
+   | Provision for (benefit from) income taxes |  |  |  |
+   | Before adoption | $ 409 | $ 393 | $ 601 |
+   | Adjustments | 74 | ( 22 ) | 1 |
+-- candidate
+   | Condensed Consolidated Statements of Operations (unaudited): | Three Months Ended — March 31, 2024 | Three Months Ended — June 30, 2024 | Three Months Ended — September 30, 2024 |
+   | --- | --- | --- | --- |
+   | Other income (expense), net |  |  |  |
+   | Before adoption | $ 108 | $ 20 | $ ( 270 ) |
+   | Adjustments | 335 | ( 100 ) | 7 |
+   | As adjusted | $ 443 | $ ( 80 ) | $ ( 263 ) |
+   | Provision for (benefit from) income taxes |  |  |  |
+   | Before adoption | $ 409 | $ 393 | $ 601 |
+   | Adjustments | 74 | ( 22 ) | 1 |
+
+===== 34. r2: section label beside a unit caption: fixture:nvda-2026-10k table 38 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | Jan 25, 2026 [cs3] |  [cs3] | Jan 26, 2025 [cs3]
+   H r2: Inventories: [cs3] | (In millions) [cs9]
+   D r3: Raw materials [cs3] | $ | 3,807 | · |  [cs3] | $ | 3,408 | ·
+   D r4: Work in process [cs3] | 8,822 [cs2] | · |  [cs3] | 3,399 [cs2] | ·
+   D r5: Finished goods [cs3] | 8,774 [cs2] | · |  [cs3] | 3,273 [cs2] | ·
+   D r6: Total inventories (1) [cs3] | $ | 21,403 | · |  [cs3] | $ | 10,080 | ·
+-- main
+   |  | Jan 25, 2026 | Jan 26, 2025 |
+   | --- | --- | --- |
+   | Inventories: | (In millions) |  |
+   | Raw materials | $ 3,807 | $ 3,408 |
+   | Work in process | 8,822 | 3,399 |
+   | Finished goods | 8,774 | 3,273 |
+   | Total inventories (1) | $ 21,403 | $ 10,080 |
+-- candidate
+   | Inventories: | Jan 25, 2026 — (In millions) | Jan 26, 2025 — (In millions) |
+   | --- | --- | --- |
+   | Raw materials | $ 3,807 | $ 3,408 |
+   | Work in process | 8,822 | 3,399 |
+   | Finished goods | 8,774 | 3,273 |
+   | Total inventories (1) | $ 21,403 | $ 10,080 |
+
+===== 35. r3: stacked titles over period rows (S7): fixture:nvda-2026-ex99-1 table 6 (display:none cells: 8)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: NVIDIA CORPORATION [cs24]
+   H r2: CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS [cs24]
+   H r3: (In millions) [cs24]
+   H r4: (Unaudited) [cs24]
+   H r5:  [cs3] | Three Months Ended [cs9] |  [cs3] | Six Months Ended [cs9]
+   H r6:  [cs3] | July 26, [cs3] |  [cs3] | July 27, [cs3] |  [cs3] | July 26, [cs3] |  [cs3] | July 27, [cs3]
+   H r7:  [cs3] | 2026 [cs3] |  [cs3] | 2025 [cs3] |  [cs3] | 2026 [cs3] |  [cs3] | 2025 [cs3]
+   . r8: Cash flows from operating activities: [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r9: Net income [cs3] | $ | 59,688 | · |  [cs3] | $ | 26,422 | · |  [cs3] | $ | 118,010 | · |  [cs3] | $ | 45,197 | ·
+   . r10: Adjustments to reconcile net income to net cash [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   . r11: provided by operating activities: [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r12: Stock-based compensation expense [cs3] | 2,027 [cs2] | · |  [cs3] | 1,624 [cs2] | · |  [cs3] | 3,954 [cs2] | · |  [cs3] | 3,099 [cs2] | ·
+-- main
+   | NVIDIA CORPORATION |  |  |  |  |
+   | --- | --- | --- | --- | --- |
+   | CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS |  |  |  |  |
+   | (In millions) |  |  |  |  |
+   | (Unaudited) |  |  |  |  |
+   |  | Three Months Ended |  | Six Months Ended |  |
+   |  | July 26, | July 27, | July 26, | July 27, |
+   |  | 2026 | 2025 | 2026 | 2025 |
+   | Cash flows from operating activities: |  |  |  |  |
+-- candidate
+   | NVIDIA CORPORATION — CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS — (In millions) — (Unaudited) | NVIDIA CORPORATION — CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS — (In millions) — (Unaudited) — Three Months Ended — July 26, — 2026 | NVIDIA CORPORATION — CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS — (In millions) — (Unaudited) — Three Months Ended — July 27, — 2025 | NVIDIA CORPORATIO …
+   | --- | --- | --- | --- | --- |
+   | Cash flows from operating activities: |  |  |  |  |
+   | Net income | $ 59,688 | $ 26,422 | $ 118,010 | $ 45,197 |
+   | Adjustments to reconcile net income to net cash |  |  |  |  |
+   | provided by operating activities: |  |  |  |  |
+   | Stock-based compensation expense | 2,027 | 1,624 | 3,954 | 3,099 |
+   | Depreciation and amortization | 1,127 | 668 | 2,124 | 1,280 |
+   | Deferred income taxes | (602) | 18 | 982 | (2,160) |
+
+===== 36. r3: label-only rows above headings, corpus (S7): edgar:CAT-10-K-2025-02-14.htm table 139 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: Enterprise-wide Disclosures: [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   H r2: Information about Geographic Areas: [cs9] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   H r3:  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] | Property, plant and equipment - net [cs9]
+   H r4:  [cs3] |  [cs3] | External sales and revenues 1 [cs15] |  [cs3] | December 31, [cs9]
+   H r5: (Millions of dollars) [cs3] |  [cs3] | 2024 [cs3] |  [cs3] | 2023 [cs3] |  [cs3] | 2022 [cs3] |  [cs3] | 2024 [cs3] |  [cs3] | 2023 [cs3]
+   D r6: Inside United States [cs3] |  [cs3] | $ | 30,624 | · |  [cs3] | $ | 31,053 | · |  [cs3] | $ | 24,368 | · |  [cs3] | $ | 8,213 | · |  [cs3] | $ | 7,658 | ·
+   D r7: Outside United States [cs3] |  [cs3] | 34,185 [cs2] | · |  [cs3] | 36,007 [cs2] | · |  [cs3] | 35,059 [cs2] | · |  [cs3] | 5,148 [cs2] | · |  [cs3] | 5,022 [cs2] | ·
+   D r8: Total [cs3] |  [cs3] | $ | 64,809 | · |  [cs3] | $ | 67,060 | · |  [cs3] | $ | 59,427 | · |  [cs3] | $ | 13,361 | · |  [cs3] | $ | 12,680 | ·
+   . r10: 1 Sales of ME&T are based on dealer or customer … [cs33]
+-- main
+   | Enterprise-wide Disclosures: |  |  |  |  |  |
+   | --- | --- | --- | --- | --- | --- |
+   | Information about Geographic Areas: |  |  |  |  |  |
+   |  |  |  |  | Property, plant and equipment - net |  |
+   |  | External sales and revenues 1 |  |  | December 31, |  |
+   | (Millions of dollars) | 2024 | 2023 | 2022 | 2024 | 2023 |
+   | Inside United States | $ 30,624 | $ 31,053 | $ 24,368 | $ 8,213 | $ 7,658 |
+   | Outside United States | 34,185 | 36,007 | 35,059 | 5,148 | 5,022 |
+   | Total | $ 64,809 | $ 67,060 | $ 59,427 | $ 13,361 | $ 12,680 |
+-- candidate
+   | Enterprise-wide Disclosures: — Information about Geographic Areas: — (Millions of dollars) | Information about Geographic Areas: — External sales and revenues 1 — 2024 | External sales and revenues 1 — 2023 | External sales and revenues 1 — 2022 | Property, plant and equipment - net — December 31, — 2024 | Property, plant and equipment - net — December 31, — 2023 |
+   | --- | --- | --- | --- | --- | --- |
+   | Inside United States | $ 30,624 | $ 31,053 | $ 24,368 | $ 8,213 | $ 7,658 |
+   | Outside United States | 34,185 | 36,007 | 35,059 | 5,148 | 5,022 |
+   | Total | $ 64,809 | $ 67,060 | $ 59,427 | $ 13,361 | $ 12,680 |
+   | 1 Sales of ME&T are based on dealer or customer location. Revenues from services provided are based on where service is rendered. |  |  |  |  |  |
+
+===== 37. r3: exhibit index headings under a caption span (S8): fixture:aapl-2023-10k table 61 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs9] |  [cs3] | Incorporated by Reference [cs15]
+   H r2: Exhibit Number [cs3] |  [cs3] | Exhibit Description [cs3] |  [cs3] | Form [cs3] |  [cs3] | Exhibit [cs3] |  [cs3] | Filing Date/ Period End Date [cs3]
+   D r3: 3.1 [cs3] |  [cs3] | Restated Articles of Incorporation of the Regist… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 3.1 [cs3] |  [cs3] | 8/7/20 [cs3]
+   D r4: 3.2 [cs3] |  [cs3] | Amended and Restated Bylaws of the Registrant ef… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 3.2 [cs3] |  [cs3] | 8/19/22 [cs3]
+   D r5: 4.1** [cs3] |  [cs3] | Description of Securities of the Registrant. [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r6: 4.2 [cs3] |  [cs3] | Indenture, dated as of April 29, 2013, between t… [cs3] |  [cs3] | S-3 [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 4/29/13 [cs3]
+   D r7: 4.3 [cs3] |  [cs3] | Officer’s Certificate of the Registrant, dated a… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 5/3/13 [cs3]
+   D r8: 4.4 [cs3] |  [cs3] | Officer’s Certificate of the Registrant, dated a… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 5/6/14 [cs3]
+   D r9: 4.5 [cs3] |  [cs3] | Officer’s Certificate of the Registrant, dated a… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 11/10/14 [cs3]
+   D r10: 4.6 [cs3] |  [cs3] | Officer’s Certificate of the Registrant, dated a… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 2/9/15 [cs3]
+   D r11: 4.7 [cs3] |  [cs3] | Officer’s Certificate of the Registrant, dated a… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 5/13/15 [cs3]
+   D r12: 4.8 [cs3] |  [cs3] | Officer’s Certificate of the Registrant, dated a… [cs3] |  [cs3] | 8-K [cs3] |  [cs3] | 4.1 [cs3] |  [cs3] | 7/31/15 [cs3]
+-- main
+   | Exhibit Number | Exhibit Description | Incorporated by Reference — Form | Exhibit | Filing Date/ Period End Date |
+   | --- | --- | --- | --- | --- |
+   | 3.1 | [Restated Articles of Incorporation of the Registrant filed on August 3, 2020.](http://www.sec.gov/Archives/edgar/data/320193/000119312520213158/d49399dex31.htm) | 8-K | 3.1 | 8/7/20 |
+   | 3.2 | [Amended and Restated Bylaws of the Registrant effective as of August 17, 2022.](http://www.sec.gov/Archives/edgar/data/320193/000119312522225365/d366128dex32.htm) | 8-K | 3.2 | 8/19/22 |
+   | 4.1** | [Description of Securities of the Registrant.](a10-kexhibit4109302023.htm) |  |  |  |
+   | 4.2 | [Indenture, dated as of April 29, 2013, between the Registrant and The Bank of New York Mellon Trust Company, N.A., as Trustee.](http://www.sec.gov/Archives/edgar/data/320193/000119312513179942/d527270dex41.htm) | S-3 | 4.1 | 4/29/13 |
+   | 4.3 | [Officer’s Certificate of the Registrant, dated as of May 3, 2013, including forms of global notes representing the Floating Rate Notes due 2016, Floating Rate Notes due 2018, 0.45% Notes due 2016, 1.00% Notes due 2018, 2.40% Notes due 2023 and 3.85% Notes due 2043.](http://www.sec.gov/Archives/edgar/data/320193/000119312513199324/d529124dex41.htm) | 8-K | 4.1 | 5/3/13 |
+   | 4.4 | [Officer’s Certificate of the Registrant, dated as of May 6, 2014, including forms of global notes representing the Floating Rate Notes due 2017, Floating Rate Notes due 2019, 1.05% Notes due 2017, 2.10% Notes due 2019, 2.85% Notes due 2021, 3.45% Notes due 2024 and 4.45% Notes due 2044.](http://www.sec.gov/Archives/edgar/data/320193/000119312514184969/d721207dex41.htm) | 8-K | 4.1 | 5/6/1 …
+   | 4.5 | [Officer’s Certificate of the Registrant, dated as of November 10, 2014, including forms of global notes representing the 1.000% Notes due 2022 and 1.625% Notes due 2026.](http://www.sec.gov/Archives/edgar/data/320193/000119312514406296/d816414dex41.htm) | 8-K | 4.1 | 11/10/14 |
+-- candidate
+   | Exhibit Number | Exhibit Description | Incorporated by Reference — Form | Incorporated by Reference — Exhibit | Incorporated by Reference — Filing Date/ Period End Date |
+   | --- | --- | --- | --- | --- |
+   | 3.1 | [Restated Articles of Incorporation of the Registrant filed on August 3, 2020.](http://www.sec.gov/Archives/edgar/data/320193/000119312520213158/d49399dex31.htm) | 8-K | 3.1 | 8/7/20 |
+   | 3.2 | [Amended and Restated Bylaws of the Registrant effective as of August 17, 2022.](http://www.sec.gov/Archives/edgar/data/320193/000119312522225365/d366128dex32.htm) | 8-K | 3.2 | 8/19/22 |
+   | 4.1** | [Description of Securities of the Registrant.](a10-kexhibit4109302023.htm) |  |  |  |
+   | 4.2 | [Indenture, dated as of April 29, 2013, between the Registrant and The Bank of New York Mellon Trust Company, N.A., as Trustee.](http://www.sec.gov/Archives/edgar/data/320193/000119312513179942/d527270dex41.htm) | S-3 | 4.1 | 4/29/13 |
+   | 4.3 | [Officer’s Certificate of the Registrant, dated as of May 3, 2013, including forms of global notes representing the Floating Rate Notes due 2016, Floating Rate Notes due 2018, 0.45% Notes due 2016, 1.00% Notes due 2018, 2.40% Notes due 2023 and 3.85% Notes due 2043.](http://www.sec.gov/Archives/edgar/data/320193/000119312513199324/d529124dex41.htm) | 8-K | 4.1 | 5/3/13 |
+   | 4.4 | [Officer’s Certificate of the Registrant, dated as of May 6, 2014, including forms of global notes representing the Floating Rate Notes due 2017, Floating Rate Notes due 2019, 1.05% Notes due 2017, 2.10% Notes due 2019, 2.85% Notes due 2021, 3.45% Notes due 2024 and 4.45% Notes due 2044.](http://www.sec.gov/Archives/edgar/data/320193/000119312514184969/d721207dex41.htm) | 8-K | 4.1 | 5/6/1 …
+   | 4.5 | [Officer’s Certificate of the Registrant, dated as of November 10, 2014, including forms of global notes representing the 1.000% Notes due 2022 and 1.625% Notes due 2026.](http://www.sec.gov/Archives/edgar/data/320193/000119312514406296/d816414dex41.htm) | 8-K | 4.1 | 11/10/14 |
+
+===== 38. r3: column headings and a caption row (S8): edgar:TSM-20-F-2025-04-17.htm table 89 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×2 | Payments Due by Period [cs18] | ·
+   H r2: Contractual Obligations | · | Total [cs2] | ·×2 | Less than 1 Year [cs2] | ·×2 | 1-3 Years [cs2] | ·×2 | 3-5 Years [cs2] | ·×2 | More than 5 Years [cs2] | ·
+   H r3: ·×2 | (in NT$ millions) [cs18] | ·
+   D r4: Long-Term Debt (1) | ·×2 | 1,232,100 | ·×3 | 79,396 | ·×3 | 337,516 | ·×3 | 224,434 | ·×3 | 590,754 | ·
+   D r5: Capital Leases ( 2 ) | ·×2 | 34,888 | ·×3 | 3,483 | ·×3 | 5,795 | ·×3 | 4,827 | ·×3 | 20,783 | ·
+   D r6: Temporary Receipts (3) | ·×2 | 291,102 | ·×3 | 198,603 | ·×3 | 92,499 | ·×3 | — | ·×3 | — | ·
+   D r7: Capital Purchase or Other Purchase Obligations (… | ·×2 | 1,144,112 | ·×3 | 1,097,240 | ·×3 | 46,700 | ·×3 | 172 | ·×3 | — | ·
+   D r8: Total Contractual Cash Obligations | ·×2 | 2,702,202 | ·×3 | 1,378,722 | ·×3 | 482,510 | ·×3 | 229,433 | ·×3 | 611,537 | ·
+-- main
+   | Contractual Obligations | Payments Due by Period — Total | Less than 1 Year | 1-3 Years | 3-5 Years | More than 5 Years |
+   | --- | --- | --- | --- | --- | --- |
+   |  | (in NT$ millions) |  |  |  |  |
+   | Long-Term Debt (1) | 1,232,100 | 79,396 | 337,516 | 224,434 | 590,754 |
+   | Capital Leases ( 2 ) | 34,888 | 3,483 | 5,795 | 4,827 | 20,783 |
+   | Temporary Receipts (3) | 291,102 | 198,603 | 92,499 | — | — |
+   | Capital Purchase or Other Purchase Obligations ( 4 ) | 1,144,112 | 1,097,240 | 46,700 | 172 | — |
+   | Total Contractual Cash Obligations | 2,702,202 | 1,378,722 | 482,510 | 229,433 | 611,537 |
+-- candidate
+   | Contractual Obligations | Payments Due by Period — Total — (in NT$ millions) | Payments Due by Period — Less than 1 Year — (in NT$ millions) | Payments Due by Period — 1-3 Years — (in NT$ millions) | Payments Due by Period — 3-5 Years — (in NT$ millions) | Payments Due by Period — More than 5 Years — (in NT$ millions) |
+   | --- | --- | --- | --- | --- | --- |
+   | Long-Term Debt (1) | 1,232,100 | 79,396 | 337,516 | 224,434 | 590,754 |
+   | Capital Leases ( 2 ) | 34,888 | 3,483 | 5,795 | 4,827 | 20,783 |
+   | Temporary Receipts (3) | 291,102 | 198,603 | 92,499 | — | — |
+   | Capital Purchase or Other Purchase Obligations ( 4 ) | 1,144,112 | 1,097,240 | 46,700 | 172 | — |
+   | Total Contractual Cash Obligations | 2,702,202 | 1,378,722 | 482,510 | 229,433 | 611,537 |
+
+===== 39. r3: fused, main kept in body: performance graph headings: edgar:NTRA-10-K-2025-02-28.htm table 123 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1: ·×5 | Nasdaq [cs2] | · | Nasdaq [cs2]
+   H r2: Trade Date | · | Natera, Inc. [cs2] | · | Biotechnology [cs2] | · | Composite [cs2]
+   D r3: Base period 1/2/2020 | · | $ | 100.00 | · | $ | 100.00 | · | $ | 100.00
+   D r4: 12/31/2020 | · | $ | 298.95 | · | $ | 126.47 | · | $ | 141.75
+   D r5: 12/31/2021 | · | $ | 278.97 | · | $ | 125.67 | · | $ | 172.07
+   D r6: 12/31/2022 | · | $ | 120.67 | · | $ | 111.96 | · | $ | 115.12
+   D r7: 12/31/2023 | · | $ | 188.16 | · | $ | 116.14 | · | $ | 165.10
+   D r8: 12/31/2024 | · | $ | 475.52 | · | $ | 114.55 | · | $ | 212.39
+-- main
+   | ​ | ​ | ​​ | ​ | ​​ | ​ | ​​ |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | ​ | ​ | ​​ | ​ | Nasdaq |  | Nasdaq |
+   | Trade Date | ​ | Natera, Inc. | ​ | Biotechnology | ​ | Composite |
+   | Base period 1/2/2020 | ​ | $ 100.00 | ​ | $ 100.00 | ​ | $ 100.00 |
+   | 12/31/2020 | ​ | $ 298.95 | ​ | $ 126.47 | ​ | $ 141.75 |
+   | 12/31/2021 | ​ | $ 278.97 | ​ | $ 125.67 | ​ | $ 172.07 |
+   | 12/31/2022 | ​ | $ 120.67 | ​ | $ 111.96 | ​ | $ 115.12 |
+   | 12/31/2023 | ​ | $ 188.16 | ​ | $ 116.14 | ​ | $ 165.10 |
+-- candidate
+   | Trade Date | Natera, Inc. | Nasdaq — Biotechnology | Nasdaq — Composite |
+   | --- | --- | --- | --- |
+   | Base period 1/2/2020 | $ 100.00 | $ 100.00 | $ 100.00 |
+   | 12/31/2020 | $ 298.95 | $ 126.47 | $ 141.75 |
+   | 12/31/2021 | $ 278.97 | $ 125.67 | $ 172.07 |
+   | 12/31/2022 | $ 120.67 | $ 111.96 | $ 115.12 |
+   | 12/31/2023 | $ 188.16 | $ 116.14 | $ 165.10 |
+   | 12/31/2024 | $ 475.52 | $ 114.55 | $ 212.39 |
+
+===== 40. r4: marker columns leave the count, values row stays body (S9): edgar:AMZN-10-Q-2025-10-31.htm table 21 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | December 31, 2024 [cs3] |  [cs3] | September 30, 2025 [cs3]
+   . r2: Weighted-average remaining lease term – operatin… [cs3] | 10.6 years [cs3] |  [cs3] | 10.0 years [cs3]
+   . r3: Weighted-average remaining lease term – finance … [cs3] | 11.9 years [cs3] |  [cs3] | 12.1 years [cs3]
+   D r4: Weighted-average discount rate – operating lease… [cs3] | 3.5 [cs2] | % |  [cs3] | 3.6 [cs2] | %
+   D r5: Weighted-average discount rate – finance leases [cs3] | 3.0 [cs2] | % |  [cs3] | 3.2 [cs2] | %
+-- main
+   |  | December 31, 2024 | September 30, 2025 |
+   | --- | --- | --- |
+   | Weighted-average remaining lease term – operating leases | 10.6 years | 10.0 years |
+   | Weighted-average remaining lease term – finance leases | 11.9 years | 12.1 years |
+   | Weighted-average discount rate – operating leases | 3.5 % | 3.6 % |
+   | Weighted-average discount rate – finance leases | 3.0 % | 3.2 % |
+-- candidate
+   |  | December 31, 2024 | September 30, 2025 |
+   | --- | --- | --- |
+   | Weighted-average remaining lease term – operating leases | 10.6 years | 10.0 years |
+   | Weighted-average remaining lease term – finance leases | 11.9 years | 12.1 years |
+   | Weighted-average discount rate – operating leases | 3.5 % | 3.6 % |
+   | Weighted-average discount rate – finance leases | 3.0 % | 3.2 % |
+
+===== 41. r4: accepted source-grid fusion: enumerated item: edgar:TSM-20-F-2025-04-17.htm table 216 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r2: (a) | · | See page F-1 for an index of the financial state… [cs5]
+   H r4: (b) | · | Exhibits to this annual report: [cs5]
+   D r6: ·×4 | 1.1 | · | Articles of Incorporation of Taiwan Semiconducto…
+   . r8: ·×4 | 2a.1 | · | Description of Securities Registered Under Secti…
+   . r10: ·×4 | 2b.1 | · | The Company hereby agrees to furnish to the U.S.…
+   D r12: ·×4 | 3.1 (1) | · | Rules for Election of Directors, as amended and …
+   D r14: ·×4 | 3.2 (1) | · | Rules and Procedures of Board of Directors Meeti…
+   D r16: ·×4 | 3.3 (2) | · | Rules and Procedures of Shareholders’ Meetings, …
+   D r18: ·×4 | 4.1 (3) | · | Land Lease with Southern Taiwan Science Park Adm…
+   D r20: ·×4 | 4.2 (4) | · | Land Lease with Southern Taiwan Science Park Adm…
+   D r22: ·×4 | 4.3 (5) | · | Land Lease with Southern Taiwan Science Park Adm…
+   D r24: ·×4 | 4.4 (6) | · | Land Lease with Hsinchu Science Park Administrat…
+-- main
+   | (a) | See page F-1 for an index of the financial statements filed as part of this annual report. |  |
+   | --- | --- | --- |
+   | (b) | Exhibits to this annual report: |  |
+   |  | 1.1 | [Articles of Incorporation of Taiwan Semiconductor Manufacturing Company Limited, as amended and restated on June 4, 2024. ](d896993dex11.htm) |
+   |  | 2a.1 | [Description of Securities Registered Under Section 12 of the Exchange Act. ](d896993dex2a1.htm) |
+   |  | 2b.1 | The Company hereby agrees to furnish to the U.S. Securities and Exchange Commission, upon request, copies of instruments defining the rights of holders of long-term debt of the Company and its subsidiaries. |
+   |  | 3.1 (1) | [Rules for Election of Directors, as amended and restated on July 26, 2021. ](http://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628dex31.htm) |
+   |  | 3.2 (1) | [Rules and Procedures of Board of Directors Meetings, as amended and restated on November 8, 2022. ](http://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628dex32.htm) |
+   |  | 3.3 (2) | Rules and Procedures of Shareholders’ Meetings, as amended and restated on May 7, 2002. (P). |
+-- candidate
+   | (a) — (b) | See page F-1 for an index of the financial statements filed as part of this annual report. — Exhibits to this annual report: | See page F-1 for an index of the financial statements filed as part of this annual report. — Exhibits to this annual report: |
+   | --- | --- | --- |
+   |  | 1.1 | [Articles of Incorporation of Taiwan Semiconductor Manufacturing Company Limited, as amended and restated on June 4, 2024. ](d896993dex11.htm) |
+   |  | 2a.1 | [Description of Securities Registered Under Section 12 of the Exchange Act. ](d896993dex2a1.htm) |
+   |  | 2b.1 | The Company hereby agrees to furnish to the U.S. Securities and Exchange Commission, upon request, copies of instruments defining the rights of holders of long-term debt of the Company and its subsidiaries. |
+   |  | 3.1 (1) | [Rules for Election of Directors, as amended and restated on July 26, 2021. ](http://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628dex31.htm) |
+   |  | 3.2 (1) | [Rules and Procedures of Board of Directors Meetings, as amended and restated on November 8, 2022. ](http://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628dex32.htm) |
+   |  | 3.3 (2) | Rules and Procedures of Shareholders’ Meetings, as amended and restated on May 7, 2002. (P). |
+   |  | 4.1 (3) | [Land Lease with Southern Taiwan Science Park Administration (formerly Tainan Science Park Administration) relating to the fabs located in Southern Taiwan Science Park (effective August 1, 2017 to July 31, 2037) (in Chinese with English summary). ](http://www.sec.gov/Archives/edgar/data/1046179/000119312518121866/d459142dex41.htm) |
+
+===== 42. r4: headings fuse without marker columns (S9 mirror): edgar:JPM-10-K-2025-02-14.htm table 207 (display:none cells: 0)
+-- source (checker's placed grid; H header zone, D data row)
+   H r1:  [cs3] | Three months ended [cs9]
+   H r2: Average amount (in millions) [cs3] | December 31, 2024 [cs3] | September 30, 2024 [cs3] | December 31, 2023 [cs3]
+   . r3: JPMorgan Chase & Co.: [cs3] |  [cs3] |  [cs3] |  [cs3]
+   . r4: HQLA [cs3] |  [cs3] |  [cs3] |  [cs3]
+   D r5: Eligible cash (a) [cs3] | $ | 396,123 | · | $ | 412,389 | · | $ | 485,263 | ·
+   D r6: Eligible securities (b)(c) [cs3] | 464,877 [cs2] | · | 453,899 [cs2] | · | 313,365 [cs2] | ·
+   D r7: Total HQLA (d) [cs3] | $ | 861,000 | · | $ | 866,288 | · | $ | 798,628 | ·
+   D r8: Net cash outflows [cs3] | $ | 763,648 | · | $ | 762,072 | · | $ | 704,857 | ·
+   D r9: LCR [cs3] | 113 [cs2] | % | 114 [cs2] | % | 113 [cs2] | %
+   D r10: Net excess eligible HQLA (d) [cs3] | $ | 97,352 | · | $ | 104,216 | · | $ | 93,771 | ·
+   . r11: JPMorgan Chase Bank, N.A.: [cs12]
+   D r12: LCR [cs3] | 124 [cs2] | % | 121 [cs2] | % | 129 [cs2] | %
+-- main
+   | Average amount (in millions) | Three months ended — December 31, 2024 | September 30, 2024 | December 31, 2023 |
+   | --- | --- | --- | --- |
+   | JPMorgan Chase & Co.: |  |  |  |
+   | HQLA |  |  |  |
+   | Eligible cash (a) | $ 396,123 | $ 412,389 | $ 485,263 |
+   | Eligible securities (b)(c) | 464,877 | 453,899 | 313,365 |
+   | Total HQLA (d) | $ 861,000 | $ 866,288 | $ 798,628 |
+   | Net cash outflows | $ 763,648 | $ 762,072 | $ 704,857 |
+   | LCR | 113 % | 114 % | 113 % |
+-- candidate
+   | Average amount (in millions) | Three months ended — December 31, 2024 | Three months ended — September 30, 2024 | Three months ended — December 31, 2023 |
+   | --- | --- | --- | --- |
+   | JPMorgan Chase & Co.: |  |  |  |
+   | HQLA |  |  |  |
+   | Eligible cash (a) | $ 396,123 | $ 412,389 | $ 485,263 |
+   | Eligible securities (b)(c) | 464,877 | 453,899 | 313,365 |
+   | Total HQLA (d) | $ 861,000 | $ 866,288 | $ 798,628 |
+   | Net cash outflows | $ 763,648 | $ 762,072 | $ 704,857 |
+   | LCR | 113 % | 114 % | 113 % |
