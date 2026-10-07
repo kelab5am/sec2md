@@ -1,8 +1,8 @@
 # sec2md Table Merge and Header Rules Design
 
-Date: 2026-10-06 (revision 17)
+Date: 2026-10-07 (revision 18)
 
-Status: Approved for planning (Astra, round 4). Revisions 6–17 add the plan
+Status: Approved for planning (Astra, round 4). Revisions 6–18 add the plan
 prototype's corrections and interpretations, for Astra to confirm with the plan.
 
 Evidence: `../audits/2026-10-04-table-merge-header-evidence/REPORT.md`
@@ -177,10 +177,21 @@ the plan's task reviews:
 | Under `EXTENDED`, a label column holding only currency codes (an exchange-rate table: rows such as `EUR`, `1.08`, `1.10` under an empty corner cell) was a currency-marker column and merged into the first value column. `main` keeps it. The corpus has no such table. | R4: the label column is never a currency-marker column for a marker other than `$`. |
 | The same fusion still happens for currency codes in a sub-label column beside the label column (a `Forward contracts` section whose rows hold `EUR` and `JPY` before their amounts): it renders `EUR 1,234` where `main` keeps the code in its own column. Such a column has the shape R4 exists for (a per-row `RMB` column); only the varying codes tell them apart. The corpus has no such table. | Recorded as a named limitation, pinned by tests and listed in the release notes. A rule for it is left to a later task. |
 | R8 keeps the later cells of a one-row PART table, so a running page-top header such as `Part II \| Annual Report 2024` is no longer a bare breadcrumb and is not stripped: sections split, and a page's text before the next item can fall out of every section. A kept part-only stub also changes what `get_section` returns for a part without an item. The corpus has no such layout (CAT 7 is not at a page top). | Recorded as a named limitation, pinned by tests and listed in the release notes. |
-| A `<table>` placed directly inside a header-row `<tr>` (or a `<div>` there), outside any cell, is malformed markup whose cells are read twice: once in the outer row and once as their own rows. After R6a's record counts each source node once, the header line's second copy is a header excess, so strict reports it where `main` passed (`main`'s column cleanup dropped the duplicate columns, which R7 keeps). The corpus has no such layout. | Recorded as a named limitation, pinned by tests and listed in the release notes. Reading each cell node once at extraction is left to a later task. |
+| A `<table>` placed directly inside a header-row `<tr>` (or a `<div>` there), outside any cell, is malformed markup whose cells are read twice: once in the outer row and once as their own rows. After R6a's record counts each source node once, the header line's second copy is a header excess, so strict reports it where `main` passed (`main`'s column cleanup dropped the duplicate columns, which R7 keeps). The corpus has no such layout. | Recorded as a named limitation, pinned by tests and listed in the release notes. Reading each cell node once at extraction is left to a later task. **Superseded by revision 18.** |
 | The body-row guard's committed baseline did not match its own generator (2,492 rows and 172 moves, from the older set semantics). | Regenerated: 2,485 rows and 165 moves. |
-| A table rendered inside a list item or an inline wrapper (`<li>`, `<b>`, `<i>`, `<em>`, `<strong>`, an inline element styled bold or italic such as `<span style="font-weight:700">`, or a `<div>` inside one of these) has no segment of its own, so R6a records a miss and strict applies the ordinary trace. R6 repeats a spanning header's numbers, so a common header such as `Year Ended December 31,` over `2025` and `2024` writes `31` twice against one source occurrence, and strict fails where `main` passed. The corpus has no such table (0 misses). | Recorded as a named limitation, pinned by tests and listed in the release notes. Binding header records for wrapped tables is the first follow-up task. |
+| A table rendered inside a list item or an inline wrapper (`<li>`, `<b>`, `<i>`, `<em>`, `<strong>`, an inline element styled bold or italic such as `<span style="font-weight:700">`, or a `<div>` inside one of these) has no segment of its own, so R6a records a miss and strict applies the ordinary trace. R6 repeats a spanning header's numbers, so a common header such as `Year Ended December 31,` over `2025` and `2024` writes `31` twice against one source occurrence, and strict fails where `main` passed. The corpus has no such table (0 misses). | Recorded as a named limitation, pinned by tests and listed in the release notes. Binding header records for wrapped tables is the first follow-up task. **Superseded by revision 18.** |
 | The XLSX acceptance said 9 `display_page` snapshots; the data, in round 5 and in the final run, holds 8 (a miscount from round 1). | The count is 8. |
+
+**User decisions after the recent filings corpus** (revision 17 → 18,
+2026-10-07). The corpus run (`../audits/2026-10-06-recent-filings-corpus/REPORT.md`)
+found no wrapped or nested table in 179 documents, and one more strict
+regression outside the named limitations. The user chose to fix the two
+table-structure limitations in this branch:
+
+| Finding | Change |
+|---|---|
+| A `<table>` inside a row of another table is read twice: `_extract_cells` collects every `td` and `th` beneath a `tr`, including a nested table's cells, which also render as their own rows. Inside a header row it gave a header excess (revision 17's limitation); inside a body row, or inside a `<div>` in a first row of `td` cells, strict also failed where `main` passed (found by the corpus run's review, outside the named limitations). | Source cell: a table nested in a row but outside every cell is read once, in the outer row that contains it; its own rows are no longer also enumerated as outer rows. (A first draft read it in its own rows instead; Codex showed that could drop a value with no inner `<tr>`, or under outer rowspans.) A table nested inside a cell renders as before. The limitation is withdrawn. |
+| A table inside a list item or an inline wrapper had no segment of its own, so R6a recorded a miss and a repeated spanning-header number failed strict (revision 17's limitation). | R6a binds such a table's record from the wrapper path and locates it with a boundary-relaxed rule (step 3). The limitation is withdrawn. |
 
 **Prototype interpretations, round 2,** recorded for Astra:
 
@@ -246,7 +257,25 @@ carries a dated correction.
 ## Definitions
 
 - **Source cell:** one `td` or `th` that is not grid-hidden, read by
-  `_extract_cells` into a `Cell`.
+  `_extract_cells` into a `Cell`. A table nested in a row but outside every
+  cell of that row (a `<table>` placed directly in the `tr`, or in a `<div>`
+  there) is read once (revision 18): its cells stay cells of the outer row
+  that contains it, as today, and its own rows are not also enumerated as rows
+  of the outer table. Every such cell lies beneath the outer `tr` and is read
+  in exactly one place. For such a table the grid width counts the columns
+  that rowspans from earlier rows occupy, so a cell pushed right by a rowspan
+  is placed rather than dropped (a review showed the plain width lost values
+  when a rowspan reached into or out of the row). A one-row table holding a
+  nested table with no inner `tr` still loses that value through the one-row
+  path, as on `main`; that path is outside this rule and left to a follow-up.
+  Because such a table's grid no longer drops cells that rowspans push
+  right, a table that also holds a table inside a cell can now render that
+  inner table's known double read in full, so strict can fail where it
+  passed before (fail-closed: a duplicate the old grid dropped is now
+  visible). Neither corpus holds such a table. A table nested inside one
+  of the row's cells is read as before. A table holding such a nested table
+  is never rendered as a list table, because the list path keeps only a row's
+  last cell and would drop a value.
 - **Grid-hidden:** a row or cell hidden by the snapshot builder's rule,
   `xlsx_tables._hidden`: `display:none`, `visibility:hidden` or a `hidden`
   attribute, on the element itself or on an ancestor inside the table.
@@ -598,7 +627,7 @@ everything else in the element.
      `_normalized_numbers` over visible text. Each source node is counted
      once (revision 17): a header-zone cell whose node lies inside another
      header-zone cell's node is left out (its text is already in the outer
-     cell's), and a node that extraction reads twice (a nested table's cells
+     cell's), and a node that extraction reads twice (since revision 18, only a table nested inside a cell: its cells
      read in the outer row and in their own row) counts at its first read;
    - `header_capacity`, each header-zone cell's tokens multiplied by the number
      of output columns whose header that cell covers, over the same cells as
@@ -611,13 +640,32 @@ everything else in the element.
 
    The record is bound to the original table node. A record from a render that
    did not supply element content is discarded.
-3. **Header check.** For each table node among the element's mapped source
-   nodes that has a record:
+
+   A table rendered inside a list item or an inline wrapper (`<li>`, `<b>`,
+   `<strong>`, `<i>`, `<em>`, an inline element the parser reads as bold or
+   italic, or a block inside one of these) takes its record by the same rule,
+   bound once after the page's segments are assembled, against the wrapper's
+   final segment, because later appends can still merge into it (revision 18). The record is
+   marked as wrapped, and the wrapper's element maps to the table.
+3. **Header check.** For each table node among, or rendered inside, the
+   element's mapped source nodes that has a record:
    - **Locate the header line** by an exact table-to-output association. The
      record identifies the table's own segment within the element content, and
      the header line is found only inside that segment, as its first line.
      Never search the whole element or replace text freely, because an
      identical prose or body line elsewhere must not be removed.
+   - **Wrapped records** (revision 18). The wrapper adds text around the
+     table's Markdown: a list marker or prose before the header line, emphasis
+     marks before it and after the last row. For a wrapped record only, the
+     segment may share its first line with leading content and its last line
+     with trailing content; its other lines are whole lines. Everything else
+     is unchanged: the table's own copy must be found in the wrapper's final
+     segment, and no link reduction in the wrapper may cross the table's
+     boundaries (otherwise the copy found could be another table's text, and
+     the record is a miss); the segment must occur exactly once in the element, its first
+     line must equal the recorded header line, and the located span is the
+     header line only. A second copy anywhere in the element makes it
+     ambiguous, so a copy the source does not hold is never credited.
    - Each located header line is consumed once.
    - Every token count of that line must be within `header_capacity`. An excess
      is a failure: `<element id>:header:<token>`.
@@ -631,8 +679,10 @@ everything else in the element.
      - Each such miss is recorded on the parser (`header_accounting_misses`),
        so it can never pass as successful accounting. Acceptance requires none
        on the fixtures and the corpus, or each one individually reviewed.
-     - A table rendered inside a list item or an inline wrapper has no segment
-       of its own, so it is recorded as a miss.
+     - A wrapped table whose own copy is not found in the wrapper's final
+       segment, or across whose boundary a link reduction runs (for example
+       `<li>See [note` before it, or a padded link label inside it), is
+       recorded as a miss and keeps the ordinary trace.
    - Tests cover the missing and the ambiguous case, each with a genuine
      ordinary-trace excess and with the no-excess source above.
 4. **Everything else.** The occurrence-sensitive trace then runs on the
@@ -705,7 +755,9 @@ under `EXTENDED`. XLSX's sentinel-header construction is untouched.
 - `TableParser.md()`, `to_markdown()` and `to_matrix()` keep their signatures.
 - List tables, unreliable-table fallback text (capture mode) and positioned-div
   tables render as today.
-- Nested tables get no special handling. `TableParser`'s grid already
+- Nested tables get no special handling, with one narrow exception (revision
+  18): a table nested in a row but outside every cell is read once, in the
+  outer row (Definitions, Source cell). `TableParser`'s grid otherwise
   flattens their rows into the outer table, and R1–R7 apply to that grid like
   any other. Their output can therefore change, for example keeping an outer
   cell's `12` that was dropped before. Nested-table structure stays deferred.
@@ -941,10 +993,11 @@ table 7 (snapshot 5, page 12): "Product" 63946 under "2025 — 2024"; expected "
 - **Strict.** R6a accounts for each table's header line separately. No other
   strict behaviour
   changes. Acceptance requires no new strict failures in either mode on the
-  fixtures and the corpus. Outside them, three of revision 17's named
+  fixtures and the corpus. Outside them, one of revision 17's named
   limitations can make strict fail where `main` passed: a number split by a
-  zero-width character, a `<table>` directly inside a header-row `<tr>`, and a
-  table inside a list item or inline wrapper whose header repeats a number.
+  zero-width character. Revision 18 withdraws the other two (a `<table>`
+  inside a row of another table, and a table inside a list item or inline
+  wrapper).
 - **Pinned failures.** All 10 pinned value failures in
   `tests/test_table_completeness_fixtures.py` are class 1, so `PINNED_FAILURES`
   is expected to become empty. Each removal is recorded with the evidence that
@@ -1041,6 +1094,37 @@ Tests are written before the code they cover.
   - a prose number that matches only a header-zone number fails;
   - a table with links is traced through the anchor-stripped re-render's
     record. A record from the other render is discarded.
+- **Revision 18, in both rendering modes:**
+  - **C1.** A `<table>` directly in a header `tr`, directly in a body `tr`,
+    and in a `<div>` in a first row of `td` cells: strict passes, and every
+    nested value appears exactly once. Value-preservation controls: a nested
+    table with no inner `tr` (`<tr><td>A</td><td>1</td><table><td>987</td></table></tr>`)
+    and outer cells with `rowspan="2"` over a nested row each keep `987`.
+    A table nested inside a cell renders byte-for-byte as before.
+  - **C2, per wrapper** (`ul>li`, `ol>li` with prose, `b`, `strong`, `i`,
+    `em`, a bold and an italic styled span, `b>div`, `b>i`,
+    `<b>Intro</b><b>T</b>`, `<b>T</b><b>more</b>`, `b>ul>li`) with a spanning
+    `Year Ended December 31,` caption: no miss, an empty trace, strict passes,
+    the record is bound as wrapped, `element_header_records` returns it, and
+    the element content is byte-for-byte as before. The former limitation
+    tests become these positive assertions.
+  - **C2 links:** a table with links in `<b>` and in `<li>` binds the
+    anchor-stripped re-render's record.
+  - **C2 misses keep the ordinary trace:** two identical tables in one `<ul>`
+    or one `<b>` (both ambiguous); a wrapped and a standalone twin (the
+    standalone located, the wrapped ambiguous); a link reduction crossing the
+    boundary (`<li>See [note …`); a padded link label; and Codex's
+    counterexample: a damaged own copy plus a twin whose literal `[2025](x)`
+    text reduces to the first table's segment, in one wrapper, must be a miss.
+  - **C2 strict still fails** per wrapper: an invented header number
+    (`…:header:<token>`), Astra's body mutation, and wrapper prose that
+    invents a number or repeats a header-only number.
+  - **Locator units:** a wrapped record is located with a prefix and a
+    suffix and its span is the header line only; a wrapped segment occurring
+    twice is ambiguous; a non-wrapped record keeps whole-line semantics; the
+    ordered-list marker is still stripped.
+  - **The accuracy harness's own locator** applies the same wrapped rule and
+    agrees with production on a wrapped-table document.
 - **XLSX boundary (R9).** `LEGACY` works on the bare `object.__new__(TableParser)`
   that XLSX uses, without new instance state, and every transitive helper,
   including final validation and joining, receives the policy. `prepare_table`
@@ -1186,8 +1270,18 @@ identified by `results.json`'s document hashes and the EDGAR manifest.
   - Each figure is the median of at least five runs, in separate processes.
   - Per-fixture outliers are recorded.
   - This is separate from the completeness spec's Phase B budget and baseline.
+- **Revision 18:** every Testing case of revision 18 passes in both modes,
+  and no fixture or corpus result changes (neither corpus holds a wrapped or
+  nested table), including both corpora's strict comparisons, Phase A's
+  reproduction of the final acceptance run and the recent corpus's three
+  verdicts.
 - **Release:** a CHANGELOG entry lists each rendering change and the new
-  diagnostics fields, and the RCQ version gets a minor bump. README and
+  diagnostics fields, and the RCQ version gets a minor bump. The revision-17
+  known-limitation bullets for a table inside a header row and for wrapped
+  tables are replaced: the release notes say these now work, and name the
+  remaining association misses (a link reduction crossing a wrapped table's
+  boundary, a padded link label, identical tables in one element), which
+  keep the ordinary trace. README and
   `docs/usage/direct-conversion.md` describe the header line, the alignment
   fields, and what the alignment check does not cover.
 
