@@ -264,9 +264,14 @@ left out. A `<table>` placed in a row of another table but outside every cell
 (malformed markup) is read once, as cells of that row, except that in a one-row
 table such a table with no `<tr>` of its own is still dropped, as before; a table
 nested inside a cell is flattened into the outer table as before. XLSX export
-keeps its own column rules, so its prepared tables do not change; only the page
-number on its contents sheet, which is guessed from the Markdown page text, can
-change (on 4 pages in 2 documents of the review corpus).
+keeps its own column rules, so its prepared tables do not change. The page
+number on its contents sheet, like `Page.display_page`, comes from absolutely
+positioned page footers when a document has them, and is otherwise guessed from
+the Markdown page text with its table rows and divider lines left out. So the
+new table layout does not move it, except through the first line of a table
+inside a list item or bold or italic text, which also holds the list marker or
+emphasis marks and is still read (no page moves on the review corpus or the
+recent filings corpus).
 
 ## Multimodal: Image Extraction
 

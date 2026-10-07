@@ -74,14 +74,12 @@
     copies where a narrower grid would drop them, and strict then fails on them:
     this fails closed, and no value is lost.
   - XLSX export keeps its own merge rules, so its prepared tables are unchanged:
-    values, column groups, source coordinates, headers and issues. One workbook value
-    can change: the page number on the contents sheet (`display_page`, the same guess
-    as `Page.display_page`). Page numbers found in absolutely positioned page footers
-    take precedence; otherwise the number is guessed from the first and last lines of
-    each Markdown page, table lines included, so a changed table line can change it.
-    On the review corpus it changes on 4 pages in 2 documents (NTRA and TSM). The
-    guess already misreads table lines in the previous release; fixing it is a
-    separate task.
+    values, column groups, source coordinates, headers and issues. The page number on
+    the contents sheet (`display_page`, the same guess as `Page.display_page`) is now
+    guessed with table lines left out (see the display page item below), so the table
+    changes in this release no longer move it, except through the first line of a
+    table inside a list item or bold or italic text, which is still read. On the
+    review corpus and the recent filings corpus they move it on no page.
 - Strict's numeric trace accounts for each table's header line on its own. A number
   repeated in the header line because its header cell spans several columns no
   longer fails strict, while a header number with no header cell to supply it still
@@ -118,6 +116,43 @@
     rendered changes or replaces the table's copy, as when a later bold run
     completes a link that the table's text opened, or when a later inline-block
     table with a link merges into it.
+- Strict no longer fails a number in parentheses whose parentheses and digits are
+  separate bold or italic runs, as in cover-page telephone numbers whose area code
+  is tagged apart from its parentheses. The source reads `( 650 )`, an accounting
+  negative, but the output's `**(** **650** **)**` read as 650, so 9 of the 70
+  annual reports in the recent filings corpus (MSFT, NTRA and TSLA 10-Ks) failed
+  default strict. Only the trace's reading of the output changes: one number
+  between `(` and `)` whose gaps hold only whitespace and emphasis marks reads as
+  `(650)` does. The Markdown and the source side are unchanged, and all other text
+  reads as before. The rule is narrow:
+  - a number split across runs, such as `**(** **1** **.25** **)**` or
+    `**(** **1** **,234** **)**`, a `$` or `%` between a parenthesis and the number,
+    such as `**( $** **1,234** **)**`, and parentheses glued to a word, such as
+    `**USD(** **650** **)**`, still fail strict, as before;
+  - a literal asterisk beside whitespace in such a gap, such as `(125 *)` or
+    `( 5* )`, now reads as a negative number the source does not hold, so strict
+    fails where it passed before. A star with no whitespace, as in the footnote
+    `(125*)`, reads as before.
+- The display page guess (`Page.display_page`, and the page number on the XLSX
+  contents sheet) leaves Markdown table lines out: lines that start with `|`, and
+  divider lines such as `| --- | --- |` or `:--- | ---:`. A table cell is no longer
+  read as the page number (`| 304 | 1,234 |` gave 304, `| Total | 509,711 |` gave
+  711), and table lines no longer take the places of the page's first and last
+  three lines, which are the lines the guess reads, so a number such as `74` on the
+  line after a table is read. Page numbers found in absolutely positioned page
+  footers still take precedence, and a footer line that holds pipes but does not
+  start with one, such as `Apple Inc. | Form 10-K | 23`, is still read. A table
+  inside a list item or bold or italic text shares its first line with the list
+  marker or emphasis marks (`- | Item | 304 |`, `**| Item | 304 |`), so that line
+  is still read and a number in it can still be taken as the page number.
+  Compared with the previous version, `display_page` changes on 216 pages in 17
+  documents of the recent filings corpus and on 57 pages in 5 documents of the
+  review corpus, the same with and without `Parser(capture_tables=True)`. Of the
+  changed pages whose printed page number could be read, 110 and 28 now show it in
+  place of a wrong number, and 8 and 4 lose a wrong number taken from a table cell
+  (their printed number is a single digit, which the guess does not take); none
+  showed it before. The other 98 and 25, whose printed labels could not be read
+  automatically (such as `F-47`), lose their number.
 - Known limitation, as in the previous release: when rowspans from the rows above
   push a row's cells right, cells past the table's widest row are dropped from the
   Markdown table: `<td rowspan="2">A</td><td>1,111</td>` over
