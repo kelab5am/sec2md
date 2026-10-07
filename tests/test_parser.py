@@ -602,6 +602,36 @@ class TestWrappedTableHeaderRecords:
         assert parser.header_accounting_misses == ()
         assert parser.trace_numeric_failures == ()
 
+    @pytest.mark.parametrize("shape", ["ul-li", "b"])
+    @CAPTURE_MODES
+    def test_wrapped_table_holding_a_table_outside_every_cell_binds_and_writes_it_once(self, capture_tables,
+                                                                                       shape):
+        """C1 and C2 together (revision 18): a table placed directly in a body row of a
+        wrapped table is read once, in that row, and the wrapped table's record is bound.
+
+        main reads 987 twice and cannot bind the record, so strict reports 31 and 987.
+        """
+        table = SPANNING_CAPTION_TABLE.replace(
+            "<td>90</td></tr></table>", "<td>90</td><table><tr><td>987</td></tr></table></tr></table>")
+        html_format, prefix, suffix = WRAPPED_TABLE_SHAPES[shape]
+        parser = Parser(_intro_and(html_format.format(table)), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        header = SPANNING_CAPTION_HEADER + "  |"
+        segment = f"{header}\n| --- | --- | --- | --- |\n| Revenue | 100 | 90 | 987 |"
+        assert element.content == f"Intro.\n\n{prefix}{segment}{suffix}"
+        assert element.content.count("987") == 1
+        outer = parser.soup.find("table")
+        (record,) = parser.element_header_records(element.id)
+        assert parser._header_records == {id(outer): record}
+        assert record.wrapped and record.segment == segment and record.header_line == header
+        assert record.header_capacity == (("2024", 1), ("2025", 1), ("31", 2))
+        assert locate_header_lines(element.content, [record])[0].span is not None
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+        # Without the record, the ordinary trace reports the caption's repeated 31.
+        assert trace_numeric_failures(element, nodes) == (f"{element.id}:31",)
+        enforce_quality(parser.diagnostics, "strict")
+
     @CAPTURE_MODES
     def test_same_table_in_a_div_binds_its_record_and_passes_strict(self, capture_tables):
         html = _intro_and(f"<div>{SPANNING_CAPTION_TABLE}</div>")
