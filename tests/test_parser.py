@@ -1,6 +1,7 @@
 """Tests for the HTML parser (parser.py)."""
 
 import re
+from html import escape
 
 import pytest
 from bs4 import BeautifulSoup
@@ -772,6 +773,94 @@ class TestWrappedTableAssociationMisses:
         assert parser.header_accounting_misses == (f"{element.id}:missing",) * 2
         assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
         assert parser.trace_numeric_failures == (f"{element.id}:2025",) * 2
+
+    @pytest.mark.parametrize("html_format, misses", [
+        pytest.param("<ul><li>{0} See [note {0}</li></ul>", 2, id="an-identical-table-before-it"),
+        pytest.param('<b><img alt="{1}" src="x.png"> See [note {0}</b>', 1, id="its-render-in-an-image-alt"),
+    ])
+    @CAPTURE_MODES
+    def test_every_occurrence_of_the_render_is_checked_not_only_the_first(self, capture_tables, html_format,
+                                                                          misses):
+        """The table's own copy can be the later occurrence of its render in the wrapper's text.
+
+        The first occurrence is intact: an identical table, or an image alt that holds the
+        render verbatim. The own copy comes after "See [note", whose link reduction runs into
+        its header. A check of the first occurrence alone would bind the record on the intact
+        text; every occurrence is checked, so each table is a miss with the ordinary trace.
+        """
+        normal_render = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |".replace(
+            "| 2025 — ", "| [2025](#fy2025) — ")
+        alt = escape(normal_render, quote=True).replace("\n", "&#10;")
+        parser = Parser(_intro_and(html_format.format(LINKED_LABELS_TABLE, alt)), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        assert "See note | Metric | [2025 — Actual |" in element.content
+        assert parser._header_records == {}
+        assert parser._wrapped_tables == {}
+        assert len(parser._render_header_records) == misses
+        assert parser.header_accounting_misses == (f"{element.id}:missing",) * misses
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",) * misses
+
+    @CAPTURE_MODES
+    def test_a_link_reduction_out_of_the_table_is_a_miss_even_when_it_rebuilds_the_copy(self, capture_tables):
+        """The boundary check is not subsumed by the check of the reduced copy.
+
+        The last cell ends in "[[](ab" and the wrapper's text after the table is "c)[](ab |".
+        Link reduction over the wrapper's text runs from the cell's first "[" out of the table
+        to "c)", and the text after it rebuilds the characters it removed: the element holds
+        the record's segment exactly where the own copy's image would be. Only the check that
+        no reduction crosses the table's boundary rejects it, so the record is a miss.
+        """
+        table = LABELS_TABLE.replace("<td>200</td>", "<td>200 [[](ab</td>")
+        parser = Parser(_intro_and(f"<b>{table}c)[](ab |</b>"), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        segment = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 [[](ab |"
+        assert element.content == f"Intro.\n\n**{segment}**"
+        node = parser.soup.find("table")
+        assert parser._header_records == {}
+        assert parser._render_header_records[id(node)][1].header_line == LABELS_HEADER
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+
+    @pytest.mark.parametrize("fragment, header_line, held", [
+        # The review's input: the later table's segment replaces the wrapper's, so the wrapped
+        # table's text is no longer in the element (a separate, older defect).
+        pytest.param(f"<b>{SPANNING_CAPTION_TABLE}</b>"
+                     '<table style="display:inline-block"><tr><td>**<a href="#n">note</a></td></tr></table>',
+                     SPANNING_CAPTION_HEADER, None, id="the-wrapped-text-is-replaced"),
+        # The later table's own text holds the wrapped record's segment at the offset of the
+        # wrapper's copy ("**Note " and "| **ab\" are both 7 characters), so the check of the
+        # copy's image alone would accept it there.
+        pytest.param('<b>Note <table><tr><th>Metric</th><th colspan="2">2025</th></tr>'
+                     '<tr style="display:none"><td>hidden</td></tr></table></b>'
+                     '<table style="display:inline-block"><tr><th>**ab| Metric</th>'
+                     '<th><a href="#n">2025</a></th></tr></table>',
+                     "| Metric | 2025 |", "| **ab\\| Metric | 2025 |\n| --- | --- |",
+                     id="the-replacement-holds-the-segment"),
+    ])
+    @CAPTURE_MODES
+    def test_a_final_segment_that_is_not_the_wrappers_reduced_text_is_a_miss(self, capture_tables, fragment,
+                                                                            header_line, held):
+        """A later inline-block table with a link merges into the wrapper's segment.
+
+        The merged segment's content is then that table's anchor-stripped re-render, not the
+        link reduction of the wrapper's text, so the wrapper's final segment no longer shows
+        where the wrapped table's copy is. The wrapped record is a miss with the ordinary trace,
+        never located on the other table's text.
+        """
+        parser = Parser(_intro_and(f"<div>{fragment}</div>"), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        if held is not None:
+            assert held in element.content
+        wrapped = parser.soup.find("b").find("table")
+        assert id(wrapped) not in parser._header_records
+        assert parser._render_header_records[id(wrapped)][1].header_line == header_line
+        assert parser._wrapped_tables == {}
+        records = parser.element_header_records(element.id)
+        assert not any(record.wrapped for record in records)
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes, records)
 
 
 class TestSpacerPreservation:

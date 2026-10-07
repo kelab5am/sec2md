@@ -2409,3 +2409,46 @@ def test_c1_a_table_between_rows_is_read_as_before():
         "<table><tr><th>Item</th><th>2025</th></tr><table><tr><td>Z</td><td>3</td></tr></table>"
         "<tr><td>C</td><td>4</td></tr></table>"
     ) == [["Item", "2025"], ["Z", "3"], ["C", "4"]]
+
+
+# The review's case: a table placed in a row outside every cell (all its cells grid-hidden)
+# and, below a rowspan, a table nested inside a cell, whose cells are read twice: in the
+# cell's own text, then as cells of the outer row (and in the inner table's own row).
+C1_FAIL_CLOSED = (
+    "<table><tr><th>Item</th><th>2025</th></tr><tr><td>A</td><td>1</td>"
+    '<table><tr><td style="display:none">X 9</td></tr></table></tr>'
+    '<tr><td rowspan="2">B</td><td rowspan="2">2</td></tr>'
+    "<tr><td>3</td><td><table><tr><td>44</td></tr></table></td></tr></table>"
+)
+
+
+@C1_MODES
+def test_c1_shows_an_in_cell_double_read_the_old_grid_dropped_and_fails_closed(capture_tables):
+    """Fail-closed (spec "Source cell", revision 18).
+
+    C1 sizes this table's grid by placement, so B's rowspans no longer push the last row's
+    cells off the grid. The cell holding the inner table, and that table's cell read again in
+    the outer row, are now both written beside 3: the known double read of a table inside a
+    cell becomes visible, and 44 appears three times against one source occurrence. Every
+    value is kept, and strict fails in normal mode where main passed, having dropped those two
+    copies (without the outside table the old width still drops them). Capture mode writes
+    the table's source text, as before. Neither corpus holds such a table.
+    """
+    from sec2md.quality import ParseQualityError, enforce_quality
+
+    values = ("Item", "2025", "A", "1", "B", "2", "3")
+    parser, markdown = _c1_parse(C1_FAIL_CLOSED, capture_tables)
+    assert {value: _token_count(markdown, value) for value in values} == dict.fromkeys(values, 1)
+    assert _token_count(markdown, "9") == 0  # grid-hidden
+    if capture_tables:
+        assert _token_count(markdown, "44") == 1
+        assert parser.trace_numeric_failures == ()
+        return
+    assert _markdown(C1_FAIL_CLOSED) == [
+        "| Item | 2025 |  |  |", "| --- | --- | --- | --- |", "| A | 1 |  |  |", "| B | 2 |  |  |",
+        "|  | 3 | 44 | 44 |", "| 44 |  |  |  |"]
+    assert _token_count(markdown, "44") == 3
+    assert [failure.rsplit(":", 1)[1] for failure in parser.trace_numeric_failures] == ["44", "44"]
+    assert parser.diagnostics.table_completeness_failures == ()
+    with pytest.raises(ParseQualityError, match=r"^untraceable normalized number: "):
+        enforce_quality(parser.diagnostics, "strict")
