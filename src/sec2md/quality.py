@@ -36,6 +36,15 @@ _QUALITY_POLICIES = frozenset({"strict", "warn", "off"})
 _MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _NUMBER_TOKEN_RE = re.compile(r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)")
 _CURRENCY_SYMBOLS = str.maketrans({"$": None, "\u20ac": None, "\u00a3": None})
+# A number in parentheses that emphasis runs split, in the output the numeric trace reads. The
+# renderer gives bold runs "(", "650", ")" as "**(** **650** **)**": the source pool reads
+# "( 650 )", the accounting token -650, but the delimiters stop the tokenizer reaching the
+# parentheses, so it read 650. Only such a number is closed up, to "(650)"; all other text,
+# including every other asterisk and underscore, reads exactly as before. The gaps hold only
+# whitespace and asterisks, and the single number group can never join two numbers. The
+# tokenizer's own boundaries apply: parentheses glued to a word or digit ("USD(", ")M") stay as
+# they are, because "USD(650)" or "(650)M" is no token and the number would drop out.
+_SPLIT_PAREN_NUMBER_RE = re.compile(r"(?<![\w.])\(([\s*]*)([−–-]?\d[\d,]*(?:\.\d+)?)([\s*]*)\)(?!\w|\.\w)")
 
 
 def normalize_numeric_token(value: str) -> str | None:
@@ -74,6 +83,20 @@ def _normalized_numbers(text: str) -> tuple[str, ...]:
         if token is not None:
             normalized.append(token)
     return tuple(normalized)
+
+
+def _close_up_split_paren_number(match: re.Match[str]) -> str:
+    """Close up "(** **650** **)" to "(650)"; leave a match whose gaps are not emphasis runs."""
+
+    gaps = (match.group(1), match.group(3))
+    if not any("*" in gap for gap in gaps):
+        return match.group(0)  # plain "( 650 )" already reads as -650
+    if any("*" in gap and not re.search(r"\s", gap) for gap in gaps):
+        # A gap of stars with no whitespace, as in the footnote "(125*)", is literal text. A gap
+        # holding both a star and whitespace closes up even when the star is literal ("(5 *)",
+        # "( 5* )", "( *5 )", "(1,234 **)"); none occurs in the 179 corpus documents.
+        return match.group(0)
+    return f"({match.group(2)})"
 
 
 @dataclass(frozen=True)
@@ -178,7 +201,9 @@ def trace_numeric_failures(
         ]
         for record, (start, end) in located:
             capacity = dict(record.header_capacity)
-            for token, count in sorted(Counter(_normalized_numbers(content[start:end])).items()):
+            # Output side, read as the rest of the output is read below.
+            line = _SPLIT_PAREN_NUMBER_RE.sub(_close_up_split_paren_number, content[start:end])
+            for token, count in sorted(Counter(_normalized_numbers(line)).items()):
                 header_failures.extend(
                     f"{element.id}:header:{token}" for _ in range(max(0, count - capacity.get(token, 0)))
                 )
@@ -187,6 +212,8 @@ def trace_numeric_failures(
             content = content[:start] + content[end:]
     if any(_is_or_has_ordered_list(node) for node in nodes if isinstance(node, Tag)):
         content = _ORDERED_LIST_MARKER_RE.sub("", content)
+    # Output side only: the source pool below reads the mapped nodes' text unchanged.
+    content = _SPLIT_PAREN_NUMBER_RE.sub(_close_up_split_paren_number, content)
     expected = Counter(_normalized_numbers(content))
     available = Counter(
         _normalized_numbers(
