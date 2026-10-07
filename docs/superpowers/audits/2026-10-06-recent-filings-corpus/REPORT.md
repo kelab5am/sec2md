@@ -14,7 +14,7 @@ Date: 2026-10-07. This is plan Task 7, the record of Tasks 1–6.
 
 - **Corpus.**
   - 70 annual reports from 17 issuers (SPCX has none), 380,186,110 bytes as served. Each passes the loader's SHA-256 check.
-  - A re-listing at 12:59 EDT on 2026-10-06 is byte-identical to the approved draft. It ran before EDGAR's filing day closed, so the MU fiscal 2026 check is not final (section 1.6).
+  - Two re-listings are byte-identical to the approved draft: one at 12:59 EDT on 2026-10-06, and a final one at 00:46 EDT on 2026-10-07, after EDGAR's filing day closed. MU filed no fiscal 2026 10-K inside the window, so the corpus has no gap (section 1.6).
 - **Strict.**
   - 0 new failures in 140 document-modes.
   - 18 failures (9 documents × 2 modes) are identical on both sides: a cover-page telephone area code.
@@ -122,12 +122,14 @@ No selected document is an amendment. No `10-KT` or other annual-form variant ap
   - It exited 0, with 70 documents, 380,178,550 bytes and 82 exclusions.
   - **The file is byte-identical to the approved `manifest_draft.json`** (SHA-256 `68e286b6…cb336`). The documents, exclusions, order and totals all match.
   - So MU had still not filed a fiscal 2026 10-K, and nothing else had changed.
-- **This is not yet the post-window check.**
+- **That was not yet the post-window check.**
   - The re-listing finished at 2026-10-06 16:59 UTC: 12:59 EDT, or 00:59 on 2026-10-07 local time (UTC+8).
   - EDGAR's 2026-10-06 filing day was still open. A 10-K submitted by 17:30 Eastern gets that day's filing date.
-  - **A final re-listing is due after 17:30 EDT on 2026-10-06** (05:30 on 2026-10-07 local time).
-  - If it shows an MU 10-K filed on 2026-10-06, that filing is recorded as a gap found after approval. It is **not downloaded**, and the corpus stays at the approved 70.
-  - A 10-K filed on 2026-10-07 or later is outside the window and is no gap.
+- **The final re-listing settles it: no gap.**
+  - It ran from 2026-10-07 04:46:00 to 04:47:01 UTC (00:46 EDT, or 12:46 local time), after the 2026-10-06 filing day closed. The command and safeguards were the same: index requests only, no document downloaded, and the output went to a scratch file.
+  - It exited 0, with 70 documents, 380,178,550 bytes and 82 exclusions.
+  - **The file is again byte-identical to the approved `manifest_draft.json`** (SHA-256 `68e286b6…cb336`).
+  - So MU filed no fiscal 2026 10-K on or before 2026-10-06, and the corpus stays at the approved 70. A 10-K filed on 2026-10-07 or later is outside the window and is no gap.
 
 ## 2. Strict comparison (`strict.json`)
 
@@ -442,6 +444,8 @@ The Phase A column is the table merge acceptance tooling's `final/` run on 109 d
    - The corpus has 0 occurrences: no wrapped or nested table, and 0 header-accounting misses in 13,105 + 5,332 tables.
    - But M3 shows that a table nested in a body row, or in a first `td` row, fails strict on the branch where `main` passes. That is outside the five named limitations (section 3.4).
    - Binding header records for wrapped tables was already the table merge spec's first follow-up.
+
+**Outcome (2026-10-07):** all three are fixed and merged: 1 by PR #7, 2 by PR #8, and 3 by PR #9 (spec revision 18). On `main` after #9, the recent corpus passes default strict on 140 of 140 document-modes.
 4. **The remaining named limitations: no harmful occurrence.**
    - Zero-width number: 0. One zero-width character touches a digit, and it trails a date.
    - Page-top PART table: 0. CAT 7 (4 recent, 1 Phase A) is never at a page top.
@@ -449,9 +453,10 @@ The Phase A column is the table merge acceptance tooling's `final/` run on 109 d
 
 ## 6. Open points
 
-- **User decision:** the `display_page` changes (section 4.1).
-- **Final re-listing** after 17:30 EDT on 2026-10-06 (05:30 on 2026-10-07 local time), to settle MU fiscal 2026 (section 1.6). The command is in the README. Any new filing is recorded, not downloaded.
-- **Commit:** this folder, the acceptance tooling's `--corpus` change, the spec and the plan are uncommitted. They go to `main` only with the user's agreement.
+- **Settled after this report:**
+  - The `display_page` changes (section 4.1): the user chose to fix the guess first. PR #8 (merged) leaves Markdown table lines out of it, which removes all 42 changes.
+  - The final re-listing (section 1.6): byte-identical to the approved draft, so MU fiscal 2026 leaves no gap.
+  - This folder, the acceptance tooling's `--corpus` change, the spec and the plan were committed to `main` with the user's agreement.
 - **Tooling minors deferred in the task reviews.** None changes a result here.
   - Selection:
     - an empty `reportDate` forms its own group;
