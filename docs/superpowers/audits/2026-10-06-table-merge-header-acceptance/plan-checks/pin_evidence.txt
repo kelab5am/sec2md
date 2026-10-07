@@ -1,0 +1,73 @@
+== aapl-2023-10k table 13: pinned ('-1',)
+  token '-1' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 1, cell(s) ['Approximate Dollar Value of Shares That May Yet Be Purchased Under the Plans or Programs (1)']: | Periods | Total Number of Shares Purchased |  | Average Price Paid Per Share | Total Number of Shares Purchased as Part of Publicly Announced Plans or Program
+      main line with label 'Periods': | Periods | Total Number of Shares Purchased |  | Average Price Paid Per Share | Total Number of Shares Purchased as Part of Publicly Announced Plans or Program
+== aapl-2023-10k table 32: pinned ('74427',)
+  token '74427' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 74,427']: | Due after 1 year through 5 years | $ 74,427 |
+      main line with label 'Due after 1 year through 5 years': | Due after 1 year through 5 years | $ |
+== aapl-2023-10k table 49: pinned ('9943',)
+  token '9943' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 9,943']: | 2024 | $ 9,943 |
+      main line with label '2024': | 2024 | $ |
+== aapl-2023-10k table 53: pinned ('4258',)
+  token '4258' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 4,258']: | 2024 | $ 4,258 |
+      main line with label '2024': | 2024 | $ |
+aapl-2023-10k table 13 capture: same segment as normal = True
+aapl-2023-10k table 32 capture: same segment as normal = True
+aapl-2023-10k table 49 capture: same segment as normal = True
+aapl-2023-10k table 53 capture: same segment as normal = True
+== nvda-2002-10k table 19: pinned ('1997', '1998', '31', '31')
+  token '1997' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 1, cell(s) ['Year Ended December 31, 1997 — (in thousands, except per share data)']: |  | Year Ended — January 27, 2002 — (in thousands, except per share data) | Year Ended — January 28, 2001 — (in thousands, except per share data) — (As restate
+  token '1998' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 1, cell(s) ['Month Ended January 31, 1998 — (in thousands, except per share data)']: |  | Year Ended — January 27, 2002 — (in thousands, except per share data) | Year Ended — January 28, 2001 — (in thousands, except per share data) — (As restate
+  token '31' x2: candidate has 3 in 1 line(s); main had 1
+    cand line 1, cell(s) ['Year Ended — January 31, 1999 — (in thousands, except per share data)', 'Month Ended January 31, 1998 — (in thousands, except per share data)', 'Year Ended December 31, 1997 — (in thousands, except per share data)']: |  | Year Ended — January 27, 2002 — (in thousands, except per share data) | Year Ended — January 28, 2001 — (in thousands, except per share data) — (As restate
+    main line 3: |  | January 27, 2002 | January 28, 2001 | January 30, 2000 | January 31, 1999 |  |  |  |  |  |
+nvda-2002-10k table 19 capture: same segment as normal = True
+== nvda-2026-q2-10q table 31: pinned ('3.5',)
+  token '3.5' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 3.5']: | Land, power, and shell guarantees for AI clouds | $ 3.5 |
+      main line with label 'Land, power, and shell guarantees for AI clouds': | Land, power, and shell guarantees for AI clouds | $ |
+nvda-2026-q2-10q table 31 capture: same segment as normal = True
+== nvda-2026-ex99-1 table 9: pinned ('15365', '24077', '42779', '50344', '74421')
+  token '15365' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 15,365']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '24077' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 24,077']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '42779' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 42,779']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '50344' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 50,344']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '74421' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 74,421']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+nvda-2026-ex99-1 table 9 capture: same segment as normal = True
+== nvda-2026-ex99-2 table 7: pinned ('3.5',)
+  token '3.5' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 3.5']: | Land, power, and shell guarantees for AI clouds | $ 3.5 |
+      main line with label 'Land, power, and shell guarantees for AI clouds': | Land, power, and shell guarantees for AI clouds | $ |
+== nvda-2026-ex99-2 table 10: pinned ('15365', '24077', '42779', '50344', '74421')
+  token '15365' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 15,365']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '24077' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 24,077']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '42779' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 42,779']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '50344' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 50,344']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+  token '74421' x1: candidate has 1 in 1 line(s); main had 0
+    cand line 3, cell(s) ['$ 74,421']: | GAAP net cash provided by operating activities | $ 24,077 | $ 50,344 | $ 15,365 | $ 74,421 | $ 42,779 |
+      main line with label 'GAAP net cash provided by operating activities': | GAAP net cash provided by operating activities | $ | $ | $ | $ | $ |
+nvda-2026-ex99-2 table 7 capture: same segment as normal = True
+nvda-2026-ex99-2 table 10 capture: same segment as normal = True

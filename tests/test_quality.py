@@ -1,5 +1,6 @@
 """Tests for runtime parse diagnostics and quality enforcement."""
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,7 @@ from sec2md.quality import (
     trace_numeric_failures,
 )
 from sec2md.table_parser import TableParser
+from tests.test_parser import SPANNING_CAPTION_HEADER, SPANNING_CAPTION_TABLE, WRAPPED_TABLE_SHAPES
 
 
 def test_untraceable_normalized_number_is_reported():
@@ -732,22 +734,22 @@ NESTED_IN_HEADER_ROW = {
 
 @pytest.mark.parametrize("grouped", [False, True], ids=["alone", "with-prose"])
 @pytest.mark.parametrize("capture_tables, failures", [
-    pytest.param(False, ("header:2024",), id="normal"),
+    # Revision 18 (C1): the nested rows are no longer read again, so no second 2024 is written.
+    pytest.param(False, (), id="normal"),
     pytest.param(True, (), id="capture"),
 ])
 @pytest.mark.parametrize("layout", sorted(NESTED_IN_HEADER_ROW))
 def test_r6a_a_table_nested_in_a_header_row_credits_its_source_once(layout, capture_tables, failures, grouped):
-    # lxml keeps the nested table inside the outer <tr>, so its cells are read for the outer row
-    # and again for their own row: the normal render writes 2024 twice from one source 2024.
-    # The record reads each cell once, so the second copy is a header excess, and prose citing
-    # 2024 keeps its own source (it was blamed when the record counted both reads). Capture
-    # mode writes the text once and passes, as on main.
+    # lxml keeps the nested table inside the outer <tr>. Its cells are read once, in that row,
+    # so the normal render writes 2024 once from one source 2024 and strict passes, as on main.
+    # The record reads each cell once, and prose citing 2024 keeps its own source (it was
+    # blamed when the record counted the cells twice). Capture mode writes the text once.
     prose = "<p>Results for fiscal 2024 follow.</p>" if grouped else ""
     html = (f"<html><body>{prose}<table><tr><th>Item</th><th>Period</th>{NESTED_IN_HEADER_ROW[layout]}</tr>"
             "<tr><td>Revenue</td><td>100</td></tr></table></body></html>")
     parser, element, _ = _r6a_parse(html, capture_tables)
     if not capture_tables:
-        assert "| Item — Fiscal | Period — 2024 | Fiscal | 2024 |" in element.content.splitlines()
+        assert "| Item | Period | Fiscal | 2024 |" in element.content.splitlines()
     assert parser.trace_numeric_failures == tuple(f"{element.id}:{failure}" for failure in failures)
     assert parser.header_accounting_misses == ()
 
@@ -832,3 +834,279 @@ def test_r6a_ambiguous_association_keeps_the_ordinary_trace(rewritten_elements, 
     assert parser.header_accounting_misses == (f"{element.id}:ambiguous",) * 2
     assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary) * 2
     assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+
+
+# --- R6a, revision 18 (C2): tables rendered inside a list item or an inline wrapper ------------
+
+ASTRA_WRAPPED_RECORD = replace(ASTRA_RECORD, wrapped=True)
+
+
+def test_wrapped_record_is_located_with_a_prefix_and_a_suffix():
+    # The wrapper shares the header's line and the last row's; the span is the header line only.
+    content = f"Intro.\n\n1. Results: {ASTRA_SEGMENT} more**"
+    start = content.index(ASTRA_HEADER)
+    assert locate_header_lines(content, [ASTRA_WRAPPED_RECORD]) == (
+        HeaderLineLocation((start, start + len(ASTRA_HEADER))),
+    )
+    # A record that is not wrapped keeps whole-line semantics on the same content.
+    assert locate_header_lines(content, [ASTRA_RECORD]) == (HeaderLineLocation(None, "missing"),)
+
+
+def test_wrapped_record_needs_its_whole_segment_with_the_header_line_first():
+    content = f"**{ASTRA_SEGMENT}**"
+    missing = (HeaderLineLocation(None, "missing"),)
+    # An interior line that differs: the segment does not occur.
+    assert locate_header_lines(content.replace("| --- |", "|---|", 1), [ASTRA_WRAPPED_RECORD]) == missing
+    # The segment's first line is not the recorded header line.
+    assert locate_header_lines(content, [replace(ASTRA_WRAPPED_RECORD, header_line="| Metric |")]) == missing
+    # A segment without a second line has no line the wrapper does not share.
+    single = replace(ASTRA_WRAPPED_RECORD, segment=ASTRA_HEADER)
+    assert locate_header_lines(content, [single]) == missing
+    assert locate_header_lines(content, [replace(ASTRA_WRAPPED_RECORD, segment="")]) == missing
+
+
+def test_wrapped_segment_occurring_twice_is_ambiguous():
+    ambiguous = HeaderLineLocation(None, "ambiguous")
+    assert locate_header_lines(f"**{ASTRA_SEGMENT} {ASTRA_SEGMENT}**", [ASTRA_WRAPPED_RECORD]) == (ambiguous,)
+    # A standalone twin occupies whole lines once, so it is located; the wrapped record sees
+    # two occurrences of its segment.
+    content = f"**{ASTRA_SEGMENT}**\n\n{ASTRA_SEGMENT}"
+    start = content.rindex(ASTRA_SEGMENT)
+    assert locate_header_lines(content, [ASTRA_WRAPPED_RECORD, ASTRA_RECORD]) == (
+        ambiguous,
+        HeaderLineLocation((start, start + len(ASTRA_HEADER))),
+    )
+    # Two records claiming one header line are both ambiguous.
+    assert locate_header_lines(f"**{ASTRA_SEGMENT}**", [ASTRA_WRAPPED_RECORD] * 2) == (ambiguous, ambiguous)
+
+
+def test_wrapped_prefix_is_traced_as_prose_and_the_ordered_list_marker_is_still_stripped():
+    record = replace(LABELS_RECORD, wrapped=True)
+    ol = BeautifulSoup(f"<ol><li>Results: {LABELS_TABLE}</li></ol>", "lxml").ol
+    content = f"1. Results: {LABELS_SEGMENT}"
+    assert trace_numeric_failures(_element(content), [ol]) == ("e1:2025",)
+    # The "1." marker left before the removed header line is still stripped; outside an ordered
+    # list it would be an untraceable 1.
+    assert trace_numeric_failures(_element(content), [ol], [record]) == ()
+    ul = BeautifulSoup(f"<ul><li>Results: {LABELS_TABLE}</li></ul>", "lxml").ul
+    assert trace_numeric_failures(_element(content), [ul], [record]) == ("e1:1",)
+    # A prefix number matching only header-zone source tokens has no source left.
+    content = f"1. Results for 2025: {LABELS_SEGMENT}"
+    assert trace_numeric_failures(_element(content), [ol], [record]) == ("e1:2025",)
+
+
+WRAPPED_MODES = [
+    pytest.param(shape, capture, id=f"{shape}-{'capture' if capture else 'normal'}")
+    for shape in sorted(WRAPPED_TABLE_SHAPES) for capture in (False, True)
+]
+
+
+def _wrapped_parse(table: str, shape: str, capture_tables: bool, *, prose: bool = False):
+    """Parse the table inside one wrapper shape after an intro paragraph (see _r6a_parse).
+
+    With prose, the wrapper holds "Results: " before the table, on the header's line.
+    """
+    html_format = WRAPPED_TABLE_SHAPES[shape][0]
+    if prose and "Results: " not in html_format:
+        table = f"Results: {table}"
+    return _r6a_parse(f"<html><body><p>Intro.</p>{html_format.format(table)}</body></html>", capture_tables)
+
+
+@pytest.mark.parametrize("shape, capture_tables", WRAPPED_MODES)
+def test_c2_invented_header_number_in_a_wrapped_table_fails_as_a_header_excess(mutated_render, shape,
+                                                                               capture_tables):
+    mutated_render(lambda headers, data: ([*headers[:-1], f"{headers[-1]} 2023"], data))
+    parser, element, _ = _wrapped_parse(SPANNING_CAPTION_TABLE, shape, capture_tables)
+    assert SPANNING_CAPTION_HEADER.replace("2024 |", "2024 2023 |") in element.content
+    assert [record.wrapped for record in parser.element_header_records(element.id)] == [True]
+    assert parser.trace_numeric_failures == (f"{element.id}:header:2023",)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.mark.parametrize("shape, capture_tables", WRAPPED_MODES)
+def test_c2_astras_body_mutation_in_a_wrapped_table_fails(mutated_render, shape, capture_tables):
+    mutated_render(lambda headers, data: (headers, [[data[0][0], f"{data[0][1]} 2025", *data[0][2:]]]))
+    parser, element, _ = _wrapped_parse(R6A_TABLES["equal"].format(top="2025"), shape, capture_tables)
+    assert f"{ASTRA_HEADER}\n| --- | --- | --- |\n| Revenue | 100 2025 | 200 |" in element.content
+    assert [record.wrapped for record in parser.element_header_records(element.id)] == [True]
+    assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.mark.parametrize("number", ["2019", "2025"], ids=["invents-a-number", "repeats-a-header-only-number"])
+@pytest.mark.parametrize("shape, capture_tables", WRAPPED_MODES)
+def test_c2_wrapper_prose_number_fails(monkeypatch, shape, capture_tables, number):
+    # The prose shares the header's line outside the located span, so it is traced as prose,
+    # against the source without the header zone's tokens: the source holds 2025 only there.
+    original = Parser._process_text_node
+    monkeypatch.setattr(Parser, "_process_text_node",
+                        lambda self, node: original(self, node).replace("Results:", f"Results for {number}:"))
+    parser, element, _ = _wrapped_parse(SPANNING_CAPTION_TABLE, shape, capture_tables, prose=True)
+    assert f"Results for {number}: {SPANNING_CAPTION_HEADER}" in element.content
+    assert [record.wrapped for record in parser.element_header_records(element.id)] == [True]
+    assert parser.trace_numeric_failures == (f"{element.id}:{number}",)
+    assert parser.header_accounting_misses == ()
+
+
+# --- strict's numeric trace reads emphasised numbers like the source (2026-10-07) -----------
+# The source pool reads separate bold runs "(", "650", ")" as "( 650 )", the accounting token
+# -650. The output's Markdown delimiters sat between the parentheses and the digits, so the
+# trace read 650 and strict failed on cover-page telephone numbers (MSFT, NTRA, TSLA). Only a
+# number in parentheses that emphasis runs split is closed up; everything else reads as before.
+
+NTRA_PHONE = ('<p><b>(</b><ix:nonNumeric name="dei:CityAreaCode"><b>650</b></ix:nonNumeric>'
+              '<b>)&#160;</b><ix:nonNumeric name="dei:LocalPhoneNumber"><b>249-9090</b></ix:nonNumeric></p>')
+_BOLD_RUN = 'style="white-space:pre-wrap;font-weight:bold;font-size:8pt;"'
+SPAN_PHONE = (f'<p><span {_BOLD_RUN}>(</span><span style="font-size:8pt;">'
+              f'<ix:nonNumeric name="dei:CityAreaCode"><span {_BOLD_RUN}>425</span></ix:nonNumeric></span>'
+              f'<span {_BOLD_RUN}>) </span><span style="font-size:8pt;">'
+              f'<ix:nonNumeric name="dei:LocalPhoneNumber"><span {_BOLD_RUN}>882-8080</span>'
+              '</ix:nonNumeric></span></p>')
+SPLIT_NET_LOSS = ('<p>Net loss was <b>(</b><ix:nonFraction name="us-gaap:NetIncomeLoss"><b>1,234</b>'
+                  '</ix:nonFraction><b>)</b> for the year.</p>')
+
+
+@pytest.mark.parametrize(("html", "rendered"), [
+    (NTRA_PHONE, "**(** **650** **)** **249-9090**"),
+    (SPAN_PHONE, "**(** **425** **)** **882-8080**"),
+], ids=["bold-tags", "bold-spans"])
+def test_strict_traces_phone_number_whose_parentheses_are_separate_bold_runs(html, rendered):
+    # The fix is on the trace's output side only: the rendered Markdown keeps its emphasis.
+    assert convert_to_markdown(html, quality_policy="strict") == rendered
+
+
+@pytest.mark.parametrize(("html", "rendered"), [
+    ("<p>Net loss was <b>(1,234)</b> for the year.</p>", "**(1,234)**"),
+    ("<p>Net loss was <b>(</b><b>1,234</b><b>)</b> for the year.</p>", "**( 1,234 )**"),
+    (SPLIT_NET_LOSS, "**(** **1,234** **)**"),
+    ('<p>Net loss was <b>$(</b><ix:nonFraction name="us-gaap:NetIncomeLoss"><b>1,234</b></ix:nonFraction>'
+     "<b>)</b> million.</p>", "**$(** **1,234** **)**"),
+], ids=["one-run", "merged-runs", "separate-runs", "separate-runs-dollar"])
+def test_strict_traces_bold_accounting_negative(html, rendered):
+    assert rendered in convert_to_markdown(html, quality_policy="strict")
+
+
+@pytest.mark.parametrize(("content", "negative", "positive", "failure"), [
+    ("Net loss **(1,234)**", "<p>Net loss <b>(1,234)</b></p>", "<p>Net loss <b>1,234</b></p>", "e1:-1234"),
+    ("**(** **650** **)** **249-9090**", NTRA_PHONE, "<p><b>650</b> <b>249-9090</b></p>", "e1:-650"),
+], ids=["one-run", "separate-runs"])
+def test_bold_accounting_negative_keeps_its_sign_in_the_trace(content, negative, positive, failure):
+    element = Element(id="e1", content=content, kind="paragraph", page_start=1, page_end=1)
+    assert trace_numeric_failures(element, [BeautifulSoup(negative, "lxml").p]) == ()
+    # Parentheses the output shows around a number the source shows without them are caught.
+    assert trace_numeric_failures(element, [BeautifulSoup(positive, "lxml").p]) == (failure,)
+
+
+@pytest.mark.parametrize("content", ["Code **12**34", "Code *12*34", "Code ***12***34", "Code **12****34**"])
+def test_emphasis_between_digits_does_not_merge_two_numbers(content):
+    element = Element(id="e1", content=content, kind="paragraph", page_start=1, page_end=1)
+    # The source reads "Code 12 34": two numbers, and the output must read two as well.
+    assert trace_numeric_failures(element, [BeautifulSoup("<p>Code <b>12</b>34</p>", "lxml").p]) == ()
+    # Merging them would trace a 1234 that the output never shows.
+    assert trace_numeric_failures(element, [BeautifulSoup("<p>Code 1234</p>", "lxml").p]) == ("e1:12", "e1:34")
+
+
+def test_split_parentheses_never_close_up_two_numbers():
+    element = Element(id="e1", content="**(** **12** **34** **)**", kind="paragraph", page_start=1, page_end=1)
+    assert trace_numeric_failures(element, [BeautifulSoup("<p>(1234)</p>", "lxml").p]) == ("e1:12", "e1:34")
+
+
+def test_number_lost_from_bold_runs_still_fails_the_trace():
+    element = Element(id="e1", content="**(** **650** **)** **249-9090**", kind="paragraph",
+                      page_start=1, page_end=1)
+    nodes = [BeautifulSoup("<p><b>(</b><b>)</b> <b>249-9090</b></p>", "lxml").p]
+    assert trace_numeric_failures(element, nodes) == ("e1:-650",)
+
+
+def _strict_trace_tokens(html):
+    """The untraceable tokens strict reports for html, without element ids ([] when it passes)."""
+    try:
+        convert_to_markdown(html, quality_policy="strict")
+    except ParseQualityError as exc:
+        assert all(w.startswith("untraceable normalized number: ") for w in exc.diagnostics.warnings)
+        return [failure.rsplit(":", 1)[1] for failure in exc.diagnostics.trace_numeric_failures]
+    return []
+
+
+@pytest.mark.parametrize(("html", "old", "new", "token"), [
+    (NTRA_PHONE, "650", "605", "-605"),
+    ("<p>Revenue (up <b>$1,234</b>) grew.</p>", "1,234", "1,834", "1834"),
+    ("<p>Terms (as defined in <b>Section 5</b>) apply.</p>", "5", "7", "7"),
+    ("<p>Leases are described (see <i>Note 12</i>) and elsewhere.</p>", "12", "17", "17"),
+], ids=["inside-split-parentheses", "bold-amount-before-paren", "bold-section-before-paren",
+        "italic-note-before-paren"])
+def test_strict_rejects_a_number_altered_inside_emphasis(monkeypatch, html, old, new, token):
+    # A number next to only one parenthesis reads as main reads it, so an alteration still fails.
+    original = Parser._process_text_node
+    monkeypatch.setattr(Parser, "_process_text_node", lambda self, node: original(self, node).replace(old, new))
+    assert _strict_trace_tokens(html) == [token]
+
+
+@pytest.mark.parametrize(("html", "token"), [(NTRA_PHONE, "650"), (SPLIT_NET_LOSS, "1234")],
+                         ids=["phone", "net-loss"])
+def test_strict_rejects_a_dropped_bold_opening_parenthesis(monkeypatch, html, token):
+    original = Parser._process_text_node
+    monkeypatch.setattr(Parser, "_process_text_node",
+                        lambda self, node: "" if str(node).strip() == "(" else original(self, node))
+    assert _strict_trace_tokens(html) == [token]
+
+
+_SPLIT_650 = '<ix:nonFraction name="us-gaap:NetIncomeLoss"><b>650</b></ix:nonFraction>'
+
+
+@pytest.mark.parametrize(("html", "rendered"), [
+    (f"<p>Loss <b>$(</b>{_SPLIT_650}<b>)M</b> total</p>", "**$(** **650** **)M**"),
+    (f"<p>Loss <b>USD(</b>{_SPLIT_650}<b>)</b> total</p>", "**USD(** **650** **)**"),
+    (f"<p>Loss <b>(</b>{_SPLIT_650}<b>)thousand</b> total</p>", "**(** **650** **)thousand**"),
+], ids=["paren-glued-to-M", "USD-glued-to-paren", "paren-glued-to-thousand"])
+def test_split_parentheses_glued_to_a_word_read_as_before(monkeypatch, html, rendered):
+    # Closed up, "(650)M" or "USD(650)" is no token the tokenizer reads, so the number would drop
+    # out of the trace. Parentheses glued to a word or digit stay as they are: the number reads
+    # 650 as on main (the source, "USD( 650 )", reads none), and an altered one still fails.
+    assert rendered in convert_to_markdown(html, quality_policy="off")
+    assert _strict_trace_tokens(html) == ["650"]
+    original = Parser._process_text_node
+    monkeypatch.setattr(Parser, "_process_text_node", lambda self, node: original(self, node).replace("650", "651"))
+    assert _strict_trace_tokens(html) == ["651"]
+
+
+@pytest.mark.parametrize("html", [
+    "<p>Shares repurchased (125*) during the year.</p>",
+    "<p>Shares repurchased (*125) during the year.</p>",
+    "<table><tr><td>Revenue</td><td>(1,234*)</td></tr><tr><td>Cost</td><td>500</td></tr></table>",
+    "<p>(10.1*) Filed herewith.</p>",
+    "<p>Net loss <b>(1,234*)</b> for the year.</p>",
+    "<p>Basic loss per share $(0.12*) for the year.</p>",
+    "<p>Number of copies requested: _5_ (five).</p>",
+    "<p>Page _1_ of _3_</p>",
+    "<p>Amount withheld (_5_) per share.</p>",
+    "<p>Signed _on March 5, 2024_ by the Registrant.</p>",
+    "<p>Yes _X_ No ___ Shares outstanding: __1,234__</p>",
+    "<p>See file_2023_report for the year ended 20__.</p>",
+], ids=["paren-125-star", "paren-star-125", "table-1234-star", "exhibit-10.1-star", "bold-1234-star",
+        "dollar-0.12-star", "underscore-5", "underscore-page", "underscore-paren", "underscore-span",
+        "underscore-blank", "underscore-word"])
+def test_literal_asterisks_and_underscores_read_as_before(html):
+    # Footnote stars and underscores are source text, not emphasis the renderer added.
+    assert _strict_trace_tokens(html) == []
+
+
+# R6a tokenizes a located table header line on its own for header excess. It reads with the same
+# close-up as the rest of the element's output, so a line reads the same whether R6a located it
+# or left it in the pool. HTML table cells render without emphasis delimiters, so the record is
+# built by hand.
+SPLIT_HEADER = "| Item | **(** **650** **)** |"
+SPLIT_SEGMENT = f"{SPLIT_HEADER}\n| --- | --- |\n| Revenue | 100 |"
+SPLIT_TABLE = ("<table><tr><th>Item</th><th><b>(</b><b>650</b><b>)</b></th></tr>"
+               "<tr><td>Revenue</td><td>100</td></tr></table>")
+
+
+def test_located_header_line_reads_split_parentheses_like_the_rest_of_the_output():
+    nodes = [_node(SPLIT_TABLE)]
+    record = ElementHeaderRecord(SPLIT_SEGMENT, SPLIT_HEADER, (("-650", 1),), (("-650", 1),))
+    assert trace_numeric_failures(_element(SPLIT_SEGMENT), nodes) == ()
+    assert trace_numeric_failures(_element(SPLIT_SEGMENT), nodes, [record]) == ()
+    # An altered header number still fails the header excess check, with its accounting sign.
+    altered = SPLIT_SEGMENT.replace("650", "651")
+    record = ElementHeaderRecord(altered, SPLIT_HEADER.replace("650", "651"), (("-650", 1),), (("-650", 1),))
+    assert trace_numeric_failures(_element(altered), nodes, [record]) == ("e1:header:-651",)

@@ -1,0 +1,113 @@
+{
+ "header_cells": 19594,
+ "literal_separator_cells": 8,
+ "header_cells_represented": 19594,
+ "values": 54990,
+ "word_only_values": 7310,
+ "literal_separator_values": 16,
+ "no_discriminating_values": 2036,
+ "values_equal": 54986,
+ "values_exact_case": 54986,
+ "header_only_columns": 733,
+ "header_only_rendered": 733,
+ "value_mismatches": [
+  {
+   "unit": 69,
+   "row": 5,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2025",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit_flags": {
+    "unit": 69,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 69,
+   "row": 5,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2024",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit_flags": {
+    "unit": 69,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 69,
+   "row": 6,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2025",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit_flags": {
+    "unit": 69,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 69,
+   "row": 6,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2024",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit_flags": {
+    "unit": 69,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  }
+ ],
+ "header_cell_misses": [],
+ "header_only_misses": []
+}

@@ -497,6 +497,55 @@ def test_audit_trace_reads_the_parsers_header_records(top):
     assert ordinary == (f"{element.id}:2025",)
 
 
+# Revision 18 (C2): a table rendered inside a list item or an inline wrapper shares its first
+# line with the wrapper's leading content and its last line with trailing content.
+LABELS_SEGMENT = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |"
+
+
+def test_oracle_locates_a_wrapped_record_with_a_prefix_and_a_suffix():
+    element = Element(id="e1", content=f"Intro.\n\n**{LABELS_SEGMENT}**", kind="table", page_start=1, page_end=1)
+    record = replace(_record(LABELS_SEGMENT, LABELS_HEADER, LABELS_CELLS), wrapped=True)
+    assert _oracle_trace_numeric_failures(element, _table_nodes(), [record]) == ()
+    # A record that is not wrapped keeps whole-line semantics: no location, the ordinary trace.
+    unwrapped = replace(record, wrapped=False)
+    assert _oracle_trace_numeric_failures(element, _table_nodes(), [unwrapped]) == ("e1:2025",)
+
+
+def test_oracle_trace_of_a_wrapped_segment_occurring_twice_is_the_ordinary_trace():
+    element = Element(id="e1", content=f"**{LABELS_SEGMENT} {LABELS_SEGMENT}**", kind="table",
+                      page_start=1, page_end=1)
+    record = replace(_record(LABELS_SEGMENT, LABELS_HEADER, LABELS_CELLS), wrapped=True)
+    nodes = _table_nodes() + _table_nodes()
+    ordinary = _oracle_trace_numeric_failures(element, nodes)
+    assert ordinary == ("e1:2025",) * 2
+    assert _oracle_trace_numeric_failures(element, nodes, [record]) == ordinary
+    # A segment without a second line is never located.
+    single = replace(record, segment=LABELS_HEADER)
+    alone = Element(id="e1", content=f"**{LABELS_SEGMENT}**", kind="table", page_start=1, page_end=1)
+    assert _oracle_trace_numeric_failures(alone, _table_nodes(), [single]) == ("e1:2025",)
+
+
+@pytest.mark.parametrize("wrapper", [
+    pytest.param("<ul><li>{}</li></ul>", id="list-item"),
+    pytest.param("<b>{}</b>", id="bold"),
+    pytest.param("<p><b>Intro</b><b>{}</b></p>", id="merged-bold-runs"),
+])
+@pytest.mark.parametrize("top", ["2025", '<a href="#fy2025">2025</a>'], ids=["plain", "links"])
+def test_audit_trace_locates_a_wrapped_table_as_production_does(wrapper, top):
+    table = R6A_TABLE.format(top=top, lower="Actual")
+    source = f"<html><body><p>Intro.</p>{wrapper.format(table)}</body></html>".encode()
+    contract = replace(load_fixture("nvda-2026-08-26-8k")[0], expected_sections=(), representative_rows=())
+    # Strict (production's trace) passes, and so does the harness's own trace.
+    assert audit_document(source, contract, quality_policy="strict").trace_failures == ()
+    _, _, annotated_html, pages, diagnostics, header_records = _parse_document(source)
+    (element,) = pages[0].elements
+    (record,) = header_records[element.id]
+    assert record.wrapped and record.header_line == LABELS_HEADER
+    assert diagnostics.trace_numeric_failures == ()
+    _, ordinary, _ = _mapping_and_trace(pages, annotated_html)
+    assert ordinary == (f"{element.id}:2025",)
+
+
 # --- Financial rows: header rows as R6 renders them (spec 2026-10-05) ---------------------
 
 FUSED_HEADER_MARKDOWN = (

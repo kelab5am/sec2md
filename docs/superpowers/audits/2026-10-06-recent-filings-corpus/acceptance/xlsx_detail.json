@@ -1,0 +1,982 @@
+{
+ "recent:AMZN-10-K-2022-02-04.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 65,
+  "only_display_page_differs": true
+ },
+ "recent:AMZN-10-K-2023-02-03.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 66,
+  "only_display_page_differs": true
+ },
+ "recent:AMZN-10-K-2024-02-02.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 66,
+  "only_display_page_differs": true
+ },
+ "recent:AMZN-10-K-2025-02-07.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 64,
+  "only_display_page_differs": true
+ },
+ "recent:AMZN-10-K-2026-02-06.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 65,
+  "only_display_page_differs": true
+ },
+ "recent:BABA-20-F-2022-07-26.htm": {
+  "pages": [
+   {
+    "page": 152,
+    "main": 139,
+    "candidate": 31
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 11,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 139,
+      "candidate": 31
+     }
+    ]
+   },
+   {
+    "ordinal": 12,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 139,
+      "candidate": 31
+     }
+    ]
+   }
+  ],
+  "tables_compared": 113,
+  "only_display_page_differs": true
+ },
+ "recent:BABA-20-F-2023-07-21.htm": {
+  "pages": [
+   {
+    "page": 141,
+    "main": 130,
+    "candidate": 2
+   },
+   {
+    "page": 290,
+    "main": null,
+    "candidate": 2
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 19,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 130,
+      "candidate": 2
+     }
+    ]
+   },
+   {
+    "ordinal": 20,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 130,
+      "candidate": 2
+     }
+    ]
+   },
+   {
+    "ordinal": 107,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": null,
+      "candidate": 2
+     }
+    ]
+   },
+   {
+    "ordinal": 108,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": null,
+      "candidate": 2
+     }
+    ]
+   }
+  ],
+  "tables_compared": 111,
+  "only_display_page_differs": true
+ },
+ "recent:BABA-20-F-2024-05-23.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 108,
+  "only_display_page_differs": true
+ },
+ "recent:BABA-20-F-2026-05-20.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 116,
+  "only_display_page_differs": true
+ },
+ "recent:BAC-10-K-2022-02-22.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 173,
+  "only_display_page_differs": true
+ },
+ "recent:BAC-10-K-2023-02-22.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 176,
+  "only_display_page_differs": true
+ },
+ "recent:BAC-10-K-2024-02-20.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 176,
+  "only_display_page_differs": true
+ },
+ "recent:BAC-10-K-2026-02-25.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 175,
+  "only_display_page_differs": true
+ },
+ "recent:CAT-10-K-2022-02-16.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 125,
+  "only_display_page_differs": true
+ },
+ "recent:CAT-10-K-2023-02-15.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 117,
+  "only_display_page_differs": true
+ },
+ "recent:CAT-10-K-2024-02-16.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 114,
+  "only_display_page_differs": true
+ },
+ "recent:CAT-10-K-2026-02-13.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 119,
+  "only_display_page_differs": true
+ },
+ "recent:CRDO-10-K-2022-06-08.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 56,
+  "only_display_page_differs": true
+ },
+ "recent:CRDO-10-K-2023-06-23.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 58,
+  "only_display_page_differs": true
+ },
+ "recent:CRDO-10-K-2024-06-24.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 59,
+  "only_display_page_differs": true
+ },
+ "recent:CRDO-10-K-2026-06-15.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 64,
+  "only_display_page_differs": true
+ },
+ "recent:CRM-10-K-2022-03-11.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 82,
+  "only_display_page_differs": true
+ },
+ "recent:CRM-10-K-2023-03-08.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 78,
+  "only_display_page_differs": true
+ },
+ "recent:CRM-10-K-2024-03-06.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 74,
+  "only_display_page_differs": true
+ },
+ "recent:CRM-10-K-2026-03-02.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 88,
+  "only_display_page_differs": true
+ },
+ "recent:GOOGL-10-K-2022-02-02.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 83,
+  "only_display_page_differs": true
+ },
+ "recent:GOOGL-10-K-2023-02-03.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 81,
+  "only_display_page_differs": true
+ },
+ "recent:GOOGL-10-K-2024-01-31.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 80,
+  "only_display_page_differs": true
+ },
+ "recent:GOOGL-10-K-2025-02-05.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 80,
+  "only_display_page_differs": true
+ },
+ "recent:GOOGL-10-K-2026-02-05.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 81,
+  "only_display_page_differs": true
+ },
+ "recent:JPM-10-K-2022-02-22.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 291,
+  "only_display_page_differs": true
+ },
+ "recent:JPM-10-K-2023-02-21.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 293,
+  "only_display_page_differs": true
+ },
+ "recent:JPM-10-K-2024-02-16.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 305,
+  "only_display_page_differs": true
+ },
+ "recent:JPM-10-K-2026-02-13.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 310,
+  "only_display_page_differs": true
+ },
+ "recent:KO-10-K-2022-02-22.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 117,
+  "only_display_page_differs": true
+ },
+ "recent:KO-10-K-2023-02-21.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 119,
+  "only_display_page_differs": true
+ },
+ "recent:KO-10-K-2024-02-20.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 120,
+  "only_display_page_differs": true
+ },
+ "recent:KO-10-K-2026-02-20.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 114,
+  "only_display_page_differs": true
+ },
+ "recent:MSFT-10-K-2022-07-28.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 88,
+  "only_display_page_differs": true
+ },
+ "recent:MSFT-10-K-2023-07-27.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 89,
+  "only_display_page_differs": true
+ },
+ "recent:MSFT-10-K-2024-07-30.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 91,
+  "only_display_page_differs": true
+ },
+ "recent:MSFT-10-K-2026-07-29.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 87,
+  "only_display_page_differs": true
+ },
+ "recent:MU-10-K-2021-10-08.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 68,
+  "only_display_page_differs": true
+ },
+ "recent:MU-10-K-2022-10-07.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 67,
+  "only_display_page_differs": true
+ },
+ "recent:MU-10-K-2023-10-06.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 68,
+  "only_display_page_differs": true
+ },
+ "recent:MU-10-K-2024-10-04.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 67,
+  "only_display_page_differs": true
+ },
+ "recent:NFLX-10-K-2022-01-27.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 61,
+  "only_display_page_differs": true
+ },
+ "recent:NFLX-10-K-2023-01-26.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 61,
+  "only_display_page_differs": true
+ },
+ "recent:NFLX-10-K-2024-01-26.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 72,
+  "only_display_page_differs": true
+ },
+ "recent:NFLX-10-K-2026-01-23.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 78,
+  "only_display_page_differs": true
+ },
+ "recent:NTRA-10-K-2022-02-25.htm": {
+  "pages": [
+   {
+    "page": 74,
+    "main": 74,
+    "candidate": 304
+   },
+   {
+    "page": 86,
+    "main": 86,
+    "candidate": 614
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 6,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 74,
+      "candidate": 304
+     }
+    ]
+   },
+   {
+    "ordinal": 9,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 86,
+      "candidate": 614
+     }
+    ]
+   }
+  ],
+  "tables_compared": 57,
+  "only_display_page_differs": true
+ },
+ "recent:NTRA-10-K-2023-03-01.htm": {
+  "pages": [
+   {
+    "page": 118,
+    "main": 7,
+    "candidate": 118
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 37,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 7,
+      "candidate": 118
+     }
+    ]
+   },
+   {
+    "ordinal": 38,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 7,
+      "candidate": 118
+     }
+    ]
+   },
+   {
+    "ordinal": 39,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 7,
+      "candidate": 118
+     }
+    ]
+   }
+  ],
+  "tables_compared": 55,
+  "only_display_page_differs": true
+ },
+ "recent:NTRA-10-K-2024-02-29.htm": {
+  "pages": [
+   {
+    "page": 117,
+    "main": 117,
+    "candidate": 25
+   },
+   {
+    "page": 118,
+    "main": 118,
+    "candidate": 3
+   },
+   {
+    "page": 121,
+    "main": 121,
+    "candidate": 271
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 34,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 117,
+      "candidate": 25
+     }
+    ]
+   },
+   {
+    "ordinal": 35,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 117,
+      "candidate": 25
+     }
+    ]
+   },
+   {
+    "ordinal": 36,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 118,
+      "candidate": 3
+     }
+    ]
+   },
+   {
+    "ordinal": 37,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 118,
+      "candidate": 3
+     }
+    ]
+   },
+   {
+    "ordinal": 38,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 118,
+      "candidate": 3
+     }
+    ]
+   },
+   {
+    "ordinal": 41,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 121,
+      "candidate": 271
+     }
+    ]
+   }
+  ],
+  "tables_compared": 50,
+  "only_display_page_differs": true
+ },
+ "recent:NTRA-10-K-2026-02-27.htm": {
+  "pages": [
+   {
+    "page": 81,
+    "main": 81,
+    "candidate": 140
+   },
+   {
+    "page": 128,
+    "main": 128,
+    "candidate": 64
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 7,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 81,
+      "candidate": 140
+     }
+    ]
+   },
+   {
+    "ordinal": 41,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 128,
+      "candidate": 64
+     }
+    ]
+   },
+   {
+    "ordinal": 42,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 128,
+      "candidate": 64
+     }
+    ]
+   }
+  ],
+  "tables_compared": 48,
+  "only_display_page_differs": true
+ },
+ "recent:NVO-20-F-2022-02-02.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 18,
+  "only_display_page_differs": true
+ },
+ "recent:NVO-20-F-2023-02-01.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 18,
+  "only_display_page_differs": true
+ },
+ "recent:NVO-20-F-2024-01-31.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 19,
+  "only_display_page_differs": true
+ },
+ "recent:NVO-20-F-2026-02-04.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 25,
+  "only_display_page_differs": true
+ },
+ "recent:TSLA-10-K-2022-02-07.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 105,
+  "only_display_page_differs": true
+ },
+ "recent:TSLA-10-K-2023-01-31.htm": {
+  "pages": [
+   {
+    "page": 67,
+    "main": 399,
+    "candidate": 211
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 35,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 399,
+      "candidate": 211
+     }
+    ]
+   }
+  ],
+  "tables_compared": 97,
+  "only_display_page_differs": true
+ },
+ "recent:TSLA-10-K-2024-01-29.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 84,
+  "only_display_page_differs": true
+ },
+ "recent:TSLA-10-K-2026-01-29.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 75,
+  "only_display_page_differs": true
+ },
+ "recent:TSM-20-F-2022-04-14.htm": {
+  "pages": [
+   {
+    "page": 37,
+    "main": 8,
+    "candidate": 34
+   },
+   {
+    "page": 146,
+    "main": 3,
+    "candidate": null
+   },
+   {
+    "page": 148,
+    "main": 1,
+    "candidate": 9
+   },
+   {
+    "page": 150,
+    "main": 2,
+    "candidate": null
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 23,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 8,
+      "candidate": 34
+     }
+    ]
+   },
+   {
+    "ordinal": 143,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 3,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 144,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 3,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 147,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": 9
+     }
+    ]
+   },
+   {
+    "ordinal": 148,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": 9
+     }
+    ]
+   },
+   {
+    "ordinal": 150,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 2,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 151,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 2,
+      "candidate": null
+     }
+    ]
+   }
+  ],
+  "tables_compared": 160,
+  "only_display_page_differs": true
+ },
+ "recent:TSM-20-F-2023-04-20.htm": {
+  "pages": [
+   {
+    "page": 51,
+    "main": 980,
+    "candidate": 48
+   },
+   {
+    "page": 112,
+    "main": 1,
+    "candidate": null
+   },
+   {
+    "page": 150,
+    "main": 1,
+    "candidate": null
+   },
+   {
+    "page": 152,
+    "main": 1,
+    "candidate": 9
+   },
+   {
+    "page": 154,
+    "main": 2,
+    "candidate": null
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 30,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 980,
+      "candidate": 48
+     }
+    ]
+   },
+   {
+    "ordinal": 68,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 69,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 151,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 152,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 155,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": 9
+     }
+    ]
+   },
+   {
+    "ordinal": 156,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": 9
+     }
+    ]
+   },
+   {
+    "ordinal": 158,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 2,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 159,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 2,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 160,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 2,
+      "candidate": null
+     }
+    ]
+   }
+  ],
+  "tables_compared": 169,
+  "only_display_page_differs": true
+ },
+ "recent:TSM-20-F-2024-04-18.htm": {
+  "pages": [
+   {
+    "page": 44,
+    "main": 532,
+    "candidate": 41
+   },
+   {
+    "page": 53,
+    "main": 980,
+    "candidate": 50
+   },
+   {
+    "page": 156,
+    "main": 1,
+    "candidate": 8
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 21,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 532,
+      "candidate": 41
+     }
+    ]
+   },
+   {
+    "ordinal": 29,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 980,
+      "candidate": 50
+     }
+    ]
+   },
+   {
+    "ordinal": 151,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": 8
+     }
+    ]
+   },
+   {
+    "ordinal": 152,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": 8
+     }
+    ]
+   }
+  ],
+  "tables_compared": 165,
+  "only_display_page_differs": true
+ },
+ "recent:TSM-20-F-2026-04-16.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 169,
+  "only_display_page_differs": true
+ },
+ "recent:UNH-10-K-2022-02-15.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 67,
+  "only_display_page_differs": true
+ },
+ "recent:UNH-10-K-2023-02-24.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 72,
+  "only_display_page_differs": true
+ },
+ "recent:UNH-10-K-2024-02-28.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 71,
+  "only_display_page_differs": true
+ },
+ "recent:UNH-10-K-2026-03-02.htm": {
+  "pages": [],
+  "tables": [],
+  "tables_compared": 72,
+  "only_display_page_differs": true
+ }
+}

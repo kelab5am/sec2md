@@ -1,0 +1,98 @@
+{
+ "new_failures": [],
+ "documents_with_warnings": {
+  "main": {
+   "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:MSFT-10-K-2025-07-30.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:MSFT-10-K-2025-07-30.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:NTRA-10-K-2025-02-28.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:NTRA-10-K-2025-02-28.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ]
+  },
+  "candidate": {
+   "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:MSFT-10-K-2025-07-30.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:MSFT-10-K-2025-07-30.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:NTRA-10-K-2025-02-28.htm|normal": [
+    "untraceable normalized number: <see trace_failures>"
+   ],
+   "edgar:NTRA-10-K-2025-02-28.htm|capture": [
+    "untraceable normalized number: <see trace_failures>"
+   ]
+  }
+ },
+ "misses": [],
+ "trace_failures": {
+  "main": 14,
+  "candidate": 14
+ }
+}

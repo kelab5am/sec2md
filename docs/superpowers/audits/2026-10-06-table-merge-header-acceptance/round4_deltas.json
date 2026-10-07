@@ -1,0 +1,240 @@
+{
+ "files": {
+  "summary.json": "differs",
+  "check1.json": "identical",
+  "findings.json": "identical",
+  "strict.json": "identical",
+  "sections.json": "identical",
+  "xlsx.json": "identical",
+  "xlsx_detail.json": "identical",
+  "modes.json": "identical",
+  "alignment.json": "differs",
+  "alignment_losses.json": "identical",
+  "header_departures.json": "differs",
+  "assignment.json": "timing only",
+  "retention.json": "differs",
+  "class8.json": "identical",
+  "limitations.json": "identical",
+  "moved_rows.json": "differs",
+  "shifted_tables.json": "identical",
+  "run_check.json": "timing only"
+ },
+ "summary_changes": {
+  "/alignment/findings_lines/main": [
+   10030,
+   10026
+  ],
+  "/alignment/evaluated_main": [
+   49638,
+   49656
+  ],
+  "/alignment/evaluated_candidate": [
+   52937,
+   52955
+  ],
+  "/retention/header_cells": [
+   19590,
+   19591
+  ],
+  "/retention/header_cells_represented": [
+   19590,
+   19591
+  ],
+  "/retention/word_only_values": [
+   7328,
+   7310
+  ],
+  "/retention/no_discriminating_values": [
+   2054,
+   2036
+  ],
+  "/moved_rows/rows": [
+   2271,
+   2270
+  ],
+  "/moved_rows/tables": [
+   1610,
+   1609
+  ],
+  "/moved_rows/rule_ok": [
+   2271,
+   2270
+  ],
+  "/moved_rows/reasons/sparse_row_fusion": [
+   115,
+   113
+  ],
+  "/moved_rows/signals_rows/words_in_value_cells": [
+   501,
+   500
+  ],
+  "/moved_rows/signals_rows/value_with_unit": [
+   6,
+   5
+  ],
+  "/moved_rows/signals_tables/value_with_unit": [
+   6,
+   5
+  ],
+  "/moved_rows/signals_tables/words_in_value_cells": [
+   384,
+   383
+  ],
+  "/moved_rows/any_signal_rows": [
+   501,
+   500
+  ],
+  "/moved_rows/any_signal_tables": [
+   384,
+   383
+  ],
+  "/moved_rows/beyond_snapshot_header_rows": [
+   1896,
+   1895
+  ],
+  "/moved_rows/beyond_snapshot_header_tables": [
+   1267,
+   1266
+  ],
+  "/moved_rows/sparse_row_fusion_only_rows": [
+   46,
+   45
+  ],
+  "/moved_rows/sparse_row_fusion_only_tables": [
+   46,
+   45
+  ],
+  "/header_departures/rows": [
+   221,
+   220
+  ],
+  "/header_departures/tables": [
+   215,
+   214
+  ],
+  "/header_departures/non_data_rows": [
+   43,
+   42
+  ],
+  "/header_departures/non_data_tables": [
+   42,
+   41
+  ],
+  "/header_departures/non_data_with_value_text_rows": [
+   19,
+   18
+  ],
+  "/header_departures/non_data_with_value_text_tables": [
+   18,
+   17
+  ],
+  "/header_departures/non_data_by_document/edgar:JPM-10-K-2025-02-14.htm": [
+   8,
+   7
+  ],
+  "/header_departures/zone_cuts": [
+   88,
+   87
+  ]
+ },
+ "alignment_coverage_changes": {
+  "main": {
+   "value_no_discriminating_header": [
+    2075,
+    2057
+   ],
+   "values_evaluated": [
+    49638,
+    49656
+   ],
+   "values_aligned": [
+    26584,
+    26606
+   ],
+   "values_misaligned": [
+    23054,
+    23050
+   ]
+  },
+  "candidate": {
+   "value_no_discriminating_header": [
+    2106,
+    2088
+   ],
+   "values_evaluated": [
+    52937,
+    52955
+   ],
+   "values_aligned": [
+    52937,
+    52955
+   ]
+  }
+ },
+ "alignment_transition_changes": {
+  "aligned -> aligned": [
+   26584,
+   26606
+  ],
+  "misaligned -> aligned": [
+   23054,
+   23050
+  ],
+  "value_no_discriminating_header -> value_no_discriminating_header": [
+   2075,
+   2057
+  ]
+ },
+ "retention_changes": {
+  "header_cells": [
+   19590,
+   19591
+  ],
+  "header_cells_represented": [
+   19590,
+   19591
+  ],
+  "word_only_values": [
+   7328,
+   7310
+  ],
+  "no_discriminating_values": [
+   2054,
+   2036
+  ]
+ },
+ "moved_rows_new": [],
+ "moved_rows_gone": [
+  {
+   "doc": "edgar:AMZN-10-Q-2025-10-31.htm",
+   "unit": 21,
+   "row": 2,
+   "texts": [
+    "Weighted-average remaining lease term – operating leases",
+    "10.6 years",
+    "10.0 years"
+   ],
+   "reasons": [
+    "sparse_row_fusion"
+   ],
+   "signals": [
+    "words_in_value_cells",
+    "value_with_unit"
+   ]
+  }
+ ],
+ "departures_new": [],
+ "departures_gone": [
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 207,
+   "row": 2,
+   "texts": [
+    "Average amount (in millions)",
+    "December 31, 2024",
+    "September 30, 2024",
+    "December 31, 2023"
+   ]
+  }
+ ]
+}

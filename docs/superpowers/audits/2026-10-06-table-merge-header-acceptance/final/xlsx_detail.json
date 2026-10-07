@@ -1,0 +1,118 @@
+{
+ "edgar:NTRA-10-K-2025-02-28.htm": {
+  "pages": [
+   {
+    "page": 76,
+    "main": 76,
+    "candidate": 587
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 7,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 76,
+      "candidate": 587
+     }
+    ]
+   }
+  ],
+  "tables_compared": 49,
+  "only_display_page_differs": true
+ },
+ "edgar:TSM-20-F-2025-04-17.htm": {
+  "pages": [
+   {
+    "page": 47,
+    "main": 957,
+    "candidate": 43
+   },
+   {
+    "page": 146,
+    "main": 4,
+    "candidate": 8
+   },
+   {
+    "page": 160,
+    "main": 1,
+    "candidate": null
+   }
+  ],
+  "tables": [
+   {
+    "ordinal": 20,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 957,
+      "candidate": 43
+     }
+    ]
+   },
+   {
+    "ordinal": 21,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 957,
+      "candidate": 43
+     }
+    ]
+   },
+   {
+    "ordinal": 131,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 4,
+      "candidate": 8
+     }
+    ]
+   },
+   {
+    "ordinal": 132,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 4,
+      "candidate": 8
+     }
+    ]
+   },
+   {
+    "ordinal": 133,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 4,
+      "candidate": 8
+     }
+    ]
+   },
+   {
+    "ordinal": 159,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": null
+     }
+    ]
+   },
+   {
+    "ordinal": 160,
+    "fields": [
+     {
+      "field": "source.display_page",
+      "main": 1,
+      "candidate": null
+     }
+    ]
+   }
+  ],
+  "tables_compared": 172,
+  "only_display_page_differs": true
+ }
+}

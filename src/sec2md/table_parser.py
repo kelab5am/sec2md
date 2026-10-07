@@ -274,6 +274,32 @@ def _descendants_named(node: Tag, names: tuple[str, ...]) -> list[Tag]:
     return [child for child in node.descendants if child.name in names]
 
 
+def _outside_every_cell(nested: Tag, table: Tag) -> bool:
+    """Whether a table nested in ``table`` sits in a row but outside every cell of that row:
+    lxml keeps a ``<table>`` placed directly in a ``<tr>``, or in a wrapper there, inside that
+    row (spec "Source cell", revision 18). Its nearest row or cell ancestor is then the row;
+    for a table nested inside a cell it is the cell.
+    """
+
+    node = nested.parent
+    while node is not None and node is not table:
+        if node.name == "tr":
+            return True
+        if node.name in ("td", "th"):
+            return False
+        node = node.parent
+    return False
+
+
+def _own_table(tr: Tag) -> Tag | None:
+    """The table a tr belongs to: its nearest table ancestor."""
+
+    node = tr.parent
+    while node is not None and node.name != "table":
+        node = node.parent
+    return node
+
+
 def _cell_value(text: str, *, policy: StructuralPolicy = LEGACY) -> str:
     """The cell text a structural rule reads: visible text under EXTENDED (R3.1)."""
 
@@ -449,6 +475,12 @@ class TableParser:
         self.base_url = base_url
         # Set by each to_markdown() call; None until a render writes a table.
         self.header_record: TableHeaderRecord | None = None
+        # Whether a table nested in a row outside every cell is folded into that row in a way
+        # that changes the rows (set by _extract_cells): a row reads one of its visible cells,
+        # or one of its own rows that was read before revision 18 (not grid-hidden, with a td
+        # or th, kept empty when every cell is grid-hidden) is no longer a row. Such a table
+        # is never a list table, and its grid is sized by placement.
+        self._folds_a_table_outside_cells = False
 
         self.cells = self._extract_cells()
         self.grid = self._create_grid()
@@ -458,10 +490,30 @@ class TableParser:
 
         Grid-hidden rows and cells are left out before placement, so spans and positions
         are those a reader sees, as in the snapshot builder and the checker's placed grid.
+        A row reads every td and th beneath it. A table nested in a row outside every cell
+        is therefore read once, in that row: its own rows are not enumerated (revision 18).
+        A table nested inside a cell keeps its rows.
         """
         rows = []
         hidden: dict = {}
-        for tr in _descendants_named(self.table_element, ("tr",)):
+        nodes = _descendants_named(self.table_element, ("tr", "table"))
+        trs = [node for node in nodes if node.name == "tr"]
+        outside_cells: set[int] = set()
+        removed: list[Tag] = []
+        if len(trs) != len(nodes):
+            outside = [
+                node for node in nodes
+                if node.name == "table" and _outside_every_cell(node, self.table_element)
+            ]
+            if outside:
+                tables = {id(node) for node in outside}
+                owned = [(tr, id(_own_table(tr)) in tables) for tr in trs]
+                removed = [tr for tr, folded in owned if folded]
+                trs = [tr for tr, folded in owned if not folded]
+                outside_cells = {
+                    id(cell) for node in outside for cell in _descendants_named(node, ("td", "th"))
+                }
+        for tr in trs:
             if _grid_hidden_within(tr, self.table_element, hidden):
                 continue
             row = []
@@ -481,6 +533,14 @@ class TableParser:
                                 header=td.name == "th", node=td))
             if row:
                 rows.append(row)
+        if outside_cells:
+            self._folds_a_table_outside_cells = any(
+                id(cell.node) in outside_cells for row in rows for cell in row
+            ) or any(
+                not _grid_hidden_within(tr, self.table_element, hidden)
+                and _descendants_named(tr, ("td", "th"))
+                for tr in removed
+            )
         return rows or [[Cell(text="")]]
 
     @staticmethod
@@ -493,6 +553,25 @@ class TableParser:
             return int(cleaned) if cleaned else default
         except (ValueError, TypeError):
             return default
+
+    def _placed_width(self) -> int:
+        """The grid width that places every cell: the furthest column a cell reaches when
+        each row's cells skip the slots that rowspans from the rows above take, exactly as
+        _create_grid places them."""
+        height = len(self.cells)
+        taken: set[tuple[int, int]] = set()
+        width = 0
+        for i, row in enumerate(self.cells):
+            col = 0
+            for cell in row:
+                while (i, col) in taken:
+                    col += 1
+                taken.add((i, col))
+                for r in range(min(cell.rowspan, height - i)):
+                    taken.update((i + r, col + c) for c in range(cell.colspan))
+                width = max(width, col + max(cell.colspan, 1))
+                col += cell.colspan
+        return width
 
     def _create_grid(self) -> List[List[GridCell]]:
         """Build the source grid, decide row roles (R0) and merge columns with membership.
@@ -508,6 +587,11 @@ class TableParser:
 
         # Calculate grid dimensions
         max_cols = max(sum(cell.colspan for cell in row) for row in self.cells)
+        if self._folds_a_table_outside_cells:
+            # A row reading a nested table is wider than its markup, and a nested row that is
+            # no longer a row no longer ends the rowspans above it. Either can push cells past
+            # the widest row's colspan sum, where the loop below would drop them (revision 18).
+            max_cols = max(max_cols, self._placed_width())
         grid = [[None for _ in range(max_cols)] for _ in range(len(self.cells))]
 
         for i, row in enumerate(self.cells):
@@ -1202,11 +1286,11 @@ class TableParser:
     def _header_record(self, header_line: str | None, kept: Sequence[int]) -> TableHeaderRecord:
         """R6a's inputs for the header line this render wrote; each source cell counts once.
 
-        A nested table's cells are read for the outer row that holds the table and again for
-        their own rows. When the table sits in a cell, that cell's text already holds them, so
-        a zone cell inside another zone cell is left out. When lxml keeps the table in the
-        ``<tr>`` itself, directly or in a wrapper such as ``<div>``, no zone cell holds them,
-        so each remaining node is read once, at its first read in document order. Both rules
+        A table nested inside a cell has its cells read for the outer row that holds it and
+        again for its own rows, and that cell's text already holds them, so a zone cell
+        inside another zone cell is left out. A table that lxml keeps in the ``<tr>`` itself,
+        directly or in a wrapper such as ``<div>``, is read once, in that row (revision 18);
+        any node still read twice counts at its first read in document order. Both rules
         apply to header_source and header_capacity alike.
         """
 
@@ -1248,8 +1332,13 @@ class TableParser:
         )
 
     def _looks_like_list_table(self) -> bool:
-        """Special case - some quirky files format lists as tables"""
-        if len(self.cells) != 1:
+        """Special case - some quirky files format lists as tables.
+
+        A table that folds a table nested in a row outside every cell into that row is never
+        one: it had more rows before revision 18, and a list line keeps only the row's last
+        cell.
+        """
+        if len(self.cells) != 1 or self._folds_a_table_outside_cells:
             return False
         row = self.cells[0]
         texts = [c.text.strip() for c in row]

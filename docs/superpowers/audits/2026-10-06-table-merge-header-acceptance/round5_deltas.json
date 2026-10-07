@@ -1,0 +1,197 @@
+{
+ "files": {
+  "summary.json": "differs",
+  "check1.json": "identical",
+  "findings.json": "identical",
+  "strict.json": "identical",
+  "sections.json": "identical",
+  "xlsx.json": "identical",
+  "xlsx_detail.json": "identical",
+  "modes.json": "identical",
+  "alignment.json": "differs",
+  "alignment_losses.json": "identical",
+  "header_departures.json": "differs",
+  "assignment.json": "timing only",
+  "retention.json": "differs",
+  "class8.json": "identical",
+  "limitations.json": "identical",
+  "moved_rows.json": "identical",
+  "shifted_tables.json": "identical",
+  "run_check.json": "timing only"
+ },
+ "summary_changes": {
+  "/alignment/values_listed": [
+   99097,
+   99084
+  ],
+  "/alignment/evaluated_main": [
+   49656,
+   49659
+  ],
+  "/alignment/evaluated_candidate": [
+   52955,
+   52954
+  ],
+  "/alignment/evaluated_on_candidate_not_main": [
+   3299,
+   3295
+  ],
+  "/retention/header_cells": [
+   19591,
+   19594
+  ],
+  "/retention/header_cells_represented": [
+   19591,
+   19594
+  ],
+  "/retention/values": [
+   54991,
+   54990
+  ],
+  "/retention/values_equal": [
+   54987,
+   54986
+  ],
+  "/retention/values_exact_case": [
+   54987,
+   54986
+  ],
+  "/header_departures/rows": [
+   220,
+   219
+  ],
+  "/header_departures/tables": [
+   214,
+   213
+  ],
+  "/header_departures/data_rows": [
+   178,
+   177
+  ]
+ },
+ "alignment_coverage_changes": {
+  "main": {
+   "rows_data": [
+    28298,
+    28297
+   ],
+   "row_unpaired": [
+    6951,
+    6950
+   ],
+   "values_total": [
+    65986,
+    65974
+   ],
+   "value_no_discriminating_header": [
+    2057,
+    2051
+   ],
+   "value_ambiguous_position": [
+    5121,
+    5115
+   ],
+   "value_ambiguous_header": [
+    3267,
+    3264
+   ],
+   "values_evaluated": [
+    49656,
+    49659
+   ],
+   "values_aligned": [
+    26606,
+    26609
+   ]
+  },
+  "candidate": {
+   "rows_data": [
+    28298,
+    28297
+   ],
+   "rows_paired": [
+    19777,
+    19776
+   ],
+   "values_total": [
+    66065,
+    66052
+   ],
+   "value_no_discriminating_header": [
+    2088,
+    2082
+   ],
+   "value_ambiguous_position": [
+    5137,
+    5131
+   ],
+   "values_evaluated": [
+    52955,
+    52954
+   ],
+   "values_aligned": [
+    52955,
+    52954
+   ]
+  }
+ },
+ "alignment_transition_changes": {
+  "aligned -> aligned": [
+   26606,
+   26609
+  ],
+  "row_unpaired -> aligned": [
+   32,
+   31
+  ],
+  "value_ambiguous_header -> aligned": [
+   3267,
+   3264
+  ],
+  "value_ambiguous_position -> value_ambiguous_position": [
+   5121,
+   5115
+  ],
+  "value_no_discriminating_header -> value_no_discriminating_header": [
+   2057,
+   2051
+  ]
+ },
+ "retention_changes": {
+  "header_cells": [
+   19591,
+   19594
+  ],
+  "header_cells_represented": [
+   19591,
+   19594
+  ],
+  "values": [
+   54991,
+   54990
+  ],
+  "values_equal": [
+   54987,
+   54986
+  ],
+  "values_exact_case": [
+   54987,
+   54986
+  ]
+ },
+ "moved_rows_new": [],
+ "moved_rows_gone": [],
+ "departures_new": [],
+ "departures_gone": [
+  {
+   "doc": "edgar:KO-10-K-2025-02-20.htm",
+   "unit": 14,
+   "row": 2,
+   "texts": [
+    "Unit Cases",
+    "1,2",
+    "Concentrate Sales"
+   ]
+  }
+ ]
+}

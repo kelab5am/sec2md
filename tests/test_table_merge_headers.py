@@ -3,6 +3,8 @@
 Covers the structural policy boundary (R9) and zero-width cell text.
 """
 
+import re
+
 import pytest
 from bs4 import BeautifulSoup
 
@@ -1557,10 +1559,9 @@ def test_header_record_counts_a_table_nested_in_a_header_cell_once():
     "<div><table><tr><th>Fiscal</th><th>2024</th></tr></table></div>",
 ], ids=["tr-direct", "div-wrapped"])
 def test_header_record_reads_each_cell_of_a_table_nested_in_a_header_row_once(nested):
-    # lxml keeps a table placed in a <tr> (directly or in a wrapper) inside that row, so its
-    # cells are read for the outer row and again for their own row, and no zone cell holds
-    # them. R6a counts each source cell once: one 2024 heading one column (was two of each,
-    # which let the second written copy pass strict).
+    # lxml keeps a table placed in a <tr> (directly or in a wrapper) inside that row, and no
+    # zone cell holds it. R6a counts each source cell once: one 2024 heading one column.
+    # Revision 18 (C1): its rows are no longer also read as header rows, so 2024 is written once.
     from collections import Counter
 
     from sec2md.quality import _normalized_numbers
@@ -1568,7 +1569,7 @@ def test_header_record_reads_each_cell_of_a_table_nested_in_a_header_row_once(ne
     html = (f"<table><tr><th>Item</th><th>Period</th>{nested}</tr>"
             "<tr><td>Revenue</td><td>100</td></tr></table>")
     record, markdown = _record(html)
-    assert markdown.splitlines()[0] == "| Item — Fiscal | Period — 2024 | Fiscal | 2024 |"
+    assert markdown.splitlines()[0] == "| Item | Period | Fiscal | 2024 |"
     assert Counter(_normalized_numbers(_table(html).get_text(" ", strip=True)))["2024"] == 1
     assert record.header_source == record.header_capacity == (("2024", 1),)
 
@@ -2036,8 +2037,8 @@ def test_header_record_of_a_headerless_table_lists_no_header_cells():
     assert record.header_cells == ()
 
 
-# Malformed markup: lxml keeps a table placed directly in a header-zone <tr> inside that row,
-# so its cells are read for the outer row and again for their own row.
+# Malformed markup: lxml keeps a table placed directly in a header-zone <tr> inside that row.
+# Revision 18 (C1): its cells are read once, in that row (they were read again as their own row).
 NESTED_IN_HEADER_ROW_HTML = (
     "<table><tr><th>Item</th><th>Period</th><table><tr><th>Fiscal</th><th>2024</th></tr></table></tr>"
     "<tr><td>Revenue</td><td>100</td></tr></table>"
@@ -2064,6 +2065,8 @@ def test_header_cells_reproduce_the_header_source_and_capacity(case):
         # Each source cell is listed once, as header_source counts it: one 2024 heading one column.
         assert record.header_source == record.header_capacity == (("2024", 1),)
         assert record.header_cells == (("Item", 1), ("Period", 1), ("Fiscal", 1), ("2024", 1))
+        # Revision 18 (C1): the header line writes it once too (no second, nested header row).
+        assert record.header_line == "| Item | Period | Fiscal | 2024 |"
 
 
 def test_list_table_has_no_header_record():
@@ -2113,3 +2116,339 @@ def test_header_source_tokenizes_header_cells_like_the_strict_source_pool():
     assert Counter(_normalized_numbers(_table(html).get_text(" ", strip=True)))["-29"] == 1
     # Capacity stays per cell: the "29" cell heads one output column.
     assert record.header_capacity == (("29", 1),)
+
+
+# --- Revision 18, C1: a table nested in a row outside every cell is read once -----------
+
+# lxml keeps a <table> placed in a <tr>, directly or in a <div>, inside that row. Its cells
+# stay cells of the outer row, and its own rows are no longer also rows of the outer table.
+# Each layout: (html, the nested values, TableParser's Markdown).
+C1_LAYOUTS = {
+    "header-tr": (
+        "<table><tr><th>Item</th><th>Period</th><table><tr><th>Fiscal</th><th>2024</th></tr></table></tr>"
+        "<tr><td>Revenue</td><td>100</td></tr></table>",
+        ("Fiscal", "2024"),
+        ["| Item | Period | Fiscal | 2024 |", "| --- | --- | --- | --- |", "| Revenue | 100 |  |  |"],
+    ),
+    "body-tr": (
+        "<table><tr><th>Item</th><th>2025</th></tr>"
+        "<tr><td>Revenue</td><td>100</td><table><tr><td>Other</td><td>555</td></tr></table></tr>"
+        "<tr><td>Costs</td><td>40</td></tr></table>",
+        ("Other", "555"),
+        ["| Item | 2025 |  |  |", "| --- | --- | --- | --- |", "| Revenue | 100 | Other | 555 |",
+         "| Costs | 40 |  |  |"],
+    ),
+    "first-td-row-div": (
+        "<table><tr><td>Item</td><td>Amount</td><div><table><tr><td>Note</td><td>777</td></tr></table></div></tr>"
+        "<tr><td>Revenue</td><td>100</td></tr></table>",
+        ("Note", "777"),
+        ["|  |  |  |  |", "| --- | --- | --- | --- |", "| Item | Amount | Note | 777 |",
+         "| Revenue | 100 |  |  |"],
+    ),
+}
+
+# Both rendering modes. The completeness checks are asserted in normal mode only: capture
+# mode writes a nested table's source text, whose check-1 findings predate C1 and are the
+# same at 1252c45.
+C1_MODES = pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+
+
+def _c1_document(table_html: str) -> str:
+    return f"<html><body><p>Intro.</p>{table_html}<p>End.</p></body></html>"
+
+
+def _c1_parse(table_html: str, capture_tables: bool):
+    """Parse a document holding the table; return the parser and its page Markdown."""
+    from sec2md.parser import Parser
+
+    parser = Parser(_c1_document(table_html), capture_tables=capture_tables)
+    return parser, "\n\n".join(page.content for page in parser.get_pages())
+
+
+def _cell_texts(html: str) -> list[list[str]]:
+    return [[cell.text for cell in row] for row in _parser(html).cells]
+
+
+@pytest.mark.parametrize("layout", sorted(C1_LAYOUTS))
+def test_c1_a_table_nested_in_a_row_outside_every_cell_is_read_once(layout):
+    html, values, expected = C1_LAYOUTS[layout]
+    parser = _parser(html)
+    markdown = parser.md()
+    assert markdown.splitlines() == expected
+    for value in values:
+        assert markdown.count(value) == 1
+    nodes = [id(cell.node) for row in parser.cells for cell in row]
+    assert len(nodes) == len(set(nodes))
+
+
+@C1_MODES
+@pytest.mark.parametrize("layout", sorted(C1_LAYOUTS))
+def test_c1_nested_layout_passes_strict_with_each_nested_value_once(layout, capture_tables):
+    # main passes these documents. Reading the nested rows too wrote a second copy: a header
+    # excess in a header row, an untraceable body token elsewhere. Capture mode writes the
+    # table's source text, as before.
+    from sec2md.quality import enforce_quality
+
+    html, values, expected = C1_LAYOUTS[layout]
+    parser, markdown = _c1_parse(html, capture_tables)
+    assert parser.trace_numeric_failures == ()
+    assert parser.header_accounting_misses == ()
+    enforce_quality(parser.diagnostics, "strict")
+    for value in values:
+        assert markdown.count(value) == 1
+    if not capture_tables:  # completeness in normal mode only (see C1_MODES)
+        assert "\n".join(expected) in markdown
+        assert parser.diagnostics.table_completeness_failures == ()
+
+
+@pytest.mark.parametrize("layout", sorted(C1_LAYOUTS))
+def test_c1_nested_layout_converts_under_strict(layout):
+    from sec2md.core import convert_to_markdown
+
+    html, values, expected = C1_LAYOUTS[layout]
+    markdown = convert_to_markdown(_c1_document(html), quality_policy="strict")
+    assert "\n".join(expected) in markdown
+    for value in values:
+        assert markdown.count(value) == 1
+
+
+# Codex's counterexamples to reading such a table in its own rows instead: with no inner
+# <tr>, or under the outer row's rowspans, 987 would be dropped. C1 keeps it, once.
+C1_VALUE_CONTROLS = {
+    "no-inner-tr": "<tr><td>A</td><td>1</td><table><td>987</td></table></tr>",
+    "outer-rowspan": '<tr><td rowspan="2">A</td><td rowspan="2">1</td><table><tr><td>987</td></tr></table></tr>',
+}
+
+
+@pytest.mark.parametrize("control", sorted(C1_VALUE_CONTROLS))
+def test_c1_keeps_a_nested_value_without_a_row_of_its_own(control):
+    assert _markdown(f"<table>{C1_VALUE_CONTROLS[control]}</table>") == [
+        "|  |  |  |", "| --- | --- | --- |", "| A | 1 | 987 |"]
+
+
+@C1_MODES
+@pytest.mark.parametrize("control", sorted(C1_VALUE_CONTROLS))
+def test_c1_value_controls_keep_the_nested_value_once_under_strict(control, capture_tables):
+    # Below a header row, so Parser renders a table. Alone, the no-inner-tr row takes Parser's
+    # one-row path, which reads only a row's direct cells and loses 987 (as on main): a
+    # separate follow-up, outside C1.
+    from sec2md.quality import enforce_quality
+
+    parser, markdown = _c1_parse(
+        f"<table><tr><th>Item</th><th>2025</th></tr>{C1_VALUE_CONTROLS[control]}</table>", capture_tables)
+    assert markdown.count("987") == 1
+    assert parser.trace_numeric_failures == ()
+    enforce_quality(parser.diagnostics, "strict")
+    if not capture_tables:
+        assert "| A | 1 | 987 |" in markdown.splitlines()
+
+
+# A table nested inside a cell is read as before: pinned from the 1252c45 render, as
+# (html, TableParser's Markdown, the normal-mode page, the capture-mode page).
+C1_IN_CELL = {
+    "header-cell": (
+        "<table><tr><th>Item</th><th>Period<table><tr><th>Fiscal</th><th>2024</th></tr></table></th></tr>"
+        "<tr><td>Revenue</td><td>100</td></tr></table>",
+        ["| Item — Fiscal | Period Fiscal 2024 — 2024 | Fiscal | 2024 |", "| --- | --- | --- | --- |",
+         "| Revenue | 100 |  |  |"],
+        "Intro.\n\n| Item — Fiscal | Period Fiscal 2024 — 2024 | Fiscal | 2024 |\n| --- | --- | --- | --- |\n"
+        "| Revenue | 100 |  |  |\n\nEnd.",
+        "Intro.\n\nItem Period Fiscal 2024 Revenue 100\n\nEnd.",
+    ),
+    "body-cell": (
+        "<table><tr><td>Outer<table><tr><td>Inner</td><td>77</td></tr><tr><td>B</td><td>88</td></tr></table></td>"
+        "<td>12</td></tr><tr><td>Outer B</td><td>34</td></tr></table>",
+        ["|  |  |  |  |  |  |", "| --- | --- | --- | --- | --- | --- |",
+         "| Outer Inner 77 B 88 | Inner | 77 | B | 88 | 12 |", "| Inner | 77 |  |  |  |  |",
+         "| B | 88 |  |  |  |  |", "| Outer B | 34 |  |  |  |  |"],
+        "Intro.\n\n|  |  |  |  |  |  |\n| --- | --- | --- | --- | --- | --- |\n"
+        "| Outer Inner 77 B 88 | Inner | 77 | B | 88 | 12 |\n| Inner | 77 |  |  |  |  |\n"
+        "| B | 88 |  |  |  |  |\n| Outer B | 34 |  |  |  |  |\n\nEnd.",
+        "Intro.\n\nOuter Inner 77 B 88 12 Outer B 34\n\nEnd.",
+    ),
+    "div-in-a-first-row-cell": (
+        "<table><tr><td>Item</td><td><div><table><tr><td>Note</td><td>777</td></tr></table></div></td></tr>"
+        "<tr><td>Revenue</td><td>100</td></tr></table>",
+        ["|  |  |  |  |", "| --- | --- | --- | --- |", "| Item | Note 777 | Note | 777 |",
+         "| Note | 777 |  |  |", "| Revenue | 100 |  |  |"],
+        "Intro.\n\n|  |  |  |  |\n| --- | --- | --- | --- |\n| Item | Note 777 | Note | 777 |\n"
+        "| Note | 777 |  |  |\n| Revenue | 100 |  |  |\n\nEnd.",
+        "Intro.\n\nItem Note 777 Revenue 100\n\nEnd.",
+    ),
+}
+
+
+@pytest.mark.parametrize("case", sorted(C1_IN_CELL))
+def test_c1_a_table_nested_inside_a_cell_renders_as_before(case):
+    html, expected, normal, capture = C1_IN_CELL[case]
+    assert _markdown(html) == expected
+    assert _c1_parse(html, capture_tables=False)[1] == normal
+    assert _c1_parse(html, capture_tables=True)[1] == capture
+
+
+def test_c1_classifies_each_nested_table_by_where_it_sits():
+    # A table inside a cell keeps its rows, even within a table placed in a row; a table
+    # placed in a row loses its rows, even within a table inside a cell.
+    assert _cell_texts(
+        "<table><tr><th>Item</th><th>2025</th></tr><tr><td>A</td><td>1</td>"
+        "<table><tr><td>B<table><tr><td>X</td><td>5</td></tr></table></td></tr></table></tr></table>"
+    ) == [["Item", "2025"], ["A", "1", "B X 5", "X", "5"], ["X", "5"]]
+    assert _cell_texts(
+        "<table><tr><th>Item</th><th>2025</th></tr><tr><td>A<table><tr><td>B</td><td>6</td>"
+        "<table><tr><td>X</td><td>5</td></tr></table></tr></table></td><td>1</td></tr></table>"
+    ) == [["Item", "2025"], ["A B 6 X 5", "B", "6", "X", "5", "1"], ["B", "6", "X", "5"]]
+
+
+# Read once, the table below has one row. A bullet in it must not make it a list line,
+# which keeps only the row's last cell and would drop "Sales grew 100".
+C1_BULLET_ROW = ("<table><tr><td>•</td><td>Sales grew 100</td>"
+                 "<table><tr><td>Other</td><td>50</td></tr></table></tr></table>")
+
+
+@pytest.mark.parametrize("html, expected", [
+    (C1_BULLET_ROW, ["|  |  |  |  |", "| --- | --- | --- | --- |", "| • | Sales grew 100 | Other | 50 |"]),
+    # Every cell of the nested row is grid-hidden: the row it no longer adds (1252c45 kept it
+    # empty) still keeps the table from becoming "- Costs 7", which would drop "Sales 300".
+    ("<table><tr><td>•</td><td>Sales 300</td><td>Costs 7</td>"
+     '<table><tr><td style="display:none">Other 50</td></tr></table></tr></table>',
+     ["| • | Sales 300 | Costs 7 |", "| --- | --- | --- |"]),
+], ids=["nested-row", "nested-row-of-hidden-cells"])
+def test_c1_a_table_holding_a_table_in_its_row_is_never_a_list_table(html, expected):
+    assert _markdown(html) == expected
+
+
+def test_c1_an_entirely_grid_hidden_table_outside_every_cell_changes_nothing():
+    # It adds no cell to the row, and its rows were never read: as at 1252c45.
+    assert _markdown(
+        '<table><tr><td>•</td><td>Sales grew 100</td><table style="display:none">'
+        "<tr><td>Other</td><td>50</td></tr></table></tr></table>"
+    ) == ["- Sales grew 100"]
+
+
+@C1_MODES
+def test_c1_a_bullet_row_holding_a_nested_table_keeps_every_value_once(capture_tables):
+    from sec2md.quality import enforce_quality
+
+    parser, markdown = _c1_parse(C1_BULLET_ROW, capture_tables)
+    for value in ("Sales grew 100", "Other", "50"):
+        assert markdown.count(value) == 1
+    enforce_quality(parser.diagnostics, "strict")
+    if not capture_tables:  # completeness in normal mode only (see C1_MODES)
+        assert parser.diagnostics.table_completeness_failures == ()
+
+
+def test_c1_a_grid_hidden_row_of_the_nested_table_stays_hidden():
+    assert _cell_texts(
+        "<table><tr><th>Item</th><th>2025</th></tr><tr><td>A</td><td>1</td><table>"
+        '<tr style="display:none"><td>H</td><td>9</td></tr><tr><td>V</td><td>8</td></tr></table></tr></table>'
+    ) == [["Item", "2025"], ["A", "1", "V", "8"]]
+
+
+# A rowspan reaching into or out of a row that reads a nested table pushes that row, or the
+# next, past the widest row's colspan sum, where the grid used to end and drop the cells
+# (before C1 the nested table's own row kept a second copy). Each layout: (html, its values).
+C1_ROWSPAN_REACH = {
+    "rowspan-into-a-header-row": (
+        '<table><tr><th rowspan="2">Item</th><th>2025</th></tr>'
+        "<tr><th>Q4</th><table><tr><td>Note</td><td>777</td></tr></table></tr>"
+        "<tr><td>Revenue</td><td>100</td></tr></table>",
+        ("Item", "2025", "Q4", "Note", "777", "Revenue", "100"),
+    ),
+    "rowspan-into-a-body-row": (
+        "<table><tr><th>Item</th><th>2025</th><th>2024</th></tr>"
+        '<tr><td rowspan="2">Revenue</td><td>100</td><td>90</td></tr>'
+        "<tr><td>110</td><table><tr><td>Adj</td><td>5</td></tr></table></tr>"
+        "<tr><td>Costs</td><td>40</td><td>30</td></tr></table>",
+        ("Item", "2025", "2024", "Revenue", "100", "90", "110", "Adj", "5", "Costs", "40", "30"),
+    ),
+    "rowspan-out-of-the-row": (
+        "<table><tr><th>Item</th><th>2025</th></tr>"
+        '<tr><td rowspan="2">A</td><td rowspan="2">1</td><table><tr><td>987</td></tr></table></tr>'
+        "<tr><td>B</td><td>2</td></tr></table>",
+        ("Item", "2025", "A", "1", "987", "B", "2"),
+    ),
+    # The nested row's only cell is grid-hidden: 1252c45 kept the row, empty, and A's rowspan
+    # ended on it. Without that row the rowspan reaches B's row.
+    "rowspan-out-of-a-row-with-hidden-nested-cells": (
+        "<table><tr><th>Item</th><th>2025</th></tr>"
+        '<tr><td rowspan="2">A</td><td>1</td><table><tr><td style="display:none">X 49</td></tr></table></tr>'
+        "<tr><td>B</td><td>2</td></tr></table>",
+        ("Item", "2025", "A", "1", "B", "2"),
+    ),
+}
+
+
+def _token_count(text: str, value: str) -> int:
+    return len(re.findall(rf"(?<![\w.,]){re.escape(value)}(?![\w.,])", text))
+
+
+@pytest.mark.parametrize("layout", sorted(C1_ROWSPAN_REACH))
+def test_c1_places_every_cell_when_a_rowspan_reaches_the_row(layout):
+    parser = _parser(C1_ROWSPAN_REACH[layout][0])
+    placed = {id(slot.cell) for row in parser.source_grid for slot in row if slot is not None}
+    assert [cell.text for row in parser.cells for cell in row if id(cell) not in placed] == []
+
+
+@C1_MODES
+@pytest.mark.parametrize("layout", sorted(C1_ROWSPAN_REACH))
+def test_c1_rowspan_reaching_the_row_keeps_every_value_once(layout, capture_tables):
+    from sec2md.quality import enforce_quality
+
+    html, values = C1_ROWSPAN_REACH[layout]
+    parser, markdown = _c1_parse(html, capture_tables)
+    assert {value: _token_count(markdown, value) for value in values} == dict.fromkeys(values, 1)
+    assert parser.trace_numeric_failures == ()
+    enforce_quality(parser.diagnostics, "strict")
+    if not capture_tables:  # completeness in normal mode only (see C1_MODES)
+        assert parser.diagnostics.table_completeness_failures == ()
+
+
+def test_c1_a_table_between_rows_is_read_as_before():
+    # Outside every row, its cells belong to no outer row: its own rows are the only read.
+    assert _cell_texts(
+        "<table><tr><th>Item</th><th>2025</th></tr><table><tr><td>Z</td><td>3</td></tr></table>"
+        "<tr><td>C</td><td>4</td></tr></table>"
+    ) == [["Item", "2025"], ["Z", "3"], ["C", "4"]]
+
+
+# The review's case: a table placed in a row outside every cell (all its cells grid-hidden)
+# and, below a rowspan, a table nested inside a cell, whose cells are read twice: in the
+# cell's own text, then as cells of the outer row (and in the inner table's own row).
+C1_FAIL_CLOSED = (
+    "<table><tr><th>Item</th><th>2025</th></tr><tr><td>A</td><td>1</td>"
+    '<table><tr><td style="display:none">X 9</td></tr></table></tr>'
+    '<tr><td rowspan="2">B</td><td rowspan="2">2</td></tr>'
+    "<tr><td>3</td><td><table><tr><td>44</td></tr></table></td></tr></table>"
+)
+
+
+@C1_MODES
+def test_c1_shows_an_in_cell_double_read_the_old_grid_dropped_and_fails_closed(capture_tables):
+    """Fail-closed (spec "Source cell", revision 18).
+
+    C1 sizes this table's grid by placement, so B's rowspans no longer push the last row's
+    cells off the grid. The cell holding the inner table, and that table's cell read again in
+    the outer row, are now both written beside 3: the known double read of a table inside a
+    cell becomes visible, and 44 appears three times against one source occurrence. Every
+    value is kept, and strict fails in normal mode where main passed, having dropped those two
+    copies (without the outside table the old width still drops them). Capture mode writes
+    the table's source text, as before. Neither corpus holds such a table.
+    """
+    from sec2md.quality import ParseQualityError, enforce_quality
+
+    values = ("Item", "2025", "A", "1", "B", "2", "3")
+    parser, markdown = _c1_parse(C1_FAIL_CLOSED, capture_tables)
+    assert {value: _token_count(markdown, value) for value in values} == dict.fromkeys(values, 1)
+    assert _token_count(markdown, "9") == 0  # grid-hidden
+    if capture_tables:
+        assert _token_count(markdown, "44") == 1
+        assert parser.trace_numeric_failures == ()
+        return
+    assert _markdown(C1_FAIL_CLOSED) == [
+        "| Item | 2025 |  |  |", "| --- | --- | --- | --- |", "| A | 1 |  |  |", "| B | 2 |  |  |",
+        "|  | 3 | 44 | 44 |", "| 44 |  |  |  |"]
+    assert _token_count(markdown, "44") == 3
+    assert [failure.rsplit(":", 1)[1] for failure in parser.trace_numeric_failures] == ["44", "44"]
+    assert parser.diagnostics.table_completeness_failures == ()
+    with pytest.raises(ParseQualityError, match=r"^untraceable normalized number: "):
+        enforce_quality(parser.diagnostics, "strict")

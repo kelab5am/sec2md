@@ -36,6 +36,15 @@ _QUALITY_POLICIES = frozenset({"strict", "warn", "off"})
 _MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 _NUMBER_TOKEN_RE = re.compile(r"(?<![\w.])(?:[$€£]\s*)?\(?\s*[−–-]?\d[\d,]*(?:\.\d+)?\s*\)?%?(?!\w|\.\w)")
 _CURRENCY_SYMBOLS = str.maketrans({"$": None, "\u20ac": None, "\u00a3": None})
+# A number in parentheses that emphasis runs split, in the output the numeric trace reads. The
+# renderer gives bold runs "(", "650", ")" as "**(** **650** **)**": the source pool reads
+# "( 650 )", the accounting token -650, but the delimiters stop the tokenizer reaching the
+# parentheses, so it read 650. Only such a number is closed up, to "(650)"; all other text,
+# including every other asterisk and underscore, reads exactly as before. The gaps hold only
+# whitespace and asterisks, and the single number group can never join two numbers. The
+# tokenizer's own boundaries apply: parentheses glued to a word or digit ("USD(", ")M") stay as
+# they are, because "USD(650)" or "(650)M" is no token and the number would drop out.
+_SPLIT_PAREN_NUMBER_RE = re.compile(r"(?<![\w.])\(([\s*]*)([−–-]?\d[\d,]*(?:\.\d+)?)([\s*]*)\)(?!\w|\.\w)")
 
 
 def normalize_numeric_token(value: str) -> str | None:
@@ -76,6 +85,20 @@ def _normalized_numbers(text: str) -> tuple[str, ...]:
     return tuple(normalized)
 
 
+def _close_up_split_paren_number(match: re.Match[str]) -> str:
+    """Close up "(** **650** **)" to "(650)"; leave a match whose gaps are not emphasis runs."""
+
+    gaps = (match.group(1), match.group(3))
+    if not any("*" in gap for gap in gaps):
+        return match.group(0)  # plain "( 650 )" already reads as -650
+    if any("*" in gap and not re.search(r"\s", gap) for gap in gaps):
+        # A gap of stars with no whitespace, as in the footnote "(125*)", is literal text. A gap
+        # holding both a star and whitespace closes up even when the star is literal ("(5 *)",
+        # "( 5* )", "( *5 )", "(1,234 **)"); none occurs in the 179 corpus documents.
+        return match.group(0)
+    return f"({match.group(2)})"
+
+
 @dataclass(frozen=True)
 class ElementHeaderRecord:
     """One table's header record, bound to the segment its render supplied (spec R6a).
@@ -86,6 +109,9 @@ class ElementHeaderRecord:
     header-zone cells' tokens, and each cell's tokens times the output columns it heads.
     header_cells are those cells with text, in document order, as (text, columns headed),
     for consumers with their own tokenizer, such as the accuracy suite's trace.
+    wrapped marks a table rendered inside a list item or an inline wrapper (revision 18): its
+    segment may share its first line with the wrapper's leading content and its last line
+    with trailing content.
     """
 
     segment: str
@@ -93,6 +119,7 @@ class ElementHeaderRecord:
     header_source: tuple[tuple[str, int], ...] = ()
     header_capacity: tuple[tuple[str, int], ...] = ()
     header_cells: tuple[tuple[str, int], ...] = ()
+    wrapped: bool = False
 
 
 HeaderMiss = Literal["missing", "ambiguous"]
@@ -103,9 +130,9 @@ class HeaderLineLocation:
     """Where a record's header line sits in element content, or why it was not located.
 
     span is the line's [start, end) offsets. miss is "missing" when the segment does not
-    occur on whole lines or its first line is not the recorded header line, and
-    "ambiguous" when the segment occurs more than once or another record claims the same
-    header line.
+    occur on whole lines (for a wrapped record, at all) or its first line is not the
+    recorded header line, and "ambiguous" when the segment occurs more than once or another
+    record claims the same header line.
     """
 
     span: tuple[int, int] | None
@@ -125,6 +152,25 @@ def _whole_line_occurrences(content: str, segment: str) -> list[int]:
     return starts
 
 
+def _wrapped_occurrences(content: str, segment: str) -> list[int]:
+    """Start offsets of a wrapped table's segment in content, overlaps included (revision 18).
+
+    The wrapper may share the segment's first line with leading content and its last line
+    with trailing content. Any occurrence of a segment that holds a line break keeps its
+    other lines whole, so only those two boundaries are relaxed. A segment without a line
+    break would share its only line on both sides, so it is never located.
+    """
+
+    if "\n" not in segment:
+        return []
+    starts: list[int] = []
+    start = content.find(segment)
+    while start != -1:
+        starts.append(start)
+        start = content.find(segment, start + 1)
+    return starts
+
+
 def locate_header_lines(
     content: str, records: Sequence[ElementHeaderRecord]
 ) -> tuple[HeaderLineLocation, ...]:
@@ -132,11 +178,19 @@ def locate_header_lines(
 
     The header line is never searched for on its own, so an identical prose or body line
     elsewhere in the element is never taken for it. Each header line is consumed once.
+    A wrapped record's segment may share its first and last lines with the wrapper's
+    content (revision 18); everything else is the same: exactly one occurrence, the header
+    line first, and the span is the header line only.
     """
 
     spans: list[tuple[int, int] | HeaderMiss] = []
     for record in records:
-        starts = _whole_line_occurrences(content, record.segment) if record.segment else []
+        if not record.segment:
+            starts = []
+        elif record.wrapped:
+            starts = _wrapped_occurrences(content, record.segment)
+        else:
+            starts = _whole_line_occurrences(content, record.segment)
         if len(starts) > 1:
             spans.append("ambiguous")
         elif not starts or record.segment.split("\n", 1)[0] != record.header_line:
@@ -178,7 +232,9 @@ def trace_numeric_failures(
         ]
         for record, (start, end) in located:
             capacity = dict(record.header_capacity)
-            for token, count in sorted(Counter(_normalized_numbers(content[start:end])).items()):
+            # Output side, read as the rest of the output is read below.
+            line = _SPLIT_PAREN_NUMBER_RE.sub(_close_up_split_paren_number, content[start:end])
+            for token, count in sorted(Counter(_normalized_numbers(line)).items()):
                 header_failures.extend(
                     f"{element.id}:header:{token}" for _ in range(max(0, count - capacity.get(token, 0)))
                 )
@@ -187,6 +243,8 @@ def trace_numeric_failures(
             content = content[:start] + content[end:]
     if any(_is_or_has_ordered_list(node) for node in nodes if isinstance(node, Tag)):
         content = _ORDERED_LIST_MARKER_RE.sub("", content)
+    # Output side only: the source pool below reads the mapped nodes' text unchanged.
+    content = _SPLIT_PAREN_NUMBER_RE.sub(_close_up_split_paren_number, content)
     expected = Counter(_normalized_numbers(content))
     available = Counter(
         _normalized_numbers(

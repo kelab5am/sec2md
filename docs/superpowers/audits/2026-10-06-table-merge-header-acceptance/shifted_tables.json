@@ -1,0 +1,601 @@
+{
+ "summary": {
+  "main": {
+   "passed": 1,
+   "total": 34
+  },
+  "candidate": {
+   "passed": 34,
+   "total": 34
+  },
+  "candidate_tables_all_passing": {
+   "edgar:BABA-20-F-2025-06-26.htm 24": true,
+   "edgar:TSM-20-F-2025-04-17.htm 79": true,
+   "edgar:TSM-20-F-2025-04-17.htm 312": true,
+   "edgar:JPM-10-K-2025-02-14.htm 482": true,
+   "edgar:MSFT-10-K-2025-07-30.htm 24": true,
+   "edgar:MSFT-10-K-2025-07-30.htm 65": true,
+   "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm 17": true
+  }
+ },
+ "assertions": [
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "unit": 24,
+   "label": "Revenue",
+   "value": "868,687",
+   "expected": "Year ended March 31, — 2023 — RMB — (in millions, except per share data)",
+   "main": {
+    "ok": false,
+    "header": "2024",
+    "column": 2
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Year ended March 31, — 2023 — RMB — (in millions, except per share data)",
+    "column": 2
+   }
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "unit": 24,
+   "label": "Revenue",
+   "value": "941,168",
+   "expected": "Year ended March 31, — 2024 — RMB — (in millions, except per share data)",
+   "main": {
+    "ok": false,
+    "header": "2025",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Year ended March 31, — 2024 — RMB — (in millions, except per share data)",
+    "column": 3
+   }
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "unit": 24,
+   "label": "Revenue",
+   "value": "996,347",
+   "expected": "Year ended March 31, — 2025 — RMB — (in millions, except per share data)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 4
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Year ended March 31, — 2025 — RMB — (in millions, except per share data)",
+    "column": 4
+   }
+  },
+  {
+   "doc": "edgar:BABA-20-F-2025-06-26.htm",
+   "unit": 24,
+   "label": "Revenue",
+   "value": "137,300",
+   "expected": "Year ended March 31, — 2025 — US$ — (Note 2(a)) — (in millions, except per share data)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Year ended March 31, — 2025 — US$ — (Note 2(a)) — (in millions, except per share data)",
+    "column": 5
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 79,
+   "label": "Gross profit",
+   "value": "59.6",
+   "expected": "For the year ended December 31, — 2022",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 1
+   },
+   "candidate": {
+    "ok": true,
+    "header": "For the year ended December 31, — 2022",
+    "column": 1
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 79,
+   "label": "Gross profit",
+   "value": "54.4",
+   "expected": "For the year ended December 31, — 2023",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "For the year ended December 31, — 2023",
+    "column": 3
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 79,
+   "label": "Gross profit",
+   "value": "56.1",
+   "expected": "For the year ended December 31, — 2024",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "For the year ended December 31, — 2024",
+    "column": 5
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 312,
+   "label": "Balance, beginning of year",
+   "value": "$ 347.0",
+   "expected": "Years Ended December 31 — 2022 — NT$ — (In Millions)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 1
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Years Ended December 31 — 2022 — NT$ — (In Millions)",
+    "column": 2
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 312,
+   "label": "Balance, beginning of year",
+   "value": "$ 331.6",
+   "expected": "Years Ended December 31 — 2023 — NT$ — (In Millions)",
+   "main": {
+    "ok": false,
+    "why": "0 cells reading '$ 331.6'",
+    "line": "Balance, beginning of year | $ 347.0 | $ | 331.6 | $ 531.5 | "
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Years Ended December 31 — 2023 — NT$ — (In Millions)",
+    "column": 4
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 312,
+   "label": "Balance, beginning of year",
+   "value": "$ 531.5",
+   "expected": "Years Ended December 31 — 2024 — NT$ — (In Millions)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 4
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Years Ended December 31 — 2024 — NT$ — (In Millions)",
+    "column": 6
+   }
+  },
+  {
+   "doc": "edgar:TSM-20-F-2025-04-17.htm",
+   "unit": 312,
+   "label": "Provision (Reversal)",
+   "value": "199.9",
+   "expected": "Years Ended December 31 — 2023 — NT$ — (In Millions)",
+   "main": {
+    "ok": false,
+    "header": "2024",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Years Ended December 31 — 2023 — NT$ — (In Millions)",
+    "column": 4
+   }
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 482,
+   "label": "Purchases",
+   "value": "$ 647",
+   "expected": "2024 — Consumer, excluding credit card",
+   "main": {
+    "ok": false,
+    "header": "Consumer, excluding credit card",
+    "column": 1
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024 — Consumer, excluding credit card",
+    "column": 2
+   }
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 482,
+   "label": "Purchases",
+   "value": "$ —",
+   "expected": "2024 — Credit card",
+   "main": {
+    "ok": false,
+    "header": "Wholesale",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024 — Credit card",
+    "column": 4
+   }
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 482,
+   "label": "Purchases",
+   "value": "$ 1,432",
+   "expected": "2024 — Wholesale",
+   "main": {
+    "ok": false,
+    "header": "Total",
+    "column": 4
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024 — Wholesale",
+    "column": 5
+   }
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 482,
+   "label": "Purchases",
+   "value": "$ 2,079",
+   "expected": "2024 — Total",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024 — Total",
+    "column": 6
+   }
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 482,
+   "label": "Sales",
+   "value": "45,147",
+   "expected": "2024 — Wholesale",
+   "main": {
+    "ok": false,
+    "header": "Total",
+    "column": 4
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024 — Wholesale",
+    "column": 5
+   }
+  },
+  {
+   "doc": "edgar:JPM-10-K-2025-02-14.htm",
+   "unit": 482,
+   "label": "Sales",
+   "value": "55,587",
+   "expected": "2024 — Total",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024 — Total",
+    "column": 6
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 24,
+   "label": "Total revenue",
+   "value": "281,724",
+   "expected": "2025",
+   "main": {
+    "ok": true,
+    "header": "2025",
+    "column": 1
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2025",
+    "column": 1
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 24,
+   "label": "Total revenue",
+   "value": "245,122",
+   "expected": "2024",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2024",
+    "column": 2
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 24,
+   "label": "Total revenue",
+   "value": "211,915",
+   "expected": "2023",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "2023",
+    "column": 3
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 65,
+   "label": "First Quarter",
+   "value": "7",
+   "expected": "Shares — 2025",
+   "main": {
+    "ok": false,
+    "header": "Shares",
+    "column": 1
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Shares — 2025",
+    "column": 1
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 65,
+   "label": "First Quarter",
+   "value": "$ 2,800",
+   "expected": "Amount — 2025",
+   "main": {
+    "ok": false,
+    "header": "Amount",
+    "column": 2
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Amount — 2025",
+    "column": 2
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 65,
+   "label": "First Quarter",
+   "value": "11",
+   "expected": "Shares — 2024",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Shares — 2024",
+    "column": 3
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 65,
+   "label": "First Quarter",
+   "value": "$ 3,560",
+   "expected": "Amount — 2024",
+   "main": {
+    "ok": false,
+    "header": "Amount",
+    "column": 4
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Amount — 2024",
+    "column": 4
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 65,
+   "label": "First Quarter",
+   "value": "17",
+   "expected": "Shares — 2023",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Shares — 2023",
+    "column": 5
+   }
+  },
+  {
+   "doc": "edgar:MSFT-10-K-2025-07-30.htm",
+   "unit": 65,
+   "label": "First Quarter",
+   "value": "$ 4,600",
+   "expected": "Amount — 2023",
+   "main": {
+    "ok": false,
+    "header": "Amount",
+    "column": 6
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Amount — 2023",
+    "column": 6
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "49,386,912",
+   "expected": "Three months ended June 30, — 2024 — Class A — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "Three months ended June 30, — 2024",
+    "column": 1
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Three months ended June 30, — 2024 — Class A — (in thousands, except share and per share data)",
+    "column": 1
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "114,995,824",
+   "expected": "Three months ended June 30, — 2024 — Class B — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "2023",
+    "column": 2
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Three months ended June 30, — 2024 — Class B — (in thousands, except share and per share data)",
+    "column": 2
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "7,047,807",
+   "expected": "Three months ended June 30, — 2023 — Class A — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 3
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Three months ended June 30, — 2023 — Class A — (in thousands, except share and per share data)",
+    "column": 3
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "51,460,350",
+   "expected": "Three months ended June 30, — 2023 — Class B — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "Six months ended June 30, — 2024",
+    "column": 4
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Three months ended June 30, — 2023 — Class B — (in thousands, except share and per share data)",
+    "column": 4
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "30,317,800",
+   "expected": "Six months ended June 30, — 2024 — Class A — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "2023",
+    "column": 5
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Six months ended June 30, — 2024 — Class A — (in thousands, except share and per share data)",
+    "column": 5
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "86,993,814",
+   "expected": "Six months ended June 30, — 2024 — Class B — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 6
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Six months ended June 30, — 2024 — Class B — (in thousands, except share and per share data)",
+    "column": 6
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "6,873,912",
+   "expected": "Six months ended June 30, — 2023 — Class A — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 7
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Six months ended June 30, — 2023 — Class A — (in thousands, except share and per share data)",
+    "column": 7
+   }
+  },
+  {
+   "doc": "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm",
+   "unit": 17,
+   "label": "Basic weighted-average common shares outstanding",
+   "value": "51,438,626",
+   "expected": "Six months ended June 30, — 2023 — Class B — (in thousands, except share and per share data)",
+   "main": {
+    "ok": false,
+    "header": "",
+    "column": 8
+   },
+   "candidate": {
+    "ok": true,
+    "header": "Six months ended June 30, — 2023 — Class B — (in thousands, except share and per share data)",
+    "column": 8
+   }
+  }
+ ]
+}

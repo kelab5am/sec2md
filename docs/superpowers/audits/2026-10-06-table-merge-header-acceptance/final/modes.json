@@ -1,0 +1,9 @@
+{
+ "candidate_findings_disagree": [],
+ "main_findings_disagree": [],
+ "candidate_alignment_disagree": [],
+ "candidate_coverage_disagree": [],
+ "candidate_strict_disagree": [],
+ "candidate_output_differs": [],
+ "candidate_sections_disagree": []
+}
