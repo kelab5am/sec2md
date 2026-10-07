@@ -3,6 +3,8 @@
     PYTHONPATH=<worktree>/src python review_sample.py --fixtures-root <checkout> --edgar-cache <cache> \
         --main-dir <main dumps> --candidate-dir <candidate dumps> --out review_sample.txt
 
+Phase A only: the sample's tables are Phase A's, so `--corpus recent` is refused.
+
 The sample is fixed below: at least one changed table per evidence class (1, 2, 3, 3e, 4,
 5, 6, 7, 8, U+200B), the classes round 1 found (display:none cells, body rows promoted
 into the header zone, the years-row limitation, value spans over a header column), F7,
@@ -119,13 +121,14 @@ def source_rows(table, grid_hidden, limit):
 def main():
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--fixtures-root", required=True)
-    ap.add_argument("--edgar-cache", required=True)
+    acc_common.add_document_arguments(ap)
     ap.add_argument("--main-dir", required=True)
     ap.add_argument("--candidate-dir", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--lines", type=int, default=7)
     args = ap.parse_args()
+    acc_common.phase_a_only("review_sample.py", args.corpus, "the review sample is 42 Phase A tables")
+    acc_common.check_document_arguments(ap, args)
     from sec2md.encoding import decode_html
     from sec2md.parser import Parser
     from sec2md.table_completeness import hidden_sets

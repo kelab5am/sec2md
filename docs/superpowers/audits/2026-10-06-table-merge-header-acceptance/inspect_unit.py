@@ -2,6 +2,7 @@
 source grid with its roles and output columns, and the Markdown (research only).
 
     PYTHONPATH=<side>/src python inspect_unit.py --fixtures-root <checkout> --edgar-cache <cache> <document id> <unit>...
+    PYTHONPATH=<side>/src python inspect_unit.py --corpus recent --recent-cache <recent cache> <document id> <unit>...
 
 Works on either side; the renderer details print only for the candidate (it has roles and
 membership). The Markdown is the unit's output in normal mode.
@@ -36,13 +37,13 @@ def compact(cells):
 def main():
     warnings.filterwarnings("ignore")
     ap = argparse.ArgumentParser()
-    ap.add_argument("--fixtures-root", required=True)
-    ap.add_argument("--edgar-cache", required=True)
+    acc_common.add_document_arguments(ap)
     ap.add_argument("document")
     ap.add_argument("units", nargs="+", type=int)
     ap.add_argument("--lines", type=int, default=12)
     args = ap.parse_args()
-    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root)
+    acc_common.check_document_arguments(ap, args)
+    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root, args.corpus, args.recent_cache)
     raw = next(raw for d, _, raw in docs if d == args.document)
     import sec2md.parser as parser_module
     from sec2md.encoding import decode_html

@@ -1,0 +1,860 @@
+{
+ "tool": "prevalence.py",
+ "sec2md_file": "C:\\Users\\einstein\\kelab5am\\sec2md\\.worktrees\\tmh-proto\\src\\sec2md\\__init__.py",
+ "branch_src": "C:\\Users\\einstein\\kelab5am\\sec2md\\.worktrees\\tmh-proto\\src",
+ "run": "Parser(html) (normal mode, table checks on), get_pages(): as convert_to_markdown under the default strict policy",
+ "detectors": [
+  "wrapped_table",
+  "zero_width_number",
+  "header_row_table",
+  "sub_label_currency",
+  "page_top_part_table"
+ ],
+ "corpora": {
+  "recent": {
+   "documents": 70,
+   "analysed": 70,
+   "skipped": [],
+   "errors": {},
+   "summary": {
+    "wrapped_table": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "zero_width_number": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "header_row_table": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "sub_label_currency": {
+     "documents": 2,
+     "tables": 2,
+     "occurrences": 2,
+     "affected": 2,
+     "affected_tables": 2,
+     "affected_documents": 2
+    },
+    "page_top_part_table": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    }
+   },
+   "occurrences": {
+    "wrapped_table": [],
+    "zero_width_number": [],
+    "header_row_table": [],
+    "sub_label_currency": [
+     {
+      "doc": "recent:BABA-20-F-2026-05-20.htm",
+      "table": 39,
+      "affected": true,
+      "column": 1,
+      "codes": [
+       "HK$",
+       "US$"
+      ],
+      "rows": 6,
+      "joined": [
+       "US$ 78.37",
+       "HK$ 116.70",
+       "HK$ 152.69",
+       "US$ 79.96",
+       "US$ 84.60",
+       "HK$ 68.00"
+      ],
+      "excerpt": "US$ 78.37 | HK$ 116.70 | HK$ 152.69 | US$ 79.96 | US$ 84.60 | HK$ 68.00"
+     },
+     {
+      "doc": "recent:TSM-20-F-2023-04-20.htm",
+      "table": 278,
+      "affected": true,
+      "column": 2,
+      "codes": [
+       "NT$",
+       "RMB",
+       "US$"
+      ],
+      "rows": 5,
+      "joined": [
+       "NT$ 132,734.5",
+       "US$ 2,009.1",
+       "NT$ 79,610.6",
+       "US$ 752.5",
+       "RMB 1,448.4"
+      ],
+      "excerpt": "NT$ 132,734.5 | US$ 2,009.1 | NT$ 79,610.6 | US$ 752.5 | RMB 1,448.4"
+     }
+    ],
+    "page_top_part_table": []
+   },
+   "context": {
+    "near": {
+     "code_before_amount": {
+      "total": 2,
+      "documents": 2
+     },
+     "code_tables": {
+      "total": 188,
+      "documents": 8
+     },
+     "nested_in_row": {
+      "total": 0,
+      "documents": 0
+     },
+     "nested_row_unmapped": {
+      "total": 0,
+      "documents": 0
+     },
+     "nested_tables": {
+      "total": 0,
+      "documents": 0
+     },
+     "part_not_first": {
+      "total": 4,
+      "documents": 4
+     },
+     "part_one_row": {
+      "total": 4,
+      "documents": 4
+     },
+     "part_page_unknown": {
+      "total": 0,
+      "documents": 0
+     },
+     "part_with_cells": {
+      "total": 4,
+      "documents": 4
+     },
+     "styled_not_read": {
+      "total": 0,
+      "documents": 0
+     },
+     "wrapped_any": {
+      "total": 0,
+      "documents": 0
+     },
+     "wrapped_no_header_zone": {
+      "total": 0,
+      "documents": 0
+     },
+     "wrapped_one_row": {
+      "total": 0,
+      "documents": 0
+     },
+     "zero_width_cells": {
+      "total": 20804,
+      "documents": 5
+     },
+     "zero_width_touches_digit": {
+      "total": 1,
+      "documents": 1
+     }
+    },
+    "branch": {
+     "ambiguous": {
+      "total": 0,
+      "documents": 0
+     },
+     "header_failures": {
+      "total": 0,
+      "documents": 0
+     },
+     "missing": {
+      "total": 0,
+      "documents": 0
+     },
+     "pages": {
+      "total": 9121,
+      "documents": 70
+     },
+     "trace_failures": {
+      "total": 9,
+      "documents": 9
+     },
+     "units": {
+      "total": 13105,
+      "documents": 70
+     }
+    },
+    "branch_effects": {
+     "recent:MSFT-10-K-2023-07-27.htm": {
+      "units": 90,
+      "pages": 109,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "425"
+      ]
+     },
+     "recent:MSFT-10-K-2024-07-30.htm": {
+      "units": 92,
+      "pages": 111,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "425"
+      ]
+     },
+     "recent:MSFT-10-K-2026-07-29.htm": {
+      "units": 88,
+      "pages": 101,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "425"
+      ]
+     },
+     "recent:NTRA-10-K-2022-02-25.htm": {
+      "units": 246,
+      "pages": 145,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "650"
+      ]
+     },
+     "recent:NTRA-10-K-2023-03-01.htm": {
+      "units": 244,
+      "pages": 136,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "650"
+      ]
+     },
+     "recent:NTRA-10-K-2024-02-29.htm": {
+      "units": 237,
+      "pages": 135,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "650"
+      ]
+     },
+     "recent:NTRA-10-K-2026-02-27.htm": {
+      "units": 213,
+      "pages": 141,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "650"
+      ]
+     },
+     "recent:TSLA-10-K-2022-02-07.htm": {
+      "units": 108,
+      "pages": 117,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "512"
+      ]
+     },
+     "recent:TSLA-10-K-2023-01-31.htm": {
+      "units": 100,
+      "pages": 107,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "512"
+      ]
+     }
+    },
+    "near_documents": {
+     "recent:BABA-20-F-2026-05-20.htm": {
+      "code_before_amount": 1,
+      "code_tables": 32,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 0,
+      "part_one_row": 0,
+      "part_page_unknown": 0,
+      "part_with_cells": 0,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     },
+     "recent:CAT-10-K-2022-02-16.htm": {
+      "code_before_amount": 0,
+      "code_tables": 0,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 1,
+      "part_one_row": 1,
+      "part_page_unknown": 0,
+      "part_with_cells": 1,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     },
+     "recent:CAT-10-K-2023-02-15.htm": {
+      "code_before_amount": 0,
+      "code_tables": 0,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 1,
+      "part_one_row": 1,
+      "part_page_unknown": 0,
+      "part_with_cells": 1,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     },
+     "recent:CAT-10-K-2024-02-16.htm": {
+      "code_before_amount": 0,
+      "code_tables": 0,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 1,
+      "part_one_row": 1,
+      "part_page_unknown": 0,
+      "part_with_cells": 1,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     },
+     "recent:CAT-10-K-2026-02-13.htm": {
+      "code_before_amount": 0,
+      "code_tables": 0,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 1,
+      "part_one_row": 1,
+      "part_page_unknown": 0,
+      "part_with_cells": 1,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     },
+     "recent:NTRA-10-K-2022-02-25.htm": {
+      "code_before_amount": 0,
+      "code_tables": 0,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 0,
+      "part_one_row": 0,
+      "part_page_unknown": 0,
+      "part_with_cells": 0,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 4116,
+      "zero_width_touches_digit": 1
+     },
+     "recent:TSM-20-F-2023-04-20.htm": {
+      "code_before_amount": 1,
+      "code_tables": 15,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 0,
+      "part_one_row": 0,
+      "part_page_unknown": 0,
+      "part_with_cells": 0,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     }
+    }
+   },
+   "wall_seconds": 40.2,
+   "document_seconds": {
+    "recent:AMZN-10-K-2022-02-04.htm": 1.7,
+    "recent:AMZN-10-K-2023-02-03.htm": 1.7,
+    "recent:AMZN-10-K-2024-02-02.htm": 1.8,
+    "recent:AMZN-10-K-2025-02-07.htm": 1.8,
+    "recent:AMZN-10-K-2026-02-06.htm": 1.9,
+    "recent:BABA-20-F-2022-07-26.htm": 6.0,
+    "recent:BABA-20-F-2023-07-21.htm": 7.7,
+    "recent:BABA-20-F-2024-05-23.htm": 8.3,
+    "recent:BABA-20-F-2026-05-20.htm": 8.3,
+    "recent:BAC-10-K-2022-02-22.htm": 10.8,
+    "recent:BAC-10-K-2023-02-22.htm": 10.9,
+    "recent:BAC-10-K-2024-02-20.htm": 10.7,
+    "recent:BAC-10-K-2026-02-25.htm": 11.5,
+    "recent:CAT-10-K-2022-02-16.htm": 5.8,
+    "recent:CAT-10-K-2023-02-15.htm": 5.3,
+    "recent:CAT-10-K-2024-02-16.htm": 5.5,
+    "recent:CAT-10-K-2026-02-13.htm": 5.9,
+    "recent:CRDO-10-K-2022-06-08.htm": 1.5,
+    "recent:CRDO-10-K-2023-06-23.htm": 1.5,
+    "recent:CRDO-10-K-2024-06-24.htm": 1.4,
+    "recent:CRDO-10-K-2026-06-15.htm": 1.6,
+    "recent:CRM-10-K-2022-03-11.htm": 3.0,
+    "recent:CRM-10-K-2023-03-08.htm": 2.5,
+    "recent:CRM-10-K-2024-03-06.htm": 2.2,
+    "recent:CRM-10-K-2026-03-02.htm": 2.3,
+    "recent:GOOGL-10-K-2022-02-02.htm": 2.5,
+    "recent:GOOGL-10-K-2023-02-03.htm": 2.5,
+    "recent:GOOGL-10-K-2024-01-31.htm": 2.3,
+    "recent:GOOGL-10-K-2025-02-05.htm": 2.4,
+    "recent:GOOGL-10-K-2026-02-05.htm": 2.5,
+    "recent:JPM-10-K-2022-02-22.htm": 10.9,
+    "recent:JPM-10-K-2023-02-21.htm": 10.7,
+    "recent:JPM-10-K-2024-02-16.htm": 11.1,
+    "recent:JPM-10-K-2026-02-13.htm": 11.1,
+    "recent:KO-10-K-2022-02-22.htm": 3.9,
+    "recent:KO-10-K-2023-02-21.htm": 3.8,
+    "recent:KO-10-K-2024-02-20.htm": 3.8,
+    "recent:KO-10-K-2026-02-20.htm": 3.4,
+    "recent:MSFT-10-K-2022-07-28.htm": 5.9,
+    "recent:MSFT-10-K-2023-07-27.htm": 6.5,
+    "recent:MSFT-10-K-2024-07-30.htm": 5.9,
+    "recent:MSFT-10-K-2026-07-29.htm": 6.3,
+    "recent:MU-10-K-2021-10-08.htm": 2.3,
+    "recent:MU-10-K-2022-10-07.htm": 2.2,
+    "recent:MU-10-K-2023-10-06.htm": 2.0,
+    "recent:MU-10-K-2024-10-04.htm": 2.0,
+    "recent:NFLX-10-K-2022-01-27.htm": 1.5,
+    "recent:NFLX-10-K-2023-01-26.htm": 1.5,
+    "recent:NFLX-10-K-2024-01-26.htm": 1.7,
+    "recent:NFLX-10-K-2026-01-23.htm": 2.0,
+    "recent:NTRA-10-K-2022-02-25.htm": 3.2,
+    "recent:NTRA-10-K-2023-03-01.htm": 2.8,
+    "recent:NTRA-10-K-2024-02-29.htm": 2.7,
+    "recent:NTRA-10-K-2026-02-27.htm": 2.1,
+    "recent:NVO-20-F-2022-02-02.htm": 1.1,
+    "recent:NVO-20-F-2023-02-01.htm": 1.2,
+    "recent:NVO-20-F-2024-01-31.htm": 1.1,
+    "recent:NVO-20-F-2026-02-04.htm": 1.2,
+    "recent:TSLA-10-K-2022-02-07.htm": 5.8,
+    "recent:TSLA-10-K-2023-01-31.htm": 5.4,
+    "recent:TSLA-10-K-2024-01-29.htm": 2.8,
+    "recent:TSLA-10-K-2026-01-29.htm": 2.2,
+    "recent:TSM-20-F-2022-04-14.htm": 8.3,
+    "recent:TSM-20-F-2023-04-20.htm": 8.8,
+    "recent:TSM-20-F-2024-04-18.htm": 10.6,
+    "recent:TSM-20-F-2026-04-16.htm": 8.9,
+    "recent:UNH-10-K-2022-02-15.htm": 2.4,
+    "recent:UNH-10-K-2023-02-24.htm": 2.9,
+    "recent:UNH-10-K-2024-02-28.htm": 2.6,
+    "recent:UNH-10-K-2026-03-02.htm": 2.8
+   }
+  },
+  "phase_a": {
+   "documents": 109,
+   "analysed": 109,
+   "skipped": [
+    "rcq:NVDA__10-K__2026-FY__c-ibembbpzdct6pow5__s-000104581026000021.htm (same filing as a fixture)",
+    "rcq:NVDA__10-Q__2027-Q2__c-3tn25vuxcduzrmbl__s-000104581026000075.htm (same filing as a fixture)"
+   ],
+   "errors": {},
+   "summary": {
+    "wrapped_table": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "zero_width_number": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "header_row_table": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "sub_label_currency": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    },
+    "page_top_part_table": {
+     "documents": 0,
+     "tables": 0,
+     "occurrences": 0,
+     "affected": 0,
+     "affected_tables": 0,
+     "affected_documents": 0
+    }
+   },
+   "occurrences": {
+    "wrapped_table": [],
+    "zero_width_number": [],
+    "header_row_table": [],
+    "sub_label_currency": [],
+    "page_top_part_table": []
+   },
+   "context": {
+    "near": {
+     "code_before_amount": {
+      "total": 0,
+      "documents": 0
+     },
+     "code_tables": {
+      "total": 25,
+      "documents": 2
+     },
+     "nested_in_row": {
+      "total": 0,
+      "documents": 0
+     },
+     "nested_row_unmapped": {
+      "total": 0,
+      "documents": 0
+     },
+     "nested_tables": {
+      "total": 0,
+      "documents": 0
+     },
+     "part_not_first": {
+      "total": 1,
+      "documents": 1
+     },
+     "part_one_row": {
+      "total": 1,
+      "documents": 1
+     },
+     "part_page_unknown": {
+      "total": 0,
+      "documents": 0
+     },
+     "part_with_cells": {
+      "total": 1,
+      "documents": 1
+     },
+     "styled_not_read": {
+      "total": 0,
+      "documents": 0
+     },
+     "wrapped_any": {
+      "total": 0,
+      "documents": 0
+     },
+     "wrapped_no_header_zone": {
+      "total": 0,
+      "documents": 0
+     },
+     "wrapped_one_row": {
+      "total": 0,
+      "documents": 0
+     },
+     "zero_width_cells": {
+      "total": 3407,
+      "documents": 1
+     },
+     "zero_width_touches_digit": {
+      "total": 0,
+      "documents": 0
+     }
+    },
+    "branch": {
+     "ambiguous": {
+      "total": 0,
+      "documents": 0
+     },
+     "header_failures": {
+      "total": 0,
+      "documents": 0
+     },
+     "missing": {
+      "total": 0,
+      "documents": 0
+     },
+     "pages": {
+      "total": 5214,
+      "documents": 109
+     },
+     "trace_failures": {
+      "total": 7,
+      "documents": 7
+     },
+     "units": {
+      "total": 5332,
+      "documents": 109
+     }
+    },
+    "branch_effects": {
+     "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm": {
+      "units": 2,
+      "pages": 11,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "2024"
+      ]
+     },
+     "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm": {
+      "units": 2,
+      "pages": 21,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "2026"
+      ]
+     },
+     "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm": {
+      "units": 5,
+      "pages": 5,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "2024"
+      ]
+     },
+     "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm": {
+      "units": 6,
+      "pages": 40,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "2024"
+      ]
+     },
+     "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm": {
+      "units": 5,
+      "pages": 42,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "2024"
+      ]
+     },
+     "edgar:MSFT-10-K-2025-07-30.htm": {
+      "units": 85,
+      "pages": 101,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "425"
+      ]
+     },
+     "edgar:NTRA-10-K-2025-02-28.htm": {
+      "units": 216,
+      "pages": 133,
+      "trace_failures": 1,
+      "header_failures": 0,
+      "missing": 0,
+      "ambiguous": 0,
+      "failure_tokens": [
+       "650"
+      ]
+     }
+    },
+    "near_documents": {
+     "edgar:CAT-10-K-2025-02-14.htm": {
+      "code_before_amount": 0,
+      "code_tables": 0,
+      "nested_in_row": 0,
+      "nested_row_unmapped": 0,
+      "nested_tables": 0,
+      "part_not_first": 1,
+      "part_one_row": 1,
+      "part_page_unknown": 0,
+      "part_with_cells": 1,
+      "styled_not_read": 0,
+      "wrapped_any": 0,
+      "wrapped_no_header_zone": 0,
+      "wrapped_one_row": 0,
+      "zero_width_cells": 0,
+      "zero_width_touches_digit": 0
+     }
+    }
+   },
+   "wall_seconds": 18.2,
+   "document_seconds": {
+    "fixture:aapl-2023-10k": 2.0,
+    "fixture:nvda-2002-10k": 2.8,
+    "fixture:nvda-2026-08-26-8k": 0.0,
+    "fixture:nvda-2026-10k": 1.7,
+    "fixture:nvda-2026-ex99-1": 0.4,
+    "fixture:nvda-2026-ex99-2": 0.4,
+    "fixture:nvda-2026-q2-10q": 1.3,
+    "rcq:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049.htm": 1.2,
+    "rcq:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069.htm": 1.6,
+    "rcq:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081.htm": 1.6,
+    "rcq:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017.htm": 2.1,
+    "rcq:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054.htm": 1.2,
+    "rcq:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791.htm": 1.3,
+    "rcq:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240.htm": 1.4,
+    "rcq:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942.htm": 2.3,
+    "rcq:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526.htm": 1.7,
+    "rcq:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705.htm": 1.6,
+    "rcq-exhibit:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049/a-5q6r23ydgpjcersy.htm": 0.5,
+    "rcq-exhibit:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049/a-llzieaebbqvfft6e.html": 0.2,
+    "rcq-exhibit:META__10-Q__2024-Q1__c-lvgg2eqi74yh4jxf__s-000132680124000049/a-wv2lzpeoil6kz5hc.htm": 0.1,
+    "rcq-exhibit:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069/a-vbntpulu4esivtpj.htm": 0.1,
+    "rcq-exhibit:META__10-Q__2024-Q2__c-2no5lru76vcj4dqx__s-000132680124000069/a-vpojkotklt6jcytp.html": 0.1,
+    "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-qlqubel52dsmcno3.html": 0.1,
+    "rcq-exhibit:META__10-Q__2024-Q3__c-hv5wmqlrjrp4tsdi__s-000132680124000081/a-x3jpybaorqx5lnom.htm": 0.1,
+    "rcq-exhibit:META__10-K__2024-FY__c-gt2akrysowoexrow__s-000132680125000017/a-pcob7lbpdtpqplfn.html": 0.1,
+    "rcq-exhibit:META__10-Q__2025-Q1__c-3qfr3yyk3dyj55qr__s-000132680125000054/a-bqyvjb6qsi6wtjsy.html": 0.1,
+    "rcq-exhibit:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791/a-3xxtfn45xh6zkzu2.htm": 0.4,
+    "rcq-exhibit:META__10-Q__2025-Q2__c-3xx6wmf22ktxqfpq__s-000162828025036791/a-vhvl522kb6ztqdik.html": 0.1,
+    "rcq-exhibit:META__10-Q__2025-Q3__c-atqnmlwm2cpcuof2__s-000162828025047240/a-k3dtnsavtxcpzqq5.html": 0.1,
+    "rcq-exhibit:META__10-K__2025-FY__c-24uhjfkfhood6sjj__s-000162828026003942/a-4da4wbjwrk3cavpd.html": 0.1,
+    "rcq-exhibit:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526/a-k2zvkosva2n6op3z.htm": 0.4,
+    "rcq-exhibit:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526/a-md3buefxuajie3eu.html": 0.1,
+    "rcq-exhibit:META__10-Q__2026-Q1__c-zkgjn5w7rlv3zs2i__s-000162828026028526/a-spfxlcso6p4cvbqv.htm": 0.1,
+    "rcq-exhibit:META__10-Q__2026-Q2__c-wcyphwqbtmry35h3__s-000162828026050705/a-my7xjond4qrp6xjw.html": 0.1,
+    "rcq:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006.htm": 1.3,
+    "rcq:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054.htm": 1.6,
+    "rcq:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102.htm": 1.5,
+    "rcq:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018.htm": 1.8,
+    "rcq:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102.htm": 1.2,
+    "rcq:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196.htm": 1.5,
+    "rcq:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227.htm": 1.6,
+    "rcq:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022.htm": 1.7,
+    "rcq:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069.htm": 1.3,
+    "rcq:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100.htm": 1.9,
+    "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-45jhkpqyj3ilctlu.htm": 0.2,
+    "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-ascogzvebus2zfam.html": 0.0,
+    "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-cruju3gdz3qhropu.htm": 0.1,
+    "rcq-exhibit:RDDT__10-Q__2024-Q1__c-rppl6yjihp5tdslx__s-000171344524000006/a-pwy6yd25sct2mn27.htm": 0.1,
+    "rcq-exhibit:RDDT__10-Q__2024-Q2__c-63xzxqtyzzhgyhto__s-000171344524000054/a-aw45edaatlwrpkm4.html": 0.0,
+    "rcq-exhibit:RDDT__10-Q__2024-Q3__c-y2v6ctuwvsqookfm__s-000171344524000102/a-agwbft6zgtsjfsed.html": 0.0,
+    "rcq-exhibit:RDDT__10-K__2024-FY__c-jizatrb5fs63nvbv__s-000171344525000018/a-irmw3svfknrrnbjb.html": 0.1,
+    "rcq-exhibit:RDDT__10-Q__2025-Q1__c-ereuzoyn3bclk6pt__s-000171344525000102/a-ouc64vrzu2pnbvpu.html": 0.0,
+    "rcq-exhibit:RDDT__10-Q__2025-Q2__c-n5ue5krjop4imyfk__s-000171344525000196/a-db7ic6jpzibkc5tv.html": 0.0,
+    "rcq-exhibit:RDDT__10-Q__2025-Q3__c-652ssjo5fazn2uiw__s-000171344525000227/a-gt3h7cn7epdd4nhf.html": 0.0,
+    "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-m7zw73ihru7legmn.htm": 0.1,
+    "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-sdgu24zh5deu7ty3.html": 0.1,
+    "rcq-exhibit:RDDT__10-K__2025-FY__c-xecnnfbwds7otmem__s-000171344526000022/a-y56cvz7iuqtqvlcr.htm": 0.1,
+    "rcq-exhibit:RDDT__10-Q__2026-Q1__c-ns7p5ojalqy3dz5m__s-000171344526000069/a-l4e7jzoo2u4xr37j.html": 0.1,
+    "rcq-exhibit:RDDT__10-Q__2026-Q2__c-lttii6wghloh2qqx__s-000171344526000100/a-6jlzdnv4crmdcyjm.html": 0.1,
+    "rcq:NVDA__10-Q__2024-Q1__c-xae25irrvojjyzda__s-000104581023000093.htm": 1.0,
+    "rcq:NVDA__10-Q__2024-Q2__c-irkqnfoquwhngml5__s-000104581023000175.htm": 1.3,
+    "rcq:NVDA__10-Q__2024-Q3__c-x7j2se5j2y4gp7ca__s-000104581023000227.htm": 1.3,
+    "rcq:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029.htm": 1.8,
+    "rcq:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124.htm": 1.2,
+    "rcq:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264.htm": 1.3,
+    "rcq:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316.htm": 1.3,
+    "rcq:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023.htm": 1.8,
+    "rcq:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116.htm": 1.1,
+    "rcq:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209.htm": 1.3,
+    "rcq:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230.htm": 1.3,
+    "rcq:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052.htm": 1.1,
+    "rcq-exhibit:NVDA__10-Q__2024-Q1__c-xae25irrvojjyzda__s-000104581023000093/a-3q2ysgaxbnmks77y.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2024-Q2__c-irkqnfoquwhngml5__s-000104581023000175/a-veflkighmpju36wp.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2024-Q3__c-x7j2se5j2y4gp7ca__s-000104581023000227/a-o4tfxcmwexjyx2ac.html": 0.0,
+    "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-2o5zcv34qhnrdt2l.htm": 0.0,
+    "rcq-exhibit:NVDA__10-K__2024-FY__c-lsdf2sig3j55ukq6__s-000104581024000029/a-t6lba2puymnmk2qv.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-6lttyfnyid5zsaok.htm": 0.3,
+    "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-b3bixfk3aduv2665.htm": 0.4,
+    "rcq-exhibit:NVDA__10-Q__2025-Q1__c-t3zpon6mrpse7sws__s-000104581024000124/a-edclyxiber7kcojh.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2025-Q2__c-muejjuczkhwwdcbq__s-000104581024000264/a-dht4m3itkxjyfwd6.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316/a-rfvajjizwq7uy27b.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2025-Q3__c-y46t24gordm6uizt__s-000104581024000316/a-walml4cmkenotpwh.htm": 0.1,
+    "rcq-exhibit:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023/a-it652ipldyycssve.htm": 0.1,
+    "rcq-exhibit:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023/a-qojjjl7frbgl2tnq.html": 0.0,
+    "rcq-exhibit:NVDA__10-K__2025-FY__c-cte5uccwn7g3koei__s-000104581025000023/a-rhom5vow6zyepsio.htm": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2026-Q1__c-qowiwgnnxwisj5be__s-000104581025000116/a-tlge4phixezqx7u5.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2026-Q2__c-dgs2y5e5dqxiudyi__s-000104581025000209/a-zorvpubngrid5xjl.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2026-Q3__c-dzi6ydfpysxt6noj__s-000104581025000230/a-z3pxdonzuuf6uu5d.html": 0.0,
+    "rcq-exhibit:NVDA__10-K__2026-FY__c-ibembbpzdct6pow5__s-000104581026000021/a-4svu4aol2nas52be.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2027-Q1__c-3djqairkgthxrvbo__s-000104581026000052/a-jrssazg746bt3p2f.html": 0.0,
+    "rcq-exhibit:NVDA__10-Q__2027-Q2__c-3tn25vuxcduzrmbl__s-000104581026000075/a-c2xsyodt3zu3mtac.html": 0.0,
+    "edgar:AMZN-10-Q-2025-10-31.htm": 1.2,
+    "edgar:BABA-20-F-2025-06-26.htm": 4.8,
+    "edgar:BAC-10-K-2025-02-25.htm": 11.1,
+    "edgar:CAT-10-K-2025-02-14.htm": 4.8,
+    "edgar:CRDO-10-K-2025-07-02.htm": 1.4,
+    "edgar:CRM-10-K-2025-03-05.htm": 2.3,
+    "edgar:GOOGL-10-Q-2025-10-30.htm": 2.0,
+    "edgar:JPM-10-K-2025-02-14.htm": 11.1,
+    "edgar:KO-10-K-2025-02-20.htm": 3.0,
+    "edgar:MSFT-10-K-2025-07-30.htm": 5.0,
+    "edgar:MU-10-K-2025-10-03.htm": 2.4,
+    "edgar:NFLX-10-K-2025-01-27.htm": 1.9,
+    "edgar:NTRA-10-K-2025-02-28.htm": 2.2,
+    "edgar:NVO-20-F-2025-02-05.htm": 1.2,
+    "edgar:SPCX-10-Q-2026-08-04.htm": 2.1,
+    "edgar:TSLA-10-K-2025-01-30.htm": 2.4,
+    "edgar:TSM-20-F-2025-04-17.htm": 10.6,
+    "edgar:UNH-10-K-2025-02-27.htm": 2.3
+   },
+   "hash_check": {
+    "documents": 109,
+    "results_json_documents": 109,
+    "matched": 109,
+    "ok": true
+   }
+  }
+ }
+}

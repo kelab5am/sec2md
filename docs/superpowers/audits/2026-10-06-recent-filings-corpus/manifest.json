@@ -1,0 +1,2172 @@
+{
+ "window": {
+  "from": "2021-10-07",
+  "to": "2026-10-06"
+ },
+ "documents": [
+  {
+   "ticker": "JPM",
+   "company": "JPMORGAN CHASE & CO",
+   "cik": 19617,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-22",
+   "accession": "0000019617-22-000272",
+   "url": "https://www.sec.gov/Archives/edgar/data/19617/000001961722000272/jpm-20211231.htm",
+   "bytes": 16005879,
+   "amendment": false,
+   "file": "JPM-10-K-2022-02-22.htm",
+   "sha256": "26f4cd118b79dc6e00b6d9a9ad495cecc349218db9dd94e7edb0c8d108e1c0ce"
+  },
+  {
+   "ticker": "JPM",
+   "company": "JPMORGAN CHASE & CO",
+   "cik": 19617,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-21",
+   "accession": "0000019617-23-000231",
+   "url": "https://www.sec.gov/Archives/edgar/data/19617/000001961723000231/jpm-20221231.htm",
+   "bytes": 15883005,
+   "amendment": false,
+   "file": "JPM-10-K-2023-02-21.htm",
+   "sha256": "2953c2df158307d7de75858ed9c03dedc7b69f4ba73f9e1f512915d71a31c9d0"
+  },
+  {
+   "ticker": "JPM",
+   "company": "JPMORGAN CHASE & CO",
+   "cik": 19617,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-16",
+   "accession": "0000019617-24-000225",
+   "url": "https://www.sec.gov/Archives/edgar/data/19617/000001961724000225/jpm-20231231.htm",
+   "bytes": 13211766,
+   "amendment": false,
+   "file": "JPM-10-K-2024-02-16.htm",
+   "sha256": "e813b36c3d9e7b4f736a64de7fa0494ed9f685dfec73e9ae0249e18c0300e330"
+  },
+  {
+   "ticker": "JPM",
+   "company": "JPMORGAN CHASE & CO",
+   "cik": 19617,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-13",
+   "accession": "0001628280-26-008131",
+   "url": "https://www.sec.gov/Archives/edgar/data/19617/000162828026008131/jpm-20251231.htm",
+   "bytes": 12927433,
+   "amendment": false,
+   "file": "JPM-10-K-2026-02-13.htm",
+   "sha256": "36f91451f2403aa80228dc2d664217ca83cda48b065218f276e89f1626a9a2b5"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-22",
+   "accession": "0000021344-22-000009",
+   "url": "https://www.sec.gov/Archives/edgar/data/21344/000002134422000009/ko-20211231.htm",
+   "bytes": 5502646,
+   "amendment": false,
+   "file": "KO-10-K-2022-02-22.htm",
+   "sha256": "6a44d6cd1eaf661cdef3f669fceb9c2463b1db61aec9fb113c4a9cdac98acac6"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-21",
+   "accession": "0000021344-23-000011",
+   "url": "https://www.sec.gov/Archives/edgar/data/21344/000002134423000011/ko-20221231.htm",
+   "bytes": 5390653,
+   "amendment": false,
+   "file": "KO-10-K-2023-02-21.htm",
+   "sha256": "3d2d95458d822d63b5e4e0b599eb0fcb2d53b92cc3aa72419948eb899b4007ba"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-20",
+   "accession": "0000021344-24-000009",
+   "url": "https://www.sec.gov/Archives/edgar/data/21344/000002134424000009/ko-20231231.htm",
+   "bytes": 4161417,
+   "amendment": false,
+   "file": "KO-10-K-2024-02-20.htm",
+   "sha256": "dca4e63abfa1891acfc0d18815b0a959475e79ae83fe05ed1fe436fac3b11803"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-20",
+   "accession": "0001628280-26-010047",
+   "url": "https://www.sec.gov/Archives/edgar/data/21344/000162828026010047/ko-20251231.htm",
+   "bytes": 3758248,
+   "amendment": false,
+   "file": "KO-10-K-2026-02-20.htm",
+   "sha256": "b3fabf19f647f3342c12affbc1e5ea472d3e2a3a83d5f90949851772e01c7f16"
+  },
+  {
+   "ticker": "MSFT",
+   "company": "MICROSOFT CORP",
+   "cik": 789019,
+   "form": "10-K",
+   "report_date": "2022-06-30",
+   "filing_date": "2022-07-28",
+   "accession": "0001564590-22-026876",
+   "url": "https://www.sec.gov/Archives/edgar/data/789019/000156459022026876/msft-10k_20220630.htm",
+   "bytes": 6215963,
+   "amendment": false,
+   "file": "MSFT-10-K-2022-07-28.htm",
+   "sha256": "43f4a0441e0a405aae9522f433eee51a8dd62e09f473fa526359ed4acf6efb81"
+  },
+  {
+   "ticker": "MSFT",
+   "company": "MICROSOFT CORP",
+   "cik": 789019,
+   "form": "10-K",
+   "report_date": "2023-06-30",
+   "filing_date": "2023-07-27",
+   "accession": "0000950170-23-035122",
+   "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm",
+   "bytes": 9963699,
+   "amendment": false,
+   "file": "MSFT-10-K-2023-07-27.htm",
+   "sha256": "1b8ae2f2982a9a5dcd783bb51569d9a52de9ea5f1451bb8cb77cae97152fae3c"
+  },
+  {
+   "ticker": "MSFT",
+   "company": "MICROSOFT CORP",
+   "cik": 789019,
+   "form": "10-K",
+   "report_date": "2024-06-30",
+   "filing_date": "2024-07-30",
+   "accession": "0000950170-24-087843",
+   "url": "https://www.sec.gov/Archives/edgar/data/789019/000095017024087843/msft-20240630.htm",
+   "bytes": 6861019,
+   "amendment": false,
+   "file": "MSFT-10-K-2024-07-30.htm",
+   "sha256": "70313da7f9b43d8e5f86572a8cf6ccd2f478a402786c3ec89842dfc537d05ee2"
+  },
+  {
+   "ticker": "MSFT",
+   "company": "MICROSOFT CORP",
+   "cik": 789019,
+   "form": "10-K",
+   "report_date": "2026-06-30",
+   "filing_date": "2026-07-29",
+   "accession": "0001193125-26-323660",
+   "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+   "bytes": 8585609,
+   "amendment": false,
+   "file": "MSFT-10-K-2026-07-29.htm",
+   "sha256": "cf381a240b802d0126d7116a1dcfd01375df7fcfafcff65cf37e58d7ff934819"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-07",
+   "accession": "0000950170-22-000796",
+   "url": "https://www.sec.gov/Archives/edgar/data/1318605/000095017022000796/tsla-20211231.htm",
+   "bytes": 7899031,
+   "amendment": false,
+   "file": "TSLA-10-K-2022-02-07.htm",
+   "sha256": "17b7daea7ed56dc3e2315db3c1535e7b06fb41707532f9d162c9463573642dd0"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-01-31",
+   "accession": "0000950170-23-001409",
+   "url": "https://www.sec.gov/Archives/edgar/data/1318605/000095017023001409/tsla-20221231.htm",
+   "bytes": 7964396,
+   "amendment": false,
+   "file": "TSLA-10-K-2023-01-31.htm",
+   "sha256": "f96561694f71070412da6b301293c6adca1feddc5837f6f6e1dbdbb18bfad9f3"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-01-29",
+   "accession": "0001628280-24-002390",
+   "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828024002390/tsla-20231231.htm",
+   "bytes": 2672854,
+   "amendment": false,
+   "file": "TSLA-10-K-2024-01-29.htm",
+   "sha256": "01f8746dad24ee5030e40d52ae660c159f9b293250ae041dcdb6de9632ddd641"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-01-29",
+   "accession": "0001628280-26-003952",
+   "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026003952/tsla-20251231.htm",
+   "bytes": 2391637,
+   "amendment": false,
+   "file": "TSLA-10-K-2026-01-29.htm",
+   "sha256": "8b6a975a720099f077264f2e4c83a6311ce64668056613d71ed296b800632d21"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-16",
+   "accession": "0000018230-22-000050",
+   "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823022000050/cat-20211231.htm",
+   "bytes": 7591518,
+   "amendment": false,
+   "file": "CAT-10-K-2022-02-16.htm",
+   "sha256": "a3f36c55eee1fc9d74c9cda2e406b2ba80adbb22a99fa62bd2afcc2e5c4604c2"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-15",
+   "accession": "0000018230-23-000011",
+   "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823023000011/cat-20221231.htm",
+   "bytes": 7203861,
+   "amendment": false,
+   "file": "CAT-10-K-2023-02-15.htm",
+   "sha256": "8c7b9c444f1be7c32fd78c406a01678f1381a3079ab371e3866e607af4befaad"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-16",
+   "accession": "0000018230-24-000009",
+   "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823024000009/cat-20231231.htm",
+   "bytes": 5687708,
+   "amendment": false,
+   "file": "CAT-10-K-2024-02-16.htm",
+   "sha256": "71ff35af4601bc1ab6d8b97a4e0f07ba0b9abfcf4511fb37779541d282e8fc36"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-13",
+   "accession": "0000018230-26-000008",
+   "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000008/cat-20251231.htm",
+   "bytes": 6100577,
+   "amendment": false,
+   "file": "CAT-10-K-2026-02-13.htm",
+   "sha256": "91363212b33a2594ac881f3f053d7f95e9aaf6fed68a7c1bcfd6a1797b28a580"
+  },
+  {
+   "ticker": "BAC",
+   "company": "BANK OF AMERICA CORP /DE/",
+   "cik": 70858,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-22",
+   "accession": "0000070858-22-000062",
+   "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085822000062/bac-20211231.htm",
+   "bytes": 16049779,
+   "amendment": false,
+   "file": "BAC-10-K-2022-02-22.htm",
+   "sha256": "ed37b8f95c2bb81cdbd0b7fecc16b4a81b22754dda6fab29cab94f0cf5b88b93"
+  },
+  {
+   "ticker": "BAC",
+   "company": "BANK OF AMERICA CORP /DE/",
+   "cik": 70858,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-22",
+   "accession": "0000070858-23-000092",
+   "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085823000092/bac-20221231.htm",
+   "bytes": 16266193,
+   "amendment": false,
+   "file": "BAC-10-K-2023-02-22.htm",
+   "sha256": "5b190e5ee66769d01dc3b30910964bf3145c2cf04aba034fbef83c320536af69"
+  },
+  {
+   "ticker": "BAC",
+   "company": "BANK OF AMERICA CORP /DE/",
+   "cik": 70858,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-20",
+   "accession": "0000070858-24-000122",
+   "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085824000122/bac-20231231.htm",
+   "bytes": 12861767,
+   "amendment": false,
+   "file": "BAC-10-K-2024-02-20.htm",
+   "sha256": "c0051bba218fc883540f8ee59b5cb0de8b80980187387e521bcc0207a3505680"
+  },
+  {
+   "ticker": "BAC",
+   "company": "BANK OF AMERICA CORP /DE/",
+   "cik": 70858,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-25",
+   "accession": "0000070858-26-000157",
+   "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085826000157/bac-20251231.htm",
+   "bytes": 12819168,
+   "amendment": false,
+   "file": "BAC-10-K-2026-02-25.htm",
+   "sha256": "dee9579727052aa6803eb12a645e78f61a11fe7403ddbbd49fd69e607fc5ad8c"
+  },
+  {
+   "ticker": "UNH",
+   "company": "UNITEDHEALTH GROUP INC",
+   "cik": 731766,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-15",
+   "accession": "0000731766-22-000008",
+   "url": "https://www.sec.gov/Archives/edgar/data/731766/000073176622000008/unh-20211231.htm",
+   "bytes": 3530471,
+   "amendment": false,
+   "file": "UNH-10-K-2022-02-15.htm",
+   "sha256": "18332303aa12138e540500e175eed11e1108019cb48f3cb33cd70c281913c0e4"
+  },
+  {
+   "ticker": "UNH",
+   "company": "UNITEDHEALTH GROUP INC",
+   "cik": 731766,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-24",
+   "accession": "0000731766-23-000008",
+   "url": "https://www.sec.gov/Archives/edgar/data/731766/000073176623000008/unh-20221231.htm",
+   "bytes": 3629708,
+   "amendment": false,
+   "file": "UNH-10-K-2023-02-24.htm",
+   "sha256": "cd3e4a10be778540dbea1233c5123eb129ef5a6786947a9ea66e43ba6f928e71"
+  },
+  {
+   "ticker": "UNH",
+   "company": "UNITEDHEALTH GROUP INC",
+   "cik": 731766,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-28",
+   "accession": "0000731766-24-000081",
+   "url": "https://www.sec.gov/Archives/edgar/data/731766/000073176624000081/unh-20231231.htm",
+   "bytes": 2702971,
+   "amendment": false,
+   "file": "UNH-10-K-2024-02-28.htm",
+   "sha256": "23f24e368c67c9fb3d37f077657e81643b35a6cbfea14d7420598c41f700beb1"
+  },
+  {
+   "ticker": "UNH",
+   "company": "UNITEDHEALTH GROUP INC",
+   "cik": 731766,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-03-02",
+   "accession": "0000731766-26-000062",
+   "url": "https://www.sec.gov/Archives/edgar/data/731766/000073176626000062/unh-20251231.htm",
+   "bytes": 2870714,
+   "amendment": false,
+   "file": "UNH-10-K-2026-03-02.htm",
+   "sha256": "47aa75b9c2b4e1d59077d946d97bfb22735fab9be4658feec2da60f4b611eb0e"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2021-09-02",
+   "filing_date": "2021-10-08",
+   "accession": "0000723125-21-000065",
+   "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312521000065/mu-20210902.htm",
+   "bytes": 2829323,
+   "amendment": false,
+   "file": "MU-10-K-2021-10-08.htm",
+   "sha256": "8b5bf4b8599c83034bcaaebbca18b30627c8ad1bf8b8403f5c143b03de83baa3"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2022-09-01",
+   "filing_date": "2022-10-07",
+   "accession": "0000723125-22-000048",
+   "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312522000048/mu-20220901.htm",
+   "bytes": 2851313,
+   "amendment": false,
+   "file": "MU-10-K-2022-10-07.htm",
+   "sha256": "29747897f76bd7bdcc822068012a7df463dfbc84f9c7f2dd7fd1633a55318d57"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2023-08-31",
+   "filing_date": "2023-10-06",
+   "accession": "0000723125-23-000054",
+   "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312523000054/mu-20230831.htm",
+   "bytes": 2227801,
+   "amendment": false,
+   "file": "MU-10-K-2023-10-06.htm",
+   "sha256": "8f7568b270d5097a33f5d8022ef3642804c77cbfbeb21a91cc5567e6dc95d613"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2024-08-29",
+   "filing_date": "2024-10-04",
+   "accession": "0000723125-24-000027",
+   "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312524000027/mu-20240829.htm",
+   "bytes": 2202455,
+   "amendment": false,
+   "file": "MU-10-K-2024-10-04.htm",
+   "sha256": "d00531f6d8175bec4e15e2cd49e856c9ea1bd50e059454af5b720b8b3e53aac1"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-25",
+   "accession": "0001558370-22-002022",
+   "url": "https://www.sec.gov/Archives/edgar/data/1604821/000155837022002022/ntra-20211231x10k.htm",
+   "bytes": 3720419,
+   "amendment": false,
+   "file": "NTRA-10-K-2022-02-25.htm",
+   "sha256": "c8ae1a8f75a42aba4edebb6ab829332bf9a1b3651968912d9460648c32c0508a"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-03-01",
+   "accession": "0001558370-23-002460",
+   "url": "https://www.sec.gov/Archives/edgar/data/1604821/000155837023002460/ntra-20221231x10k.htm",
+   "bytes": 3544530,
+   "amendment": false,
+   "file": "NTRA-10-K-2023-03-01.htm",
+   "sha256": "91367d4f301dbc28a2ab6a8d1a7ef8abdb45d7911b6bee81c5a5a94591875b57"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-29",
+   "accession": "0001558370-24-002083",
+   "url": "https://www.sec.gov/Archives/edgar/data/1604821/000155837024002083/ntra-20231231x10k.htm",
+   "bytes": 3321085,
+   "amendment": false,
+   "file": "NTRA-10-K-2024-02-29.htm",
+   "sha256": "0216f0f8956d06cca0c18d28fd7142a857b52972b9424c659e49176b96006a65"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-27",
+   "accession": "0001104659-26-020881",
+   "url": "https://www.sec.gov/Archives/edgar/data/1604821/000110465926020881/ntra-20251231x10k.htm",
+   "bytes": 3333051,
+   "amendment": false,
+   "file": "NTRA-10-K-2026-02-27.htm",
+   "sha256": "d28c2d476a7d84a5b13a3f956fb3d50666d7fe5653bddf5c305c090b5ec52221"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-01-27",
+   "accession": "0001065280-22-000036",
+   "url": "https://www.sec.gov/Archives/edgar/data/1065280/000106528022000036/nflx-20211231.htm",
+   "bytes": 1956004,
+   "amendment": false,
+   "file": "NFLX-10-K-2022-01-27.htm",
+   "sha256": "822dbe4fb8eced562e7f6aa1542d7158afc75d0d9c4e8a45acfb9e51745727e3"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-01-26",
+   "accession": "0001065280-23-000035",
+   "url": "https://www.sec.gov/Archives/edgar/data/1065280/000106528023000035/nflx-20221231.htm",
+   "bytes": 1965666,
+   "amendment": false,
+   "file": "NFLX-10-K-2023-01-26.htm",
+   "sha256": "eabc03e33365d2e8417823ee2837359ad36829ca368af35122bed767ca772e12"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-01-26",
+   "accession": "0001065280-24-000030",
+   "url": "https://www.sec.gov/Archives/edgar/data/1065280/000106528024000030/nflx-20231231.htm",
+   "bytes": 1793716,
+   "amendment": false,
+   "file": "NFLX-10-K-2024-01-26.htm",
+   "sha256": "ab98159090d4319ec706757c55557353ae4321104e4b7f101e2ffe6e93726292"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-01-23",
+   "accession": "0001065280-26-000034",
+   "url": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm",
+   "bytes": 2137847,
+   "amendment": false,
+   "file": "NFLX-10-K-2026-01-23.htm",
+   "sha256": "dfdb4a80b47dbe8c11043fb5be3630546922f403cf9e8a2340bc85a88b064616"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2022-01-31",
+   "filing_date": "2022-03-11",
+   "accession": "0001108524-22-000013",
+   "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852422000013/crm-20220131.htm",
+   "bytes": 3024991,
+   "amendment": false,
+   "file": "CRM-10-K-2022-03-11.htm",
+   "sha256": "ca0138bba60fef737d025b2e4b4df660f9c0a92cd077343a4fcc4e5c77af60a1"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2023-01-31",
+   "filing_date": "2023-03-08",
+   "accession": "0001108524-23-000011",
+   "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852423000011/crm-20230131.htm",
+   "bytes": 3028366,
+   "amendment": false,
+   "file": "CRM-10-K-2023-03-08.htm",
+   "sha256": "416bc792ee1d44cd3bd2015300e2105824a458d8f3b3ee02fb04ecb604174873"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2024-01-31",
+   "filing_date": "2024-03-06",
+   "accession": "0001108524-24-000005",
+   "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852424000005/crm-20240131.htm",
+   "bytes": 2407226,
+   "amendment": false,
+   "file": "CRM-10-K-2024-03-06.htm",
+   "sha256": "0895c61f84e5dcdfc8580c31ddae327819e451fe9d2595bc0cdd154dba2c803e"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2026-01-31",
+   "filing_date": "2026-03-02",
+   "accession": "0001108524-26-000060",
+   "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000060/crm-20260131.htm",
+   "bytes": 2570386,
+   "amendment": false,
+   "file": "CRM-10-K-2026-03-02.htm",
+   "sha256": "56eacede9fe13179a89dc5f8e8f3a84faea32df59997b5a2b0b300a11200608d"
+  },
+  {
+   "ticker": "CRDO",
+   "company": "Credo Technology Group Holding Ltd",
+   "cik": 1807794,
+   "form": "10-K",
+   "report_date": "2022-04-30",
+   "filing_date": "2022-06-08",
+   "accession": "0001628280-22-016593",
+   "url": "https://www.sec.gov/Archives/edgar/data/1807794/000162828022016593/crdo-20220430.htm",
+   "bytes": 2069259,
+   "amendment": false,
+   "file": "CRDO-10-K-2022-06-08.htm",
+   "sha256": "8a18641f775ee01bc1e2a47859c5054824fb1a61929005052bfe1d6ad2bd131b"
+  },
+  {
+   "ticker": "CRDO",
+   "company": "Credo Technology Group Holding Ltd",
+   "cik": 1807794,
+   "form": "10-K",
+   "report_date": "2023-04-29",
+   "filing_date": "2023-06-23",
+   "accession": "0001628280-23-023187",
+   "url": "https://www.sec.gov/Archives/edgar/data/1807794/000162828023023187/crdo-20230429.htm",
+   "bytes": 1795898,
+   "amendment": false,
+   "file": "CRDO-10-K-2023-06-23.htm",
+   "sha256": "e1540cebc97db0fcc49075012dceb9f080921f32b07cd50ce57965174d654627"
+  },
+  {
+   "ticker": "CRDO",
+   "company": "Credo Technology Group Holding Ltd",
+   "cik": 1807794,
+   "form": "10-K",
+   "report_date": "2024-04-27",
+   "filing_date": "2024-06-24",
+   "accession": "0001628280-24-029629",
+   "url": "https://www.sec.gov/Archives/edgar/data/1807794/000162828024029629/crdo-20240427.htm",
+   "bytes": 1658386,
+   "amendment": false,
+   "file": "CRDO-10-K-2024-06-24.htm",
+   "sha256": "20fcd60c91b2bb41dd8e83e9dee3ee48db46341687c0ddd872a976537780955c"
+  },
+  {
+   "ticker": "CRDO",
+   "company": "Credo Technology Group Holding Ltd",
+   "cik": 1807794,
+   "form": "10-K",
+   "report_date": "2026-05-02",
+   "filing_date": "2026-06-15",
+   "accession": "0001628280-26-043303",
+   "url": "https://www.sec.gov/Archives/edgar/data/1807794/000162828026043303/crdo-20260502.htm",
+   "bytes": 1712544,
+   "amendment": false,
+   "file": "CRDO-10-K-2026-06-15.htm",
+   "sha256": "dad6cbb945c7b6c85d1684b5326fce9043771e6a71ec2bc08e7e08514212bb87"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-04-14",
+   "accession": "0001193125-22-104891",
+   "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312522104891/d204786d20f.htm",
+   "bytes": 6930870,
+   "amendment": false,
+   "file": "TSM-20-F-2022-04-14.htm",
+   "sha256": "ab5f5ae27546e6c38b878e8948f66861421eccaf8aaee1c7e51b8c1d36b20842"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-04-20",
+   "accession": "0001193125-23-107214",
+   "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312523107214/d428519d20f.htm",
+   "bytes": 6175803,
+   "amendment": false,
+   "file": "TSM-20-F-2023-04-20.htm",
+   "sha256": "26a95130e0ce821dbca2cbbf72b035179fe5c41eb7bbbd86232423bc79ac6e2b"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-04-18",
+   "accession": "0001193125-24-099840",
+   "url": "https://www.sec.gov/Archives/edgar/data/1046179/000119312524099840/d592628d20f.htm",
+   "bytes": 7294361,
+   "amendment": false,
+   "file": "TSM-20-F-2024-04-18.htm",
+   "sha256": "3c83a0a04f0e6df1a94acde3919e27b9404177f52e73489a3ea331b77e06baa2"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-04-16",
+   "accession": "0001628280-26-025362",
+   "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+   "bytes": 10355924,
+   "amendment": false,
+   "file": "TSM-20-F-2026-04-16.htm",
+   "sha256": "cbd58e4cb26cb15000d35f40f18b3492dbb7b2754b5e326d4eb260f4e7bf90b8"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2022-03-31",
+   "filing_date": "2022-07-26",
+   "accession": "0001104659-22-082622",
+   "url": "https://www.sec.gov/Archives/edgar/data/1577552/000110465922082622/baba-20220331x20f.htm",
+   "bytes": 7737925,
+   "amendment": false,
+   "file": "BABA-20-F-2022-07-26.htm",
+   "sha256": "2de4eddfadfa3d56c88280e03482e99ebc88982b94cafbff362fe51319b03539"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2023-03-31",
+   "filing_date": "2023-07-21",
+   "accession": "0000950170-23-033752",
+   "url": "https://www.sec.gov/Archives/edgar/data/1577552/000095017023033752/baba-20230331.htm",
+   "bytes": 14079028,
+   "amendment": false,
+   "file": "BABA-20-F-2023-07-21.htm",
+   "sha256": "1ff8ca9607216f356501011a9b3944d93f5d660a973fab257ffdbbe9eb1edb30"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2024-03-31",
+   "filing_date": "2024-05-23",
+   "accession": "0000950170-24-063767",
+   "url": "https://www.sec.gov/Archives/edgar/data/1577552/000095017024063767/baba-20240331.htm",
+   "bytes": 9018138,
+   "amendment": false,
+   "file": "BABA-20-F-2024-05-23.htm",
+   "sha256": "6ceda24b4c9ee82c0c2612cd9547786aab3e9eb6e32fffe7a127f37829bb27c4"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2026-03-31",
+   "filing_date": "2026-05-20",
+   "accession": "0001193125-26-231755",
+   "url": "https://www.sec.gov/Archives/edgar/data/1577552/000119312526231755/baba-20260331.htm",
+   "bytes": 11745271,
+   "amendment": false,
+   "file": "BABA-20-F-2026-05-20.htm",
+   "sha256": "c150d58b97130e190c22b6d6d305e7861e7d2100f1c5032674cf69890e0ca6a6"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-02",
+   "accession": "0001628280-22-001639",
+   "url": "https://www.sec.gov/Archives/edgar/data/353278/000162828022001639/nvo-20211231.htm",
+   "bytes": 1419585,
+   "amendment": false,
+   "file": "NVO-20-F-2022-02-02.htm",
+   "sha256": "7c5ef3e968136a1a66ff46e96bf6e782c5e79d28dd11f39700b4bbad67f5232c"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-01",
+   "accession": "0001628280-23-001868",
+   "url": "https://www.sec.gov/Archives/edgar/data/353278/000162828023001868/nvo-20221231.htm",
+   "bytes": 1443448,
+   "amendment": false,
+   "file": "NVO-20-F-2023-02-01.htm",
+   "sha256": "ae468a59a6d968649d4b41505b0f6f44cb1cecb6fb2a06540ef5e3b6f39cf077"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-01-31",
+   "accession": "0001628280-24-002635",
+   "url": "https://www.sec.gov/Archives/edgar/data/353278/000162828024002635/nvo-20231231.htm",
+   "bytes": 1352142,
+   "amendment": false,
+   "file": "NVO-20-F-2024-01-31.htm",
+   "sha256": "515b8bcad04e94a44c2573a647856e6643c1ffba2141788fc5e3fbe5bd8c0788"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-04",
+   "accession": "0000353278-26-000012",
+   "url": "https://www.sec.gov/Archives/edgar/data/353278/000035327826000012/nvo-20251231.htm",
+   "bytes": 1425859,
+   "amendment": false,
+   "file": "NVO-20-F-2026-02-04.htm",
+   "sha256": "2d785e8a7488d6399e35f1267560d1d20df16eca31171fb467c1628cc8085eb5"
+  },
+  {
+   "ticker": "AMZN",
+   "company": "AMAZON COM INC",
+   "cik": 1018724,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-04",
+   "accession": "0001018724-22-000005",
+   "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872422000005/amzn-20211231.htm",
+   "bytes": 2415729,
+   "amendment": false,
+   "file": "AMZN-10-K-2022-02-04.htm",
+   "sha256": "3d7ad28d00fc219b75edc5569cf2840398b2f55d63fcd17d073f1c0a4812fa94"
+  },
+  {
+   "ticker": "AMZN",
+   "company": "AMAZON COM INC",
+   "cik": 1018724,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-03",
+   "accession": "0001018724-23-000004",
+   "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000004/amzn-20221231.htm",
+   "bytes": 2486300,
+   "amendment": false,
+   "file": "AMZN-10-K-2023-02-03.htm",
+   "sha256": "c1508f56e7d29ea5e5de3848a21bf8aca361ecab5c2355864dffd20d8c13b0ef"
+  },
+  {
+   "ticker": "AMZN",
+   "company": "AMAZON COM INC",
+   "cik": 1018724,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-02-02",
+   "accession": "0001018724-24-000008",
+   "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm",
+   "bytes": 1945286,
+   "amendment": false,
+   "file": "AMZN-10-K-2024-02-02.htm",
+   "sha256": "91e3e255d3384977be6ee263f51caa7d62db578a01ef9fa94653ee7094d05540"
+  },
+  {
+   "ticker": "AMZN",
+   "company": "AMAZON COM INC",
+   "cik": 1018724,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-07",
+   "accession": "0001018724-25-000004",
+   "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000004/amzn-20241231.htm",
+   "bytes": 1922463,
+   "amendment": false,
+   "file": "AMZN-10-K-2025-02-07.htm",
+   "sha256": "b3105f50195169a971aeb4c8ae408e4cf7831ced3b1a67ca1f916dbed2f7aab2"
+  },
+  {
+   "ticker": "AMZN",
+   "company": "AMAZON COM INC",
+   "cik": 1018724,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-06",
+   "accession": "0001018724-26-000004",
+   "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+   "bytes": 1968450,
+   "amendment": false,
+   "file": "AMZN-10-K-2026-02-06.htm",
+   "sha256": "62414dcb0fe5733d53953d90491fd47aa35da1ddc8823be35b4071adcf827c3a"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-02-02",
+   "accession": "0001652044-22-000019",
+   "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204422000019/goog-20211231.htm",
+   "bytes": 3015481,
+   "amendment": false,
+   "file": "GOOGL-10-K-2022-02-02.htm",
+   "sha256": "442f61979b53b2a1b6a4ecea046481b26bb931e120db43c1a79e27112ab3a7f3"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2022-12-31",
+   "filing_date": "2023-02-03",
+   "accession": "0001652044-23-000016",
+   "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000016/goog-20221231.htm",
+   "bytes": 3038521,
+   "amendment": false,
+   "file": "GOOGL-10-K-2023-02-03.htm",
+   "sha256": "742a146b7f70b12ac19a0b2c1d6599eef891bfb602fb041bf9dc52c227972483"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2023-12-31",
+   "filing_date": "2024-01-31",
+   "accession": "0001652044-24-000022",
+   "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000022/goog-20231231.htm",
+   "bytes": 2410511,
+   "amendment": false,
+   "file": "GOOGL-10-K-2024-01-31.htm",
+   "sha256": "8c33c5ce6289d5967c0574f319d79debd42d3d77f1931a198ebe4936e378410b"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-05",
+   "accession": "0001652044-25-000014",
+   "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000014/goog-20241231.htm",
+   "bytes": 2528452,
+   "amendment": false,
+   "file": "GOOGL-10-K-2025-02-05.htm",
+   "sha256": "b8cc1aeca7232fc9e0419a2f4b461dd53732a3794ad39818079b8ae8e43bed27"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-02-05",
+   "accession": "0001652044-26-000018",
+   "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+   "bytes": 2616607,
+   "amendment": false,
+   "file": "GOOGL-10-K-2026-02-05.htm",
+   "sha256": "90c9ea11a3bd069d417a4bc0e4d38c52ff4f99889359fd1703dab7035d5e0374"
+  }
+ ],
+ "excluded": [
+  {
+   "ticker": "JPM",
+   "company": "JPMORGAN CHASE & CO",
+   "cik": 19617,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-14",
+   "accession": "0000019617-25-000270",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-02-21",
+   "accession": "0000021344-19-000014",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-02-24",
+   "accession": "0000021344-20-000006",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-25",
+   "accession": "0000021344-21-000008",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "KO",
+   "company": "COCA COLA CO",
+   "cik": 21344,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-20",
+   "accession": "0000021344-25-000011",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "MSFT",
+   "company": "MICROSOFT CORP",
+   "cik": 789019,
+   "form": "10-K",
+   "report_date": "2021-06-30",
+   "filing_date": "2021-07-29",
+   "accession": "0001564590-21-039151",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "MSFT",
+   "company": "MICROSOFT CORP",
+   "cik": 789019,
+   "form": "10-K",
+   "report_date": "2025-06-30",
+   "filing_date": "2025-07-30",
+   "accession": "0000950170-25-100235",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-02-19",
+   "accession": "0001564590-19-003165",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-02-13",
+   "accession": "0001564590-20-004475",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K/A",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-04-28",
+   "accession": "0001564590-20-018984",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-08",
+   "accession": "0001564590-21-004599",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K/A",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-04-30",
+   "accession": "0001564590-21-022604",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K/A",
+   "report_date": "2021-12-31",
+   "filing_date": "2022-05-02",
+   "accession": "0001564590-22-016871",
+   "reason": "amendment",
+   "kept": "0000950170-22-000796"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-01-30",
+   "accession": "0001628280-25-003063",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K/A",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-04-30",
+   "accession": "0001104659-25-042659",
+   "reason": "amendment",
+   "kept": "0001628280-25-003063"
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla, Inc.",
+   "cik": 1318605,
+   "form": "10-K/A",
+   "report_date": "2025-12-31",
+   "filing_date": "2026-04-30",
+   "accession": "0001104659-26-053166",
+   "reason": "amendment",
+   "kept": "0001628280-26-003952"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-02-19",
+   "accession": "0000018230-20-000056",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-17",
+   "accession": "0000018230-21-000063",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "CAT",
+   "company": "CATERPILLAR INC",
+   "cik": 18230,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-14",
+   "accession": "0000018230-25-000008",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "BAC",
+   "company": "BANK OF AMERICA CORP /DE/",
+   "cik": 70858,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-25",
+   "accession": "0000070858-25-000139",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "UNH",
+   "company": "UNITEDHEALTH GROUP INC",
+   "cik": 731766,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-03-01",
+   "accession": "0000731766-21-000013",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "UNH",
+   "company": "UNITEDHEALTH GROUP INC",
+   "cik": 731766,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-27",
+   "accession": "0000731766-25-000063",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2017-08-31",
+   "filing_date": "2017-10-26",
+   "accession": "0000723125-17-000131",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2018-08-30",
+   "filing_date": "2018-10-15",
+   "accession": "0000723125-18-000092",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2019-08-29",
+   "filing_date": "2019-10-17",
+   "accession": "0000723125-19-000094",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2020-09-03",
+   "filing_date": "2020-10-19",
+   "accession": "0000723125-20-000082",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "MU",
+   "company": "MICRON TECHNOLOGY INC",
+   "cik": 723125,
+   "form": "10-K",
+   "report_date": "2025-08-28",
+   "filing_date": "2025-10-03",
+   "accession": "0000723125-25-000028",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2015-12-31",
+   "filing_date": "2016-03-24",
+   "accession": "0001558370-16-004339",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2016-12-31",
+   "filing_date": "2017-03-16",
+   "accession": "0001558370-17-001890",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2017-12-31",
+   "filing_date": "2018-03-15",
+   "accession": "0001558370-18-002153",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-03-15",
+   "accession": "0001558370-19-002131",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-03-02",
+   "accession": "0001558370-20-001821",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-26",
+   "accession": "0001558370-21-001907",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NTRA",
+   "company": "Natera, Inc.",
+   "cik": 1604821,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-28",
+   "accession": "0001558370-25-001869",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2016-12-31",
+   "filing_date": "2017-01-27",
+   "accession": "0001628280-17-000496",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2017-12-31",
+   "filing_date": "2018-01-29",
+   "accession": "0001065280-18-000069",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K/A",
+   "report_date": "2017-12-31",
+   "filing_date": "2018-02-05",
+   "accession": "0001628280-18-000941",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-01-29",
+   "accession": "0001065280-19-000043",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K/A",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-02-08",
+   "accession": "0001065280-19-000079",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-01-29",
+   "accession": "0001065280-20-000040",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-01-28",
+   "accession": "0001065280-21-000040",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NFLX",
+   "company": "NETFLIX INC",
+   "cik": 1065280,
+   "form": "10-K",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-01-27",
+   "accession": "0001065280-25-000044",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2019-01-31",
+   "filing_date": "2019-03-08",
+   "accession": "0001108524-19-000009",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2020-01-31",
+   "filing_date": "2020-03-05",
+   "accession": "0001108524-20-000014",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2021-01-31",
+   "filing_date": "2021-03-17",
+   "accession": "0001108524-22-000008",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "CRM",
+   "company": "Salesforce, Inc.",
+   "cik": 1108524,
+   "form": "10-K",
+   "report_date": "2025-01-31",
+   "filing_date": "2025-03-05",
+   "accession": "0001108524-25-000006",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "CRDO",
+   "company": "Credo Technology Group Holding Ltd",
+   "cik": 1807794,
+   "form": "10-K/A",
+   "report_date": "2022-04-30",
+   "filing_date": "2023-04-05",
+   "accession": "0001628280-23-010881",
+   "reason": "amendment",
+   "kept": "0001628280-22-016593"
+  },
+  {
+   "ticker": "CRDO",
+   "company": "Credo Technology Group Holding Ltd",
+   "cik": 1807794,
+   "form": "10-K",
+   "report_date": "2025-05-03",
+   "filing_date": "2025-07-02",
+   "accession": "0001628280-25-033813",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2013-12-31",
+   "filing_date": "2014-04-14",
+   "accession": "0001193125-14-141496",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2014-12-31",
+   "filing_date": "2015-04-13",
+   "accession": "0001193125-15-126836",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2015-12-31",
+   "filing_date": "2016-04-11",
+   "accession": "0001193125-16-536225",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2016-12-31",
+   "filing_date": "2017-04-13",
+   "accession": "0001193125-17-122097",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2017-12-31",
+   "filing_date": "2018-04-19",
+   "accession": "0001193125-18-121866",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-04-17",
+   "accession": "0001193125-19-108390",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-04-15",
+   "accession": "0001193125-20-107579",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-04-16",
+   "accession": "0001193125-21-118512",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "cik": 1046179,
+   "form": "20-F",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-04-17",
+   "accession": "0001193125-25-083423",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2015-03-31",
+   "filing_date": "2015-06-25",
+   "accession": "0001047469-15-005768",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2016-03-31",
+   "filing_date": "2016-05-24",
+   "accession": "0001047469-16-013400",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2017-03-31",
+   "filing_date": "2017-06-15",
+   "accession": "0001047469-17-004019",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2018-03-31",
+   "filing_date": "2018-07-27",
+   "accession": "0001047469-18-005257",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2019-03-31",
+   "filing_date": "2019-06-05",
+   "accession": "0001047469-19-003492",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2020-03-31",
+   "filing_date": "2020-07-09",
+   "accession": "0001104659-20-082409",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2021-03-31",
+   "filing_date": "2021-07-27",
+   "accession": "0001104659-21-096092",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F/A",
+   "report_date": "2023-03-31",
+   "filing_date": "2024-02-23",
+   "accession": "0001193125-24-044480",
+   "reason": "amendment",
+   "kept": "0000950170-23-033752"
+  },
+  {
+   "ticker": "BABA",
+   "company": "Alibaba Group Holding Ltd",
+   "cik": 1577552,
+   "form": "20-F",
+   "report_date": "2025-03-31",
+   "filing_date": "2025-06-26",
+   "accession": "0000950170-25-090161",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2016-12-31",
+   "filing_date": "2017-02-09",
+   "accession": "0001171843-17-000780",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2017-12-31",
+   "filing_date": "2018-02-08",
+   "accession": "0001628280-18-001266",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-02-04",
+   "accession": "0001628280-19-000875",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-02-05",
+   "accession": "0001628280-20-001021",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-03",
+   "accession": "0001628280-21-001364",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "NVO",
+   "company": "NOVO NORDISK A S",
+   "cik": 353278,
+   "form": "20-F",
+   "report_date": "2024-12-31",
+   "filing_date": "2025-02-05",
+   "accession": "0001628280-25-003920",
+   "reason": "phase_a_duplicate"
+  },
+  {
+   "ticker": "AMZN",
+   "company": "AMAZON COM INC",
+   "cik": 1018724,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-03",
+   "accession": "0001018724-21-000004",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2015-12-31",
+   "filing_date": "2016-02-11",
+   "accession": "0001652044-16-000012",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K/A",
+   "report_date": "2015-12-31",
+   "filing_date": "2016-03-29",
+   "accession": "0001193125-16-520367",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2016-12-31",
+   "filing_date": "2017-02-03",
+   "accession": "0001652044-17-000008",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2017-12-31",
+   "filing_date": "2018-02-06",
+   "accession": "0001652044-18-000007",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-02-05",
+   "accession": "0001652044-19-000004",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K/A",
+   "report_date": "2018-12-31",
+   "filing_date": "2019-02-06",
+   "accession": "0001193125-19-028757",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2019-12-31",
+   "filing_date": "2020-02-04",
+   "accession": "0001652044-20-000008",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "GOOGL",
+   "company": "Alphabet Inc.",
+   "cik": 1652044,
+   "form": "10-K",
+   "report_date": "2020-12-31",
+   "filing_date": "2021-02-03",
+   "accession": "0001652044-21-000010",
+   "reason": "outside_window"
+  },
+  {
+   "ticker": "SPCX",
+   "company": "SPACE EXPLORATION TECHNOLOGIES CORP",
+   "cik": 1181412,
+   "form": "10-K",
+   "report_date": null,
+   "filing_date": null,
+   "accession": null,
+   "reason": "no_annual_report"
+  }
+ ],
+ "other_annual_forms": [],
+ "totals": {
+  "documents": 70,
+  "bytes": 380186110
+ },
+ "size_mismatches": [
+  {
+   "file": "JPM-10-K-2022-02-22.htm",
+   "index_bytes": 16005771,
+   "bytes": 16005879
+  },
+  {
+   "file": "JPM-10-K-2023-02-21.htm",
+   "index_bytes": 15882897,
+   "bytes": 15883005
+  },
+  {
+   "file": "JPM-10-K-2024-02-16.htm",
+   "index_bytes": 13211658,
+   "bytes": 13211766
+  },
+  {
+   "file": "JPM-10-K-2026-02-13.htm",
+   "index_bytes": 12927325,
+   "bytes": 12927433
+  },
+  {
+   "file": "KO-10-K-2022-02-22.htm",
+   "index_bytes": 5502538,
+   "bytes": 5502646
+  },
+  {
+   "file": "KO-10-K-2023-02-21.htm",
+   "index_bytes": 5390545,
+   "bytes": 5390653
+  },
+  {
+   "file": "KO-10-K-2024-02-20.htm",
+   "index_bytes": 4161309,
+   "bytes": 4161417
+  },
+  {
+   "file": "KO-10-K-2026-02-20.htm",
+   "index_bytes": 3758140,
+   "bytes": 3758248
+  },
+  {
+   "file": "MSFT-10-K-2022-07-28.htm",
+   "index_bytes": 6215855,
+   "bytes": 6215963
+  },
+  {
+   "file": "MSFT-10-K-2023-07-27.htm",
+   "index_bytes": 9963591,
+   "bytes": 9963699
+  },
+  {
+   "file": "MSFT-10-K-2024-07-30.htm",
+   "index_bytes": 6860911,
+   "bytes": 6861019
+  },
+  {
+   "file": "MSFT-10-K-2026-07-29.htm",
+   "index_bytes": 8585501,
+   "bytes": 8585609
+  },
+  {
+   "file": "TSLA-10-K-2022-02-07.htm",
+   "index_bytes": 7898923,
+   "bytes": 7899031
+  },
+  {
+   "file": "TSLA-10-K-2023-01-31.htm",
+   "index_bytes": 7964288,
+   "bytes": 7964396
+  },
+  {
+   "file": "TSLA-10-K-2024-01-29.htm",
+   "index_bytes": 2672746,
+   "bytes": 2672854
+  },
+  {
+   "file": "TSLA-10-K-2026-01-29.htm",
+   "index_bytes": 2391529,
+   "bytes": 2391637
+  },
+  {
+   "file": "CAT-10-K-2022-02-16.htm",
+   "index_bytes": 7591410,
+   "bytes": 7591518
+  },
+  {
+   "file": "CAT-10-K-2023-02-15.htm",
+   "index_bytes": 7203753,
+   "bytes": 7203861
+  },
+  {
+   "file": "CAT-10-K-2024-02-16.htm",
+   "index_bytes": 5687600,
+   "bytes": 5687708
+  },
+  {
+   "file": "CAT-10-K-2026-02-13.htm",
+   "index_bytes": 6100469,
+   "bytes": 6100577
+  },
+  {
+   "file": "BAC-10-K-2022-02-22.htm",
+   "index_bytes": 16049671,
+   "bytes": 16049779
+  },
+  {
+   "file": "BAC-10-K-2023-02-22.htm",
+   "index_bytes": 16266085,
+   "bytes": 16266193
+  },
+  {
+   "file": "BAC-10-K-2024-02-20.htm",
+   "index_bytes": 12861659,
+   "bytes": 12861767
+  },
+  {
+   "file": "BAC-10-K-2026-02-25.htm",
+   "index_bytes": 12819060,
+   "bytes": 12819168
+  },
+  {
+   "file": "UNH-10-K-2022-02-15.htm",
+   "index_bytes": 3530363,
+   "bytes": 3530471
+  },
+  {
+   "file": "UNH-10-K-2023-02-24.htm",
+   "index_bytes": 3629600,
+   "bytes": 3629708
+  },
+  {
+   "file": "UNH-10-K-2024-02-28.htm",
+   "index_bytes": 2702863,
+   "bytes": 2702971
+  },
+  {
+   "file": "UNH-10-K-2026-03-02.htm",
+   "index_bytes": 2870606,
+   "bytes": 2870714
+  },
+  {
+   "file": "MU-10-K-2021-10-08.htm",
+   "index_bytes": 2829215,
+   "bytes": 2829323
+  },
+  {
+   "file": "MU-10-K-2022-10-07.htm",
+   "index_bytes": 2851205,
+   "bytes": 2851313
+  },
+  {
+   "file": "MU-10-K-2023-10-06.htm",
+   "index_bytes": 2227693,
+   "bytes": 2227801
+  },
+  {
+   "file": "MU-10-K-2024-10-04.htm",
+   "index_bytes": 2202347,
+   "bytes": 2202455
+  },
+  {
+   "file": "NTRA-10-K-2022-02-25.htm",
+   "index_bytes": 3720311,
+   "bytes": 3720419
+  },
+  {
+   "file": "NTRA-10-K-2023-03-01.htm",
+   "index_bytes": 3544422,
+   "bytes": 3544530
+  },
+  {
+   "file": "NTRA-10-K-2024-02-29.htm",
+   "index_bytes": 3320977,
+   "bytes": 3321085
+  },
+  {
+   "file": "NTRA-10-K-2026-02-27.htm",
+   "index_bytes": 3332943,
+   "bytes": 3333051
+  },
+  {
+   "file": "NFLX-10-K-2022-01-27.htm",
+   "index_bytes": 1955896,
+   "bytes": 1956004
+  },
+  {
+   "file": "NFLX-10-K-2023-01-26.htm",
+   "index_bytes": 1965558,
+   "bytes": 1965666
+  },
+  {
+   "file": "NFLX-10-K-2024-01-26.htm",
+   "index_bytes": 1793608,
+   "bytes": 1793716
+  },
+  {
+   "file": "NFLX-10-K-2026-01-23.htm",
+   "index_bytes": 2137739,
+   "bytes": 2137847
+  },
+  {
+   "file": "CRM-10-K-2022-03-11.htm",
+   "index_bytes": 3024883,
+   "bytes": 3024991
+  },
+  {
+   "file": "CRM-10-K-2023-03-08.htm",
+   "index_bytes": 3028258,
+   "bytes": 3028366
+  },
+  {
+   "file": "CRM-10-K-2024-03-06.htm",
+   "index_bytes": 2407118,
+   "bytes": 2407226
+  },
+  {
+   "file": "CRM-10-K-2026-03-02.htm",
+   "index_bytes": 2570278,
+   "bytes": 2570386
+  },
+  {
+   "file": "CRDO-10-K-2022-06-08.htm",
+   "index_bytes": 2069151,
+   "bytes": 2069259
+  },
+  {
+   "file": "CRDO-10-K-2023-06-23.htm",
+   "index_bytes": 1795790,
+   "bytes": 1795898
+  },
+  {
+   "file": "CRDO-10-K-2024-06-24.htm",
+   "index_bytes": 1658278,
+   "bytes": 1658386
+  },
+  {
+   "file": "CRDO-10-K-2026-06-15.htm",
+   "index_bytes": 1712436,
+   "bytes": 1712544
+  },
+  {
+   "file": "TSM-20-F-2022-04-14.htm",
+   "index_bytes": 6930762,
+   "bytes": 6930870
+  },
+  {
+   "file": "TSM-20-F-2023-04-20.htm",
+   "index_bytes": 6175695,
+   "bytes": 6175803
+  },
+  {
+   "file": "TSM-20-F-2024-04-18.htm",
+   "index_bytes": 7294253,
+   "bytes": 7294361
+  },
+  {
+   "file": "TSM-20-F-2026-04-16.htm",
+   "index_bytes": 10355816,
+   "bytes": 10355924
+  },
+  {
+   "file": "BABA-20-F-2022-07-26.htm",
+   "index_bytes": 7737817,
+   "bytes": 7737925
+  },
+  {
+   "file": "BABA-20-F-2023-07-21.htm",
+   "index_bytes": 14078920,
+   "bytes": 14079028
+  },
+  {
+   "file": "BABA-20-F-2024-05-23.htm",
+   "index_bytes": 9018030,
+   "bytes": 9018138
+  },
+  {
+   "file": "BABA-20-F-2026-05-20.htm",
+   "index_bytes": 11745163,
+   "bytes": 11745271
+  },
+  {
+   "file": "NVO-20-F-2022-02-02.htm",
+   "index_bytes": 1419477,
+   "bytes": 1419585
+  },
+  {
+   "file": "NVO-20-F-2023-02-01.htm",
+   "index_bytes": 1443340,
+   "bytes": 1443448
+  },
+  {
+   "file": "NVO-20-F-2024-01-31.htm",
+   "index_bytes": 1352034,
+   "bytes": 1352142
+  },
+  {
+   "file": "NVO-20-F-2026-02-04.htm",
+   "index_bytes": 1425751,
+   "bytes": 1425859
+  },
+  {
+   "file": "AMZN-10-K-2022-02-04.htm",
+   "index_bytes": 2415621,
+   "bytes": 2415729
+  },
+  {
+   "file": "AMZN-10-K-2023-02-03.htm",
+   "index_bytes": 2486192,
+   "bytes": 2486300
+  },
+  {
+   "file": "AMZN-10-K-2024-02-02.htm",
+   "index_bytes": 1945178,
+   "bytes": 1945286
+  },
+  {
+   "file": "AMZN-10-K-2025-02-07.htm",
+   "index_bytes": 1922355,
+   "bytes": 1922463
+  },
+  {
+   "file": "AMZN-10-K-2026-02-06.htm",
+   "index_bytes": 1968342,
+   "bytes": 1968450
+  },
+  {
+   "file": "GOOGL-10-K-2022-02-02.htm",
+   "index_bytes": 3015373,
+   "bytes": 3015481
+  },
+  {
+   "file": "GOOGL-10-K-2023-02-03.htm",
+   "index_bytes": 3038413,
+   "bytes": 3038521
+  },
+  {
+   "file": "GOOGL-10-K-2024-01-31.htm",
+   "index_bytes": 2410403,
+   "bytes": 2410511
+  },
+  {
+   "file": "GOOGL-10-K-2025-02-05.htm",
+   "index_bytes": 2528344,
+   "bytes": 2528452
+  },
+  {
+   "file": "GOOGL-10-K-2026-02-05.htm",
+   "index_bytes": 2616499,
+   "bytes": 2616607
+  }
+ ]
+}

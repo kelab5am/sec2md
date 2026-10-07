@@ -17,6 +17,8 @@ runs first (main, candidate / candidate, main / ...), so drift affects both side
 Reported: per fixture and side, every run's time and the median; the total of the
 per-fixture medians and the median of per-run totals; the ratio candidate/main for both;
 and outliers (a run more than 15% from its fixture's median).
+
+Phase A only: the fixtures are Phase A's, so `--corpus recent` is refused.
 """
 from __future__ import annotations
 
@@ -80,7 +82,11 @@ def main():
     ap.add_argument("--candidate-src")
     ap.add_argument("--runs", type=int, default=9)
     ap.add_argument("--out")
+    ap.add_argument("--corpus", choices=("phase-a", "recent"), default="phase-a")
     args = ap.parse_args()
+    if args.corpus != "phase-a":
+        raise SystemExit("overhead.py: overhead is measured on the 7 Phase A fixtures (tests/fixtures/sec), so it "
+                         f"runs on the Phase A corpus only, not with --corpus {args.corpus}")
     if args.child:
         child(args)
         return

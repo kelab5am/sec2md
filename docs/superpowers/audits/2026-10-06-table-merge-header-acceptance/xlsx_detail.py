@@ -2,6 +2,8 @@
 
     PYTHONPATH=<side>/src python xlsx_detail.py dump --fixtures-root <checkout> --edgar-cache <cache> \
         --out <side>.json <document id>...
+    PYTHONPATH=<side>/src python xlsx_detail.py dump --corpus recent --recent-cache <recent filings cache> \
+        --out <side>.json <document id>...
     python xlsx_detail.py compare <main>.json <candidate>.json --out xlsx_detail.json
 
 `dump` parses each document in capture mode and writes every prepared table
@@ -29,7 +31,7 @@ def dump(args):
     from sec2md.parser import Parser
     from sec2md.xlsx_tables import prepare_table
 
-    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root)
+    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root, args.corpus, args.recent_cache)
     out = {}
     for doc_id, _, raw in docs:
         if doc_id not in args.documents:
@@ -74,8 +76,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
     d = sub.add_parser("dump")
-    d.add_argument("--fixtures-root", required=True)
-    d.add_argument("--edgar-cache", required=True)
+    acc_common.add_document_arguments(d)
     d.add_argument("--out", required=True)
     d.add_argument("documents", nargs="+")
     c = sub.add_parser("compare")
@@ -83,7 +84,11 @@ def main():
     c.add_argument("candidate")
     c.add_argument("--out", required=True)
     args = ap.parse_args()
-    dump(args) if args.command == "dump" else compare(args)
+    if args.command == "dump":
+        acc_common.check_document_arguments(d, args)
+        dump(args)
+    else:
+        compare(args)
 
 
 if __name__ == "__main__":

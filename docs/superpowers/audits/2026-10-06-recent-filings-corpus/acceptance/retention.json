@@ -1,0 +1,305 @@
+{
+ "header_cells": 38572,
+ "literal_separator_cells": 23,
+ "header_cells_represented": 38572,
+ "values": 117342,
+ "word_only_values": 15514,
+ "literal_separator_values": 112,
+ "no_discriminating_values": 3968,
+ "values_equal": 117330,
+ "values_exact_case": 117330,
+ "header_only_columns": 2256,
+ "header_only_rendered": 2256,
+ "value_mismatches": [
+  {
+   "unit": 74,
+   "row": 5,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2023",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2023-07-27.htm",
+   "unit_flags": {
+    "unit": 74,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 74,
+   "row": 5,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2022",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2023-07-27.htm",
+   "unit_flags": {
+    "unit": 74,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 74,
+   "row": 6,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2023",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2023-07-27.htm",
+   "unit_flags": {
+    "unit": 74,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 74,
+   "row": 6,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2022",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2023-07-27.htm",
+   "unit_flags": {
+    "unit": 74,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 76,
+   "row": 5,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2024",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2024-07-30.htm",
+   "unit_flags": {
+    "unit": 76,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 76,
+   "row": 5,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2023",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2024-07-30.htm",
+   "unit_flags": {
+    "unit": 76,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 76,
+   "row": 6,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2024",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2024-07-30.htm",
+   "unit_flags": {
+    "unit": 76,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 76,
+   "row": 6,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2023",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2024-07-30.htm",
+   "unit_flags": {
+    "unit": 76,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 72,
+   "row": 5,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2026",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2026-07-29.htm",
+   "unit_flags": {
+    "unit": 72,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 72,
+   "row": 5,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2025",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2026-07-29.htm",
+   "unit_flags": {
+    "unit": 72,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 72,
+   "row": 6,
+   "column": 10,
+   "outcome": "value_no_discriminating_header",
+   "header": "2026",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2026-07-29.htm",
+   "unit_flags": {
+    "unit": 72,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  },
+  {
+   "unit": 72,
+   "row": 6,
+   "column": 16,
+   "outcome": "value_no_discriminating_header",
+   "header": "2025",
+   "expected": "",
+   "word_only": true,
+   "literal": false,
+   "doc": "recent:MSFT-10-K-2026-07-29.htm",
+   "unit_flags": {
+    "unit": 72,
+    "hidden_tds": 0,
+    "hidden_trs": 0,
+    "nested": false,
+    "grid": true,
+    "header_rows": 1,
+    "header_row_list": [
+     3
+    ],
+    "data_rows": 2,
+    "changed": true
+   }
+  }
+ ],
+ "header_cell_misses": [],
+ "header_only_misses": []
+}

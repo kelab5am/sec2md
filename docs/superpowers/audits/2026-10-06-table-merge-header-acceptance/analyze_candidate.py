@@ -4,6 +4,9 @@
         --fixtures-root <checkout> --edgar-cache <cache> --main-dir <main dumps> \
         --candidate-dir <candidate dumps> --merges merges.json.gz --out-dir <dir> [--workers N]
 
+With `--corpus recent --recent-cache <recent filings cache>` in place of --fixtures-root and
+--edgar-cache, it reads the recent filings corpus, and _run.json records `"corpus": "recent"`.
+
 Per document it parses the candidate once in normal mode (`get_pages(include_images=False)`,
 checks on), checks that its table outputs equal the candidate dump's, and runs:
 
@@ -800,8 +803,7 @@ def work(item):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--expect-src", required=True)
-    ap.add_argument("--fixtures-root", required=True)
-    ap.add_argument("--edgar-cache", required=True)
+    acc_common.add_document_arguments(ap)
     ap.add_argument("--main-dir", required=True)
     ap.add_argument("--candidate-dir", required=True)
     ap.add_argument("--merges", required=True)
@@ -809,11 +811,12 @@ def main():
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--only", nargs="*")
     args = ap.parse_args()
+    acc_common.check_document_arguments(ap, args)
     os.makedirs(args.out_dir, exist_ok=True)
     location = acc_common.sec2md_location(args.expect_src)
     started = time.perf_counter()
-    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root)
-    hashes = acc_common.verify_hashes(docs)
+    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root, args.corpus, args.recent_cache)
+    hashes = acc_common.verify_hashes(docs, args.corpus)
     if args.only:
         docs = [d for d in docs if d[0] in args.only]
     order = sorted(docs, key=lambda d: -len(d[2]))
@@ -823,7 +826,8 @@ def main():
         for doc_id, seconds in pool.imap_unordered(work, order):
             times[doc_id] = seconds
             print(f"{doc_id}: {seconds:.1f}s", file=sys.stderr, flush=True)
-    run = {"sec2md_file": location, "hash_check_ok": hashes["ok"], "documents": [d[0] for d in docs],
+    run = {**acc_common.corpus_record(args.corpus), "sec2md_file": location, "hash_check_ok": hashes["ok"],
+           "documents": [d[0] for d in docs],
            "document_seconds": times, "wall_seconds": round(time.perf_counter() - started, 1)}
     with open(os.path.join(args.out_dir, "_run.json"), "w", encoding="utf-8") as handle:
         json.dump(run, handle, indent=1)

@@ -76,3 +76,22 @@ in the scratch folder; only aggregated results are kept here. `E:\RCQWealth` and
 The candidate needs `TableAlignment.outcomes` (prototype T9 from `5215e3d` on). `analyze_candidate.py`
 re-parses the candidate and checks that its outputs equal the candidate dump's, and that its summed coverage
 equals production's (`ParseDiagnostics` for the candidate, `check_tables` on main's Markdown for main).
+
+## Corpus
+
+Each script that loads documents (`run_side.py`, `merges_main.py`, `analyze_candidate.py`, `xlsx_detail.py dump`,
+`inspect_unit.py`, `review_sample.py`) takes `--corpus {phase-a,recent}`:
+
+- `phase-a`, the default, reads the Phase A corpus from `--fixtures-root` and `--edgar-cache`, as above. Every
+  result file is as before the switch, and none records a corpus.
+- `recent` reads the recent filings corpus
+  ([`../2026-10-06-recent-filings-corpus/corpus_recent.py`](../2026-10-06-recent-filings-corpus/corpus_recent.py))
+  from `--recent-cache` (the main checkout's `outputs/recent-filings-corpus`), in place of `--fixtures-root` and
+  `--edgar-cache`. Each document's SHA-256 is checked against that folder's `manifest.json`, whose own count is
+  required. `_run.json`, the merges summary, `run_check.json` and `summary.json` record `"corpus": "recent"`.
+  `report.py` takes `--corpus recent` as well, and stops if any input was made with another corpus.
+
+Phase A content stays Phase A only. `shifted_tables.py`, `review_sample.py` and `overhead.py` refuse
+`--corpus recent`. Under it, `report.py` writes as not applicable class 8's table list (with its fixed and remaining
+counts; `class8.json` lists every candidate split table instead), check 1's class-1 tables and Phase A's false
+positives (so `residual_genuine` lists every candidate `TableParser` value failure with output).

@@ -2,6 +2,8 @@
 
     PYTHONPATH=<c674828 tree>/src python merges_main.py --expect-src <tree>/src \
         --fixtures-root <tree> --edgar-cache <cache> --out merges.json.gz [--workers N]
+    PYTHONPATH=<c674828 tree>/src python merges_main.py --expect-src <tree>/src \
+        --corpus recent --recent-cache <recent filings cache> --out merges.json.gz [--workers N]
 
 Replays main's TableParser with the evidence report's tracer
 (../2026-10-04-table-merge-header-evidence/corpus.py and trace_merge.py) on every corpus
@@ -10,7 +12,8 @@ every legacy merge step that joins value columns under the same header
 ("value+value|same_header"), it records the source cells of both sides' body values:
 each as (TableParser row, td index in that row's find_all(['td', 'th'])), which the
 candidate side maps back to the same td element. The replay must reproduce the
-parser's Markdown for every table (3,707), and the merge count must be 6,616.
+parser's Markdown for every table (3,707), and the merge count must be 6,616 (both figures
+are Phase A's). With --corpus recent the summary also records `"corpus": "recent"`.
 """
 from __future__ import annotations
 
@@ -123,16 +126,16 @@ def work(item):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--expect-src", required=True)
-    ap.add_argument("--fixtures-root", required=True)
-    ap.add_argument("--edgar-cache", required=True)
+    acc_common.add_document_arguments(ap)
     ap.add_argument("--out", required=True)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--only", nargs="*")
     args = ap.parse_args()
+    acc_common.check_document_arguments(ap, args)
     location = acc_common.sec2md_location(args.expect_src)
     started = time.perf_counter()
-    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root)
-    hashes = acc_common.verify_hashes(docs)
+    docs, _ = acc_common.load_documents(args.edgar_cache, args.fixtures_root, args.corpus, args.recent_cache)
+    hashes = acc_common.verify_hashes(docs, args.corpus)
     if args.only:
         docs = [d for d in docs if d[0] in args.only]
     order = sorted(docs, key=lambda d: -len(d[2]))
@@ -149,7 +152,8 @@ def main():
         totals.update(doc["counts"])
         replay.update(doc["replay"])
     same = sum(len(t["steps"]) for d in documents for t in d["tables"])
-    summary = {"sec2md_file": location, "hash_check_ok": hashes["ok"], "replay": dict(replay),
+    summary = {**acc_common.corpus_record(args.corpus), "sec2md_file": location, "hash_check_ok": hashes["ok"],
+               "replay": dict(replay),
                "same_header_value_steps": same,
                "same_header_value_tables": sum(len(d["tables"]) for d in documents),
                "counts": dict(sorted(totals.items())), "seconds": round(time.perf_counter() - started, 1)}

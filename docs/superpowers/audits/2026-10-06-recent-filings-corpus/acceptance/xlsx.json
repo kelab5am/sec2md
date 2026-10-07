@@ -1,0 +1,693 @@
+{
+ "documents": 70,
+ "snapshots": 7075,
+ "status": {
+  "needs_review": 2326,
+  "source_text_only": 3892,
+  "exported": 857
+ },
+ "differences": [
+  {
+   "doc": "recent:BABA-20-F-2022-07-26.htm",
+   "count_main": 113,
+   "count_candidate": 113,
+   "first": [
+    [
+     {
+      "ordinal": 11,
+      "sha": "513ae865d864959c469c8f1767d87a4970212e42b1afb49c720f51a212b41cc9",
+      "status": "exported",
+      "export": true,
+      "headers": 4,
+      "rows": 29
+     },
+     {
+      "ordinal": 11,
+      "sha": "f16986bd0f2cb5288dc0347984e0c1edfdd972390dd91a04b11a8c307db2518c",
+      "status": "exported",
+      "export": true,
+      "headers": 4,
+      "rows": 29
+     }
+    ],
+    [
+     {
+      "ordinal": 12,
+      "sha": "0ae9ee4ef7ab1ac45f35e66efc16fbb87f8da588b0b17e423cbe62396983aefc",
+      "status": "needs_review",
+      "export": true,
+      "headers": 11,
+      "rows": 14
+     },
+     {
+      "ordinal": 12,
+      "sha": "2a4b6ca4d07acd05eab549aafb44447870926470a2c0090b4cd09a865350f2bc",
+      "status": "needs_review",
+      "export": true,
+      "headers": 11,
+      "rows": 14
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:BABA-20-F-2023-07-21.htm",
+   "count_main": 111,
+   "count_candidate": 111,
+   "first": [
+    [
+     {
+      "ordinal": 19,
+      "sha": "6a1454804eba1993547f645e40e5597c9a94a1e0cc4f1ca598cd0413b9161da0",
+      "status": "exported",
+      "export": true,
+      "headers": 4,
+      "rows": 29
+     },
+     {
+      "ordinal": 19,
+      "sha": "80659081562d226cd140d782da5ed7e01c4f0e3ce7780ee30091aa9e2aa96d18",
+      "status": "exported",
+      "export": true,
+      "headers": 4,
+      "rows": 29
+     }
+    ],
+    [
+     {
+      "ordinal": 20,
+      "sha": "654525514d40714ba049a3824999ad61b12134de2ae58f331d1e423283277bc3",
+      "status": "needs_review",
+      "export": true,
+      "headers": 29,
+      "rows": 13
+     },
+     {
+      "ordinal": 20,
+      "sha": "175e25ce04b505272b8854b566d5dd849ce252f681cf9fdf2b9fb8b25c894d46",
+      "status": "needs_review",
+      "export": true,
+      "headers": 29,
+      "rows": 13
+     }
+    ],
+    [
+     {
+      "ordinal": 107,
+      "sha": "f002b81506ac8cbd7496a1ced2b2d2f622b79158a9874c62854f8fcfa400f479",
+      "status": "needs_review",
+      "export": true,
+      "headers": 28,
+      "rows": 11
+     },
+     {
+      "ordinal": 107,
+      "sha": "8b015b6f9aec0ec2a2658fdce3b37999f7195d43e3e8c51348541c0e1750b17c",
+      "status": "needs_review",
+      "export": true,
+      "headers": 28,
+      "rows": 11
+     }
+    ],
+    [
+     {
+      "ordinal": 108,
+      "sha": "1a70f99da0e072f7a091f69755584248692573dc199727c22daf65bd4f48f3cb",
+      "status": "needs_review",
+      "export": true,
+      "headers": 28,
+      "rows": 11
+     },
+     {
+      "ordinal": 108,
+      "sha": "c3dafd7aae9c2714d3b1fe500d46c91d62487666eb1a051ced838c0049499de3",
+      "status": "needs_review",
+      "export": true,
+      "headers": 28,
+      "rows": 11
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NTRA-10-K-2022-02-25.htm",
+   "count_main": 57,
+   "count_candidate": 57,
+   "first": [
+    [
+     {
+      "ordinal": 6,
+      "sha": "d79db6abf41c431890ad949bbf387becea56fc5dc1d62fd51f2d3f8f2621d3e0",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 23
+     },
+     {
+      "ordinal": 6,
+      "sha": "b6bdc74817b305c77bf65e585e189c766d31e948c964a359bb15ad37e2100738",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 23
+     }
+    ],
+    [
+     {
+      "ordinal": 9,
+      "sha": "d81e3cef4add4aa3651b821dbe1b536581884f2d154fe1f5310b9f79c8775ebe",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 9,
+      "sha": "101a14a1fe4d47391e0fea82ab38c7d0ad5e29638079d1c02f0df1e62b169c4c",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NTRA-10-K-2023-03-01.htm",
+   "count_main": 55,
+   "count_candidate": 55,
+   "first": [
+    [
+     {
+      "ordinal": 37,
+      "sha": "09ea4f1ea0080ddb102f5452dc1a146469e4496882ded06ab32341d8c9fdc6ec",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 8
+     },
+     {
+      "ordinal": 37,
+      "sha": "e01a09d1a880d77216d550f748dd2da0dc7cafd4cedf2e2ede9381ad4277d76f",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 8
+     }
+    ],
+    [
+     {
+      "ordinal": 38,
+      "sha": "41aa56d232522b0aab7b291c5a931c1498316e94e9669d31dbbbe5d4ad0cc02e",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 38,
+      "sha": "cf9216ab0fccfb9700832b732af433cd8d7253c9aa06c806d7d5ab9420bc82d4",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ],
+    [
+     {
+      "ordinal": 39,
+      "sha": "2277245fd2b57bb6c06ae9c4dc4bdb44ea09424224fe6e37be4c8820212fd49f",
+      "status": "needs_review",
+      "export": true,
+      "headers": 3,
+      "rows": 12
+     },
+     {
+      "ordinal": 39,
+      "sha": "0b67ae476156e759aeddc0a3802b2089f30089d32085d7386651053bc70580a8",
+      "status": "needs_review",
+      "export": true,
+      "headers": 3,
+      "rows": 12
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NTRA-10-K-2024-02-29.htm",
+   "count_main": 50,
+   "count_candidate": 50,
+   "first": [
+    [
+     {
+      "ordinal": 34,
+      "sha": "2e3636d98dbb8a8cf8bbd245db6a00354957ffb67c476ca77c2f9f48a5942e64",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 17
+     },
+     {
+      "ordinal": 34,
+      "sha": "e15d7db4be142540f83f694c64898dcd8772afb7e83654d82f01e12ae0399bc6",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 17
+     }
+    ],
+    [
+     {
+      "ordinal": 35,
+      "sha": "55d1c50e9a52bb8477d2ae9b1f0fc9ad363373d6c33f0263edd78dae0f81be07",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 35,
+      "sha": "f35c10d81d07068446512ba2ed0ed3652916829547cfccce356233b7fbe1208e",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ],
+    [
+     {
+      "ordinal": 36,
+      "sha": "06ceb70b225c31ef59d5b302ee77d9085bbc684fac11a3220b1bfc00a8e9c433",
+      "status": "needs_review",
+      "export": true,
+      "headers": 3,
+      "rows": 12
+     },
+     {
+      "ordinal": 36,
+      "sha": "96df392b89d168486052ba3ea48ca448ac1067c01373c64e4d68f4ebd58059a8",
+      "status": "needs_review",
+      "export": true,
+      "headers": 3,
+      "rows": 12
+     }
+    ],
+    [
+     {
+      "ordinal": 37,
+      "sha": "c1e678a587043aa1c891bd8bef6f5cf55df4c82f1f82b0464915f807e41ddded",
+      "status": "exported",
+      "export": true,
+      "headers": 12,
+      "rows": 6
+     },
+     {
+      "ordinal": 37,
+      "sha": "fafd15c75de8165fd839a327209ab661582a0a770fdc16ca32121efb5367067e",
+      "status": "exported",
+      "export": true,
+      "headers": 12,
+      "rows": 6
+     }
+    ],
+    [
+     {
+      "ordinal": 38,
+      "sha": "9c25eed954bfbddc9b6f750cb8f90f2efdbb45c40574a7e5849242a12a750ef3",
+      "status": "exported",
+      "export": true,
+      "headers": 13,
+      "rows": 4
+     },
+     {
+      "ordinal": 38,
+      "sha": "4ee5cf1f1b330bae4bc99782e459b5579ea1c2e2d74a31be4b82fda767a6e4f8",
+      "status": "exported",
+      "export": true,
+      "headers": 13,
+      "rows": 4
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:NTRA-10-K-2026-02-27.htm",
+   "count_main": 48,
+   "count_candidate": 48,
+   "first": [
+    [
+     {
+      "ordinal": 7,
+      "sha": "9c4ccb841ba05bb90078164957d5484a2803d14758875484c4386d040c2d71f4",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 7,
+      "sha": "488d7b839c3d6bbb615935bd990e93c4be168975be8d3f34ff9d605f4e840965",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ],
+    [
+     {
+      "ordinal": 41,
+      "sha": "59df449915a155725f93a481f8239e0959fe666f24fcca06bb6a5033ef326e6d",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 10
+     },
+     {
+      "ordinal": 41,
+      "sha": "5a058b1d04550c3482751f0b05d2fde279829d666331dd3b7b546f269a2a5438",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 10
+     }
+    ],
+    [
+     {
+      "ordinal": 42,
+      "sha": "1be199f31b18399fb4d563d744ca117f03f4b3ca4f094b5a3eb8809947632ab7",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 42,
+      "sha": "60aa4e356497a2320838c7a8aae91aa051ab362e053403de10b1bcce47bf9b20",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSLA-10-K-2023-01-31.htm",
+   "count_main": 97,
+   "count_candidate": 97,
+   "first": [
+    [
+     {
+      "ordinal": 35,
+      "sha": "8ed15489c5eee945065a7d5656f8c5ec4aa096cf7346855d0a6724c572f7bb2b",
+      "status": "needs_review",
+      "export": true,
+      "headers": 9,
+      "rows": 12
+     },
+     {
+      "ordinal": 35,
+      "sha": "de16c051088654a864844954e9fc6082d3fd62259214f799cfb5f1e8e65456c9",
+      "status": "needs_review",
+      "export": true,
+      "headers": 9,
+      "rows": 12
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2022-04-14.htm",
+   "count_main": 160,
+   "count_candidate": 160,
+   "first": [
+    [
+     {
+      "ordinal": 23,
+      "sha": "b047df6141252020ce0babd5318b825f8085a89e3d9f5705d818e47fd44dbd1d",
+      "status": "needs_review",
+      "export": true,
+      "headers": 6,
+      "rows": 20
+     },
+     {
+      "ordinal": 23,
+      "sha": "a31dabd6787998a7a701bc2d329704c4e324edce54eb7016c82c2d474ff29fe0",
+      "status": "needs_review",
+      "export": true,
+      "headers": 6,
+      "rows": 20
+     }
+    ],
+    [
+     {
+      "ordinal": 143,
+      "sha": "52870033ffca39685917f317fd4c8eb162de36f6d9aec4a7a17a88e8d14df374",
+      "status": "needs_review",
+      "export": true,
+      "headers": 11,
+      "rows": 29
+     },
+     {
+      "ordinal": 143,
+      "sha": "0fc936d52315ba5ff3fee3a728b3d0b0a79e84b9d874e7f9af78230906994692",
+      "status": "needs_review",
+      "export": true,
+      "headers": 11,
+      "rows": 29
+     }
+    ],
+    [
+     {
+      "ordinal": 144,
+      "sha": "8e9cef317935ff35beecbd45261d540e2d581445a108ed712c9cd027cfebe1e6",
+      "status": "needs_review",
+      "export": true,
+      "headers": 6,
+      "rows": 10
+     },
+     {
+      "ordinal": 144,
+      "sha": "332b2f8809e32f2b1e32e84771a2f44040b80ca45c0ffc73d8fe5095ab568657",
+      "status": "needs_review",
+      "export": true,
+      "headers": 6,
+      "rows": 10
+     }
+    ],
+    [
+     {
+      "ordinal": 147,
+      "sha": "585bcec456b8fd4610922127ba3ea78a5acc3dbca12f83f64b28e3e0853680c2",
+      "status": "needs_review",
+      "export": true,
+      "headers": 8,
+      "rows": 32
+     },
+     {
+      "ordinal": 147,
+      "sha": "cf6af28c8cb162abfd433b91583f0db28852985ed8982344552cc73522861b7d",
+      "status": "needs_review",
+      "export": true,
+      "headers": 8,
+      "rows": 32
+     }
+    ],
+    [
+     {
+      "ordinal": 148,
+      "sha": "e9be2caa85511ece629bf541cc9647ed452be670637cf6aea1a7f6f1c082fc64",
+      "status": "exported",
+      "export": true,
+      "headers": 4,
+      "rows": 13
+     },
+     {
+      "ordinal": 148,
+      "sha": "4fbacfa0cbaf7b38194f4e25f04949d4f1e14b36b8eadbf10a6a7f6920a544a7",
+      "status": "exported",
+      "export": true,
+      "headers": 4,
+      "rows": 13
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2023-04-20.htm",
+   "count_main": 169,
+   "count_candidate": 169,
+   "first": [
+    [
+     {
+      "ordinal": 30,
+      "sha": "435a60045236296c26cd48ae38e38e25647d28c4e8b1b0891cd5efc075a86464",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 4
+     },
+     {
+      "ordinal": 30,
+      "sha": "0d8ea16cf6a859484724a9ba34b846a39f208b0dfd10b54417a61bf64a56fbf6",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 4
+     }
+    ],
+    [
+     {
+      "ordinal": 68,
+      "sha": "3d419d8bbf61b206a5f98da766e782ce9e0ac2b7a74b8cbb84aad20519163a3d",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 3
+     },
+     {
+      "ordinal": 68,
+      "sha": "cf73ba1bb399362fb09301f78d572cbdce11bfe007cb301c746c5136b956e181",
+      "status": "needs_review",
+      "export": true,
+      "headers": 7,
+      "rows": 3
+     }
+    ],
+    [
+     {
+      "ordinal": 69,
+      "sha": "ac43adf489f8012789d8bc92677590bea11c772df94e8e6f382a0136209d8638",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     },
+     {
+      "ordinal": 69,
+      "sha": "fe83126d1841d6a00cb0545b0af5ab1b82c196cf8f078b7b9448f57a020e59f4",
+      "status": "source_text_only",
+      "export": true,
+      "headers": 0,
+      "rows": 0
+     }
+    ],
+    [
+     {
+      "ordinal": 151,
+      "sha": "2aaef2237c23828de819b91cbb6fad812a4d545d404b49d7b86181cd5ca32653",
+      "status": "needs_review",
+      "export": true,
+      "headers": 9,
+      "rows": 28
+     },
+     {
+      "ordinal": 151,
+      "sha": "c287c92b0c862e6137a7fea55a0e157977bd65bd527cfb3004968f81d9e39608",
+      "status": "needs_review",
+      "export": true,
+      "headers": 9,
+      "rows": 28
+     }
+    ],
+    [
+     {
+      "ordinal": 152,
+      "sha": "a2b9fe54f72846af7b1aeb47915dfbf9345231423a084b9a40b0f4b981f8a1da",
+      "status": "needs_review",
+      "export": true,
+      "headers": 6,
+      "rows": 10
+     },
+     {
+      "ordinal": 152,
+      "sha": "daba57e8e58d406807b1a4b40177cc1baa57b1ed742f0eeedb79f212a5be06f9",
+      "status": "needs_review",
+      "export": true,
+      "headers": 6,
+      "rows": 10
+     }
+    ]
+   ]
+  },
+  {
+   "doc": "recent:TSM-20-F-2024-04-18.htm",
+   "count_main": 165,
+   "count_candidate": 165,
+   "first": [
+    [
+     {
+      "ordinal": 21,
+      "sha": "2d6f6ba25e2f70c9fb1a69ba4240623c42978dec5a1d7925176e6f9321300d85",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 13
+     },
+     {
+      "ordinal": 21,
+      "sha": "8e62c460b1f6ca677d77b48319443c1241e5dd56b916d4e3c1dd55687c8a7925",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 13
+     }
+    ],
+    [
+     {
+      "ordinal": 29,
+      "sha": "786813d8218435e33b3c30bfa20f2f4c7a910916132e2b8e11c7b01dc7b5a39b",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 5
+     },
+     {
+      "ordinal": 29,
+      "sha": "a1023a66e37daf404da4822caae68d34b9879ee8a55395211e5fe815143b1840",
+      "status": "needs_review",
+      "export": true,
+      "headers": 5,
+      "rows": 5
+     }
+    ],
+    [
+     {
+      "ordinal": 151,
+      "sha": "d748fcdd6f3a2be1b2144359fd1d0c6f68794ade66d2f24b5af86fbd7819f00e",
+      "status": "needs_review",
+      "export": true,
+      "headers": 12,
+      "rows": 21
+     },
+     {
+      "ordinal": 151,
+      "sha": "858a5c7d47fa18b2bd0f0c7fa188dcc3aa355f1c0bdf980201a9f8c57c71b4e1",
+      "status": "needs_review",
+      "export": true,
+      "headers": 12,
+      "rows": 21
+     }
+    ],
+    [
+     {
+      "ordinal": 152,
+      "sha": "03882cb7ee701a5ceda69d459686ad2545e7fbd03d727686566bc9a4dfc6c542",
+      "status": "needs_review",
+      "export": true,
+      "headers": 12,
+      "rows": 43
+     },
+     {
+      "ordinal": 152,
+      "sha": "5984241a96dbc8f0a94b3d0f986abbcc8f8a750f37b197641bd6f029df2abfa2",
+      "status": "needs_review",
+      "export": true,
+      "headers": 12,
+      "rows": 43
+     }
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "steps": 11576,
+ "ok": 11576,
+ "merges_summary": {
+  "corpus": "recent",
+  "sec2md_file": "C:\\Users\\einstein\\AppData\\Local\\Temp\\claude\\C--Users-einstein-kelab5am-sec2md\\95c5be76-e581-42c1-84d7-0b7535f959cc\\scratchpad\\corpus-task6\\main\\src\\sec2md\\__init__.py",
+  "hash_check_ok": true,
+  "replay": {
+   "ok": 7075
+  },
+  "same_header_value_steps": 11576,
+  "same_header_value_tables": 3501,
+  "counts": {
+   "mixed|nested_headers|interleaved": 10,
+   "mixed|nested_headers|stacked": 14,
+   "mixed|no_header|interleaved": 23,
+   "mixed|no_header|stacked": 15,
+   "mixed|same_header|interleaved": 1556,
+   "mixed|same_header|stacked": 214,
+   "mixed|sibling_headers|interleaved": 5,
+   "text+text|nested_headers|interleaved": 13,
+   "text+text|nested_headers|stacked": 6,
+   "text+text|no_header|interleaved": 2,
+   "text+text|same_header|interleaved": 2,
+   "text+text|same_header|stacked": 4,
+   "text+text|sibling_headers|interleaved": 4,
+   "text+text|sibling_headers|stacked": 1,
+   "value+value|nested_headers|interleaved": 2,
+   "value+value|no_header|interleaved": 70,
+   "value+value|no_header|stacked": 74,
+   "value+value|same_header|interleaved": 9905,
+   "value+value|same_header|stacked": 1671,
+   "value+value|sibling_headers|interleaved": 1
+  },
+  "seconds": 53.4
+ },
+ "text_status": {
+  "located": 103437,
+  "ambiguous": 10363,
+  "nil": 11264,
+  "not_a_value": 336
+ },
+ "contradictions": 0,
+ "header_exact": 11576,
+ "paths_differ": 0,
+ "steps_all_located": 6724,
+ "steps_text_confirmed": 11524,
+ "failures": []
+}
