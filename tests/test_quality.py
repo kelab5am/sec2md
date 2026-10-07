@@ -1,5 +1,6 @@
 """Tests for runtime parse diagnostics and quality enforcement."""
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,7 @@ from sec2md.quality import (
     trace_numeric_failures,
 )
 from sec2md.table_parser import TableParser
+from tests.test_parser import SPANNING_CAPTION_HEADER, SPANNING_CAPTION_TABLE, WRAPPED_TABLE_SHAPES
 
 
 def test_untraceable_normalized_number_is_reported():
@@ -732,22 +734,22 @@ NESTED_IN_HEADER_ROW = {
 
 @pytest.mark.parametrize("grouped", [False, True], ids=["alone", "with-prose"])
 @pytest.mark.parametrize("capture_tables, failures", [
-    pytest.param(False, ("header:2024",), id="normal"),
+    # Revision 18 (C1): the nested rows are no longer read again, so no second 2024 is written.
+    pytest.param(False, (), id="normal"),
     pytest.param(True, (), id="capture"),
 ])
 @pytest.mark.parametrize("layout", sorted(NESTED_IN_HEADER_ROW))
 def test_r6a_a_table_nested_in_a_header_row_credits_its_source_once(layout, capture_tables, failures, grouped):
-    # lxml keeps the nested table inside the outer <tr>, so its cells are read for the outer row
-    # and again for their own row: the normal render writes 2024 twice from one source 2024.
-    # The record reads each cell once, so the second copy is a header excess, and prose citing
-    # 2024 keeps its own source (it was blamed when the record counted both reads). Capture
-    # mode writes the text once and passes, as on main.
+    # lxml keeps the nested table inside the outer <tr>. Its cells are read once, in that row,
+    # so the normal render writes 2024 once from one source 2024 and strict passes, as on main.
+    # The record reads each cell once, and prose citing 2024 keeps its own source (it was
+    # blamed when the record counted the cells twice). Capture mode writes the text once.
     prose = "<p>Results for fiscal 2024 follow.</p>" if grouped else ""
     html = (f"<html><body>{prose}<table><tr><th>Item</th><th>Period</th>{NESTED_IN_HEADER_ROW[layout]}</tr>"
             "<tr><td>Revenue</td><td>100</td></tr></table></body></html>")
     parser, element, _ = _r6a_parse(html, capture_tables)
     if not capture_tables:
-        assert "| Item — Fiscal | Period — 2024 | Fiscal | 2024 |" in element.content.splitlines()
+        assert "| Item | Period | Fiscal | 2024 |" in element.content.splitlines()
     assert parser.trace_numeric_failures == tuple(f"{element.id}:{failure}" for failure in failures)
     assert parser.header_accounting_misses == ()
 
@@ -832,6 +834,118 @@ def test_r6a_ambiguous_association_keeps_the_ordinary_trace(rewritten_elements, 
     assert parser.header_accounting_misses == (f"{element.id}:ambiguous",) * 2
     assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary) * 2
     assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+
+
+# --- R6a, revision 18 (C2): tables rendered inside a list item or an inline wrapper ------------
+
+ASTRA_WRAPPED_RECORD = replace(ASTRA_RECORD, wrapped=True)
+
+
+def test_wrapped_record_is_located_with_a_prefix_and_a_suffix():
+    # The wrapper shares the header's line and the last row's; the span is the header line only.
+    content = f"Intro.\n\n1. Results: {ASTRA_SEGMENT} more**"
+    start = content.index(ASTRA_HEADER)
+    assert locate_header_lines(content, [ASTRA_WRAPPED_RECORD]) == (
+        HeaderLineLocation((start, start + len(ASTRA_HEADER))),
+    )
+    # A record that is not wrapped keeps whole-line semantics on the same content.
+    assert locate_header_lines(content, [ASTRA_RECORD]) == (HeaderLineLocation(None, "missing"),)
+
+
+def test_wrapped_record_needs_its_whole_segment_with_the_header_line_first():
+    content = f"**{ASTRA_SEGMENT}**"
+    missing = (HeaderLineLocation(None, "missing"),)
+    # An interior line that differs: the segment does not occur.
+    assert locate_header_lines(content.replace("| --- |", "|---|", 1), [ASTRA_WRAPPED_RECORD]) == missing
+    # The segment's first line is not the recorded header line.
+    assert locate_header_lines(content, [replace(ASTRA_WRAPPED_RECORD, header_line="| Metric |")]) == missing
+    # A segment without a second line has no line the wrapper does not share.
+    single = replace(ASTRA_WRAPPED_RECORD, segment=ASTRA_HEADER)
+    assert locate_header_lines(content, [single]) == missing
+    assert locate_header_lines(content, [replace(ASTRA_WRAPPED_RECORD, segment="")]) == missing
+
+
+def test_wrapped_segment_occurring_twice_is_ambiguous():
+    ambiguous = HeaderLineLocation(None, "ambiguous")
+    assert locate_header_lines(f"**{ASTRA_SEGMENT} {ASTRA_SEGMENT}**", [ASTRA_WRAPPED_RECORD]) == (ambiguous,)
+    # A standalone twin occupies whole lines once, so it is located; the wrapped record sees
+    # two occurrences of its segment.
+    content = f"**{ASTRA_SEGMENT}**\n\n{ASTRA_SEGMENT}"
+    start = content.rindex(ASTRA_SEGMENT)
+    assert locate_header_lines(content, [ASTRA_WRAPPED_RECORD, ASTRA_RECORD]) == (
+        ambiguous,
+        HeaderLineLocation((start, start + len(ASTRA_HEADER))),
+    )
+    # Two records claiming one header line are both ambiguous.
+    assert locate_header_lines(f"**{ASTRA_SEGMENT}**", [ASTRA_WRAPPED_RECORD] * 2) == (ambiguous, ambiguous)
+
+
+def test_wrapped_prefix_is_traced_as_prose_and_the_ordered_list_marker_is_still_stripped():
+    record = replace(LABELS_RECORD, wrapped=True)
+    ol = BeautifulSoup(f"<ol><li>Results: {LABELS_TABLE}</li></ol>", "lxml").ol
+    content = f"1. Results: {LABELS_SEGMENT}"
+    assert trace_numeric_failures(_element(content), [ol]) == ("e1:2025",)
+    # The "1." marker left before the removed header line is still stripped; outside an ordered
+    # list it would be an untraceable 1.
+    assert trace_numeric_failures(_element(content), [ol], [record]) == ()
+    ul = BeautifulSoup(f"<ul><li>Results: {LABELS_TABLE}</li></ul>", "lxml").ul
+    assert trace_numeric_failures(_element(content), [ul], [record]) == ("e1:1",)
+    # A prefix number matching only header-zone source tokens has no source left.
+    content = f"1. Results for 2025: {LABELS_SEGMENT}"
+    assert trace_numeric_failures(_element(content), [ol], [record]) == ("e1:2025",)
+
+
+WRAPPED_MODES = [
+    pytest.param(shape, capture, id=f"{shape}-{'capture' if capture else 'normal'}")
+    for shape in sorted(WRAPPED_TABLE_SHAPES) for capture in (False, True)
+]
+
+
+def _wrapped_parse(table: str, shape: str, capture_tables: bool, *, prose: bool = False):
+    """Parse the table inside one wrapper shape after an intro paragraph (see _r6a_parse).
+
+    With prose, the wrapper holds "Results: " before the table, on the header's line.
+    """
+    html_format = WRAPPED_TABLE_SHAPES[shape][0]
+    if prose and "Results: " not in html_format:
+        table = f"Results: {table}"
+    return _r6a_parse(f"<html><body><p>Intro.</p>{html_format.format(table)}</body></html>", capture_tables)
+
+
+@pytest.mark.parametrize("shape, capture_tables", WRAPPED_MODES)
+def test_c2_invented_header_number_in_a_wrapped_table_fails_as_a_header_excess(mutated_render, shape,
+                                                                               capture_tables):
+    mutated_render(lambda headers, data: ([*headers[:-1], f"{headers[-1]} 2023"], data))
+    parser, element, _ = _wrapped_parse(SPANNING_CAPTION_TABLE, shape, capture_tables)
+    assert SPANNING_CAPTION_HEADER.replace("2024 |", "2024 2023 |") in element.content
+    assert [record.wrapped for record in parser.element_header_records(element.id)] == [True]
+    assert parser.trace_numeric_failures == (f"{element.id}:header:2023",)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.mark.parametrize("shape, capture_tables", WRAPPED_MODES)
+def test_c2_astras_body_mutation_in_a_wrapped_table_fails(mutated_render, shape, capture_tables):
+    mutated_render(lambda headers, data: (headers, [[data[0][0], f"{data[0][1]} 2025", *data[0][2:]]]))
+    parser, element, _ = _wrapped_parse(R6A_TABLES["equal"].format(top="2025"), shape, capture_tables)
+    assert f"{ASTRA_HEADER}\n| --- | --- | --- |\n| Revenue | 100 2025 | 200 |" in element.content
+    assert [record.wrapped for record in parser.element_header_records(element.id)] == [True]
+    assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+    assert parser.header_accounting_misses == ()
+
+
+@pytest.mark.parametrize("number", ["2019", "2025"], ids=["invents-a-number", "repeats-a-header-only-number"])
+@pytest.mark.parametrize("shape, capture_tables", WRAPPED_MODES)
+def test_c2_wrapper_prose_number_fails(monkeypatch, shape, capture_tables, number):
+    # The prose shares the header's line outside the located span, so it is traced as prose,
+    # against the source without the header zone's tokens: the source holds 2025 only there.
+    original = Parser._process_text_node
+    monkeypatch.setattr(Parser, "_process_text_node",
+                        lambda self, node: original(self, node).replace("Results:", f"Results for {number}:"))
+    parser, element, _ = _wrapped_parse(SPANNING_CAPTION_TABLE, shape, capture_tables, prose=True)
+    assert f"Results for {number}: {SPANNING_CAPTION_HEADER}" in element.content
+    assert [record.wrapped for record in parser.element_header_records(element.id)] == [True]
+    assert parser.trace_numeric_failures == (f"{element.id}:{number}",)
+    assert parser.header_accounting_misses == ()
 
 
 # --- strict's numeric trace reads emphasised numbers like the source (2026-10-07) -----------

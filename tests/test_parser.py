@@ -1,6 +1,7 @@
 """Tests for the HTML parser (parser.py)."""
 
 import re
+from html import escape
 
 import pytest
 from bs4 import BeautifulSoup
@@ -15,7 +16,13 @@ from sec2md.element_builder import (
 from sec2md.core import convert_to_markdown
 from sec2md.models import Element, Page
 from sec2md.parser import Parser
-from sec2md.quality import ElementHeaderRecord, ParseQualityError, enforce_quality
+from sec2md.quality import (
+    ElementHeaderRecord,
+    HeaderLineLocation,
+    enforce_quality,
+    locate_header_lines,
+    trace_numeric_failures,
+)
 
 
 class TestParserBasics:
@@ -484,25 +491,43 @@ class TestHeaderRecordBinding:
         pytest.param(LABELS_TABLE, ("2025",), id="ordinary-excess"),
     ])
     @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
-    def test_table_rendered_inside_other_content_is_a_missing_association(self, capture_tables, table,
-                                                                         ordinary, wrapper):
-        # The table's Markdown reaches the element inside a list item or bold run, not as a
-        # segment of its own, so its header line cannot be located.
+    def test_table_rendered_inside_other_content_binds_a_wrapped_record(self, capture_tables, table,
+                                                                        ordinary, wrapper):
+        # Revision 18 (C2): the table's Markdown reaches the element inside a list item or bold
+        # run, not as a segment of its own. Its record is bound from the wrapper path, marked
+        # wrapped, and returned for the wrapper's element, so its header line is accounted for.
         parser = Parser(f"<html><body>{wrapper.format(table)}</body></html>", capture_tables=capture_tables)
         pages = parser.get_pages()
         (element,) = pages[0].elements
+        node = parser.soup.find("table")
         assert "| --- | --- | --- |" in element.content
-        assert parser._header_records == {}
-        assert parser.header_accounting_misses == (f"{element.id}:missing",)
-        assert parser.trace_numeric_failures == tuple(f"{element.id}:{token}" for token in ordinary)
+        (record,) = parser.element_header_records(element.id)
+        assert parser._header_records == {id(node): record}
+        assert record.wrapped
+        assert record.segment in element.content
+        assert parser._render_header_records == {}
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+        # Without the record, the ordinary trace is what strict applied before revision 18.
+        nodes = parser.block_nodes_map[element.id]
+        assert trace_numeric_failures(element, nodes) == tuple(f"{element.id}:{token}" for token in ordinary)
 
     def test_repeated_parse_resets_header_accounting(self):
+        # The wrapped table and its standalone twin share one element: the standalone one is
+        # located on its own lines, and the wrapped one's segment occurs twice (ambiguous).
         parser = Parser(f"<html><body><ul><li>{LABELS_TABLE}</li></ul>{LABELS_TABLE}</body></html>")
         first = (parser.get_pages(), parser.header_accounting_misses, parser.trace_numeric_failures)
-        assert len(parser._header_records) == 1 and len(first[1]) == 1
+        (element,) = first[0][0].elements
+        wrapper = parser.soup.find("ul")
+        wrapped, standalone = parser.soup.find_all("table")
+        assert parser._header_records.keys() == {id(wrapped), id(standalone)}
+        assert parser._wrapped_tables == {id(wrapper): [wrapped]}
+        assert first[1:] == ((f"{element.id}:ambiguous",), (f"{element.id}:2025",))
         second = (parser.get_pages(), parser.header_accounting_misses, parser.trace_numeric_failures)
         assert second[1:] == first[1:]
-        assert len(parser._header_records) == 1
+        assert parser._header_records.keys() == {id(wrapped), id(standalone)}
+        assert parser._wrapped_tables == {id(wrapper): [wrapped]}
+        assert len(parser._wrapped_renders) == 1
 
 
 # The final review's case: a period caption spanning two year columns. R6 writes it in both
@@ -513,50 +538,145 @@ SPANNING_CAPTION_TABLE = (
     "<tr><td>Revenue</td><td>100</td><td>90</td></tr></table>"
 )
 SPANNING_CAPTION_HEADER = "|  | Year Ended December 31, — 2025 | Year Ended December 31, — 2024 |"
+SPANNING_CAPTION_SEGMENT = f"{SPANNING_CAPTION_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 90 |"
+SPANNING_CAPTION_RECORD = ElementHeaderRecord(
+    segment=SPANNING_CAPTION_SEGMENT,
+    header_line=SPANNING_CAPTION_HEADER,
+    header_source=(("2024", 1), ("2025", 1), ("31", 1)),
+    header_capacity=(("2024", 1), ("2025", 1), ("31", 2)),
+    header_cells=(("Year Ended December 31,", 2), ("2025", 1), ("2024", 1)),
+    wrapped=True,
+)
+
+# Revision 18 (C2): each wrapper that renders a table inside other content, as (the HTML around
+# the table, the element content before and after the table's segment). The content is pinned
+# byte-for-byte as before revision 18: the wrapper shares the header's line and the last row's.
+WRAPPED_TABLE_SHAPES = {
+    "ul-li": ("<ul><li>{}</li></ul>", "- ", ""),
+    "ol-li-with-prose": ("<ol><li>Results: {}</li></ol>", "1. Results: ", ""),
+    "b": ("<b>{}</b>", "**", "**"),
+    "strong": ("<strong>{}</strong>", "**", "**"),
+    "i": ("<i>{}</i>", "*", "*"),
+    "em": ("<em>{}</em>", "*", "*"),
+    "bold-styled-span": ('<span style="font-weight:700">{}</span>', "**", "**"),
+    "italic-styled-span": ('<span style="font-style:italic">{}</span>', "*", "*"),
+    "b-div": ("<b><div>{}</div></b>", "**", "**"),
+    "b-i": ("<b><i>{}</i></b>", "***", "***"),
+    "merged-after-a-bold-run": ("<p><b>Intro</b><b>{}</b></p>", "**Intro ", "**"),
+    "merged-before-a-bold-run": ("<p><b>{}</b><b>more</b></p>", "**", " more**"),
+    "b-ul-li": ("<b><ul><li>{}</li></ul></b>", "**- ", "**"),
+}
+CAPTURE_MODES = pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
 
 
 def _intro_and(fragment):
     return f"<html><body><p>Intro.</p>{fragment}</body></html>"
 
 
-class TestWrappedTableHeaderLimitation:
-    """R6a cannot locate the header line of a table rendered inside other content."""
+def _only_element(parser):
+    """Parse with elements; return the single element and its mapped nodes."""
+    pages = parser.get_pages()
+    (element,) = [element for page in pages for element in page.elements or ()]
+    return element, parser.block_nodes_map[element.id]
 
-    @pytest.mark.parametrize("wrapper", [
-        pytest.param("<ol><li>Results: {}</li></ol>", id="list-item"),
-        pytest.param("<b>{}</b>", id="bold"),
-        pytest.param("<em>{}</em>", id="italic"),
-        pytest.param('<span style="font-weight:700">{}</span>', id="bold-styled-span"),
-    ])
-    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
-    def test_wrapped_spanning_caption_fails_strict_known_limitation(self, capture_tables, wrapper):
-        """Known limitation (spec revision 17, accepted 2026-10-06); binding records for wrapped
-        tables is a follow-up task.
 
-        A table rendered inside a list item or a bold or italic run reaches the element inside
-        that content, not as a segment of its own, so R6a records a miss and strict applies the
-        ordinary trace. R6 repeats the spanning caption's "31" in both year columns against one
-        source occurrence, so default strict raises where main passes (main wrote the caption
-        once). The same table in a <div> passes (next test).
+def _ordinary(element, tokens):
+    return tuple(f"{element.id}:{token}" for token in tokens)
+
+
+class TestWrappedTableHeaderRecords:
+    """R6a binds and locates the header record of a table rendered inside other content (rev. 18)."""
+
+    @pytest.mark.parametrize("shape", sorted(WRAPPED_TABLE_SHAPES))
+    @CAPTURE_MODES
+    def test_wrapped_spanning_caption_binds_its_record_and_passes_strict(self, capture_tables, shape):
+        """Revision 18 withdraws revision 17's limitation for wrapped tables.
+
+        R6 repeats the spanning caption's "31" in both year columns against one source
+        occurrence. The record, bound from the wrapper path and marked wrapped, locates the
+        header line inside the wrapper's content, so the repetition is header capacity, not an
+        untraceable number, and strict passes as it does on main.
         """
-        html = _intro_and(wrapper.format(SPANNING_CAPTION_TABLE))
+        html_format, prefix, suffix = WRAPPED_TABLE_SHAPES[shape]
+        html = _intro_and(html_format.format(SPANNING_CAPTION_TABLE))
         parser = Parser(html, capture_tables=capture_tables)
+        element, _ = _only_element(parser)
+        assert element.content == f"Intro.\n\n{prefix}{SPANNING_CAPTION_SEGMENT}{suffix}"
+        table = parser.soup.find("table")
+        assert parser._header_records == {id(table): SPANNING_CAPTION_RECORD}
+        assert parser.element_header_records(element.id) == (SPANNING_CAPTION_RECORD,)
+        # The located span is the header line only; the wrapper's prefix stays in the pool.
+        start = len(f"Intro.\n\n{prefix}")
+        assert locate_header_lines(element.content, [SPANNING_CAPTION_RECORD]) == (
+            HeaderLineLocation((start, start + len(SPANNING_CAPTION_HEADER))),
+        )
+        assert parser._render_header_records == {}
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+        assert parser.diagnostics.warnings == ()
+        enforce_quality(parser.diagnostics, "strict")
+        if not capture_tables:
+            markdown = convert_to_markdown(html, quality_policy="strict")
+            assert f"{prefix}{SPANNING_CAPTION_HEADER}" in markdown
+
+    @pytest.mark.parametrize("shape", ["b", "ul-li"])
+    @CAPTURE_MODES
+    def test_wrapped_table_with_links_binds_the_anchor_stripped_record(self, capture_tables, shape):
+        html_format, prefix, suffix = WRAPPED_TABLE_SHAPES[shape]
+        parser = Parser(_intro_and(html_format.format(LINKED_LABELS_TABLE)), capture_tables=capture_tables)
         pages = parser.get_pages()
         (element,) = pages[0].elements
-        message = f"untraceable normalized number: {element.id}:31"
-        with pytest.raises(ParseQualityError) as caught:
-            enforce_quality(parser.diagnostics, "strict")
-        assert str(caught.value) == message
-        if not capture_tables:
-            with pytest.raises(ParseQualityError) as caught:
-                convert_to_markdown(html, quality_policy="strict")
-            assert str(caught.value) == message
-        assert SPANNING_CAPTION_HEADER in element.content
-        assert parser._header_records == {}
-        assert parser.header_accounting_misses == (f"{element.id}:missing",)
-        assert parser.trace_numeric_failures == (f"{element.id}:31",)
+        # The page keeps the links; the element holds their labels, as the anchor-stripped
+        # re-render writes them. Its record is bound; the normal render's is discarded.
+        labels_segment = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |"
+        assert pages[0].content == f"Intro.\n\n{prefix}{labels_segment}{suffix}".replace(
+            "| 2025 — ", "| [2025](#fy2025) — "
+        )
+        assert element.content == f"Intro.\n\n{prefix}{labels_segment}{suffix}"
+        table = parser.soup.find("table")
+        assert parser._header_records == {id(table): ElementHeaderRecord(
+            segment=labels_segment,
+            header_line=LABELS_HEADER,
+            header_source=(("2025", 1),),
+            header_capacity=(("2025", 2),),
+            header_cells=LABELS_HEADER_CELLS,
+            wrapped=True,
+        )}
+        assert parser._render_header_records == {}
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
 
-    @pytest.mark.parametrize("capture_tables", [False, True], ids=["normal", "capture"])
+    @pytest.mark.parametrize("shape", ["ul-li", "b"])
+    @CAPTURE_MODES
+    def test_wrapped_table_holding_a_table_outside_every_cell_binds_and_writes_it_once(self, capture_tables,
+                                                                                       shape):
+        """C1 and C2 together (revision 18): a table placed directly in a body row of a
+        wrapped table is read once, in that row, and the wrapped table's record is bound.
+
+        main reads 987 twice and cannot bind the record, so strict reports 31 and 987.
+        """
+        table = SPANNING_CAPTION_TABLE.replace(
+            "<td>90</td></tr></table>", "<td>90</td><table><tr><td>987</td></tr></table></tr></table>")
+        html_format, prefix, suffix = WRAPPED_TABLE_SHAPES[shape]
+        parser = Parser(_intro_and(html_format.format(table)), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        header = SPANNING_CAPTION_HEADER + "  |"
+        segment = f"{header}\n| --- | --- | --- | --- |\n| Revenue | 100 | 90 | 987 |"
+        assert element.content == f"Intro.\n\n{prefix}{segment}{suffix}"
+        assert element.content.count("987") == 1
+        outer = parser.soup.find("table")
+        (record,) = parser.element_header_records(element.id)
+        assert parser._header_records == {id(outer): record}
+        assert record.wrapped and record.segment == segment and record.header_line == header
+        assert record.header_capacity == (("2024", 1), ("2025", 1), ("31", 2))
+        assert locate_header_lines(element.content, [record])[0].span is not None
+        assert parser.header_accounting_misses == ()
+        assert parser.trace_numeric_failures == ()
+        # Without the record, the ordinary trace reports the caption's repeated 31.
+        assert trace_numeric_failures(element, nodes) == (f"{element.id}:31",)
+        enforce_quality(parser.diagnostics, "strict")
+
+    @CAPTURE_MODES
     def test_same_table_in_a_div_binds_its_record_and_passes_strict(self, capture_tables):
         html = _intro_and(f"<div>{SPANNING_CAPTION_TABLE}</div>")
         parser = Parser(html, capture_tables=capture_tables)
@@ -565,12 +685,256 @@ class TestWrappedTableHeaderLimitation:
         (record,) = parser._header_records.values()
         assert record.header_line == SPANNING_CAPTION_HEADER
         assert record.header_capacity == (("2024", 1), ("2025", 1), ("31", 2))
+        assert not record.wrapped
         assert parser._header_records.keys() == {id(table)}
+        assert parser._wrapped_tables == {}
         assert parser.header_accounting_misses == ()
         assert parser.trace_numeric_failures == ()
         assert parser.diagnostics.warnings == ()
         if not capture_tables:
             assert SPANNING_CAPTION_HEADER in convert_to_markdown(html, quality_policy="strict")
+
+
+# The faithful repeated 2025 balances without accounting; repetition over labels does not.
+WRAPPED_ASSOCIATION_SOURCES = pytest.mark.parametrize("table, ordinary", [
+    pytest.param(EQUAL_TABLE, (), id="no-excess"),
+    pytest.param(LABELS_TABLE, ("2025",), id="ordinary-excess"),
+])
+# A literal "[note" in a cell: link reduction over the wrapper's text can run from it into
+# text after the table.
+NOTE_TABLE = LABELS_TABLE.replace("<td>Revenue</td>", "<td>Revenue [note</td>")
+
+
+class TestWrappedTableAssociationMisses:
+    """A wrapped record that cannot be associated with its own copy grants no exemption (rev. 18).
+
+    Each miss is recorded, and strict applies exactly the ordinary trace.
+    """
+
+    @pytest.mark.parametrize("html_format", [
+        pytest.param("<ul><li>{0}</li><li>{0}</li></ul>", id="one-list"),
+        pytest.param("<b>{0}{0}</b>", id="one-bold-run"),
+    ])
+    @WRAPPED_ASSOCIATION_SOURCES
+    @CAPTURE_MODES
+    def test_identical_tables_in_one_wrapper_are_ambiguous(self, capture_tables, table, ordinary, html_format):
+        parser = Parser(f"<html><body>{html_format.format(table)}</body></html>", capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        records = parser.element_header_records(element.id)
+        assert len(records) == 2 and all(record.wrapped for record in records)
+        assert parser.header_accounting_misses == (f"{element.id}:ambiguous",) * 2
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == _ordinary(element, ordinary) * 2
+
+    @WRAPPED_ASSOCIATION_SOURCES
+    @CAPTURE_MODES
+    def test_wrapped_table_with_a_standalone_twin_is_ambiguous(self, capture_tables, table, ordinary):
+        parser = Parser(f"<html><body><b>{table}</b>{table}</body></html>", capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        wrapped, standalone = parser.soup.find_all("table")
+        records = parser.element_header_records(element.id)
+        assert records == (parser._header_records[id(wrapped)], parser._header_records[id(standalone)])
+        assert [record.wrapped for record in records] == [True, False]
+        # The standalone copy occupies whole lines once; the wrapped segment occurs twice.
+        locations = locate_header_lines(element.content, records)
+        assert [location.miss for location in locations] == ["ambiguous", None]
+        assert parser.header_accounting_misses == (f"{element.id}:ambiguous",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes, records[1:])
+        assert parser.trace_numeric_failures == _ordinary(element, ordinary)
+
+    @pytest.mark.parametrize("html_format, table, damaged", [
+        pytest.param("<ul><li>See [note {}</li></ul>", LINKED_LABELS_TABLE,
+                     "- See note | Metric | [2025 — Actual |", id="into-the-table-in-a-list-item"),
+        pytest.param("<b>See [note {}</b>", LINKED_LABELS_TABLE,
+                     "**See note | Metric | [2025 — Actual |", id="into-the-table-in-a-bold-run"),
+        pytest.param("<ul><li>{} ](#n) follows</li></ul>", NOTE_TABLE,
+                     "| Revenue note | 100 | 200 |  follows", id="out-of-the-table"),
+    ])
+    @CAPTURE_MODES
+    def test_link_reduction_across_the_tables_boundary_is_a_miss(self, capture_tables, html_format, table,
+                                                                 damaged):
+        parser = Parser(_intro_and(html_format.format(table)), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        assert damaged in element.content
+        node = parser.soup.find("table")
+        assert parser._header_records == {}
+        assert parser._render_header_records[id(node)][1].header_line is not None
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+
+    @pytest.mark.parametrize("shape", ["b", "ul-li"])
+    @CAPTURE_MODES
+    def test_padded_link_label_is_a_miss(self, capture_tables, shape):
+        # The element reduces "[ 2025 ](#fy2025)" to " 2025 "; the anchor-stripped re-render
+        # writes "2025", so the wrapper's copy is not the record's segment.
+        table = LINKED_LABELS_TABLE.replace(">2025</a>", "> 2025 </a>")
+        parser = Parser(_intro_and(WRAPPED_TABLE_SHAPES[shape][0].format(table)), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        assert "| Metric |  2025  — Actual |  2025  — Budget |" in element.content
+        assert parser._header_records == {}
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+
+    @CAPTURE_MODES
+    def test_padded_link_label_is_never_located_on_a_twin(self, capture_tables):
+        # A standalone twin whose literal "[Metric](z)" header reduces to exactly the padded
+        # table's anchor-stripped segment (so the twin's own record is missing). The wrapped
+        # copy reads " 2025 ", not the record's segment, so the record is a miss; it is never
+        # located on the twin.
+        table = LINKED_LABELS_TABLE.replace(">2025</a>", "> 2025 </a>")
+        twin = LABELS_TABLE.replace("<th>Metric</th>", "<th>[Metric](z)</th>")
+        parser = Parser(_intro_and(f"<b>{table}</b>{twin}"), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        wrapped, standalone = parser.soup.find_all("table")
+        labels_segment = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |"
+        assert element.content.count(labels_segment) == 1
+        assert id(wrapped) not in parser._header_records
+        assert parser._header_records[id(standalone)].segment == labels_segment
+        records = parser.element_header_records(element.id)
+        assert all(location.span is None for location in locate_header_lines(element.content, records))
+        assert parser.header_accounting_misses == (f"{element.id}:missing",) * 2
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",) * 2
+
+    @pytest.mark.parametrize("literal", ["[2025](x)", "[2025](#fy2025)"], ids=["other-link", "same-link"])
+    @CAPTURE_MODES
+    def test_codex_counterexample_a_damaged_copy_is_never_located_on_a_twin(self, capture_tables, literal):
+        """Codex's counterexample (spec revision 18).
+
+        Two otherwise identical tables in one list item after "See [note": A's 2025 is an HTML
+        link, B's is the literal text "[2025](x)". The wrapper's link reduction runs from
+        "[note" into A's header, damaging A's copy, and reduces B's literal text so that B
+        reads exactly as A's anchor-stripped segment. A must be a miss, never located on B.
+        """
+        twin = LINKED_LABELS_TABLE.replace('<a href="#fy2025">2025</a>', literal)
+        parser = Parser(_intro_and(f"<ul><li>See [note {LINKED_LABELS_TABLE}{twin}</li></ul>"),
+                        capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        first, second = parser.soup.find_all("table")
+        labels_segment = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |"
+        assert "- See note | Metric | [2025 — Actual |" in element.content
+        assert element.content.count(labels_segment) == 1
+        assert id(first) not in parser._header_records
+        records = parser.element_header_records(element.id)
+        assert all(location.span is None for location in locate_header_lines(element.content, records))
+        assert parser.header_accounting_misses == (f"{element.id}:missing",) * 2
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",) * 2
+
+    @CAPTURE_MODES
+    def test_a_later_merge_that_damages_the_own_copy_is_a_miss(self, capture_tables):
+        """The own copy is checked in the wrapper's final segment, not as first appended.
+
+        A later bold run merges into the wrapper's segment, and link reduction over the merged
+        text runs from A's literal "[note" out of the table. The element still holds A's
+        segment once, as a standalone twin whose literal "[Metric](z)" header reduces to it
+        (so the twin's own record is missing). A must be a miss, never located on the twin.
+        """
+        twin = NOTE_TABLE.replace("<th>Metric</th>", "<th>[Metric](z)</th>")
+        parser = Parser(_intro_and(f"<p><b>{NOTE_TABLE}</b><b>](y) more</b></p>{twin}"),
+                        capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        wrapped, standalone = parser.soup.find_all("table")
+        segment = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue [note | 100 | 200 |"
+        assert "| Revenue note | 100 | 200 |  more**" in element.content
+        assert element.content.count(segment) == 1
+        assert id(wrapped) not in parser._header_records
+        assert parser._header_records[id(standalone)].segment == segment
+        records = parser.element_header_records(element.id)
+        assert all(location.span is None for location in locate_header_lines(element.content, records))
+        assert parser.header_accounting_misses == (f"{element.id}:missing",) * 2
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",) * 2
+
+    @pytest.mark.parametrize("html_format, misses", [
+        pytest.param("<ul><li>{0} See [note {0}</li></ul>", 2, id="an-identical-table-before-it"),
+        pytest.param('<b><img alt="{1}" src="x.png"> See [note {0}</b>', 1, id="its-render-in-an-image-alt"),
+    ])
+    @CAPTURE_MODES
+    def test_every_occurrence_of_the_render_is_checked_not_only_the_first(self, capture_tables, html_format,
+                                                                          misses):
+        """The table's own copy can be the later occurrence of its render in the wrapper's text.
+
+        The first occurrence is intact: an identical table, or an image alt that holds the
+        render verbatim. The own copy comes after "See [note", whose link reduction runs into
+        its header. A check of the first occurrence alone would bind the record on the intact
+        text; every occurrence is checked, so each table is a miss with the ordinary trace.
+        """
+        normal_render = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 |".replace(
+            "| 2025 — ", "| [2025](#fy2025) — ")
+        alt = escape(normal_render, quote=True).replace("\n", "&#10;")
+        parser = Parser(_intro_and(html_format.format(LINKED_LABELS_TABLE, alt)), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        assert "See note | Metric | [2025 — Actual |" in element.content
+        assert parser._header_records == {}
+        assert parser._wrapped_tables == {}
+        assert len(parser._render_header_records) == misses
+        assert parser.header_accounting_misses == (f"{element.id}:missing",) * misses
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",) * misses
+
+    @CAPTURE_MODES
+    def test_a_link_reduction_out_of_the_table_is_a_miss_even_when_it_rebuilds_the_copy(self, capture_tables):
+        """The boundary check is not subsumed by the check of the reduced copy.
+
+        The last cell ends in "[[](ab" and the wrapper's text after the table is "c)[](ab |".
+        Link reduction over the wrapper's text runs from the cell's first "[" out of the table
+        to "c)", and the text after it rebuilds the characters it removed: the element holds
+        the record's segment exactly where the own copy's image would be. Only the check that
+        no reduction crosses the table's boundary rejects it, so the record is a miss.
+        """
+        table = LABELS_TABLE.replace("<td>200</td>", "<td>200 [[](ab</td>")
+        parser = Parser(_intro_and(f"<b>{table}c)[](ab |</b>"), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        segment = f"{LABELS_HEADER}\n| --- | --- | --- |\n| Revenue | 100 | 200 [[](ab |"
+        assert element.content == f"Intro.\n\n**{segment}**"
+        node = parser.soup.find("table")
+        assert parser._header_records == {}
+        assert parser._render_header_records[id(node)][1].header_line == LABELS_HEADER
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes)
+        assert parser.trace_numeric_failures == (f"{element.id}:2025",)
+
+    @pytest.mark.parametrize("fragment, header_line, held", [
+        # The review's input: the later table's segment replaces the wrapper's, so the wrapped
+        # table's text is no longer in the element (a separate, older defect).
+        pytest.param(f"<b>{SPANNING_CAPTION_TABLE}</b>"
+                     '<table style="display:inline-block"><tr><td>**<a href="#n">note</a></td></tr></table>',
+                     SPANNING_CAPTION_HEADER, None, id="the-wrapped-text-is-replaced"),
+        # The later table's own text holds the wrapped record's segment at the offset of the
+        # wrapper's copy ("**Note " and "| **ab\" are both 7 characters), so the check of the
+        # copy's image alone would accept it there.
+        pytest.param('<b>Note <table><tr><th>Metric</th><th colspan="2">2025</th></tr>'
+                     '<tr style="display:none"><td>hidden</td></tr></table></b>'
+                     '<table style="display:inline-block"><tr><th>**ab| Metric</th>'
+                     '<th><a href="#n">2025</a></th></tr></table>',
+                     "| Metric | 2025 |", "| **ab\\| Metric | 2025 |\n| --- | --- |",
+                     id="the-replacement-holds-the-segment"),
+    ])
+    @CAPTURE_MODES
+    def test_a_final_segment_that_is_not_the_wrappers_reduced_text_is_a_miss(self, capture_tables, fragment,
+                                                                            header_line, held):
+        """A later inline-block table with a link merges into the wrapper's segment.
+
+        The merged segment's content is then that table's anchor-stripped re-render, not the
+        link reduction of the wrapper's text, so the wrapper's final segment no longer shows
+        where the wrapped table's copy is. The wrapped record is a miss with the ordinary trace,
+        never located on the other table's text.
+        """
+        parser = Parser(_intro_and(f"<div>{fragment}</div>"), capture_tables=capture_tables)
+        element, nodes = _only_element(parser)
+        if held is not None:
+            assert held in element.content
+        wrapped = parser.soup.find("b").find("table")
+        assert id(wrapped) not in parser._header_records
+        assert parser._render_header_records[id(wrapped)][1].header_line == header_line
+        assert parser._wrapped_tables == {}
+        records = parser.element_header_records(element.id)
+        assert not any(record.wrapped for record in records)
+        assert parser.header_accounting_misses == (f"{element.id}:missing",)
+        assert parser.trace_numeric_failures == trace_numeric_failures(element, nodes, records)
 
 
 class TestSpacerPreservation:
