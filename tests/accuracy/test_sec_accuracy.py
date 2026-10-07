@@ -17,6 +17,7 @@ from sec2md.quality import ElementHeaderRecord, ParseQualityError, normalize_num
 from sec2md.table_parser import TableParser
 from sec2md.utils import FetchedHtml
 
+from tests.accuracy import metrics
 from tests.accuracy.fixtures import FIXTURE_IDS, FixtureContract, load_fixture
 from tests.accuracy.metrics import (
     SourceRow,
@@ -24,9 +25,11 @@ from tests.accuracy.metrics import (
     _in_header_line_cells,
     _mapping_and_trace,
     _markdown_cells,
+    _oracle_page_ends,
     _oracle_trace_numeric_failures,
     _parse_document,
     _parse_once,
+    _visible_text,
     audit_document,
     body_line_counts,
     body_matched_rows,
@@ -934,3 +937,228 @@ def test_body_row_signatures_ignore_cell_boundaries_whitespace_links_and_escapes
     # Text changes are not matches: a lost value or a changed label.
     changed = markdown.replace("$ (29)", "$").replace("Note A", "Note C")
     assert body_matched_rows(source, changed) == ()
+
+
+# --- Numeric recall counts content, not furniture (recall audit 2026-10-06) ---------------
+# The branch's remaining numeric-recall gap on the recent fixtures was all metric artefacts:
+# the <head> title (a file name), page footers the parser strips on purpose, and numbers
+# split across consecutive links to one target. Link destinations and image markup in the
+# output could also hide a future loss.
+
+
+def _visible(html: str) -> str:
+    return _visible_text(source_soup(html.encode()))
+
+
+AFTER_BREAK = '<hr style="page-break-after:always"/>'
+BODIES = ("Net sales 383,285", "Gross margin 169,148", "Operating income 114,301")
+BODY_NUMBERS = ["383285", "169148", "114301"]
+
+
+def _workiva_footer(text) -> str:
+    """A page footer as Workiva writes it (aapl, nvda): a box at the bottom of the page."""
+
+    return ('<div style="height:42.75pt;position:relative;width:100%">'
+            '<div style="bottom:0;position:absolute;width:100%">'
+            f'<div style="text-align:center"><span>{text}</span></div></div></div>')
+
+
+def _pages(pages, separator: str = AFTER_BREAK, head: str = "") -> str:
+    return f"<html><head>{head}</head><body>{separator.join(pages)}</body></html>"
+
+
+def _footed(footer) -> str:
+    """BODIES on three pages, each closed by footer(page number)."""
+
+    return _pages([f"<p>{body}</p>{footer(number)}" for number, body in enumerate(BODIES, 1)])
+
+
+def _legacy_footed(bodies=BODIES, footer: str = "{}") -> str:
+    """nvda-2002's shape: a right-aligned page number (footer.format(number)), the next page
+    opening with a page-break-before paragraph."""
+
+    pages = []
+    for number, body in enumerate(bodies, 1):
+        style = ' style="page-break-before:always"' if number > 1 else ""
+        pages.append(f'<p{style}>{body}</p><div align="right"><font size="2">'
+                     f'{footer.format(number)}</font></div>')
+    return _pages(pages, separator="")
+
+
+def test_visible_text_leaves_out_the_head():
+    # The <title> names the file (aapl-20230930); no browser draws it on the page.
+    html = _pages(["<p>Total net sales 383,285</p>"], head="<title>aapl-20230930</title>")
+    assert _visible(html) == "Total net sales 383,285"
+
+
+@pytest.mark.parametrize("html", [
+    pytest.param(_footed(lambda n: _workiva_footer(f"Apple Inc. | 2023 Form 10-K | {n}")),
+                 id="running-line"),
+    pytest.param(_footed(lambda n: _workiva_footer(n + 1)), id="page-number"),
+    pytest.param(_legacy_footed(), id="legacy-page-number"),
+    pytest.param(_pages([f'<div style="page-break-after:always"><p>{body}</p><p>{n}</p></div>'
+                         for n, body in enumerate(BODIES, 1)], separator=""),
+                 id="break-after-content"),
+])
+def test_visible_text_leaves_out_page_footers(html):
+    assert normalize_numbers(_visible(html)) == BODY_NUMBERS
+
+
+@pytest.mark.parametrize("html", [
+    pytest.param(_pages([f"<p>{BODIES[0]}</p>{_workiva_footer(1)}", f"<p>{BODIES[1]}</p>",
+                         f"<p>{BODIES[2]}</p>{_workiva_footer(3)}"]), id="page-without-footer"),
+    pytest.param(_pages([f"<p>{BODIES[0]}</p>{_workiva_footer(1)}", "",
+                         f"<p>{BODIES[1]}</p>{_workiva_footer(3)}",
+                         f"<p>{BODIES[2]}</p>{_workiva_footer(4)}"]), id="blank-page"),
+    # One physical break written twice: an after-break rule, then a before-break page.
+    pytest.param(_pages([f"<p>{BODIES[0]}</p>{_workiva_footer('Acme | 1')}"] + [
+        f'<div style="page-break-before:always"><p>{body}</p>{_workiva_footer(f"Acme | {n}")}</div>'
+        for n, body in enumerate(BODIES[1:], 2)]), id="one-break-written-twice"),
+])
+def test_page_numbers_keep_step_with_pages_without_a_footer(html):
+    # Page number minus page-end ordinal stays constant across a page with no footer, across
+    # a page with no text at all, and across one break that two elements both declare.
+    assert normalize_numbers(_visible(html)) == BODY_NUMBERS
+
+
+def test_page_ends_follow_document_order():
+    # A before-break nested inside an after-break element ends its page first.
+    soup = source_soup(b'<html><body><p>A 1</p><div style="page-break-after:always"><p>B 2</p>'
+                       b'<p style="page-break-before:always">C 3</p></div><p>D 4</p></body></html>')
+    visible = [node for node in soup.strings if node.strip()]
+    assert [str(node) for node in _oracle_page_ends(soup, visible)] == ["B 2", "C 3", "D 4"]
+
+
+@pytest.mark.parametrize("html", [
+    pytest.param(_footed(lambda n: f"<table><tr><td>Page</td><td>{n}</td></tr></table>"),
+                 id="in-a-table"),
+    pytest.param(_footed(lambda n: f"<p>See Note {(12, 7, 9)[n - 1]}</p>"),
+                 id="numbers-not-increasing"),
+    pytest.param(_pages([f"<p>{BODIES[0]}</p><p>Acme | 1</p>", f"<p>{BODIES[1]}</p><p>Acme | 2</p>",
+                         f"<p>{BODIES[2]}</p>", "<p>Net income 96,995</p>",
+                         "<p>Total assets 352,583</p>"]),
+                 id="under-half-of-the-pages"),
+    pytest.param(_footed(lambda n: f"<p>{n} units</p>"), id="number-not-last"),
+    pytest.param(_footed(lambda n: f"<div><p>Revenue grew</p>{n}</div>"), id="closing-block-holds-more"),
+    pytest.param(_pages([f"<p>{BODIES[0]}</p><p>7</p>"]), id="single-page"),
+    # A page number stands alone or after whitespace: never the tail of a longer number.
+    pytest.param(_footed(lambda n: f"<p>Total 1,00{n}</p>"), id="thousands-tail"),
+    pytest.param(_footed(lambda n: f"<p>Rate 1.{n}</p>"), id="decimal-tail"),
+    pytest.param(_footed(lambda n: f"<p>{12340 + n}</p>"), id="five-digit-tail"),
+    # Page numbers advance with the pages: page number minus page-end ordinal is constant.
+    pytest.param(_footed(lambda n: f"<p>{(1, 2, 9)[n - 1]}</p>"), id="numbers-skip"),
+    pytest.param(_footed(lambda n: f"<p>{(150, 275, 390)[n - 1]}</p>"), id="body-values"),
+    # A year series closing consecutive pages advances with them, but its offset (page
+    # number minus page-end ordinal) is far beyond any page of the document.
+    pytest.param(_footed(lambda n: f"<p>Fiscal {2023 + n}</p>"), id="fiscal-years"),
+    pytest.param(_footed(lambda n: f"<p>{2023 + n}</p>"), id="bare-years"),
+    # A tagged XBRL fact is content.
+    pytest.param(_footed(lambda n: f'<p><ix:nonFraction name="us-gaap:Shares">{n}</ix:nonFraction></p>'),
+                 id="xbrl-fact"),
+])
+def test_visible_text_keeps_page_end_lines_that_are_not_page_furniture(html):
+    assert _visible(html) == BeautifulSoup(html, "lxml").get_text(" ", strip=True)
+
+
+def test_visible_text_joins_a_number_split_across_consecutive_links_to_one_target():
+    # nvda-2026-10k's Item 15 index and the 8-K's exhibit table write one date as several
+    # links to one target; a reader sees "January 25, 2026" and "August 26, 2026".
+    index = "".join(f'<a href="#fs">{part}</a>'
+                    for part in ("Statements for January 2", "5", ", 202", "6"))
+    exhibit = "".join(f'<a href="q2.htm">{part}</a>' for part in ("Augu", "st ", "2", "6", ", 2026"))
+    wrapped = ('<span><a href="#n">$ 1,23</a></span><span><a href="#n">4</a></span>'
+               '<a href="#n">.5</a>')
+    assert normalize_numbers(_visible(f"<p>{index}</p>")) == ["25", "2026"]
+    assert normalize_numbers(_visible(f"<p>{exhibit}</p>")) == ["26", "2026"]
+    assert normalize_numbers(_visible(f"<p>{wrapped}</p>")) == ["1234.5"]
+
+
+@pytest.mark.parametrize("html, numbers", [
+    pytest.param('<p><a href="#a">2</a><a href="#b">5</a></p>', ["2", "5"], id="different-targets"),
+    pytest.param('<p><a href="#a">2</a> <a href="#a">5</a></p>', ["2", "5"], id="space-between"),
+    pytest.param('<p><a href="#a">2 </a><a href="#a">5</a></p>', ["2", "5"], id="space-inside"),
+    pytest.param('<p><a href="#a">2</a><br/><a href="#a">5</a></p>', ["2", "5"], id="line-break"),
+    pytest.param('<div><div><a href="#a">2</a></div><a href="#a">5</a></div>', ["2", "5"],
+                 id="block-boundary"),
+    pytest.param('<table><tr><td><a href="#a">2</a></td><td><a href="#a">5</a></td></tr></table>',
+                 ["2", "5"], id="table-cells"),
+    pytest.param("<p><a>2</a><a>5</a></p>", ["2", "5"], id="no-target"),
+    # Not every untagged boundary: a range dash must not turn 4.3 into a negative number.
+    pytest.param("<p><span>3.5%-</span><span>4.3%</span></p>", ["3.5", "4.3"], id="untagged-range"),
+    pytest.param('<p><a href="#a">3.5%-</a><a href="#a">4.3%</a></p>', ["3.5", "4.3"],
+                 id="linked-range"),
+])
+def test_visible_text_joins_only_number_fragments_of_touching_same_target_links(html, numbers):
+    assert normalize_numbers(_visible(html)) == numbers
+
+
+def _audit_with_markdown(monkeypatch, source: bytes, markdown: str):
+    """audit_document's measurements of a source, with the parser's Markdown replaced."""
+
+    monkeypatch.setattr(
+        metrics, "_parse_document", lambda raw: (markdown, *_parse_document(raw)[1:])
+    )
+    contract = replace(load_fixture("nvda-2026-08-26-8k")[0], expected_sections=(),
+                       representative_rows=())
+    return audit_document(source, contract, quality_policy="off")
+
+
+def test_numeric_recall_counts_neither_title_nor_footers_nor_split_link_fragments(monkeypatch):
+    split = "".join(f'<a href="#fs">{part}</a>' for part in ("January 2", "5", ", 202", "6"))
+    pages = [f"<p>{body}</p>" for body in BODIES]
+    pages[1] = f"<p>{BODIES[1]} {split}</p>"
+    pages = [page + _workiva_footer(f"Acme Inc. | 2023 Form 10-K | {n}")
+             for n, page in enumerate(pages, 1)]
+    source = _pages(pages, head="<title>acme-20230930</title>").encode()
+    markdown = f"{BODIES[0]}\n\n{BODIES[1]} [January 25, 2026](#fs)\n\n{BODIES[2]}"
+    assert _audit_with_markdown(monkeypatch, source, markdown).numeric_recall == 1.0
+
+
+def test_numeric_recall_does_not_let_kept_footer_lines_stand_in_for_lost_values(monkeypatch):
+    # nvda-2002: the parser keeps the page numbers the harness leaves out of the source, as
+    # lines of their own. One such line per footer leaves the output too, so a lost body
+    # value with a page number's digits still counts as lost.
+    bodies = ("Revenue grew 2%", BODIES[0], BODIES[1])
+    source = _legacy_footed(bodies).encode()
+    kept = "\n\n".join(f"{body}\n\n{number}" for number, body in enumerate(bodies, 1))
+    assert _audit_with_markdown(monkeypatch, source, kept).numeric_recall == 1.0
+    lost = kept.replace("grew 2%", "grew %")
+    assert _audit_with_markdown(monkeypatch, source, lost).numeric_recall == pytest.approx(2 / 3)
+
+
+def test_numeric_recall_counts_a_lost_year_line_closing_a_page(monkeypatch):
+    # "Fiscal 2024 / 2025 / 2026" closing three consecutive pages is content, not a footer.
+    source = _footed(lambda n: f"<p>Fiscal {2023 + n}</p>").encode()
+    faithful = "\n\n".join(f"{body}\n\nFiscal {2023 + n}" for n, body in enumerate(BODIES, 1))
+    assert _audit_with_markdown(monkeypatch, source, faithful).numeric_recall == 1.0
+    lost = faithful.replace("Fiscal 2025", "Fiscal")
+    assert _audit_with_markdown(monkeypatch, source, lost).numeric_recall == pytest.approx(5 / 6)
+
+
+@pytest.mark.parametrize("footer, line", [
+    pytest.param("<b>{}</b>", "**{}**", id="bold"),
+    pytest.param("<i>{}</i>", "*{}*", id="italic"),
+    pytest.param("<b>NVIDIA Corporation {}</b>", "**NVIDIA Corporation {}**", id="bold-running-text"),
+    pytest.param("NVIDIA_Corp {}", "NVIDIA\\_Corp {}", id="escaped-running-text"),
+])
+def test_numeric_recall_drops_kept_footer_lines_whatever_their_emphasis(monkeypatch, footer, line):
+    # A legacy page number the parser keeps as **2** or *2* is still the footer's line: it is
+    # read without emphasis and escapes, so it never stands in for a lost body value.
+    bodies = ("Revenue grew 2%", BODIES[0], BODIES[1])
+    source = _legacy_footed(bodies, footer).encode()
+    kept = "\n\n".join(f"{body}\n\n{line.format(n)}" for n, body in enumerate(bodies, 1))
+    assert _audit_with_markdown(monkeypatch, source, kept).numeric_recall == 1.0
+    lost = kept.replace("grew 2%", "grew %")
+    assert _audit_with_markdown(monkeypatch, source, lost).numeric_recall == pytest.approx(2 / 3)
+
+
+def test_numeric_recall_reads_link_labels_not_destinations_or_image_markup(monkeypatch):
+    source = b"<html><body><p>Exhibit 99.1 lists 320193 shares and 1731 holders.</p></body></html>"
+    # The output lost 320193 and 1731: only a link destination and an image's alt text hold them.
+    lost = ("Exhibit [99.1](https://www.sec.gov/Archives/edgar/data/320193/x.htm) lists shares "
+            "and ![1731](chart.jpg) holders.")
+    result = _audit_with_markdown(monkeypatch, source, lost)
+    assert result.numeric_recall == pytest.approx(1 / 3)
+    assert result.word_recall == pytest.approx(7 / 9)
+    faithful = "Exhibit [99.1](https://www.sec.gov/x.htm) lists 320193 shares and 1731 holders."
+    assert _audit_with_markdown(monkeypatch, source, faithful).numeric_recall == 1.0
