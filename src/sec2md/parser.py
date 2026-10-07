@@ -53,9 +53,10 @@ def _wrapped_copy_survives(
     reduced to labels), rendered the table's normal render, and links the reduction's
     matches in raw as (start, end, characters removed). A wrapper only adds text around a
     table's render, so the table's copy is one of rendered's occurrences in raw; any other
-    occurrence is another table that renders the same text. Every occurrence must keep its
-    boundaries, crossed by no link reduction, and its reduced text must be exactly the
-    record's segment. So a copy that the reduction damaged is never taken for intact, and
+    occurrence is other text that reads the same, such as another table's render (or part
+    of one, or a cell's literal Markdown) or an image's alt text. Every occurrence must
+    keep its boundaries, crossed by no link reduction, and its reduced text must be exactly
+    the record's segment. So a copy that the reduction damaged is never taken for intact, and
     the record is never left to be located on other text that only reduces to its segment.
     """
 
@@ -1259,11 +1260,15 @@ class Parser:
         """Per element, the tables whose header record was never bound: missing associations.
 
         A table rendered inside a list item or an inline wrapper is bound from the wrapper's
-        segment (revision 18), unless that segment's final text lost the table's own copy:
-        a link reduction ran across the table's boundaries, or the reduced copy is not the
-        record's segment (a padded link label). Such a table, or one whose header line
-        reached content outside any table segment, is counted against the element mapped to
-        its nearest ancestor.
+        segment (revision 18), unless the wrapper's final segment does not show the table's
+        own copy intact: the final segment is not the link reduction of the wrapper's text (a
+        later inline-block table with a link merged into it), a link reduction ran across the
+        table's boundaries, or the reduced copy is not the record's segment (a padded link
+        label). Every occurrence of the table's render in the wrapper's text is checked, so
+        another occurrence that fails the check also leaves it unbound (Codex's
+        counterexample: an identical table before it, whose copy a link reduction
+        damaged). Such a table, or one whose header line reached content outside any table
+        segment, is counted against the element mapped to its nearest ancestor.
         """
 
         unbound: Counter[str] = Counter()

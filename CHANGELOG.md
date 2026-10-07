@@ -66,8 +66,10 @@
   - Other nested tables are flattened into the outer table as before, so their output
     can change too, for example keeping an outer cell's value that was dropped. A
     table nested inside a cell is still read more than once: its text appears in that
-    cell's text and again as cells and rows of the outer table, so in the normal
-    rendering mode strict can report its numbers as untraceable, as before. A table
+    cell's text and again as cells and rows of the outer table, so strict can report
+    its numbers as untraceable, as before. With `Parser(capture_tables=True)` the outer
+    table is written as its source text instead, unless it sits inside a list item or
+    bold or italic text, where it is written as Markdown in both modes. A table
     holding both kinds places every cell (see above), so it can show such extra
     copies where a narrower grid would drop them, and strict then fails on them:
     this fails closed, and no value is lost.
@@ -119,11 +121,13 @@
 - Known limitation, as in the previous release: when rowspans from the rows above
   push a row's cells right, cells past the table's widest row are dropped from the
   Markdown table: `<td rowspan="2">A</td><td>1,111</td>` over
-  `<td>B</td><td>2,222</td>` renders `|  | B |` and loses `2,222`. In the normal
-  rendering mode `table_completeness_failures` reports a dropped number
-  (`missing 2222 x1 [body]`); strict does not, and a dropped text cell is not
-  reported. A table holding a `<table>` outside every cell places these cells (see
-  above). Fixing this is a separate task.
+  `<td>B</td><td>2,222</td>` renders `|  | B |` and loses `2,222`.
+  `table_completeness_failures` reports a dropped number (`missing 2222 x1 [body]`);
+  strict does not, and a dropped text cell is not reported. With
+  `Parser(capture_tables=True)` such a table is written as its source text, which
+  keeps the cells, unless it sits inside a list item or bold or italic text. A table
+  holding a `<table>` outside every cell places these cells (see above). Fixing this
+  is a separate task.
 - Known limitation: a zero-width character (U+200B, U+200C, U+200D, U+2060 or
   U+FEFF) inside a table number is now removed from the rendered cell, so `1,2`, a
   U+200B and `34` render as `1,234`. Strict still splits the source number at the

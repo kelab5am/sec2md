@@ -95,12 +95,14 @@ rows are not written again. In a one-row table, such a table with no `<tr>` of
 its own is still dropped, as before; neither strict nor the table completeness
 checks report it, and only `numeric_recall` falls. A table nested inside a cell
 is flattened into the outer table as before, so its text appears in that cell
-and again as cells and rows of the outer table; in the normal rendering mode
-strict can report those extra copies as untraceable numbers. A table that holds
-both kinds places every cell (unless every row of the outside table is hidden,
-or it has no cells), so it can show extra copies a narrower grid would drop, and
-strict then fails on them instead of passing with them dropped (it fails closed;
-no value is lost).
+and again as cells and rows of the outer table, and strict can report those
+extra copies as untraceable numbers. With `Parser(capture_tables=True)` the outer
+table is written as its source text instead, unless it sits inside a list item
+or bold or italic text, where it is written as Markdown in both modes. A table
+that holds both kinds places every cell (unless every row of the outside table
+is hidden, or it has no cells), so it can show extra copies a narrower grid
+would drop, and strict then fails on them instead of passing with them dropped
+(it fails closed; no value is lost).
 
 Strict's numeric trace checks each header line on its own against the numbers
 its header cells supply, so a year repeated over several columns does not fail
