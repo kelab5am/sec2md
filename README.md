@@ -140,6 +140,14 @@ Strict raises in these cases:
 - an element lacks a source-node mapping
 - a number in an element cannot be traced to its source nodes
 
+A table's header line is traced on its own against the numbers its header cells
+supply, so a number repeated because a header cell spans several columns does
+not raise. This holds for a table inside a list item or bold or italic text too.
+When a header line cannot be matched to its own table, for example when the same
+table text occurs twice in one element or a link in the surrounding text runs
+into the table, the miss is listed in `Parser.header_accounting_misses` and the
+line is traced like any other text, so a repeated header number can raise.
+
 Strict does not check that every source number reached the output. Table
 completeness checks do that for each table, and a header-alignment check tests
 that each value sits under the header its source column carries. They are
@@ -227,11 +235,13 @@ sec2md handles both:
 | iPad             | $28,300           |
 ```
 
-Every source value is kept, and each sits under the header its source column
-carries. A table with several header rows gets one header line: each column's
-header rows are joined top to bottom with ` — `, and a header cell that spans
-several columns repeats in each of them. Currency markers in their own column
-join the amount, as `$` does:
+Merging columns no longer drops source values, and each value sits under the
+header its source column carries. Cells that rowspans from earlier rows push
+past a table's widest row are still dropped, as before; a dropped number is
+reported in `table_completeness_failures`. A table with several header rows gets
+one header line: each column's header rows are joined top to bottom with ` — `,
+and a header cell that spans several columns repeats in each of them. Currency
+markers in their own column join the amount, as `$` does:
 
 ```markdown
 |  | Year Ended June 30, — 2025 | Year Ended June 30, — 2024 |
@@ -250,9 +260,13 @@ label, such as `Common Stock | AAPL`, stays in the body, and so do label-only ro
 at the end of the header, such as `Accounts Receivable:` just before the data. A
 table whose first row is already data gets a header line of empty cells, so no
 data row is mistaken for a header. Hidden rows and cells (`display:none`) are
-left out. XLSX export keeps its own column rules, so its prepared tables do not
-change; only the page number on its contents sheet, which is guessed from the
-Markdown page text, can change (on 4 pages in 2 documents of the review corpus).
+left out. A `<table>` placed in a row of another table but outside every cell
+(malformed markup) is read once, as cells of that row, except that in a one-row
+table such a table with no `<tr>` of its own is still dropped, as before; a table
+nested inside a cell is flattened into the outer table as before. XLSX export
+keeps its own column rules, so its prepared tables do not change; only the page
+number on its contents sheet, which is guessed from the Markdown page text, can
+change (on 4 pages in 2 documents of the review corpus).
 
 ## Multimodal: Image Extraction
 

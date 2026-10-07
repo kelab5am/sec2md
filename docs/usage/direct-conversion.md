@@ -88,10 +88,44 @@ label-only row just before the data, such as `Accounts Receivable:`, stays in th
 body. Equal header texts, ignoring case and spacing, are written once unless they
 link to different places.
 Rows and cells hidden with `display:none`, `visibility:hidden` or the `hidden`
-attribute are left out of the table. Strict's numeric trace checks each
-header line on its own against the numbers its header cells supply, so a year
-repeated over several columns does not fail strict, but cannot vouch for the
-same year written in the body.
+attribute are left out of the table. A `<table>` placed in a row of another
+table but outside every cell, directly in the `<tr>` or in a `<div>` there
+(malformed markup), is read once: its cells stay cells of that row, and its own
+rows are not written again. In a one-row table, such a table with no `<tr>` of
+its own is still dropped, as before; neither strict nor the table completeness
+checks report it, and only `numeric_recall` falls. A table nested inside a cell
+is flattened into the outer table as before, so its text appears in that cell
+and again as cells and rows of the outer table; in the normal rendering mode
+strict can report those extra copies as untraceable numbers. A table that holds
+both kinds places every cell (unless every row of the outside table is hidden,
+or it has no cells), so it can show extra copies a narrower grid would drop, and
+strict then fails on them instead of passing with them dropped (it fails closed;
+no value is lost).
+
+Strict's numeric trace checks each header line on its own against the numbers
+its header cells supply, so a year repeated over several columns does not fail
+strict, but cannot vouch for the same year written in the body. This also holds
+for a table inside a list item or bold or italic text (`<li>`, `<b>`,
+`<strong>`, `<i>`, `<em>`, a `<span>` styled bold or italic, or a `<div>` inside
+one of these), whose first and last lines may be shared with a list marker,
+emphasis marks or words around it. The header line is matched to its own table
+only when no link syntax crosses the table's boundary, its copy is intact, and
+that copy occurs once in the element. These cases are misses, recorded in
+`Parser.header_accounting_misses` as `<element id>:missing` or
+`<element id>:ambiguous`; the header line is then traced like any other text,
+so a number it repeats can make strict raise:
+
+- Markdown link syntax that runs from the surrounding text into the table, or
+  from the table out into the surrounding text, such as a list item reading
+  `See [note` before a table with a link
+- a link label in the table with spaces inside the link, such as
+  `<a href="#n"> 2025 </a>`
+- identical tables in one element, such as two in one list or bold run, or a
+  wrapped table beside an identical table (`ambiguous`, or `missing` when a link
+  reduction also damages one copy)
+- a copy damaged after rendering, when later text merges into the wrapper's
+  Markdown, such as a later bold run that completes a link the table's text
+  opened, or a later inline-block table with a link
 
 ### Header alignment
 
