@@ -40,6 +40,8 @@ _css_decl = re.compile(r"^[a-zA-Z\-]+\s*:\s*[^;]+;\s*$")
 ITEM_HEADER_CELL_RE = re.compile(r"^\s*Item\s+([0-9IVX]+)\.\s*$", re.I)
 PART_HEADER_CELL_RE = re.compile(r"^\s*Part\s+([IVX]+)\s*$", re.I)
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+# A Markdown table divider row, with or without outer pipes (as quality._TABLE_DIVIDER_RE).
+_MARKDOWN_TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
 
 logger = logging.getLogger(__name__)
 
@@ -255,6 +257,12 @@ class Parser:
     @staticmethod
     def _is_plausible_page_number(num: int, min_val: int = 1) -> bool:
         return min_val <= num <= 9999 and not (1900 <= num <= 2100)
+
+    @staticmethod
+    def _is_markdown_table_line(line: str) -> bool:
+        """A Markdown table row (it starts with '|') or a table divider row."""
+        stripped = line.strip()
+        return stripped.startswith("|") or bool(_MARKDOWN_TABLE_DIVIDER_RE.match(stripped))
 
     def _try_merge_inline_spans(self, last_text: str, current_text: str, last_source: Optional[Tag],
                                  current_source: Optional[Tag]) -> Optional[str]:
@@ -924,7 +932,10 @@ class Parser:
         if not content:
             return None
 
-        lines = content.split('\n')
+        # Table cells are not page numbers ("| 304 | 1,234 |" would read as 304), and table lines
+        # must not take the first/last three lines' places either, or rendering a table
+        # differently would move the guess.
+        lines = [line for line in content.split('\n') if not self._is_markdown_table_line(line)]
 
         check_lines = []
         if len(lines) >= 3:
