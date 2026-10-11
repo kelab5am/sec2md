@@ -1,8 +1,9 @@
 # sec2md XLSX Header Detection Design
 
-Date: 2026-10-11 (revision 4, same day)
+Date: 2026-10-11 (revision 5, same day)
 
-Status: Draft for review. Not implemented.
+Status: Draft for review. Not implemented. Implementation plan:
+`../plans/2026-10-11-sec2md-xlsx-header-detection.md`.
 
 Scope: `src/sec2md/xlsx_tables.py` only. The Markdown renderer, strict's numeric
 trace and the table completeness check must not change.
@@ -78,6 +79,29 @@ accepted.
 reading `July 30,` without the year, because `2023` sat under an equally wide
 `July 30,` and check 8 required a wider heading. Check 8 now also accepts a year
 under an equally wide period heading that has no year of its own.
+
+**Round 3** (Codex on gpt-6.1-sol, reviewing the implementation plan; revision
+4 → 5). Each finding was reproduced before it was accepted.
+
+| Finding | Verdict | Change |
+|---|---|---|
+| 1. High: a line item containing period wording (`Revenue for year ended December 31, 2025 \| 2024 \| 2025`, `Cash as of December 31, 2025`) counted as a caption label, so its year-shaped amounts became headings and the row was swallowed. | Confirmed | A caption label must be a whole caption (definition below). Both rows now fall back to source text. |
+| 2. High: the wrapped-heading join cleared independent identifiers: `Notes — Cash` turned note reference `7` into a number; `CUSIP — Shares` and `Notes — Amount` also cleared. | Confirmed | A part is exempt for quantity words only in its own text. The join with the next part counts only for `number of` and `grant date fair value`. |
+| 3. High: the XBRL check matched digits anywhere in the filing, so an amount could pass on an unrelated fact. | Confirmed | Acceptance validates each number against the fact inside its own source cell: value, sign and period. |
+| 4. High: instant and duration facts could stand in for each other. | Confirmed | Balance sheets need instants; income statements need durations of the stated length; cash flow statements need durations, except opening and closing balances. |
+| 5. High: skipped cells (no period, no conversion, zero) left the counters at zero. | Confirmed | Every fact in a statement gets a verdict; failures are counted by reason. |
+| 6. High: cash flow arithmetic skipped non-numeric operands. | Confirmed | A missing or non-numeric operand fails. Arithmetic uses Decimal. |
+| 7. High: an exported summary could stand in for a primary statement that fell back. | Confirmed | Statements are identified from their source rows and XBRL fact count, independent of the export result; a fallback statement fails. |
+| 8. Medium: removing checks 4b, 5 or 7 left all tests passing. | Partly confirmed | Tests added so checks 1, 3, 3b, 4b, 4c, 6, 7b and 8, the evidence cut-off and each Rule 3 exemption are each the only blocker in some test; a mutation run disables each safeguard in turn and a test fails. Checks 2 (its unit-declaration half), 4, 5 and 7 cannot fail alone: 2 is covered by checks 3 and 4, 4 by 4c, 7 by 3b, and 5's layout already falls back on the unresolved-span check. They stay as defence in depth. A byte-level fingerprint test pins `_header_count` and `_PERIOD`. |
+| 9. Medium: tables present in one run only were not compared. | Confirmed | The comparison pairs tables by ordinal and source cells and reports missing or added tables. |
+| 10. Medium: structural cells (`$`) were counted as numeric cells. | Confirmed | Only digit-bearing source cells are counted, cell by cell. |
+| 11. Medium: promoted rows were truncated and listed only for vault filings. | Confirmed | Every promoted row is listed in full, with digit-bearing rows marked, for every filing. |
+| 12. Medium: the plan said the harness was committed when it was not; documents on `main` conflict with a branch-and-PR workflow. | Partly confirmed | The harness is committed with the plan. Documents stay on `main` by the user's standing instruction. |
+| 13. Low: expected loss totals disagreed with revision 4's evidence. | Confirmed | The numbers come from one rerun of the revised harness and are recorded in the audit. |
+
+Also from this round: the Rule 2 change to `_numeric_role` was dead code (the
+identifier rule already treats footnoted-year headers as periods), so it is
+dropped.
 
 ## Root cause
 
@@ -161,8 +185,15 @@ Three approaches were considered:
   `<month> <day>, <year>`.
 - **Currency caption:** `$`, `US$`, `NT$`, `HK$`, `RMB`, `€`, `£` or `¥`,
   optionally in parentheses.
-- **Caption label:** a unit declaration (`_UNIT_DECLARATION`), a period heading,
-  `As of` / `As at`, or a parenthesised scale such as `(Dollars in millions)`.
+- **Caption label:** the whole label is a caption, nothing else: a unit
+  declaration (`_UNIT_DECLARATION`, full match), a parenthesised scale such as
+  `(Dollars in millions)`, `As of` / `As at`, or a period caption, optionally
+  followed by a parenthesised scale. Period captions are `<month> <day>,` with or
+  without a year, and `<three|six|nine|twelve> months ended`, `(fiscal) year(s)
+  ended` or `quarter(s) ended`, optionally followed by a date and optionally
+  preceded by `As of`, `As at`, `As of or for the` or `For the`. So
+  `December 31, (in millions)` and `As of or for the year ended December 31,` are
+  captions; `Cash as of December 31, 2025` and a bare `2026` are not.
 - **Heading-like label:** a caption label, or a column-heading word fully
   matching one of: `Description`, `Exhibit`, `Exhibit Number`, `Exhibit No.`,
   `Period`, `Issuance`, `Issuance Period`, `Name`, `Name/Title`,
@@ -198,6 +229,11 @@ row that fails a check ends the scan.
 | 7b | If the row has a label and any year-token heading, the label is a caption label | `Revenue \| 2024 \| 2025` |
 | 8 | Every year-token heading lies inside a period heading above it that is wider, or equally wide and without a year of its own | `2024` under `Amount`; allows `2023` under an equally wide `July 30,` |
 
+Checks 2 (its unit-declaration half), 4, 5 and 7 are implied by other checks
+(2 by 3 and 4, 4 by 4c, 7 by 3b) or reach the same result through the existing
+unresolved-span fallback (5). They stay as defence in depth; tests cannot make
+them the only blocker.
+
 **The header ends at the last accepted row with span evidence.** Return the
 index after that row, or `base` if no accepted row has evidence. Accepted rows
 below the last evidenced row are not header rows; they stay in the body.
@@ -215,11 +251,12 @@ above the evidenced dates.
 
 ### Rule 2: footnoted years are periods in the export
 
-`2023 (2)` is a period when the export decides header roles. Add an XLSX-only
-pattern, `_EXPORT_PERIOD`, equal to `_PERIOD` plus the alternative
-`(?:19|20)\d{2} \(\d{1,2}\)`. Use it in `_numeric_role`'s `period_header` test
-and in the period-heading definition. Do not change `_PERIOD`, because
-`_header_count` uses it and must stay unchanged.
+`2023 (2)` is a year heading: the year token allows a footnote marker. Add an
+XLSX-only pattern, `_EXPORT_PERIOD`, equal to `_PERIOD` plus the alternative
+`(?:19|20)\d{2} \(\d{1,2}\)`, and use it in the period-heading definition.
+`_numeric_role` keeps `_PERIOD`: Rule 3 already treats a footnoted-year header
+as a period. Do not change `_PERIOD`, because `_header_count` uses it and must
+stay unchanged.
 
 ### Rule 3: identifier columns
 
@@ -236,10 +273,12 @@ is not exempt. A part is exempt when any of these holds:
   the part no longer matches `_IDENTIFIER`. So `Year ended March 31,` is exempt,
   while `CUSIP as of December 31, 2024` and
   `Notes for year ended December 31, 2024` stay identifiers.
-- The part, or the part joined with the next one, matches `_VALUE` or
-  `_ROW_UNIT`, or contains `number of`, `to date` or `per share`. The join
-  handles wrapped headings such as `Number — of RSUs` and
-  `grant date — fair value`.
+- The part itself matches `_VALUE` or `_ROW_UNIT`, or contains `number of`,
+  `to date` or `per share` (`Number of Shares`, `Plan to Date`).
+- The part joined with the next one contains `number of` or
+  `grant date fair value`: a heading wrapped over two rows (`Number — of RSUs`,
+  `grant date — fair value`). Other value words in the next part do not count,
+  so `Notes — Cash`, `CUSIP — Shares` and `Notes — Amount` stay identifiers.
 
 Ancestor parts never exempt another part. So `December 31, 2024 — Notes`,
 `December 31, 2024 — CUSIP`, `2024 — Exhibit Number`, `CUSIP — RMB` and
@@ -468,10 +507,27 @@ or a units caption):
 16. `Plan to Date` with no units, `$` cells or value words: the value stays text
     with "Numeric role unresolved".
 
+Sole-blocker cases (revision 5). In each, only one safeguard stops a wrong
+result, so removing that safeguard fails a test:
+- an unlabelled `N/A | NM` or `.75 | .50` row (check 1);
+- `Description | Foo` with one narrower heading (check 3);
+- `Description | Foo | Bar` as wide as the years (check 4b);
+- `Description | 2024 | 2023` under `December 31,` (check 7b);
+- unlabelled years under `Amount` (check 8);
+- line items that mention a period (`Revenue for year ended December 31, 2025`,
+  `Cash as of December 31, 2025`) holding year-shaped amounts (caption labels
+  must be whole);
+- identifier columns in tables (`Notes`, `CUSIP`, `Exhibit Number`,
+  `Notes — Cash`, `CUSIP — Shares`) beside measured columns that hold numbers
+  (`Number of Shares`, `Number — of RSUs (iii)`, `Plan to Date — Severance`).
+
+A heading over part of a wider amount (check 5) falls back to source text.
+
 Unchanged-behaviour guards:
 
-17. `_header_count` returns today's values on every new test grid (direct
-    assertion), so the completeness check is unaffected.
+17. `_header_count` and `_PERIOD` are byte-identical to today's (a SHA-256
+    fingerprint of `_header_count`'s source and of `_PERIOD`'s pattern), so the
+    completeness check is unaffected.
 18. The full test suite passes, including `tests/test_table_completeness*.py`,
     `tests/test_quality.py`, `tests/test_parser.py` and the accuracy tests.
 
@@ -484,15 +540,26 @@ Unchanged-behaviour guards:
    new output by source coordinate and records:
    - digit-bearing source cells that were numbers and no longer are, or whose
      value changed;
-   - every row promoted from the body into the header, text-only rows included;
+   - every row promoted from the body into the header, text-only rows included,
+     listed in full (for a table that used to fall back, all its new header
+     rows);
+   - tables present in one run only;
    - balanced columns, by value.
-3. **Primary statements, vault filings (META, NVDA, RDDT):** in every filing the
-   balance sheet, income statement and cash flow statement are exported, not
-   source text, and every value column has a period header including its year.
-   The XBRL period cross-check finds 0 mismatches and 0 untagged numbers in
-   them. The balance identity holds in every balance sheet column, and the cash
-   flow statement's opening cash plus net change (with the exchange-rate effect
-   where reported) equals closing cash. Any failure blocks the merge.
+3. **Primary statements, vault filings (META, NVDA, RDDT):** each statement is
+   identified from its source rows and XBRL fact count, independent of the
+   export result. In every filing the balance sheet, income statement and cash
+   flow statement are exported, not source text, and every value column has a
+   period header including its year. Every inline XBRL fact in them gets a
+   verdict from the fact inside its own source cell, and every verdict is ok:
+   the copy cell is a number equal to the displayed amount, with the displayed
+   sign, under a header naming the fact's period (instants for balance sheets
+   and opening and closing cash; durations of the stated length otherwise).
+   No number in them lacks a fact, apart from a repeated total equal to a
+   tagged number in its column (META's FY2023 10-K repeats closing cash as an
+   untagged `Total cash, cash equivalents, and restricted cash` line). The balance identity holds in every balance
+   sheet column, and opening cash plus net change (with or without the
+   exchange-rate effect) equals closing cash; a missing operand fails. Any
+   failure blocks the merge.
 4. Vault filings, all tables: no lost or changed numeric cell, no balanced
    column lost, and every promoted row is reviewed as a real column heading.
 5. Other filings: every lost or changed cell and every promoted row with digits
