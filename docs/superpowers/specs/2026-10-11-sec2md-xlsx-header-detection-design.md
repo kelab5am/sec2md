@@ -1,6 +1,6 @@
 # sec2md XLSX Header Detection Design
 
-Date: 2026-10-11 (revision 3, same day)
+Date: 2026-10-11 (revision 4, same day)
 
 Status: Draft for review. Not implemented.
 
@@ -18,6 +18,12 @@ balance sheet and every MD&A results table. The user copies these tables into
 Google Sheets, where text cells cannot be summed. US 10-K and 10-Q filings
 matter most. One rule set serves every filer; no separate foreign-filer path is
 proposed.
+
+**Accuracy comes before coverage.** The balance sheet, income statement and cash
+flow statement must be correct at all cost: every exported number must sit under
+the period it belongs to. When the exporter cannot establish a header with
+evidence, the table stays `source_text_only`. Falling back is the safe failure;
+a wrong header or a data row swallowed into a header is not acceptable.
 
 ## Review history
 
@@ -54,6 +60,24 @@ also pulled about 30 exhibit-list entries into headers.
 | Check 5 split in two. Per row: no heading may be narrower than an amount beneath it. Per header: the header ends at the last accepted row that has span evidence (a heading wider than an amount beneath it); rows accepted after it are dropped. | The row directly above the data must prove it is a heading. Rows above it may repeat widths or be spanning captions. |
 | Only digit-bearing data cells count as amounts for check 5. | A full-width text cell (`Level 1`) or nil dash says nothing about the heading above it. |
 | New check 4b: a labelled row may not repeat the width of the heading above it, except for a currency caption. | Closes a hole found while testing the change: `Alpha \| Foo \| Bar`, with each cell as wide as the year above it, carried span evidence. Real lower header rows subdivide (`Shares` under `Class A`). |
+
+**Round 2** (Codex on gpt-6-astra, revision 3 → 4). Codex ran each
+counterexample against the prototype; each was reproduced again before it was
+accepted.
+
+| Finding | Verdict | Change |
+|---|---|---|
+| 1. High: a labelled row of year-shaped or leading-dot amounts (`Revenue \| 2024 \| 2025`, `Basic EPS \| .75 \| .50`) under a wider heading became a header, silently. | Confirmed | Leading-dot numbers are data cells. Check 7b: a labelled row may hold year headings only when its label is a unit or period caption. Both examples now fall back, as today. |
+| 2. High: a heading straddling two parent periods (`Debt` across `December 31, 2024` and `December 31, 2023`) put the 2023 amount under a 2024 header. | Confirmed | Check 4c: every heading must lie entirely under one parent heading. The example keeps today's output, with each amount under its own date. |
+| 3. High: a labelled text row narrower than the heading above (`Alpha \| Foo \| Bar` under `December 31, 2025`) was swallowed. | Confirmed | Check 3b: a labelled row joins the header only if its label is a unit or period caption or a column-heading word (`Description`, `Exhibit Number`, `Period`, …). Layout cannot tell `Description \| Cash \| Debt` from `Alpha \| Foo \| Bar`; the label's meaning can. |
+| 4. High: identifier and period in one cell (`CUSIP as of December 31, 2024`) cleared the identifier. | Confirmed | Rule 3 removes the period wording from a part and tests the remainder for identifier meaning. |
+| 5. Medium: acceptance could pass correct values under wrong headers, and text rows swallowed into headers. | Confirmed | Acceptance adds an XBRL period cross-check of every primary-statement number and a review of every promoted row, text-only rows included. |
+| 6. Medium: the prototype's note-reference pattern missed `Notes 2(a)`. | Confirmed | Prototype aligned with the spec. |
+
+**Revision 3 → 4, also:** the XBRL cross-check found NVDA's FY2024 10-Q headers
+reading `July 30,` without the year, because `2023` sat under an equally wide
+`July 30,` and check 8 required a wider heading. Check 8 now also accepts a year
+under an equally wide period heading that has no year of its own.
 
 ## Root cause
 
@@ -119,7 +143,8 @@ Three approaches were considered:
 - **Nil token:** text fully matching a dash run (`-`, `–`, `—`), `N/A`, `n.a.`,
   `NM`, `n/m`, `not meaningful` or a run of `*`.
 - **Data cell:** `is_numeric_fact`; or text, not a year token, that fully
-  matches the existing body-number pattern `[$(\d+−-][\d,.() $%+−-]*`; or a
+  matches the body-number pattern `[$(\d+−.-][\d,.() $%+−-]*` (the existing pattern, also
+  accepting a leading dot as in `.75`); or a
   nil token.
 - **Digit data cell (amount):** a data cell whose text contains a digit, or an
   `is_numeric_fact` cell.
@@ -136,6 +161,17 @@ Three approaches were considered:
   `<month> <day>, <year>`.
 - **Currency caption:** `$`, `US$`, `NT$`, `HK$`, `RMB`, `€`, `£` or `¥`,
   optionally in parentheses.
+- **Caption label:** a unit declaration (`_UNIT_DECLARATION`), a period heading,
+  `As of` / `As at`, or a parenthesised scale such as `(Dollars in millions)`.
+- **Heading-like label:** a caption label, or a column-heading word fully
+  matching one of: `Description`, `Exhibit`, `Exhibit Number`, `Exhibit No.`,
+  `Period`, `Issuance`, `Issuance Period`, `Name`, `Name/Title`,
+  `Name of <words>`, `Record Date`, `Payment Date`, `Plan category`,
+  `Instrument`, `Fiscal Year`, `Investment Type`, `Pricing Category`,
+  `Range of Exercise Prices`, `Type`, `Category`, `Item`, `Class`, `Security`,
+  or `Date…`, optionally followed by a footnote marker such as `(1)`. The list
+  comes from every labelled header row in the 60-filing evidence set; a label
+  outside it stops the extension, which is the safe direction.
 
 ### Rule 1: header extension (`_export_header_count`)
 
@@ -149,15 +185,18 @@ row that fails a check ends the scan.
 
 | # | Check | Rejects, for example |
 |---|---|---|
-| 1 | The row has no data cell | `Alpha \| N/A`, `Bob \| -` |
+| 1 | The row has no data cell. Data cells include leading-dot numbers (`.75`) | `Alpha \| N/A`, `Bob \| -`, `Basic EPS \| .75` |
 | 2 | The row has headings, and they are not all unit declarations (`_UNIT_DECLARATION`) | `Assets`, `Inventories: \| (In millions)` |
 | 3 | If the row has a label, it has at least two headings | `Alice \| CEO` |
+| 3b | If the row has a label, the label is heading-like | `Alpha \| Foo \| Bar`, `Revenue \| …` |
 | 4 | No heading spans more columns than its heading above (headers narrow downward) | `(unaudited)` across every period under the years |
-| 4b | If the row has a label, each heading with a heading above is strictly narrower than it, unless it is a currency caption | `Alpha \| Foo \| Bar` with each cell as wide as the year above it |
+| 4b | If the row has a label, each heading with a heading above is strictly narrower than it, unless it is a currency caption | `Description \| Foo \| Bar` with each cell as wide as the year above it |
+| 4c | Each heading lies entirely under one parent heading: in the nearest row above that has any heading over its columns, every one of its columns is covered by the same non-empty cell | `Debt` spanning the edge between `December 31, 2024` and `December 31, 2023` |
 | 5 | No heading is narrower than an amount beneath it | A heading over part of a wider amount |
 | 6 | A currency caption is not narrower than its heading above | `NT$` over only the `$` and amount cells of `December 31, 2023` |
 | 7 | The label is not a year token | `2026 \| 2000` |
-| 8 | Every year-token heading sits strictly inside a wider period heading above it | `2024` under `Amount` |
+| 7b | If the row has a label and any year-token heading, the label is a caption label | `Revenue \| 2024 \| 2025` |
+| 8 | Every year-token heading lies inside a period heading above it that is wider, or equally wide and without a year of its own | `2024` under `Amount`; allows `2023` under an equally wide `July 30,` |
 
 **The header ends at the last accepted row with span evidence.** Return the
 index after that row, or `base` if no accepted row has evidence. Accepted rows
@@ -190,8 +229,13 @@ is not exempt. A part is exempt when any of these holds:
 
 - It is a note reference such as `(Note 3)` or `Notes 2(a)`, fully matching
   `\(?notes? \d+[a-z]?(?:\([a-z]\))?\)?`.
-- It is a period heading, or a maturity bucket (`Less than 1 year`,
-  `1-3 years`, `5 years or more`).
+- It is a maturity bucket (`Less than 1 year`, `1-3 years`,
+  `5 years or more`).
+- After removing its period wording (`<three|six|…> months ended`,
+  `year(s) ended`, `for the`, `as of`, dates and four-digit years), the rest of
+  the part no longer matches `_IDENTIFIER`. So `Year ended March 31,` is exempt,
+  while `CUSIP as of December 31, 2024` and
+  `Notes for year ended December 31, 2024` stay identifiers.
 - The part, or the part joined with the next one, matches `_VALUE` or
   `_ROW_UNIT`, or contains `number of`, `to date` or `per share`. The join
   handles wrapped headings such as `Number — of RSUs` and
@@ -220,7 +264,7 @@ words). Without such evidence, a value stays text and gets the existing
 
 ## Evidence
 
-A prototype of revision 3 (monkeypatched, outside the repo) was measured on 60
+A prototype of revision 4 (monkeypatched, outside the repo) was measured on 60
 filings: 18 META, 14 NVDA and 10 RDDT 10-K/10-Q filings from the RCQ vault, plus
 the 18 filings in `outputs/table-completeness-corpus` (US 10-K/10-Q, banks and
 three 20-F filers). The comparison is by source coordinate. Numbers count
@@ -231,53 +275,87 @@ compared by value.
 | Group | Fallback tables before → after | Numeric cells before → after | Balanced columns before → after |
 |---|---|---|---|
 | META (18) | 408 → 57 | 8,309 → 16,091 | 28 → 36 |
-| NVDA (14) | 270 → 7 | 6,550 → 13,211 | 22 → 28 |
+| NVDA (14) | 270 → 8 | 6,550 → 13,084 | 22 → 28 |
 | RDDT (10) | 174 → 10 | 6,092 → 9,407 | 16 → 20 |
-| Others (18) | 1,004 → 573 | 9,511 → 22,425 | 23 → 37 |
+| Others (18) | 1,004 → 619 | 9,511 → 21,173 | 23 → 37 |
 
-Comparison of the three revisions on the vault filings:
+Comparison of the revisions on the vault filings:
 
-| | Rev 1 | Rev 2 | Rev 3 |
-|---|---|---|---|
-| Fallback tables, META / NVDA / RDDT | 57 / 7 / 10 | 96 / 37 / 78 | 57 / 7 / 10 |
-| Numeric cells lost or changed | 0 | 0 | 0 |
-| Body rows with digits moved into headers | 69 | 29 | 38 |
-| Of those, not real headings | about 30 exhibit entries | 0 | 0 |
+| | Rev 1 | Rev 2 | Rev 3 | Rev 4 |
+|---|---|---|---|---|
+| Fallback tables, META / NVDA / RDDT | 57 / 7 / 10 | 96 / 37 / 78 | 57 / 7 / 10 | 57 / 8 / 10 |
+| Numeric cells lost or changed | 0 | 0 | 0 | 0 |
+| Codex round 2 counterexamples handled safely | no | no | no | yes |
+| Rows promoted into headers that are not headings | about 30 exhibit entries | 0 | 0 | 0 |
 
-- **Vault filings:** no numeric cell lost or changed, and no balanced column
-  lost. All 38 moved rows were reviewed and are real column headings:
-  footnoted repurchase headings such as `Total Number of Shares Purchased (1)`,
-  stock-performance chart dates, RDDT vesting-schedule headings and NVDA
-  `Pricing Category | <date> | <date>` rows.
-- **Spot checks against the source cells** (META FY2024 10-K intangibles and
-  debt, META Q1 2025 10-Q fair value, RDDT Q2 2025 stockholders' equity and
-  stock options): every value sits under its correct period and column.
-- **Adversarial rows** placed between SEC-style year headings and the data, with
-  cells as wide as the years: a text row, a nil row (`N/A | NM`) and a date row
-  stay in the body with their values. A range row (`2027 - 2062`) makes the
-  table fall back to source text, as today.
-- **Other filings:** 95 digit-bearing cells in 11 tables are no longer numbers,
-  and 16 cells in 5 tables changed value.
-  - TSM's two statements of financial position (20): note references (`7`,
-    `8`, …) now sit under a `Notes` header as text. A fix.
-  - MSFT "Long-term Debt" (21): maturity years such as `2039` under
-    `Maturities (calendar year)` are now flagged text. Likely a fix.
-  - JPM regulatory capital (9 changed): `12.3 | %` now converts to `0.123`
-    instead of `12.3`. A fix (see the mixed-scale gap below).
-  - TSM "Share Ownership" (26): ownership percentages are now flagged text
-    ("Conflicting explicit units"). A visible regression.
-  - Not yet classified: 28 cells in TSM and NTRA tables, and 7 changed cells in
-    TSM and CRDO.
-- All 249 existing XLSX tests pass with the prototype, including the NVDA
-  fixture counts and the year-as-data cases. All Codex round 1
-  counterexamples keep today's output.
+**Primary statements (vault).** The balance sheet, income statement and cash
+flow statement were found and exported in all 42 vault filings (126
+statements, none falling back). Every number in them was cross-checked
+against the filing's inline XBRL: for each cell, a fact with the same digits
+must exist for the period named by its column header (instants for balance
+sheets and opening and closing cash; durations of the stated length for the
+rest). Non-dimensional facts are matched first; a dimensional fact for the
+right period is accepted as a second tier (RDDT's per-class common stock,
+META's share-based compensation lines).
+
+| | Cells checked | Matched the column's period | Matched via a dimensional fact | Mismatched | No tagged fact |
+|---|---|---|---|---|---|
+| META | 3,216 | 3,216 | 97 | 0 | 0 |
+| NVDA | 2,545 | 2,545 | 0 | 0 | 0 |
+| RDDT | 1,877 | 1,877 | 36 | 0 | 0 |
+
+The cross-check also found the one defect revision 3 had on these statements:
+NVDA's FY2024 10-Q headers read `July 30,` without the year (see Round 2).
+Revision 4 fixes it. Separately, the balance identity holds in every vault
+balance sheet column.
+
+**Rows promoted into headers (vault).** All 241 distinct promoted rows were
+listed and reviewed, including text-only rows. Every one is a column heading:
+period and date rows, `% change` / `$ Change` columns, fair value levels,
+equity statement column headings, debt maturity and rate headings, exhibit
+index headings and group captions such as `Plan to Date`.
+
+**Counterexamples.** Every counterexample from Codex rounds 1 and 2, and the
+adversarial rows in tests 12a and 12b, either keeps today's output or falls
+back to source text. All 249 existing XLSX tests pass with the prototype.
+
+**Other filings.** 93 digit-bearing cells in 10 tables are no longer numbers,
+and 14 cells in 3 tables changed value.
+
+- TSM's two statements of financial position (20): note references (`7`,
+  `8`, …) now sit under a `Notes` header as text. A fix.
+- MSFT "Long-term Debt" (21): maturity years such as `2039` under
+  `Maturities (calendar year)` are now flagged text. Likely a fix.
+- JPM regulatory capital (9 changed): `12.3 | %` now converts to `0.123`
+  instead of `12.3`. A fix (see the mixed-scale gap below).
+- TSM "Share Ownership" (26): ownership percentages are now flagged text
+  ("Conflicting explicit units"). A visible regression in a 20-F filer.
+- Not yet classified: 26 cells in TSM and NTRA tables, and 5 changed cells in
+  TSM's customer table.
+
+In the other filings' primary statements, 1,719 cells matched their period. The
+8 mismatches are limits of the checker, not of the export: Micron's opening
+cash under bare-date headers, and a TSM percent-of-revenue table picked as the
+income statement. 28 primary statements were not checked: some still fall back
+(CRM, KO, MSFT, JPM, BAC; see "Period caption in the label column"), and the
+checker did not recognise the others (CAT, NVO and several income statements).
 
 ## Known remaining gaps (out of scope)
 
 - **Period caption in the label column.** Banks and some industrials (JPM, BAC,
-  KO, CAT, MSFT) put `Year ended December 31` or
+  KO, CAT, MSFT, CRM) put `Year ended December 31` or
   `(In millions, except percentages)` in column 0, with the years to their right
-  and no wider heading above. Check 8 rejects those years.
+  and no wider heading above. Check 8 rejects those years, so some of these
+  companies' primary statements still export as source text. That is safe, but
+  it is the most valuable follow-up for US filers outside the vault.
+- **Heading-word list.** Check 3b accepts labelled header rows only for the
+  listed column-heading words and captions. A filing with another heading word
+  in the label column keeps today's output for that table. Extending the list is
+  safe only with the same review of promoted rows.
+- **No runtime XBRL guard.** The XBRL period cross-check runs in acceptance, not
+  in the exporter. A follow-up could run it inside `export_xlsx()` and mark a
+  table for review when a tagged amount's period disagrees with its column
+  header, protecting filings never swept here.
 - **Tables with no header row**, such as META's `Thereafter` and
   `Contractual Commitments` maturity tables, where only body spans show how the
   `$` and amount cells pair up.
@@ -355,6 +433,17 @@ Rule 1, negative cases (each asserts the output equals today's):
      as the amounts, it carries no evidence and stays in the body. With cells as
      wide as the years (`As Reported | As Adjusted`), it joins the header as a
      wrapped heading (see "Known remaining gaps"). Both cases are pinned.
+12c. Codex round 2, each asserting today's output or a fallback:
+     `Revenue | 2024 | 2025` and `Basic EPS | .75 | .50` under a wider heading
+     (checks 1 and 7b); `Description | Cash | Debt | Other` with `Debt`
+     straddling `December 31, 2024` and `December 31, 2023`, where each amount
+     must keep its own date (check 4c); `Alpha | Foo | Bar` narrower than
+     `December 31, 2025` (check 3b).
+12d. A labelled header row with a heading-like label joins the header:
+     `Description | December 31, 2024 | Quoted Prices…` (fair value) and
+     `Pricing Category | <date> | <date>` (NVDA), each above an evidenced row.
+12e. The NVDA FY2024 10-Q layout: `July 30,` above an equally wide `2023`. The
+     header reads `July 30, — 2023`, and amounts are `Decimal`.
 
 Rule 2:
 
@@ -371,7 +460,9 @@ or a units caption):
     `December 31, 2024 — US$ — (Note 3)`.
 15. Identifiers: `Exhibit Number`, `CUSIP`, `Notes`, `Date`, `Filing Date`,
     `December 31, 2024 — Notes`, `December 31, 2024 — CUSIP`,
-    `2024 — Exhibit Number`, `CUSIP — RMB`, `Filing Date — December 31, 2024`.
+    `2024 — Exhibit Number`, `CUSIP — RMB`, `Filing Date — December 31, 2024`,
+    `CUSIP as of December 31, 2024`, `Notes for year ended December 31, 2024`.
+    Not an identifier: `Notes 2(a)` (a note reference).
     In table form, their numbers stay text, including when the cell is an
     `ix:nonFraction` fact.
 16. `Plan to Date` with no units, `$` cells or value words: the value stays text
@@ -387,23 +478,33 @@ Unchanged-behaviour guards:
 ## Acceptance
 
 1. All tests pass.
-2. Commit the sweep harness to
+2. Commit the harness to
    `docs/superpowers/audits/2026-10-11-xlsx-header-detection/` and run it on the
    same 60 filings with the implementation. For each table it compares old and
    new output by source coordinate and records:
    - digit-bearing source cells that were numbers and no longer are, or whose
      value changed;
-   - body rows containing digits that moved into the header;
+   - every row promoted from the body into the header, text-only rows included;
    - balanced columns, by value.
-3. Vault filings (META, NVDA, RDDT): no lost or changed numeric cell, no
-   balanced column lost, and every moved row is a real column heading.
-4. Other filings: every lost or changed cell and every moved row is classified
-   as a fix or a regression, with the source cells shown. Regressions block the
-   merge unless the user accepts them. No balanced column may be lost.
-5. Spot-check against the filings: the META FY2024 10-K balance sheet, its
-   revenue MD&A table and Basic EPS, the META Q1 2025 10-Q income statement, and
-   one RDDT 10-Q results-of-operations table.
-6. Add a CHANGELOG entry under the unreleased version describing the export
+3. **Primary statements, vault filings (META, NVDA, RDDT):** in every filing the
+   balance sheet, income statement and cash flow statement are exported, not
+   source text, and every value column has a period header including its year.
+   The XBRL period cross-check finds 0 mismatches and 0 untagged numbers in
+   them. The balance identity holds in every balance sheet column, and the cash
+   flow statement's opening cash plus net change (with the exchange-rate effect
+   where reported) equals closing cash. Any failure blocks the merge.
+4. Vault filings, all tables: no lost or changed numeric cell, no balanced
+   column lost, and every promoted row is reviewed as a real column heading.
+5. Other filings: every lost or changed cell and every promoted row with digits
+   is classified as a fix or a regression, with the source cells shown.
+   Regressions block the merge unless the user accepts them. No balanced column
+   may be lost. Any XBRL mismatch in an exported primary statement is
+   investigated; a real misattribution blocks the merge.
+6. Spot-check against the filings: the META FY2024 10-K balance sheet, its
+   revenue MD&A table and Basic EPS, the META Q1 2025 10-Q income statement, an
+   NVDA FY2024 10-Q balance sheet, and one RDDT 10-Q results-of-operations
+   table.
+7. Add a CHANGELOG entry under the unreleased version describing the export
    change and noting that Markdown output is unchanged.
 
 ## Rollout
