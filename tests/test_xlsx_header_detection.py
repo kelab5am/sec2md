@@ -54,6 +54,318 @@ BALANCE_SHEET = ('<table>' + DATE_OVER_YEARS + money('Cash', '43,889', '41,862')
                  + plain('Total assets', '276,054', '229,623') + '</table>')
 
 
+# --- Rule 1, positive cases -----------------------------------------------------
+
+def test_bare_instant_date_over_years_gives_period_headers():
+    table = prepared(BALANCE_SHEET)
+    assert table.status == 'exported'
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert values(table) == [['Cash', Decimal('43889'), Decimal('41862')],
+                             ['Total assets', Decimal('276054'), Decimal('229623')]]
+    assert table.cell_sources[0][1:] == (((2, 1), (2, 2)), ((2, 4), (2, 5)))
+
+
+def test_change_column_beside_years_gets_its_own_header():
+    table = prepared(
+        '<table><tr><td></td><td colspan="9">Year Ended December 31,</td></tr>'
+        '<tr><td></td><td colspan="3">2024</td><td colspan="3">2023</td><td colspan="3">2024 vs 2023 % change</td></tr>'
+        '<tr><td>Advertising</td><td>$</td><td>160,633</td><td></td><td>$</td><td>131,948</td><td></td>'
+        '<td></td><td>22</td><td>%</td></tr></table>')
+    assert table.headers == ('Column 1', 'Year Ended December 31, — 2024', 'Year Ended December 31, — 2023',
+                             'Year Ended December 31, — 2024 vs 2023 % change')
+    assert values(table) == [['Advertising', Decimal('160633'), Decimal('131948'), Decimal('0.22')]]
+
+
+def test_labelled_heading_row_with_heading_word_joins_the_header():
+    table = prepared(
+        '<table><tr><td></td><td></td><td></td><td colspan="4">Fair Value Measurement Using</td></tr>'
+        '<tr><td>Description</td><td colspan="2">December 31, 2024</td><td colspan="2">Level 1</td>'
+        '<td colspan="2">Level 2</td></tr>'
+        + '<tr><td>Money market funds</td><td>$</td><td>36,165</td><td>$</td><td>36,165</td><td>$</td><td>12</td></tr>'
+        '</table>')
+    assert table.status == 'exported'
+    assert table.headers == ('Description', 'December 31, 2024', 'Fair Value Measurement Using — Level 1',
+                             'Fair Value Measurement Using — Level 2')
+    assert values(table) == [['Money market funds', Decimal('36165'), Decimal('36165'), Decimal('12')]]
+
+
+def test_three_level_td_header():
+    table = prepared(
+        '<table><tr><td></td><td colspan="4">December 31, 2024</td></tr>'
+        '<tr><td></td><td colspan="2">Less than 12 months</td><td colspan="2">12 months or greater</td></tr>'
+        '<tr><td></td><td colspan="2">Fair Value</td><td colspan="2">Fair Value</td></tr>'
+        '<tr><td>U.S. government securities</td><td>$</td><td>6,860</td><td>$</td><td>4,330</td></tr></table>')
+    assert table.headers == ('Column 1', 'December 31, 2024 — Less than 12 months — Fair Value',
+                             'December 31, 2024 — 12 months or greater — Fair Value')
+    assert values(table) == [['U.S. government securities', Decimal('6860'), Decimal('4330')]]
+    assert table.cell_sources[0][1:] == (((3, 1), (3, 2)), ((3, 3), (3, 4)))
+
+
+def test_equal_width_headings_in_the_evidenced_row():
+    # META's debt table: Maturity and rates over cells as wide as they are.
+    table = prepared(
+        '<table><tr><td></td><td colspan="2">Maturity</td><td colspan="2">Stated Interest Rate</td>'
+        '<td colspan="2">December 31, 2024</td></tr>'
+        '<tr><td>2027 Notes</td><td colspan="2">2027</td><td colspan="2">3.50%</td><td>$</td><td>2,750</td></tr>'
+        '</table>')
+    assert table.headers == ('Column 1', 'Maturity', 'Stated Interest Rate', 'December 31, 2024')
+    assert values(table)[0][3] == Decimal('2750')
+
+
+def test_equal_width_headings_one_row_above_the_evidenced_row():
+    # NVDA's debt table: term and rate headings above the evidenced dates.
+    table = prepared(
+        '<table><tr><td></td><td colspan="2">Expected Remaining Term (years)</td>'
+        '<td colspan="2">Effective Interest Rate</td><td colspan="4">Carrying Value at</td></tr>'
+        '<tr><td></td><td colspan="2"></td><td colspan="2"></td><td colspan="2">Jan 25, 2026</td>'
+        '<td colspan="2">Jan 26, 2025</td></tr>'
+        '<tr><td>3.50% Notes Due 2027</td><td colspan="2">1.2</td><td colspan="2">3.54%</td>'
+        '<td>$</td><td>1,000</td><td>$</td><td>1,000</td></tr></table>')
+    assert table.headers[-2:] == ('Carrying Value at — Jan 25, 2026', 'Carrying Value at — Jan 26, 2025')
+    assert values(table)[0][-2:] == [Decimal('1000'), Decimal('1000')]
+
+
+def test_full_width_text_or_nil_in_the_data_row_does_not_block_the_header():
+    table = prepared(
+        '<table>' + DATE_OVER_YEARS
+        + '<tr><td>Level</td><td colspan="3">Level 1</td><td colspan="3">—</td></tr>'
+        + money('Cash', '10', '20') + '</table>')
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+
+
+def test_year_completes_an_equally_wide_yearless_date():
+    # NVDA FY2024 10-Q balance sheets: 'July 30,' over an equally wide '2023'.
+    table = prepared(
+        '<table><tr><td></td><td colspan="3">July 30,</td><td colspan="3">January 29,</td></tr>'
+        '<tr><td></td><td colspan="3">2023</td><td colspan="3">2023</td></tr>'
+        + money('Cash and cash equivalents', '5,783', '3,389') + '</table>')
+    assert table.headers == ('Column 1', 'July 30, — 2023', 'January 29, — 2023')
+    assert values(table) == [['Cash and cash equivalents', Decimal('5783'), Decimal('3389')]]
+    assert table.cell_sources[0][1:] == (((2, 1), (2, 2)), ((2, 4), (2, 5)))
+
+
+def test_footnoted_years_are_periods():
+    table = prepared(
+        '<table><tr><td></td><td colspan="9">Year Ended December 31,</td></tr>'
+        '<tr><td></td><td colspan="3">2024</td><td colspan="3">2023 (2)</td><td colspan="3">2022 (2)</td></tr>'
+        '<tr><td>Net income</td><td>$</td><td>62,360</td><td></td><td>$</td><td>39,098</td><td></td>'
+        '<td>$</td><td>23,200</td><td></td></tr></table>')
+    assert values(table) == [['Net income', Decimal('62360'), Decimal('39098'), Decimal('23200')]]
+    assert table.headers[1:] == ('Year Ended December 31, — 2024', 'Year Ended December 31, — 2023 (2)',
+                                 'Year Ended December 31, — 2022 (2)')
+
+
+# --- Rule 1, negative cases: today's output, or a fallback ----------------------
+
+def assert_body_row_kept(table, label, texts):
+    row = next(row for row in table.rows if row[0].value == label)
+    assert [cell.value for cell in row[1:] if cell.value is not None] == texts
+
+
+def test_unaudited_and_unit_captions_are_not_column_leaves():
+    for captions in (['(unaudited)'], ['(in thousands)'], ['(unaudited)', '(in thousands)']):
+        rows = ''.join(f'<tr><td></td><td colspan="6">{c}</td></tr>' for c in captions)
+        table = prepared('<table><tr><td></td><td colspan="6">Three months ended June 30,</td></tr>'
+                         '<tr><td></td><td colspan="3">2025</td><td colspan="3">2024</td></tr>'
+                         + rows + money('Revenue', '499,628', '281,184') + '</table>')
+        assert table.status == 'exported', captions
+        assert table.headers[1:] == ('Three months ended June 30, — 2025', 'Three months ended June 30, — 2024')
+
+
+def test_label_and_units_row_stays_in_the_body():
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + '<tr><td>Inventories:</td><td colspan="6">(In millions)</td></tr>'
+                     + money('Raw materials', '3,807', '3,408') + '</table>')
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert table.rows[0][0].value == 'Inventories:'
+
+
+@pytest.mark.parametrize('first, second', [('N/A', 'NM'), ('NM', '—'), ('March 31, 2025', 'June 30, 2025'),
+                                           ('Foo', 'Bar')])
+def test_labelled_text_row_as_wide_as_the_years_stays_in_the_body(first, second):
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + f'<tr><td>Alpha</td><td colspan="3">{first}</td><td colspan="3">{second}</td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert_body_row_kept(table, 'Alpha', [first, second])
+    assert values(table)[-1] == ['Beta', Decimal('10'), Decimal('20')]
+
+
+def test_labelled_range_row_falls_back_as_today():
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + '<tr><td>Alpha</td><td colspan="3">2027 - 2062</td><td colspan="3">3.50% - 4.65%</td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert table.status == 'source_text_only'
+
+
+def test_unlabelled_text_row():
+    narrow = prepared('<table>' + DATE_OVER_YEARS
+                      + '<tr><td></td><td></td><td>Foo</td><td></td><td></td><td>Bar</td><td></td></tr>'
+                      + money('Beta', '10', '20') + '</table>')
+    assert narrow.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert [cell.value for cell in narrow.rows[0]] == [None, 'Foo', 'Bar']
+    wide = prepared('<table>' + DATE_OVER_YEARS
+                    + '<tr><td></td><td colspan="3">As Reported</td><td colspan="3">As Adjusted</td></tr>'
+                    + money('Beta', '10', '20') + '</table>')
+    assert wide.headers == ('Column 1', 'December 31, — 2024 — As Reported', 'December 31, — 2023 — As Adjusted')
+
+
+@pytest.mark.parametrize('row', [
+    '<tr><td>Alpha</td><td>N/A</td></tr>', '<tr><td>Alpha</td><td>NM</td></tr>',
+    '<tr><td>Alpha</td><td>—</td></tr>', '<tr><td>Alpha</td><td>March 31, 2025</td></tr>',
+    '<tr><td>Alpha</td><td>2027 - 2062</td></tr>'])
+def test_codex_round_1_text_row_after_th_header(row):
+    source = f'<table><tr><th>Item</th><th>Amount</th></tr>{row}<tr><td>Beta</td><td>10</td></tr></table>'
+    table = prepared(source)
+    assert table.headers == ('Item', 'Amount')
+    assert table.rows[0][0].value == 'Alpha'
+    assert table.rows[-1][1].value == Decimal('10')
+
+
+def test_codex_round_1_year_shaped_amounts_under_a_wider_heading():
+    table = prepared('<table><tr><th>Item</th><th colspan="2">Amount</th></tr>'
+                     '<tr><td>Revenue</td><td>2024</td><td>2025</td></tr>'
+                     '<tr><td>Cost</td><td>100</td><td>150</td></tr></table>')
+    assert values(table) == [['Revenue', Decimal('2024'), Decimal('2025')], ['Cost', Decimal('100'), Decimal('150')]]
+
+
+def test_codex_round_1_text_table_with_a_dash():
+    table = prepared('<table><tr><td>Name</td><td>Title</td></tr><tr><td>Alice</td><td>CEO</td></tr>'
+                     '<tr><td>Bob</td><td>-</td></tr></table>')
+    assert table.headers == ('Column 1', 'Column 2')
+    assert len(table.rows) == 3
+
+
+def test_signature_table_is_unchanged():
+    table = prepared('<table><tr><td>Signature</td><td>Title</td><td>Date</td></tr>'
+                     '<tr><td>/s/ Mark Zuckerberg</td><td>Chief Executive Officer</td><td>January 29, 2025</td></tr>'
+                     '<tr><td>Peggy Alford</td><td></td><td></td></tr></table>')
+    assert table.headers == ('Column 1', 'Column 2', 'Column 3')
+    assert len(table.rows) == 3
+
+
+def test_currency_row_narrower_than_its_date_stays_out_of_the_header():
+    # TSM: 'NT$' spans only the '$' and amount cells of a wider date column.
+    table = prepared(
+        '<table><tr><td></td><td colspan="4">December 31, 2023</td><td colspan="4">December 31, 2024</td></tr>'
+        '<tr><td></td><td></td><td colspan="2">NT$</td><td></td><td></td><td colspan="2">NT$</td><td></td></tr>'
+        '<tr><td>Corporate bonds</td><td></td><td>$</td><td>113,851.9</td><td></td><td></td><td>$</td>'
+        '<td>172,092.0</td><td></td></tr></table>')
+    assert table.headers == ('Column 1', 'December 31, 2023', 'December 31, 2024')
+
+
+def test_codex_round_2_labelled_rows_of_amounts_fall_back():
+    for middle in ('<tr><td>Revenue</td><td colspan="2">2024</td><td colspan="2">2025</td></tr>',
+                   '<tr><td>Basic EPS</td><td colspan="2">.75</td><td colspan="2">.50</td></tr>'):
+        table = prepared('<table><tr><th>Item</th><th colspan="4">December 31, 2025</th></tr>' + middle
+                         + '<tr><td>Cost</td><td>$</td><td>100</td><td>$</td><td>150</td></tr></table>')
+        assert table.status == 'source_text_only', middle
+
+
+def test_codex_round_2_heading_across_two_periods_keeps_each_amount_under_its_date():
+    table = prepared(
+        '<table><tr><th>Item</th><th colspan="3">December 31, 2024</th><th colspan="3">December 31, 2023</th></tr>'
+        '<tr><td>Description</td><td colspan="2">Cash</td><td colspan="2">Debt</td><td colspan="2">Other</td></tr>'
+        '<tr><td>Revenue</td><td>$</td><td>100</td><td>$</td><td>200</td><td>$</td><td>300</td></tr></table>')
+    by_header = {}
+    for header, cell in zip(table.headers, table.rows[-1]):
+        by_header.setdefault(header, []).append(cell.value)
+    assert Decimal('200') not in by_header.get('December 31, 2024 — Debt', [])
+    assert all('Debt' not in header for header in table.headers)
+
+
+def test_codex_round_2_narrower_labelled_text_row_stays_in_the_body():
+    table = prepared('<table><tr><th>Item</th><th colspan="4">December 31, 2025</th></tr>'
+                     '<tr><td>Alpha</td><td colspan="2">Foo</td><td colspan="2">Bar</td></tr>'
+                     '<tr><td>Cost</td><td>$</td><td>100</td><td>$</td><td>150</td></tr></table>')
+    assert table.rows[0][0].value == 'Alpha'
+    assert all('Foo' not in header for header in table.headers)
+
+
+@pytest.mark.parametrize('first, second', [('N/A', 'NM'), ('.75', '.50')])
+def test_check_1_unlabelled_row_of_data_stays_in_the_body(first, second):
+    # Unlabelled, so checks 3 and 3b do not apply; only check 1 sees data cells.
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + f'<tr><td></td><td colspan="3">{first}</td><td colspan="3">{second}</td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert all(first not in header for header in table.headers)
+
+
+def test_check_3_labelled_row_needs_two_headings():
+    # 'Description' passes check 3b and 'Foo' is narrower than '2024'; only check 3 stops it.
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + '<tr><td>Description</td><td colspan="2">Foo</td><td></td><td></td><td></td><td></td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert all('Foo' not in header for header in table.headers)
+    assert table.status == 'source_text_only' or table.rows[0][0].value == 'Description'
+
+
+def test_check_8_years_need_a_period_heading_above():
+    # Unlabelled years under a non-period heading: only check 8 keeps them out of the header.
+    table = prepared('<table><tr><td></td><td colspan="6">Amount</td></tr>'
+                     '<tr><td></td><td colspan="3">2024</td><td colspan="3">2023</td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert all('2024' not in header for header in table.headers)
+
+
+def test_check_4b_labelled_row_as_wide_as_its_heading_stays_in_the_body():
+    # 'Description' is a heading word, so only check 4b keeps this row out of the header.
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + '<tr><td>Description</td><td colspan="3">Foo</td><td colspan="3">Bar</td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert_body_row_kept(table, 'Description', ['Foo', 'Bar'])
+
+
+def test_check_7b_years_on_a_heading_word_row_are_not_headers():
+    # 'Description' passes check 3b; only check 7b stops its years becoming headings.
+    table = prepared('<table><tr><td></td><td colspan="6">December 31,</td></tr>'
+                     '<tr><td>Description</td><td colspan="3">2024</td><td colspan="3">2023</td></tr>'
+                     + money('Beta', '10', '20') + '</table>')
+    assert table.status == 'source_text_only' or table.rows[0][0].value == 'Description'
+
+
+def test_heading_over_part_of_a_wider_amount_falls_back():
+    # Check 5 is a second line of defence: without it the unresolved-span check falls back too.
+    table = prepared('<table><tr><td></td><td colspan="4">December 31, 2024</td></tr>'
+                     '<tr><td></td><td>A</td><td>B</td><td colspan="2">C</td></tr>'
+                     '<tr><td>Revenue</td><td colspan="2">100</td><td>$</td><td>200</td></tr></table>')
+    assert table.status == 'source_text_only'
+
+
+@pytest.mark.parametrize('label', ['Revenue for year ended December 31, 2025', 'Cash as of December 31, 2025'])
+def test_line_item_mentioning_a_period_is_not_a_caption(label):
+    # A body label containing period wording must not head its year-shaped amounts.
+    table = prepared(f'<table><tr><th>Item</th><th colspan="4">December 31, 2025</th></tr>'
+                     f'<tr><td>{label}</td><td colspan="2">2024</td><td colspan="2">2025</td></tr>'
+                     '<tr><td>Cost</td><td>$</td><td>100</td><td>$</td><td>150</td></tr></table>')
+    assert table.status == 'source_text_only' or table.rows[0][0].value == label
+
+
+def test_pricing_category_heading_row():
+    table = prepared(
+        '<table><tr><td></td><td colspan="4">Fair Value at</td></tr>'
+        '<tr><td>Pricing Category</td><td colspan="2">Apr 27, 2025</td><td colspan="2">Jan 26, 2025</td></tr>'
+        '<tr><td>Money market funds</td><td>$</td><td>14,925</td><td>$</td><td>11,423</td></tr></table>')
+    assert table.headers == ('Pricing Category', 'Fair Value at — Apr 27, 2025', 'Fair Value at — Jan 26, 2025')
+    assert values(table) == [['Money market funds', Decimal('14925'), Decimal('11423')]]
+
+
+def test_header_count_and_period_are_byte_identical():
+    # table_completeness reads _header_count, which uses _PERIOD; neither may change.
+    source = inspect.getsource(xlsx_tables._header_count).encode()
+    assert hashlib.sha256(source).hexdigest() == 'ee9602d3dbf304d6dd0abbc69b84c830eaa16cf0f285437d7a2776ca3a3b9df1'
+    pattern = xlsx_tables._PERIOD.pattern.encode()
+    assert hashlib.sha256(pattern).hexdigest() == 'ee6996610a505583030f3ab913a7e8854dafd0e6b3c115602df6bbffcda21f16'
+
+
+def test_header_count_is_unchanged_for_the_completeness_check():
+    # table_completeness reads _header_count; these grids keep today's counts.
+    assert _header_count(grid_of(BALANCE_SHEET)) == 0
+    assert _header_count(grid_of('<table><tr><th>Item</th><th>Amount</th></tr>'
+                                 '<tr><td>Alpha</td><td>N/A</td></tr></table>')) == 1
+
+
 # --- Rule 3: identifier columns -------------------------------------------------
 
 @pytest.mark.parametrize('header', [

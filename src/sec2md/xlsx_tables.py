@@ -434,6 +434,154 @@ def _header_count(grid):
     return count
 
 
+# XLSX header extension (Rules 1 and 2 of the 2026-10-11 header detection spec).
+# _header_count and _PERIOD stay as they are: table_completeness reads
+# _header_count. A footnoted year ("2023 (2)") is a period in the export only.
+_EXPORT_PERIOD = re.compile(rf'^(?:(?:(?:three|six|nine|twelve) months?|years?) ended(?: {_MONTH} \d{{1,2}},?)?'
+                            rf'|(?:19|20)\d{{2}}(?: \(\d{{1,2}}\))?|{_MONTH} \d{{1,2}},? (?:19|20)\d{{2}})$', re.I)
+_YEAR_TOKEN = re.compile(r'(?:19|20)\d{2}(?:\s*\(\d{1,2}\))?')
+_HAS_YEAR = re.compile(r'(?:19|20)\d{2}')
+_BODY_NUMBER = re.compile(r'[$(\d+−.-][\d,.() $%+−-]*')
+_NIL = re.compile(r'(?:[—–-]+|n/?a|n\.a\.|nm|n/m|not meaningful|\*+)', re.I)
+_PERIOD_PHRASE = re.compile(rf'\b(?:years?|months?|quarters?|weeks?|periods?) ended\b'
+                            rf'|\b{_MONTH} \d{{1,2}},? (?:19|20)\d{{2}}\b', re.I)
+_INSTANT = re.compile(rf'(?:as of |as at )?{_MONTH} \d{{1,2}},?', re.I)
+_CURRENCY = re.compile(r'\(?(?:US\$|NT\$|HK\$|RMB|€|£|¥|\$)\)?', re.I)
+_SCALE_CAPTION = re.compile(r'\((?:dollars |amounts )?in (?:thousands|millions|billions)[^)]*\)', re.I)
+# A label-column caption is a period or unit caption and nothing else, so a line
+# item that merely mentions a date ('Cash as of December 31, 2025') is not one.
+_CAPTION_PERIOD = re.compile(
+    rf'(?:(?:as of|as at|as of or for the|for the)\s+)?'
+    rf'(?:(?:(?:three|six|nine|twelve) months?|(?:fiscal )?years?|quarters?) ended,?'
+    rf'(?: {_MONTH} \d{{1,2}},?(?: (?:19|20)\d{{2}})?)?'
+    rf'|{_MONTH} \d{{1,2}},?(?: (?:19|20)\d{{2}})?)'
+    rf'(?:,? \((?:dollars |amounts )?in (?:thousands|millions|billions)[^)]*\))?', re.I)
+# Column-heading words seen in the label column of real header rows.
+_HEADING_WORD = re.compile(
+    r'(?:description|exhibit(?: number| no\.?)?|period|issuance(?: period)?|name(?:/title| of [a-z ]+)?'
+    r'|record date|payment date|plan category|instrument|fiscal year|investment type|pricing category'
+    r'|range of exercise prices|type|category|item|class|security|date[a-z ]*)(?:\s*\(\d\))?', re.I)
+
+
+def _row_origins(row):
+    return [cell for cell in dict.fromkeys(c for c in row if c is not None) if cell.text.strip()]
+
+
+def _is_data_cell(cell, digits=False):
+    """A body value: a numeric fact, a number other than a bare year or, unless
+    digits are required, a nil token such as 'N/A', 'NM' or a dash."""
+    text = cell.text.strip()
+    if cell.is_numeric_fact:
+        return True
+    if _YEAR_TOKEN.fullmatch(text):
+        return False
+    if _BODY_NUMBER.fullmatch(text):
+        return not digits or bool(re.search(r'\d', text))
+    return not digits and bool(_NIL.fullmatch(text))
+
+
+def _period_heading(text):
+    text = text.strip()
+    return bool(_EXPORT_PERIOD.fullmatch(text) or _INSTANT.fullmatch(text) or _PERIOD_PHRASE.search(text))
+
+
+def _caption_label(text):
+    """A whole unit or period caption: '(in millions)', 'December 31,', 'As of'."""
+    text = re.sub(r'\s+', ' ', text).strip()
+    return bool(_UNIT_DECLARATION.fullmatch(text) or _SCALE_CAPTION.fullmatch(text)
+                or re.fullmatch(r'as (?:of|at)', text, re.I) or _CAPTION_PERIOD.fullmatch(text))
+
+
+def _heading_label(text):
+    """A label-column cell that can head a header row ('Description', '(in millions)')."""
+    return _caption_label(text) or bool(_HEADING_WORD.fullmatch(re.sub(r'\s+', ' ', text).strip()))
+
+
+def _export_header_count(grid):
+    """Header rows for the XLSX copy table.
+
+    Starts from _header_count and extends it downward through heading rows, up to
+    the first row with an amount. The header ends at the last accepted row with
+    span evidence: a heading wider than an amount beneath it, as
+    'December 31, 2024' spans '$' and '2,750'. Accepted rows after it stay in the
+    body. Without a data row the count is unchanged, so text tables are too.
+    """
+    base = _header_count(grid)
+    data = next((r for r in range(base, len(grid))
+                 if any(_is_data_cell(cell, digits=True) for cell in _row_origins(grid[r]))), None)
+    if data is None:
+        return base
+
+    def above(cell, index):
+        """The nearest heading above any of the cell's columns."""
+        for r in range(index - 1, -1, -1):
+            for col in range(cell.column, cell.column + cell.colspan):
+                upper = grid[r][col]
+                if upper is not None and upper is not cell and upper.text.strip():
+                    return upper
+        return None
+
+    def straddles(cell, index):
+        """Whether the cell is not wholly under one parent heading."""
+        columns = range(cell.column, cell.column + cell.colspan)
+        for r in range(index - 1, -1, -1):
+            uppers = [grid[r][col] for col in columns]
+            if any(u is not None and u is not cell and u.text.strip() for u in uppers):
+                return len(set(uppers)) != 1 or uppers[0] is None or not uppers[0].text.strip()
+        return False
+
+    def amounts_under(cell):
+        return [u for u in dict.fromkeys(grid[data][col] for col in range(cell.column, cell.column + cell.colspan))
+                if u is not None and _is_data_cell(u, digits=True)]
+
+    def year_heading_ok(year, index):
+        # A year heading completes a wider period heading, or an equally wide one
+        # that has no year of its own ('July 30,' over '2023').
+        upper = above(year, index)
+        return (upper is not None and _period_heading(upper.text)
+                and (upper.colspan > year.colspan
+                     or (upper.colspan == year.colspan and not _HAS_YEAR.search(upper.text))))
+
+    def rejected(index, label, headings, cells):
+        if any(_is_data_cell(cell) for cell in cells):
+            return True  # a body value, including 'N/A' and '.75'
+        if not headings or all(_UNIT_DECLARATION.fullmatch(cell.text.strip()) for cell in headings):
+            return True  # a body label: 'Assets', 'Inventories: | (In millions)'
+        if label is not None and (len(headings) < 2 or not _heading_label(label.text)):
+            return True  # a labelled row must look like a header row: 'Description | ...'
+        for cell in headings:
+            upper = above(cell, index)
+            if upper is not None and cell.colspan > upper.colspan:
+                return True  # header rows narrow downward
+            if (label is not None and upper is not None and cell.colspan >= upper.colspan
+                    and not _CURRENCY.fullmatch(cell.text.strip())):
+                return True  # a labelled row must subdivide the heading above it
+            if straddles(cell, index):
+                return True  # a heading across two parents would misattribute amounts
+            if any(cell.colspan < amount.colspan for amount in amounts_under(cell)):
+                return True
+            if _CURRENCY.fullmatch(cell.text.strip()) and upper is not None and cell.colspan < upper.colspan:
+                return True  # 'NT$' over part of a date column would split it
+        years = [cell for cell in headings if _YEAR_TOKEN.fullmatch(cell.text.strip())]
+        if label is not None and (_YEAR_TOKEN.fullmatch(label.text.strip()) or (years and not _caption_label(label.text))):
+            return True  # 'Revenue | 2024 | 2025' holds amounts
+        return not all(year_heading_ok(year, index) for year in years)
+
+    evidenced = base
+    for index in range(base, data):
+        row = grid[index]
+        cells = _row_origins(row)
+        if not cells:
+            continue
+        label = row[0] if row[0] is not None and row[0].text.strip() else None
+        headings = [cell for cell in cells if cell is not label]
+        if rejected(index, label, headings, cells):
+            break
+        if any(cell.colspan > amount.colspan for cell in headings for amount in amounts_under(cell)):
+            evidenced = index + 1
+    return evidenced
+
+
 # Identifier columns (Rule 3). A header part keeps identifier meaning unless the
 # identifier word belongs to a note reference, a maturity bucket, period wording
 # or a measured quantity. Ancestor parts never clear another part.
@@ -575,7 +723,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                            for col, c in enumerate(row)) for r, row in enumerate(grid))
     notes.append('Original text uses source columns and header levels; span-covered positions are blank. '
                  'Source span origins and symbol coordinates are retained in the table snapshot and cell_sources.')
-    header_count = _header_count(grid)
+    header_count = _export_header_count(grid)
     # Body labels and individual column units retain their local scope. A source
     # declaration must precede data and span all value columns, including the
     # common first grouping row (e.g. Inventories: / (In millions)).
