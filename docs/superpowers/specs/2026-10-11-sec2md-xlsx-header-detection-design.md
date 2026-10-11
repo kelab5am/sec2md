@@ -1,6 +1,6 @@
 # sec2md XLSX Header Detection Design
 
-Date: 2026-10-11 (revision 2, same day)
+Date: 2026-10-11 (revision 3, same day)
 
 Status: Draft for review. Not implemented.
 
@@ -36,8 +36,24 @@ prototype before it was accepted.
 
 Codex's finding 3 example also shows a limitation that exists today: when the
 `Item | Notes | Amount` row is not recognised as a header, the period heading
-above alone makes the `Notes` column numeric. Revision 2 neither causes nor
+above alone makes the `Notes` column numeric. This design neither causes nor
 fixes that (see "Known remaining gaps").
+
+**Revision 2 → 3** (user request: recover revision 1's coverage without losing
+revision 2's safety; the user needs the tables correct and accurate).
+
+Revision 2's check 5 required every heading to be wider than every data cell
+beneath it. That rejected 96 vault tables whose real headings sit over equally
+wide cells: interest rates (`3.50%`), maturity years (`2027`), remaining lives
+(`4.2`), share counts and full-width nil dashes. A trace showed check 5 was the
+only blocker for all 96. Revision 1 exported them with correct headers, but it
+also pulled about 30 exhibit-list entries into headers.
+
+| Change | Why |
+|---|---|
+| Check 5 split in two. Per row: no heading may be narrower than an amount beneath it. Per header: the header ends at the last accepted row that has span evidence (a heading wider than an amount beneath it); rows accepted after it are dropped. | The row directly above the data must prove it is a heading. Rows above it may repeat widths or be spanning captions. |
+| Only digit-bearing data cells count as amounts for check 5. | A full-width text cell (`Level 1`) or nil dash says nothing about the heading above it. |
+| New check 4b: a labelled row may not repeat the width of the heading above it, except for a currency caption. | Closes a hole found while testing the change: `Alpha \| Foo \| Bar`, with each cell as wide as the year above it, carried span evidence. Real lower header rows subdivide (`Shares` under `Class A`). |
 
 ## Root cause
 
@@ -105,9 +121,13 @@ Three approaches were considered:
 - **Data cell:** `is_numeric_fact`; or text, not a year token, that fully
   matches the existing body-number pattern `[$(\d+−-][\d,.() $%+−-]*`; or a
   nil token.
-- **Digit data cell:** a data cell whose text contains a digit, or an
+- **Digit data cell (amount):** a data cell whose text contains a digit, or an
   `is_numeric_fact` cell.
 - **Data row:** the first row at or after `base` containing a digit data cell.
+- **Amounts beneath a heading:** the digit data cells of the data row that lie
+  in the heading's columns.
+- **Span evidence:** a heading spanning more columns than some amount beneath
+  it.
 - **Heading above a cell:** scanning upward from the row above, the first
   origin with text covering any of the cell's columns.
 - **Period heading:** text that fully matches `_EXPORT_PERIOD` (below) or an
@@ -124,8 +144,8 @@ leaves text-only tables (signatures, power of attorney, audit matters) exactly
 as today.
 
 Otherwise scan each row from `base` up to, not including, the data row. Skip
-rows with no origins. A row joins the header only if every check passes. The
-first row that fails a check ends the scan, and the count so far is returned.
+rows with no origins. A row is accepted only if every check passes. The first
+row that fails a check ends the scan.
 
 | # | Check | Rejects, for example |
 |---|---|---|
@@ -133,14 +153,26 @@ first row that fails a check ends the scan, and the count so far is returned.
 | 2 | The row has headings, and they are not all unit declarations (`_UNIT_DECLARATION`) | `Assets`, `Inventories: \| (In millions)` |
 | 3 | If the row has a label, it has at least two headings | `Alice \| CEO` |
 | 4 | No heading spans more columns than its heading above (headers narrow downward) | `(unaudited)` across every period under the years |
-| 5 | Each heading spans more columns than every data-row origin beneath it | `Revenue \| 2024 \| 2025` above `Cost \| 100 \| 150` (equal widths) |
+| 4b | If the row has a label, each heading with a heading above is strictly narrower than it, unless it is a currency caption | `Alpha \| Foo \| Bar` with each cell as wide as the year above it |
+| 5 | No heading is narrower than an amount beneath it | A heading over part of a wider amount |
 | 6 | A currency caption is not narrower than its heading above | `NT$` over only the `$` and amount cells of `December 31, 2023` |
 | 7 | The label is not a year token | `2026 \| 2000` |
 | 8 | Every year-token heading sits strictly inside a wider period heading above it | `2024` under `Amount` |
 
-Check 5 is the affirmative evidence. In SEC tables a column heading spans the
-`$`, amount and padding cells beneath it (`2024` spans 3), while a body cell in
-the same column does not.
+**The header ends at the last accepted row with span evidence.** Return the
+index after that row, or `base` if no accepted row has evidence. Accepted rows
+below the last evidenced row are not header rows; they stay in the body.
+
+Span evidence is the affirmative test. In SEC tables the heading directly above
+the data spans the `$`, amount and padding cells beneath it
+(`December 31, 2024` spans `$` and `2,750`). A body row in the same position
+does not: its cells are the amounts' width or narrower, so it carries no
+evidence, and it is dropped from the header if it is the last accepted row.
+Other headings may be as wide as the cells beneath them when the evidence comes
+from their own row or a row below. In META's debt table, `Maturity` and
+`Stated Interest Rate` sit over `2027` and `3.50%` in the same row as
+`December 31, 2024`. In NVDA's, `Expected Remaining Term (years)` sits one row
+above the evidenced dates.
 
 ### Rule 2: footnoted years are periods in the export
 
@@ -188,40 +220,57 @@ words). Without such evidence, a value stays text and gets the existing
 
 ## Evidence
 
-A prototype of revision 2 (monkeypatched, outside the repo) was measured on 60
+A prototype of revision 3 (monkeypatched, outside the repo) was measured on 60
 filings: 18 META, 14 NVDA and 10 RDDT 10-K/10-Q filings from the RCQ vault, plus
 the 18 filings in `outputs/table-completeness-corpus` (US 10-K/10-Q, banks and
-three 20-F filers). Numbers count digit-bearing source cells converted to
-numbers. "Balanced" counts columns whose `Total assets` equals `Total
-liabilities and … equity` as numbers, compared by value.
+three 20-F filers). The comparison is by source coordinate. Numbers count
+digit-bearing source cells converted to numbers. "Balanced" counts columns
+whose `Total assets` equals `Total liabilities and … equity` as numbers,
+compared by value.
 
 | Group | Fallback tables before → after | Numeric cells before → after | Balanced columns before → after |
 |---|---|---|---|
-| META (18) | 408 → 96 | 8,309 → 14,876 | 28 → 36 |
-| NVDA (14) | 270 → 37 | 6,550 → 12,229 | 22 → 28 |
-| RDDT (10) | 174 → 78 | 6,092 → 7,323 | 16 → 20 |
-| Others (18) | 1,004 → 623 | 9,511 → 21,012 | 23 → 37 |
+| META (18) | 408 → 57 | 8,309 → 16,091 | 28 → 36 |
+| NVDA (14) | 270 → 7 | 6,550 → 13,211 | 22 → 28 |
+| RDDT (10) | 174 → 10 | 6,092 → 9,407 | 16 → 20 |
+| Others (18) | 1,004 → 573 | 9,511 → 22,425 | 23 → 37 |
+
+Comparison of the three revisions on the vault filings:
+
+| | Rev 1 | Rev 2 | Rev 3 |
+|---|---|---|---|
+| Fallback tables, META / NVDA / RDDT | 57 / 7 / 10 | 96 / 37 / 78 | 57 / 7 / 10 |
+| Numeric cells lost or changed | 0 | 0 | 0 |
+| Body rows with digits moved into headers | 69 | 29 | 38 |
+| Of those, not real headings | about 30 exhibit entries | 0 | 0 |
 
 - **Vault filings:** no numeric cell lost or changed, and no balanced column
-  lost. 29 body rows with digits moved into headers; all are real column
-  headings (footnoted repurchase headings such as
-  `Total Number of Shares Purchased (1)`, stock-performance chart dates, and
-  RDDT vesting-schedule headings).
-- **Other filings:** 78 digit-bearing cells in 10 tables are no longer numbers,
-  and 7 cells in 3 tables changed value. Examples:
+  lost. All 38 moved rows were reviewed and are real column headings:
+  footnoted repurchase headings such as `Total Number of Shares Purchased (1)`,
+  stock-performance chart dates, RDDT vesting-schedule headings and NVDA
+  `Pricing Category | <date> | <date>` rows.
+- **Spot checks against the source cells** (META FY2024 10-K intangibles and
+  debt, META Q1 2025 10-Q fair value, RDDT Q2 2025 stockholders' equity and
+  stock options): every value sits under its correct period and column.
+- **Adversarial rows** placed between SEC-style year headings and the data, with
+  cells as wide as the years: a text row, a nil row (`N/A | NM`) and a date row
+  stay in the body with their values. A range row (`2027 - 2062`) makes the
+  table fall back to source text, as today.
+- **Other filings:** 95 digit-bearing cells in 11 tables are no longer numbers,
+  and 16 cells in 5 tables changed value.
+  - TSM's two statements of financial position (20): note references (`7`,
+    `8`, …) now sit under a `Notes` header as text. A fix.
   - MSFT "Long-term Debt" (21): maturity years such as `2039` under
     `Maturities (calendar year)` are now flagged text. Likely a fix.
-  - TSM "Share Ownership" (26): ownership percentages under
-    `Percentage of Outstanding Common Shares` are now flagged text ("Conflicting
-    explicit units"). A visible regression.
-  - The rest, in TSM, NTRA and UNH (31 cells), and the 7 changed cells in TSM
-    and CRDO, are not yet classified.
+  - JPM regulatory capital (9 changed): `12.3 | %` now converts to `0.123`
+    instead of `12.3`. A fix (see the mixed-scale gap below).
+  - TSM "Share Ownership" (26): ownership percentages are now flagged text
+    ("Conflicting explicit units"). A visible regression.
+  - Not yet classified: 28 cells in TSM and NTRA tables, and 7 changed cells in
+    TSM and CRDO.
 - All 249 existing XLSX tests pass with the prototype, including the NVDA
-  fixture counts and the year-as-data cases.
-
-Revision 1's looser rules converted more tables (META 408 → 57 fallbacks), but
-Codex's findings 1, 2 and 4 showed they could swallow body rows. Revision 2
-trades some of those gains for that safety.
+  fixture counts and the year-as-data cases. All Codex round 1
+  counterexamples keep today's output.
 
 ## Known remaining gaps (out of scope)
 
@@ -232,10 +281,20 @@ trades some of those gains for that safety.
 - **Tables with no header row**, such as META's `Thereafter` and
   `Contractual Commitments` maturity tables, where only body spans show how the
   `$` and amount cells pair up.
-- **Column headings no wider than the data cells.** Check 5 rejects them, so
-  simple tables built from 1-column cells keep today's behaviour. This includes
-  Codex's `Item | Notes | Amount` example, where the `Notes` column is already
-  numeric today.
+- **Headers with no span evidence.** A header whose last row is no wider than
+  the amounts beneath it is not extended, so simple tables built from 1-column
+  cells keep today's behaviour. This includes Codex's `Item | Notes | Amount`
+  example, where the `Notes` column is already numeric today.
+- **Unlabelled full-width text rows are headings.** Check 4b applies only to
+  labelled rows, so that wrapped headings over several rows
+  (`Weighted-` / `average` / `grant date fair value`) still work. An unlabelled
+  text row as wide as the heading above it therefore joins the header. In
+  filings such rows are headings (`As Reported | As Adjusted`); no amount is
+  moved either way.
+- **Mixed scale in a percent column.** When only the first row of a column shows
+  `%` (JPM: `12.3 | %`, then `13.8`), the first value converts to `0.123` and
+  the rest stay `13.8`. This is existing value-conversion behaviour that the new
+  headers expose, not something this change introduces.
 - **Currency rows narrowing a column (20-F).** Check 6 keeps TSM's `NT$` rows out
   of the header, so those tables keep today's output instead of splitting
   `(82.7 | )`. Using them as headers needs a `_column_groups` change.
@@ -260,6 +319,15 @@ Rule 1, positive cases:
    two cells) above amounts: the headings become headers.
 4. A three-level `<td>` header (`December 31, 2024` / `Less than 12 months` /
    `Fair Value`) above amounts.
+5a. Headings as wide as the cells beneath them, in the evidenced row: the META
+    debt layout `Maturity | Stated Interest Rate | December 31, 2024` over
+    `2027 | 3.50% | $ 2,750`. All three become headers; the carrying value is a
+    `Decimal`.
+5b. Equal-width headings one row above the evidenced row: the NVDA layout
+    `Expected Remaining Term (years) | Effective Interest Rate` over
+    `<date> | <date>`.
+5c. A full-width text cell or nil dash in the data row under a heading
+    (`Level 1`, `—`) does not block the header.
 
 Rule 1, negative cases (each asserts the output equals today's):
 
@@ -277,6 +345,16 @@ Rule 1, negative cases (each asserts the output equals today's):
 11. A signature table and a two-column text table.
 12. `NT$` spanning only the `$` and amount cells under `December 31, 2023`
     (the TSM pattern).
+12a. Check 4b and the evidence rule: under `December 31,` / `2024 | 2023`
+     (each year spanning 3), insert a labelled row whose cells are as wide as
+     the years: `Alpha | Foo | Bar`, `Alpha | N/A | NM` and
+     `Alpha | March 31, 2025 | June 30, 2025`. Each stays a body row with its
+     text, and the amounts below stay `Decimal`. With `Alpha | 2027 - 2062 |
+     3.50% - 4.65%`, the table falls back to source text, as today.
+12b. An unlabelled text row as the last row before the data. With cells as wide
+     as the amounts, it carries no evidence and stays in the body. With cells as
+     wide as the years (`As Reported | As Adjusted`), it joins the header as a
+     wrapped heading (see "Known remaining gaps"). Both cases are pinned.
 
 Rule 2:
 
