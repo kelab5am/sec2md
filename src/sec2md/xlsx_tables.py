@@ -434,9 +434,41 @@ def _header_count(grid):
     return count
 
 
+# Identifier columns (Rule 3). A header part keeps identifier meaning unless the
+# identifier word belongs to a note reference, a maturity bucket, period wording
+# or a measured quantity. Ancestor parts never clear another part.
+_NOTE_REF = re.compile(r'\(?notes? \d+[a-z]?(?:\([a-z]\))?\)?', re.I)
+_MATURITY_BUCKET = re.compile(r'(?:(?:less|more) than \d+ years?|\d+\s*[-–]\s*\d+ years?'
+                              r'|\d+ years? or (?:more|greater|less))', re.I)
+_PERIOD_WORDS = re.compile(
+    rf'\b(?:for )?(?:the )?(?:(?:three|six|nine|twelve) )?(?:years?|months?|quarters?|weeks?|periods?) ended\b'
+    rf'|\b{_MONTH} \d{{1,2}},?(?: (?:19|20)\d{{2}})?|\b(?:19|20)\d{{2}}\b|\bas (?:of|at)\b', re.I)
+_QUANTITY = re.compile(r'\bnumber of\b|\bto date\b|\bper share\b', re.I)
+# Quantity phrases a heading may wrap across two header rows.
+_WRAPPED_QUANTITY = re.compile(r'\bnumber of\b|\bgrant[- ]date fair value\b', re.I)
+
+
+def _identifier_column(header):
+    """Whether a flattened header names an identifier column."""
+    parts = [part.strip() for part in header.split(' — ') if part.strip()]
+    for index, part in enumerate(parts):
+        if not _IDENTIFIER.search(part):
+            continue
+        if _NOTE_REF.fullmatch(part) or _MATURITY_BUCKET.fullmatch(part):
+            continue
+        if not _IDENTIFIER.search(_PERIOD_WORDS.sub(' ', part)):
+            continue  # 'Year ended March 31,' is a period, not an identifier
+        if any(pattern.search(part) for pattern in (_VALUE, _ROW_UNIT, _QUANTITY)):
+            continue  # the identifier word names a measured quantity: 'Number of Shares'
+        if _WRAPPED_QUANTITY.search(' '.join(parts[index:index + 2])):
+            continue  # a wrapped heading: 'Number — of RSUs', 'grant date — fair value'
+        return True
+    return False
+
+
 def _numeric_role(text, header, label, cells, units, financial, percent_header):
     period_header = all(_PERIOD.fullmatch(part) for part in header.split(' — '))
-    if _IDENTIFIER.search(header) and not period_header:
+    if _identifier_column(header) and not period_header:
         return 'text'
     if percent_header or _PERCENT_UNIT.fullmatch(label.strip()):
         return 'percent'
@@ -619,7 +651,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                         bool(_ROW_UNIT.search(local_units) or '$' in local_units))
             if conflict:
                 value = CellValue(text, '@', text, 'Conflicting explicit units; verify the row, column and displayed value units.')
-            elif role == 'text' and index > 0 and re.search(r'\d', text) and not _IDENTIFIER.search(headers[index]):
+            elif role == 'text' and index > 0 and re.search(r'\d', text) and not _identifier_column(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
             if value.review_reason:
                 issues.append(f'Source row {r}, column {groups[col][0]}: {value.review_reason}')
