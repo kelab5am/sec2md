@@ -467,6 +467,7 @@ _HEADING_WORD = re.compile(
 _FOOTNOTE_MARK = re.compile(r'\([a-z\d]{1,2}\)|\*+', re.I)
 _PERIOD_QUALIFIER = re.compile(
     r'\((?:unaudited|audited|restated|as restated|as adjusted|as reported|as previously reported)\)', re.I)
+_PARENTHESISED = re.compile(r'\([^()]*\)')
 _DATE_WORDS = re.compile(r'\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?'
                          r'|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\.? \d{1,2}', re.I)
 _NUMERIC_DATE = re.compile(r'\b\d{1,2}/\d{1,2}/(?:\d{4}|\d{2})\b')
@@ -513,10 +514,13 @@ def _heading_label(text):
 def _period_text(text):
     """Text that only names a period: 'Three months ended March 31, 2025',
     'December 31, 2025 (a)', '2023 (2)', 'Thirteen Weeks Ended May 3, 2025:',
-    '12/31/2024'. Not 'Balance as of December 31, 2024' or 'Fiscal Year' (no date,
-    year or 'ended')."""
+    '12/31/2024', 'Year ended December 31, 2022 (in millions)'. Not 'Balance as of
+    December 31, 2024' or 'Fiscal Year' (no date, year or 'ended')."""
     text = re.sub(r'\s+', ' ', text).strip()
     rest = _FOOTNOTE_MARK.sub(' ', text)
+    # A unit caption in parentheses: '(in millions)', '(dollars in millions)'.
+    rest = _PARENTHESISED.sub(lambda m: ' ' if _UNIT_DECLARATION.fullmatch(m[0]) or _SCALE_CAPTION.fullmatch(m[0])
+                              else m[0], rest)
     rest = re.sub(r':$', '', _PERIOD_QUALIFIER.sub(' ', rest).strip())
     for pattern in (_DATE_WORDS, _NUMERIC_DATE, _HAS_YEAR, _WEEK_COUNT, _PERIOD_VOCABULARY):
         rest = pattern.sub(' ', rest)

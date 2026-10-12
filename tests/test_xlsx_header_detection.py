@@ -379,10 +379,12 @@ def outcome(table):
 
 
 def headers_over_amounts(table, first_row):
-    """The column header of every amount converted from source row first_row on."""
-    return [header for row, sources in zip(table.rows, table.cell_sources)
+    """The headers over every amount converted from source row first_row on: its column's header and the label
+    column's header, which heads every row (JPM: 'Year ended December 31, 2023 (in millions)')."""
+    over = [header for row, sources in zip(table.rows, table.cell_sources)
             for header, cell, origins in zip(table.headers, row, sources)
             if origins and origins[0][0] >= first_row and isinstance(cell.value, Decimal)]
+    return over + list(table.headers[:1]) if over else over
 
 
 # A stockholders' equity statement stacking two period blocks, as in the RDDT and
@@ -417,31 +419,48 @@ SECOND_BLOCK_AMOUNTS = (money('Balance as of December 31, 2024', '(1,705,853)', 
                         + money('Net income', '26,158', '26,158'))
 
 
-@pytest.mark.parametrize('first_caption, second_caption', [
-    (FIRST_CAPTION, caption_row('Three months ended March 31, 2025')),
-    (FIRST_CAPTION, caption_beside_headings('Three months ended March 31, 2025')),
-    (FIRST_CAPTION, caption_row('Three Months Ended June 30, 2025 and 2024')),
-    (FIRST_CAPTION, caption_row('Three Months Ended June 30, 2025 (1)')),
-    (FIRST_CAPTION, label_caption('Three months ended March 31, 2025')),
-    (FIRST_CAPTION, caption_row('Three Months Ended March 31, 2025 (a)')),
-    (FIRST_CAPTION, caption_beside_headings('Three Months Ended March 31, 2025 (Unaudited)')),
-    (FIRST_CAPTION, label_caption('Three months ended March 31, 2025:')),
-    ('Thirteen Weeks Ended May 4, 2024', caption_row('Thirteen Weeks Ended May 3, 2025')),
-    (FIRST_CAPTION, caption_row('Period from January 1, 2025 through March 31, 2025')),
-    (FIRST_CAPTION, caption_row('Three months ended March 31, 2025, as restated')),
-    (FIRST_CAPTION, '<tr><td></td><td colspan="5">Three months ended March 31, 2025</td><td>(1)</td></tr>'
-     + EQUITY_HEADINGS),
-    (FIRST_CAPTION, '<tr><td>Three months ended March 31, 2025</td><td colspan="5"></td><td>*</td></tr>'
-     + EQUITY_HEADINGS),
+def stacked(second_caption, first_caption=FIRST_CAPTION):
+    return '<table>' + first_block(first_caption) + second_caption + SECOND_BLOCK_AMOUNTS + '</table>'
+
+
+def jpm_block(caption, interest_rate, total):
+    # JPM 10-K derivatives table: the period, with its unit, heads the label column beside the column headings.
+    return (f'<tr><td>{caption}</td><td colspan="3">Amounts reclassified from AOCI to income</td>'
+            '<td colspan="3">Amounts recorded in OCI</td></tr><tr><td>Contract type</td></tr>'
+            + money('Interest rate', *interest_rate) + money('Total', *total))
+
+
+JPM_LAYOUT = ('<table>' + jpm_block('Year ended December 31, 2023 (in millions)', ('(1,839)', '274'), ('(1,775)', '483'))
+              + jpm_block('Year ended December 31, 2022 (in millions)', ('(153)', '(7,131)'), ('(420)', '(7,473)'))
+              + '</table>')
+
+
+@pytest.mark.parametrize('first_period, source', [
+    (FIRST_CAPTION, stacked(caption_row('Three months ended March 31, 2025'))),
+    (FIRST_CAPTION, stacked(caption_beside_headings('Three months ended March 31, 2025'))),
+    (FIRST_CAPTION, stacked(caption_row('Three Months Ended June 30, 2025 and 2024'))),
+    (FIRST_CAPTION, stacked(caption_row('Three Months Ended June 30, 2025 (1)'))),
+    (FIRST_CAPTION, stacked(label_caption('Three months ended March 31, 2025'))),
+    (FIRST_CAPTION, stacked(caption_row('Three Months Ended March 31, 2025 (a)'))),
+    (FIRST_CAPTION, stacked(caption_beside_headings('Three Months Ended March 31, 2025 (Unaudited)'))),
+    (FIRST_CAPTION, stacked(label_caption('Three months ended March 31, 2025:'))),
+    ('Thirteen Weeks Ended May 4, 2024',
+     stacked(caption_row('Thirteen Weeks Ended May 3, 2025'), 'Thirteen Weeks Ended May 4, 2024')),
+    (FIRST_CAPTION, stacked(caption_row('Period from January 1, 2025 through March 31, 2025'))),
+    (FIRST_CAPTION, stacked(caption_row('Three months ended March 31, 2025, as restated'))),
+    (FIRST_CAPTION, stacked('<tr><td></td><td colspan="5">Three months ended March 31, 2025</td><td>(1)</td></tr>'
+                            + EQUITY_HEADINGS)),
+    (FIRST_CAPTION, stacked('<tr><td>Three months ended March 31, 2025</td><td colspan="5"></td><td>*</td></tr>'
+                            + EQUITY_HEADINGS)),
+    ('Year ended December 31, 2023', JPM_LAYOUT),
 ], ids=['caption-row', 'caption-beside-headings', 'two-years', 'footnoted', 'label-column', 'letter-footnote',
         'unaudited-beside-headings', 'colon-label-column', 'thirteen-weeks', 'period-from-through', 'as-restated',
-        'footnote-own-cell', 'star-own-cell-label-column'])
-def test_guard_stacked_period_blocks(first_caption, second_caption, monkeypatch):
+        'footnote-own-cell', 'star-own-cell-label-column', 'jpm-unit-captions'])
+def test_guard_stacked_period_blocks(first_period, source, monkeypatch):
     # D1: the extended header would put the second block's amounts under the first block's period.
-    source = '<table>' + first_block(first_caption) + second_caption + SECOND_BLOCK_AMOUNTS + '</table>'
     table = prepared(source)
     assert outcome(table) == outcome(todays(source, monkeypatch))
-    assert not any(first_caption in header for header in headers_over_amounts(table, SECOND_BLOCK_ROW))
+    assert not any(first_period in header for header in headers_over_amounts(table, SECOND_BLOCK_ROW))
 
 
 def years_under_instant(first, second):
@@ -518,6 +537,7 @@ def test_guard_cost_on_repeated_section_label(monkeypatch):
     ('Three Months Ended March 31, 2025 (Unaudited)', True), ('Three months ended March 31, 2025:', True),
     ('Thirteen Weeks Ended May 3, 2025', True), ('Period from January 1, 2025 through March 31, 2025', True),
     ('12/31/2024', True), ('2024 (a)', True), ('March 31, 2025 (Restated)', True),
+    ('Year ended December 31, 2022 (in millions)', True),
     ('Balance as of December 31, 2024', False), ('2024 vs 2023 % change', False), ('Common Stock', False),
     ('Fiscal Year', False), ('Market 10', False),
     ('Cash paid for income taxes for the years ended December 31,', False)])
