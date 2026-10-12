@@ -190,7 +190,7 @@ Every other digit cell in the column stays text, as today. A `$` inside longer t
   - `format` and `sign`;
   - `displayed`: the fact element's visible text.
 - **`_cell` fills it** from the `ix:nonFraction` nodes inside the cell.
-- **Unit resolution.** The parser builds a unit map once from the document's `xbrli:unit` definitions. `snapshot_html_table` and `snapshot_positioned_table` receive it.
+- **Unit resolution.** A unit map is built once per document from its `xbrli:unit` definitions. It is reached from the table node's document root and cached by that root, so `parser.py` does not change.
 - **`is_numeric_fact` keeps its meaning,** so `table_completeness.py` and every other reader are unaffected.
 - **The audit harness's `export_tables.py`** records `scale`, `format` and the resolved unit for each fact.
 
