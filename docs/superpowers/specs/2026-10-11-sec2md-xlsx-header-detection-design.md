@@ -1,9 +1,10 @@
 # sec2md XLSX Header Detection Design
 
-Date: 2026-10-11 (revision 5, same day)
+Date: 2026-10-11 (revision 5); revision 6 on 2026-10-12
 
-Status: Draft for review. Not implemented. Implementation plan:
-`../plans/2026-10-11-sec2md-xlsx-header-detection.md`.
+Status: Draft for review. Revision 5 is implemented on branch
+`fix/xlsx-header-detection` (not merged); revision 6 adds the period-row guard.
+Implementation plan: `../plans/2026-10-11-sec2md-xlsx-header-detection.md`.
 
 Scope: `src/sec2md/xlsx_tables.py` only. The Markdown renderer, strict's numeric
 trace and the table completeness check must not change.
@@ -102,6 +103,34 @@ under an equally wide period heading that has no year of its own.
 Also from this round: the Rule 2 change to `_numeric_role` was dead code (the
 identifier rule already treats footnoted-year headers as periods), so it is
 dropped.
+
+**Acceptance run of revision 5** (revision 5 → 6). The implementation of
+revision 5 reproduced every expected number in the plan. A code review of the
+implementation and an extra check in the acceptance run found two defects that
+the stated checks could not see. Each was reproduced before it was accepted.
+
+| Finding | Verdict | Change |
+|---|---|---|
+| D1. Critical: stacked period blocks. 21 vault statements of stockholders' equity (9 META 10-Qs, 12 RDDT 10-Qs) put a second period block under its own caption row inside the same table. The extended header takes the first block's caption, so the second block's 906 numbers (852 XBRL facts) sit under the first block's period. RDDT's Q1 2025 net income `26,158` sits under `Three months ended March 31, 2024 — Total Stockholders' Equity (Deficit)`. The tables are `needs_review`, but the issue names the caption row, not the header. On `main` 20 are `source_text_only` and 1 is `needs_review`. | Confirmed (found by an extra check of every XBRL fact in every exported table) | Period-row guard (Rule 1). Acceptance checks every fact in every exported table, not only the primary statements. Giving each block its own header on one sheet is a separate follow-up spec. |
+| I1. High: a stranded period row. A row the scan accepts after the last evidenced row stays in the body. When that row holds the years or dates, the headers lack them: TSM 20-F #105 exports with `Measurement Date` twice, its dates in the first body row and 4 tagged rates turned to unflagged text. No primary statement is affected. | Confirmed (code review) | The same period-row guard. |
+| I2. Medium: a table-wide caption such as `(In millions, except per share and percentage data)` makes `_numeric_role` read plain amounts as percents (`16,169` → `161.69`). | Confirmed, existing behaviour | No change: value conversion is unchanged by this spec. It occurs 0 times in the 60 filings, because they write the plural `except percentages`, which `_UNIT_DECLARATION` does not match. Recorded as a known gap. |
+
+**Round 4** (Codex on gpt-6.1-sol, reviewing the revision 6 draft). Each finding
+was checked against the code before it was accepted.
+
+| Finding | Verdict | Change |
+|---|---|---|
+| 1. High: a second caption sharing its row with column headings (`Three Months Ended June 30, 2025 \| Common Stock \| …`), or a stranded date row labelled `Date`, was not a period row, so the guard missed it. | Confirmed | A period row needs only one period-text origin and no data cell. Tests for both. |
+| 2. High: period text missed `Three Months Ended June 30, 2025 and 2024`, `Three Months Ended June 30, 2025 (1)` and `December 31, 2025 (1)` (verified: the draft's pattern union returns False for all three). | Confirmed | Period text is defined by vocabulary: footnotes removed, nothing but period words, dates and years left. |
+| 3. High: "returning `base` restores today's output" is false. Rule 3 still applies, so a header `main` vetoes as an identifier (`Year Ended December 31, 2024`: `_IDENTIFIER` matches, `_PERIOD` does not fully match) holds numbers, which a table-wide percent caption can then divide by 100. | Confirmed | The claim is narrowed to "today's header rows", and the interaction is a known gap. 0 such cells in the corpus. |
+| 4. High: the all-table check accepted a duration starting the day after any header date and did not read `Quarter ended` as 3 months; skipped facts were uncounted. | Confirmed (the day-after rule is unconditional in the script) | Acceptance 3b states the duration rules, counts every verdict, lists yearless period headers, and requires tests of the script's blind spots. |
+| 5. Medium: "Vault filings: 0 mismatches" contradicts 19 checker-limit mismatches already present on `main`. | Confirmed | 0 real misattributions in both cohorts; checker limits are classified. |
+| 6. Medium: a statement with a repeated date section label falls back under the guard. | Confirmed as the stated trade-off; none in the 126 vault statements | Test 12i pins it; Acceptance 3 still requires every vault statement to export. |
+
+The other filings' lost cells were also classified (audit README): 41 fixes and 52
+regressions. The regressions are TSM #105 (I1, fixed by the guard), NTRA #8
+(`Less Than` / `1 Year`), TSM #150–#152 (`Other Changes (Note)`) and TSM #19/#20
+(known since revision 1). See "Known remaining gaps".
 
 ## Root cause
 
@@ -203,6 +232,22 @@ Three approaches were considered:
   or `Date…`, optionally followed by a footnote marker such as `(1)`. The list
   comes from every labelled header row in the 60-filing evidence set; a label
   outside it stops the extension, which is the safe direction.
+- **Period text:** text made only of period vocabulary that names a period.
+  Remove footnote markers (`(1)`, `*`), then dates (`<month> <day>`), four-digit
+  years (`(?:19|20)\d{2}`), the words `three`, `six`, `nine`, `twelve`, `fiscal`,
+  `month(s)`, `year(s)`, `quarter(s)`, `week(s)`, `period(s)`, `ended`,
+  `ending`, `as`, `of`, `at`, `for`, `the`, `and`, `through`, `to`, and the
+  punctuation `,` `.` `-` `–` `—`. The text is period text when nothing
+  remains and the original contained a date, a year or `ended`. Period text:
+  `Three months ended March 31, 2025`, `Three Months Ended June 30, 2025 and
+  2024`, `December 31, 2025 (1)`, `Six Months Ended`, `December 31,`,
+  `2023 (2)`, `As of December 31, 2024`. Not period text:
+  `Balance as of December 31, 2024`, `2024 vs 2023 % change`, `Common Stock`,
+  `Fiscal Year`.
+- **Period row:** a row with no data cell in which at least one origin, label
+  included, is period text. Other origins may be column headings
+  (`Three Months Ended June 30, 2025 | Common Stock | Retained Earnings`) or a
+  heading-word label (`Date | December 31, 2023 | December 31, 2024`).
 
 ### Rule 1: header extension (`_export_header_count`)
 
@@ -248,6 +293,31 @@ from their own row or a row below. In META's debt table, `Maturity` and
 `Stated Interest Rate` sit over `2027` and `3.50%` in the same row as
 `December 31, 2024`. In NVDA's, `Expected Remaining Term (years)` sits one row
 above the evidenced dates.
+
+**Period-row guard (revision 6).** When the evidenced count is greater than
+`base`, scan every row from the evidenced count to the end of the table. If any
+of them is a period row, return `base`: the table keeps `_header_count`'s
+header rows. A period row in the body means one of two things, and neither can
+be exported safely under one header:
+
+- a second period block stacked under the first (D1): its caption row
+  (`Three months ended March 31, 2025`) would leave its numbers under the first
+  block's period;
+- an accepted period row stranded below the evidenced row (I1): its years or
+  dates would be missing from the column headers.
+
+The guard only ever returns `base`, so it restores today's header rows. The
+rest of the table is then prepared as revision 5 prepares any table whose
+extension adds nothing: Rule 3 still applies, so the output can differ from
+`main` exactly where Rule 3 differs from today's `_IDENTIFIER` test (see
+"Table-wide percent captions" under Known remaining gaps). A period row that is
+a legitimate section label also returns `base`, which costs coverage: a
+statement with a repeated `December 31, 2025` section label falls back to
+today's output. Rows of amounts are unaffected, because they contain data cells
+(`Balance as of December 31, 2024 | $ 2,130,749`). A labelled row of
+year-shaped values with no other data (`Revenue | 2024 | 2025`) is a period row
+and returns `base`, the safe direction for a row that checks 7b and 8 already
+treat as data.
 
 ### Rule 2: footnoted years are periods in the export
 
@@ -302,6 +372,11 @@ words). Without such evidence, a value stays text and gets the existing
 - Table detection and table count. Table sheets per workbook stay the same.
 
 ## Evidence
+
+The figures below are revision 4's prototype evidence. The implemented revision
+5 measurements, the classification of every lost and changed cell, and, after
+the rerun, revision 6's measurements are in
+`../audits/2026-10-11-xlsx-header-detection/README.md`, which supersedes them.
 
 A prototype of revision 4 (monkeypatched, outside the repo) was measured on 60
 filings: 18 META, 14 NVDA and 10 RDDT 10-K/10-Q filings from the RCQ vault, plus
@@ -417,6 +492,32 @@ checker did not recognise the others (CAT, NVO and several income statements).
   `(82.7 | )`. Using them as headers needs a `_column_groups` change.
 - **Review flag for identifier columns holding amounts.** An identifier column's
   numbers are still unflagged text. Flagging them is a separate change.
+- **Stacked period blocks (revision 6).** The period-row guard keeps today's
+  output for tables that stack two period blocks, such as the META and RDDT
+  10-Q equity statements. The follow-up is a separate spec: keep the statement
+  on one sheet and give each block its own header row, so the 2025 block sits
+  beneath the 2024 block under its own period.
+- **Table-wide percent captions.** `_numeric_role` reads plain amounts as
+  percents when the table's unit caption says `except per share and percentage
+  data` (I2). Not seen in the 60 filings; a value-conversion change, out of
+  scope. Rule 3 can also expose it without any header extension: `main` vetoes
+  a header such as `Year Ended December 31, 2024` as an identifier (it is not a
+  full `_PERIOD` match), so the column stays text; Rule 3 exempts the period
+  wording, so the column's plain amounts reach the percent rule. Revision 5's
+  corpus run, which includes Rule 3, found 0 such cells.
+- **Rule 3 misreads in wrapped or annotated headings.** `Less Than` / `1 Year`
+  (NTRA #8, 4 amounts) and `Other Changes (Note)` (TSM #150–#152, 13 tagged
+  amounts) read as identifier columns, so their amounts become unflagged text
+  where `main` converted them. `Year-over-Year Change` (NVDA), `Full Year 2024`
+  (CAT), `Within 1 year` (JPM), `At Prior Year Rates` (AMZN) and
+  `credit-related notes` (JPM) do the same in 154 cells of tables that used to
+  fall back; those were text on `main` too. Regressions listed in the audit
+  need the user's acceptance.
+- **Mixed percent scale in newly exported tables.** BAC #127, CRM #60, KO #56
+  and JPM #64, #73, #210, #281 and #282 expose the existing mixed-scale
+  behaviour described above.
+- **TSM #48** heads its US$ column `December 31, 2024`, like the NT$ column; the
+  `US$` caption is dropped on both `main` and the branch.
 
 ## Testing
 
@@ -484,6 +585,32 @@ Rule 1, negative cases (each asserts the output equals today's):
 12e. The NVDA FY2024 10-Q layout: `July 30,` above an equally wide `2023`. The
      header reads `July 30, — 2023`, and amounts are `Decimal`.
 
+"Today's header rows" below means the result of `prepare_table` with
+`_export_header_count` replaced by `_header_count`; each guard case asserts
+equality with it.
+
+12f. Period-row guard, stacked blocks (D1): a table with `Three months ended
+     March 31, 2024` over column headings over `$`/amount rows, then an
+     unlabelled `Three months ended March 31, 2025` row, its own column
+     headings and amounts. The output equals today's header rows, and no column
+     header names 2024 over the 2025 amounts. Variants: the second caption
+     shares its row with the column headings; it reads
+     `Three Months Ended June 30, 2025 and 2024`; it carries a footnote
+     (`Three Months Ended June 30, 2025 (1)`); it sits in the label column.
+12g. Period-row guard, stranded rows (I1): `December 31,` (colspan 4) over a
+     1-column `2024 | 2023` row over `$`/amount pairs; an unlabelled
+     `December 31, 2023 | December 31, 2024` row under `Measurement Date`; and
+     the same row labelled `Date`. Each gives today's header rows.
+12h. The guard does not fire on rows with amounts: a body row
+     `Balance as of December 31, 2024 | $ | 2,130,749` leaves the extended
+     header in place. A body row `Revenue | 2024 | 2025` is a period row and
+     gives today's header rows.
+12i. The guard's cost, pinned: a balance sheet (`December 31,` over `2025 |
+     2024`, `$`/amount rows) with a repeated `December 31, 2025` section label
+     in the body gives today's header rows.
+12j. Period text, directly: each example of period text and of non-period text
+     in the definition.
+
 Rule 2:
 
 13. `Year Ended December 31,` above `2024 | 2023 (2) | 2022 (2)`: all three
@@ -520,6 +647,8 @@ result, so removing that safeguard fails a test:
 - identifier columns in tables (`Notes`, `CUSIP`, `Exhibit Number`,
   `Notes — Cash`, `CUSIP — Shares`) beside measured columns that hold numbers
   (`Number of Shares`, `Number — of RSUs (iii)`, `Plan to Date — Severance`).
+
+- the period-row guard: case 12f fails when the guard is removed.
 
 A heading over part of a wider amount (check 5) falls back to source text.
 
@@ -560,6 +689,31 @@ Unchanged-behaviour guards:
    sheet column, and opening cash plus net change (with or without the
    exchange-rate effect) equals closing cash; a missing operand fails. Any
    failure blocks the merge.
+3b. **Every exported table, every filing (revision 6):** a committed harness
+   script checks every inline XBRL fact in every table that is not
+   `source_text_only` against the period its column header names, on `main`
+   and on the branch:
+   - instants: at or near the header date, or at the start of a stated
+     period (opening balances);
+   - durations: ending at or near the header date, with the stated length
+     (`Three months` and `Quarter` are 3 months, `Six months` 6, `Nine months`
+     9, `Year` and `Twelve months` 12); a duration starting the day after the
+     header date is accepted only under a header that states no length;
+   - every fact gets a verdict: ok, mismatch, no header date, or not placed
+     (no copy cell); the counts of each are reported per group;
+   - every table whose column headers carry period wording without a year is
+     listed (a yearless period header).
+
+   The script's own tests cover a 6-month fact under a `Three Months Ended`
+   header, a fact starting the day after a `Three Months Ended` header date,
+   and a 6-month fact under `Quarter ended`; each must be a mismatch.
+   Acceptance, for vault and other filings alike: 0 real misattributions. Each
+   mismatch is classified as a real misattribution or a checker limit (such as
+   NVDA's opening deferred revenue under a bare date, present on `main`), with
+   its source cells. Mismatches and yearless period headers present on `main`
+   are listed as existing; new ones are classified one by one. None of the 21
+   D1 tables may export a number under another block's period. Any real
+   misattribution blocks the merge.
 4. Vault filings, all tables: no lost or changed numeric cell, no balanced
    column lost, and every promoted row is reviewed as a real column heading.
 5. Other filings: every lost or changed cell and every promoted row with digits
