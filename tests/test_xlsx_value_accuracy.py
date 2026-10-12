@@ -209,12 +209,64 @@ def test_percent_heading_never_attaches_in_a_period_row_without_headers():
 
 
 def test_percent_never_attaches_across_into_another_leaf_header():
-    """The '%' under '% change' is not the percent sign of the amount under '2025'."""
+    """The '%' under '% change' is not the percent sign of the amount under '2025'. Fix A
+    (user decision 2026-10-13): the refused attachment flags the amount as P4 text."""
     table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">% change</th></tr>'
                      '<tr><td>Revenue</td><td>1,000</td><td></td><td>%</td></tr>')
-    assert cell_rows(table) == [[('Revenue', '@', 'Revenue', None), (Decimal('1000'), '#,##0', '1,000', None),
+    assert cell_rows(table) == [[('Revenue', '@', 'Revenue', None), ('1,000', '@', '1,000', _UNPROVEN),
                                  (None, '@', '', None), ('%', '@', '%', None)]]
     assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),), ((1, 3),)),)
+    assert table.issues == (f'Source row 1, column 1: {_UNPROVEN}',)
+    assert table.status == 'needs_review'
+
+
+def test_split_percent_attaches_under_a_spanning_period_heading():
+    """TSM 20-F 2025 #8 'Results of Operations': 'For the year ended December 31,' spans
+    the year leaves, and each split '%' or ')%' sits under that heading, not under the
+    year above its value. The 2024 marker has no heading above it."""
+    def row(label, *cells):
+        return f'<tr><td>{label}</td>' + ''.join(f'<td>{c}</td>' for c in cells) + '</tr>'
+    table = prepared('<tr>' + '<td></td>' * 13 + '</tr>'
+                     '<tr><td></td><td></td><td colspan="10">For the year ended December 31,</td><td></td></tr>'
+                     '<tr><td></td><td></td><td colspan="2">2022</td><td></td><td></td><td colspan="2">2023</td>'
+                     '<td></td><td></td><td colspan="2">2024</td><td></td></tr>'
+                     + row('Net revenue', '', '', '100.0', '%', '', '', '100.0', '%', '', '', '100.0', '%')
+                     + row('Cost of revenue', '', '', '(40.4', ')%', '', '', '(45.6', ')%', '', '', '(43.9', ')%')
+                     + row('Gross profit', '', '', '59.6', '%', '', '', '54.4', '%', '', '', '56.1', '%'))
+    converted = [[(c.value, c.number_format, c.original, c.review_reason) for c in row if c.value is not None][1:]
+                 for row in table.rows]
+    assert converted == [
+        [(Decimal('1.000'), '0.0%', '100.0 %', None)] * 3,
+        [(Decimal('-0.404'), '0.0%;(0.0%)', '(40.4)%', None), (Decimal('-0.456'), '0.0%;(0.0%)', '(45.6)%', None),
+         (Decimal('-0.439'), '0.0%;(0.0%)', '(43.9)%', None)],
+        [(Decimal('0.596'), '0.0%', '59.6 %', None), (Decimal('0.544'), '0.0%', '54.4 %', None),
+         (Decimal('0.561'), '0.0%', '56.1 %', None)],
+    ]
+    # Each value's provenance includes its marker; the marker's own copy position is empty.
+    for r, sources in zip((3, 4, 5), table.cell_sources):
+        assert {((r, 3), (r, 4)), ((r, 7), (r, 8)), ((r, 11), (r, 12))} <= {tuple(s[-2:]) for s in sources}
+        assert ((r, 4),) not in sources and ((r, 8),) not in sources
+    assert not any('Percent sign' in issue for issue in table.issues)
+
+
+def test_refused_split_percent_flags_a_plain_value_as_p4_text():
+    """A '%' under 'Change' refused for the value under '2025' never leaves a plain number."""
+    table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">Change</th></tr>'
+                     '<tr><td>Gross margin</td><td>12.5</td><td></td><td>%</td></tr>'
+                     '<tr><td>Operating margin</td><td>(0)</td><td></td><td>%</td></tr>')
+    assert [row[1] for row in cell_rows(table)] == [
+        ('12.5', '@', '12.5', _UNPROVEN),
+        ('(0)', '@', '(0)', 'Negative zero retained; verify the source meaning.')]
+    assert f'Source row 1, column 1: {_UNPROVEN}' in table.issues
+    assert table.status == 'needs_review'
+
+
+def test_refused_split_percent_under_an_identifier_heading_keeps_the_identifier_reason():
+    """Existing reason precedence: an identifier heading keeps the cell text with its I2 reason."""
+    table = prepared('<tr><th>Item</th><th>Notes</th><th colspan="2">% change</th></tr>'
+                     '<tr><td>Revenue</td><td>1,000</td><td></td><td>%</td></tr>')
+    assert cell_rows(table)[0][1] == ('1,000', '@', '1,000', _AMOUNT_FORMATTED)
+    assert not any(_UNPROVEN in issue for issue in table.issues)
 
 
 # --- Rule P: percent proofs (P1-P3), mixed columns (P4) and except captions (P5) --------

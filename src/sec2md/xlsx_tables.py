@@ -877,6 +877,7 @@ class _BodyCell(NamedTuple):
     by_fact: bool
     identifier_text: bool  # a digit cell its identifier heading keeps as text (spec I1)
     identifier_quantity: bool  # a digit cell that proves a quantity under one (spec I1)
+    refused_percent: bool  # its value's split '%' was refused by the leaf-header rule (Fix A)
 
 
 def _unproven_value(text, origins):
@@ -945,18 +946,22 @@ def _leaf(grid, header_count, col):
 
 
 def _attached_percent_signs(grid, header_count):
-    """The attachment pass (spec P4): {value origin: marker origin}.
+    """The attachment pass (spec P4): ({value origin: marker origin}, {value origin: refused marker}).
 
     A body origin whose whole text is '%' or ')%' attaches to the nearest value
     origin on its left in the same source row. Only empty origins or '$' and '('
     fragments may lie between them, so two values are never joined. The row
     label, a value spanning from another row and a value that already shows a
     '%' take no marker. Neither does period text or any origin of a period row
-    (heading rows left in the body: '| | 2025 | 2024 | $ | % |'), nor a value
-    under a different leaf header than a headed marker ('2025' over an amount,
-    '% change' over the '%').
+    (heading rows left in the body: '| | 2025 | 2024 | $ | % |').
+
+    A marker under a leaf header attaches only when that heading also spans the
+    value's column (user decision 2026-10-13, amending Ruling 5): TSM's '%' under
+    'For the year ended December 31,' joins the value under its '2022' leaf, while
+    a '%' under '% change' never joins the amount under '2025'. Such a refused
+    value is returned as refused, so it is flagged rather than left a plain number.
     """
-    attached = {}
+    attached, refused = {}, {}
     for r in range(header_count, len(grid)):
         row = grid[r]
         if _period_row(row):
@@ -969,9 +974,12 @@ def _attached_percent_signs(grid, header_count):
                     or '%' in value.text or _period_text(value.text)):
                 continue
             marker_leaf = _leaf(grid, header_count, col)
-            if marker_leaf is None or marker_leaf is _leaf(grid, header_count, value.column + value.colspan - 1):
+            if marker_leaf is None or (marker_leaf.column <= value.column + value.colspan - 1
+                                       < marker_leaf.column + marker_leaf.colspan):
                 attached[value] = marker
-    return attached
+            else:
+                refused[value] = marker
+    return attached, refused
 
 
 def _with_attached(origins, attached):
@@ -1083,7 +1091,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     # Spec P1.5: a table-wide percent declaration comes from the positions units do.
     table_percent = any(_table_percent_declaration(text)
                         for text in (*snapshot.context_before, *(c.text for c in captions)))
-    attached = _attached_percent_signs(grid, header_count)
+    attached, refused = _attached_percent_signs(grid, header_count)
     groups = _column_groups(grid, original, header_count, attached)
     group_origins = [[list(dict.fromkeys(grid[r][col] for col in group
                                         if grid[r][col] and (grid[r][col].row, grid[r][col].column) == (r, col)))
@@ -1171,10 +1179,13 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             elif role == 'text' and index > 0 and digits and not _identifier_column(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
             # Spec P4: no proof of either kind, and no table-wide declaration proving it.
-            unproven = (digits and not label_column and not points and proof.role is None and not proof.conflict
-                        and role != 'percent' and not (identifier and not quantity))
+            flaggable = digits and not label_column and not points and not proof.conflict and not (identifier and not quantity)
+            unproven = flaggable and proof.role is None and role != 'percent'
+            # User decision (2026-10-13): a value whose split '%' the leaf-header rule
+            # refused is P4 text, never a plain number.
+            refused_percent = flaggable and any(o in refused and refused[o] not in origins for o in origins)
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
-                                     unproven, proof.by_fact, identifier and not quantity, quantity))
+                                     unproven, proof.by_fact, identifier and not quantity, quantity, refused_percent))
         body.append(decided)
     # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
     # column a percent column, as does a withheld declaration (Rulings 10 and 11).
@@ -1187,8 +1198,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     for r, decided in enumerate(body, start=header_count):
         row_values = []
         for index, cell in enumerate(decided):
-            value = (_unproven_value(cell.text, cell.origins) if cell.unproven and index in percent_columns
-                     else cell.value)
+            value = (_unproven_value(cell.text, cell.origins)
+                     if (cell.unproven and index in percent_columns) or cell.refused_percent else cell.value)
             # Spec I2. A cell's own reason (points, conflicting units) stays (Ruling 4).
             if cell.identifier_text and not value.review_reason:
                 value = replace(value, review_reason=_identifier_reason(cell.text, index in quantity_columns))
