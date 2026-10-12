@@ -5,7 +5,7 @@ Filings in one run only: []
 | META | 18 | 408 → 66 | 8,309 → 15,176 | 28 → 36 | 0 | 0 | 775 | 0 | 0 / 0 |
 | NVDA | 14 | 270 → 15 | 6,550 → 12,886 | 22 → 28 | 0 | 0 | 650 | 0 | 0 / 0 |
 | RDDT | 10 | 174 → 21 | 6,092 → 8,574 | 16 → 20 | 0 | 0 | 357 | 0 | 0 / 0 |
-| Others | 18 | 1004 → 652 | 9,511 → 19,497 | 23 → 37 | 89 | 14 | 1217 | 0 | 0 / 0 |
+| Others | 18 | 1004 → 654 | 9,511 → 19,402 | 23 → 37 | 89 | 14 | 1210 | 0 | 0 / 0 |
 
 ## missing_tables
 
@@ -703,13 +703,8 @@ Every promoted row, in full: [column, text] for each non-empty source cell.
 - Others DIGITS JPM-10-K-2025-02-14.htm #150 row 1: [[3, "2024"], [18, "2023"]]
 - Others JPM-10-K-2025-02-14.htm #150 row 2: [[3, "Credit exposure(h)"], [6, "On-balance sheet"], [12, "Off-balance sheet(i)"], [18, "Credit exposure(h)"], [21, "On-balance sheet"], [27, "Off-balance sheet(i)"]]
 - Others JPM-10-K-2025-02-14.htm #150 row 3: [[0, "December 31, (in millions)"], [6, "Loans"], [9, "Derivatives"], [21, "Loans"], [24, "Derivatives"]]
-- Others JPM-10-K-2025-02-14.htm #159 row 0: []
-- Others JPM-10-K-2025-02-14.htm #159 row 1: [[6, "Carrying amount of the hedged items(a)(b)"], [12, "Cumulative amount of fair value hedging adjustments included in the carrying amount of hedged items: (d)"]]
-- Others JPM-10-K-2025-02-14.htm #159 row 2: [[0, "December 31, 2024 (in millions)"], [12, "Active hedging relationships"], [15, "Discontinued hedging relationships(e)"], [18, "Total"]]
 - Others JPM-10-K-2025-02-14.htm #160 row 1: [[3, "Derivatives gains/(losses) recorded in income and other comprehensive income/(loss)"]]
 - Others JPM-10-K-2025-02-14.htm #160 row 2: [[0, "Year ended December 31, 2024 (in millions)"], [3, "Amounts reclassified from AOCI to income"], [12, "Amounts recorded in OCI"], [21, "Total change in OCI for period"]]
-- Others JPM-10-K-2025-02-14.htm #161 row 1: [[3, "Derivatives gains/(losses) recorded in income and other comprehensive income/(loss)"]]
-- Others JPM-10-K-2025-02-14.htm #161 row 2: [[0, "Year ended December 31, 2023 (in millions)"], [3, "Amounts reclassified from AOCI to income"], [12, "Amounts recorded in OCI"], [21, "Total change in OCI for period"]]
 - Others DIGITS JPM-10-K-2025-02-14.htm #166 row 1: [[0, "December 31, 2023 (in millions)"], [3, "<1 year"], [9, "1–5 years"], [15, ">5 years"], [21, "Total notional amount"], [27, "Fair value of receivables(b)"], [33, "Fair value of payables(b)"], [39, "Net fair value"]]
 - Others JPM-10-K-2025-02-14.htm #181 row 1: [[6, "RSUs/PSUs"], [15, "SARs"]]
 - Others JPM-10-K-2025-02-14.htm #181 row 2: [[0, "Year ended December 31, 2024"], [6, "Number of units"], [9, "Weighted-average grant date fair value"], [15, "Number of awards"], [21, "Weighted-average exercise price"], [27, "Weighted-average remaining contractual life (in years)"], [30, "Aggregate intrinsic value"]]
@@ -751,8 +746,6 @@ Every promoted row, in full: [column, text] for each non-empty source cell.
 - Others JPM-10-K-2025-02-14.htm #237 row 2: [[0, "December 31, 2024 (in millions)"], [3, "Total assets held by securitization VIEs"], [6, "Assets held in consolidated securitization VIEs"], [9, "Assets held in nonconsolidated securitization VIEs with continuing involvement"], [15, "Trading assets"], [18, "Investment securities"], [21, "Other financial assets"], [24, "Total interests held by JPMorganChase"]]
 - Others JPM-10-K-2025-02-14.htm #238 row 1: [[3, "Principal amount outstanding"], [15, "JPMorganChase interest in securitized assets in nonconsolidated VIEs(c)(d)(e)"]]
 - Others JPM-10-K-2025-02-14.htm #238 row 2: [[0, "December 31, 2023 (in millions)"], [3, "Total assets held by securitization VIEs"], [6, "Assets held in consolidated securitization VIEs"], [9, "Assets held in nonconsolidated securitization VIEs with continuing involvement"], [15, "Trading assets"], [18, "Investment securities"], [21, "Other financial assets"], [24, "Total interests held by JPMorganChase"]]
-- Others JPM-10-K-2025-02-14.htm #241 row 1: [[3, "Assets"], [21, "Liabilities"]]
-- Others JPM-10-K-2025-02-14.htm #241 row 2: [[0, "December 31, 2024 (in millions)"], [3, "Trading assets"], [6, "Loans"], [12, "Other(c)"], [15, "Total assets(d)"], [21, "Beneficial interests in VIE assets(e)"], [24, "Other(f)"], [27, "Total liabilities"]]
 - Others DIGITS JPM-10-K-2025-02-14.htm #243 row 1: [[3, "2024"], [12, "2023"], [21, "2022"]]
 - Others JPM-10-K-2025-02-14.htm #243 row 2: [[0, "Year ended December 31, (in millions)"], [3, "Residential mortgage(d)"], [6, "Commercial and other(e)"], [12, "Residential mortgage(d)"], [15, "Commercial and other(e)"], [21, "Residential mortgage(d)"], [24, "Commercial and other(e)"]]
 - Others DIGITS JPM-10-K-2025-02-14.htm #266 row 1: [[3, "Shares(a)"], [12, "Carrying value (in millions)"], [18, "Issue date"], [21, "Contractual rate in effect at December 31, 2024"], [24, "Earliest redemption date(b)"], [27, "Floating annualized rate(c)"], [30, "Dividend declared per share(d)"]]

@@ -1,6 +1,6 @@
 # All-table XBRL period check: base and revision 6
 
-Output of `all_facts.py` (spec Acceptance 3b) on the two export directories of the revision 6 acceptance run: `base` (main's code) and `new6` (branch `fix/xlsx-header-detection` at `429f1fd`). Each report below is the script's report unchanged, with headings moved down one level. The classification of every mismatch, yearless period header and unlocated-fact table is in `README.md`, section "Revision 6".
+Output of `all_facts.py` (spec Acceptance 3b) on the two export directories of the final revision 6 acceptance run: `base` (main's code) and `new6` (branch `fix/xlsx-header-detection` at `5f779c0`). Each report below is the script's report unchanged, with headings moved down one level. The classification of every mismatch, yearless period header and unlocated-fact table is in `README.md`, section "Revision 6: acceptance rerun".
 
 ## All-table XBRL period check: `base`
 
@@ -159,8 +159,8 @@ A dated header with length wording but no length this script reads. Its facts ar
 | META | 798 | 12958 | 10277 | 0 | 0 | 2553 | 128 | 0 |
 | NVDA | 652 | 11308 | 8808 | 25 | 0 | 2224 | 251 | 0 |
 | RDDT | 465 | 6002 | 5087 | 0 | 0 | 743 | 172 | 0 |
-| Others | 1033 | 17889 | 11103 | 79 | 0 | 6440 | 267 | 0 |
-| Total | 2948 | 48157 | 35275 | 104 | 0 | 11960 | 818 | 0 |
+| Others | 1031 | 17787 | 11103 | 79 | 0 | 6338 | 267 | 0 |
+| Total | 2946 | 48055 | 35275 | 104 | 0 | 11858 | 818 | 0 |
 
 ### Mismatches: 104 facts in 25 tables
 

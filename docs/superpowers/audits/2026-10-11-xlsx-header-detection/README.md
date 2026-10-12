@@ -12,8 +12,8 @@ revision 5, "Acceptance" 1-6) and Task 3 of its plan
   in `outputs/table-completeness-corpus`.
 - Run on 2026-10-12. Both export directories hold 60 JSON files (3,702 tables each).
 
-**Revision 6.** The rerun for spec revision 6 (the period-row guard, branch at `429f1fd`) is recorded in
-"Revision 6: acceptance rerun" at the end of this file. It resolves D1 and TSM #105 (items 1 and 2 below).
+**Revision 6.** The rerun for spec revision 6 (the period-row guard, final branch commit `5f779c0`, after the audit
+review) is recorded in "Revision 6: acceptance rerun" at the end of this file. It resolves D1 and TSM #105 (items 1 and 2 below).
 `compare.md` and `all-facts.md` now hold that run; `statements.md` is unchanged by it. The revision 5 record that
 follows is kept as it was.
 
@@ -334,32 +334,66 @@ No exported primary statement in the other filings has a number under the wrong 
 
 ## Revision 6: acceptance rerun
 
-Acceptance rerun for spec revision 6 (the period-row guard in Rule 1, Acceptance 1-6 including 3b) and Task 7 of the
-plan.
+Acceptance rerun for spec revision 6 (the period-row guard in Rule 1, Acceptance 1-6 including 3b, and gate 6
+below) and Task 7 of the plan. This section records the final run, made after the audit review.
 
-- Candidate: branch `fix/xlsx-header-detection` at `429f1fd` (`f9a7a9e` and `429f1fd` add the guard on top of
-  `ad131b0`). `git diff ad131b0 429f1fd -- src/sec2md/xlsx_tables.py` adds only `_period_text`, `_period_row`, their
-  patterns and the guard line in `_export_header_count`.
+- Candidate: branch `fix/xlsx-header-detection` at `5f779c0`. Three commits sit on top of `ad131b0`:
+  - `f9a7a9e` and `429f1fd` add the guard;
+  - `5f779c0` makes period text read captions with a unit suffix, such as
+    `Year ended December 31, 2022 (in millions)`.
+
+  `git diff ad131b0 5f779c0 -- src/sec2md/xlsx_tables.py` adds only `_period_text`, `_period_row`, their patterns
+  and the guard line in `_export_header_count`.
 - Baseline: `outputs/xlsx-header-detection/base` from the revision 5 run, reused. The main checkout's `src` has not
   changed.
-- Export: `outputs/xlsx-header-detection/new6`, 60 JSON files that all parse, 3,702 tables, the same file names as
-  `base` and `new`. One run with `--workers 12` took 8m12s; no filing needed a second run.
+- Export: `outputs/xlsx-header-detection/new6`, re-exported at `5f779c0`. It has 60 JSON files that all parse, and
+  3,702 tables. File names match `base` and `new`. One run with `--workers 12` took 8m31s.
 - Run on 2026-10-12.
+
+### Audit review and rerun
+
+The first revision 6 run, at `429f1fd` (commit `7607834`), passed gates 1-5, and an independent audit review
+reproduced gates 1, 2, 3 and 5 exactly. It found one false claim in this section: the "Extra check: columns mixing
+periods" said that no header named one period over another period's facts.
+
+- **What the check missed.** JPM 10-K #159, #161 and #241 still stacked a second period block, with both captions in
+  the label column. The label column's header cell was `Year ended December 31, 2023 (in millions)`; a body row
+  later read `Year ended December 31, 2022 (in millions) | <column headings>`.
+  - #161 and #241 were `exported` with no issues.
+  - 63 XBRL facts disagreed with the label column's period.
+- **Why it missed them.** The extra check looked only at the value columns' headers, not the label column's header.
+  Its own output had listed #161 for review, but the record dropped it.
+- **The fix.** The branch's `5f779c0` removes a parenthesised unit caption before the period-text test. The guard now
+  fires on the three tables, and each equals `base`.
+- **This rerun.** It repeats every gate, adds gate 6 (a structural scan for stacked period blocks), fixes the count
+  errors the review found, and replaces every figure below.
+- **What changed between the two runs.** Only JPM #159, #161 and #241 differ, table by table: #161 and #241 went
+  from `exported` to source text, and #159 got `main`'s headers back. The all-facts mismatch, yearless, unlocated and
+  unparsed lists are identical between the two runs.
 
 ### Result in one paragraph
 
-All five gates pass. The guard fired in 165 tables. 104 of them differ from revision 5, and each of the 104 is now
-identical to `main`'s output in every recorded field. The other 61 fall back to source text on both revisions. No
-table differs from revision 5 for any other reason. The 21 D1 tables and TSM #105 are among the 104. The 126 vault
-primary statements are unchanged from revision 5, with every XBRL fact `ok`. In the vault, 0 cells are lost or
-changed and 0 balanced columns are lost. The all-table XBRL check finds 104 mismatched facts in 25 tables on the
-branch; 26 facts in 11 of those tables are on `main` too. Every mismatch is a checker limit, except one existing TSM
-row where the filing's own tags disagree with its own columns, so there are **0 real misattributions**.
+All six gates pass. The guard fired in 169 tables. 107 of them differ from revision 5, and each of the 107 is now
+identical to `main`'s output in every recorded field. The other 62 fall back to source text on both revisions. No
+table differs from revision 5 for any other reason. The 21 D1 tables, TSM #105 and JPM #159, #161 and #241 are among
+the 107.
 
-The guard costs more coverage than the spec states. Besides D1 and TSM #105, it returns 82 tables to `main`'s
-output, which is 1,592 fewer numeric cells than revision 5. Two groups of newly exported tables still have amounts
-under period headers without a year: NVDA's change columns (58 tables, arithmetic verified) and CRM's
-percent-of-revenue columns (6 tables). The CRM columns are a misattribution risk for the user to accept or reject.
+The 126 vault primary statements are unchanged from revision 5, with every XBRL fact `ok`. In the vault, 0 cells are
+lost or changed and 0 balanced columns are lost.
+
+The all-table XBRL check finds 104 mismatched facts in 25 tables on the branch; 26 facts in 11 of those tables are on
+`main` too. Every mismatch is a checker limit, except one existing TSM row where the filing's own tags disagree with
+its own columns, so there are **0 real misattributions**.
+
+The reviewer's stacked-block scan finds no table on the branch that is not also on `main`. A broader scan finds 3,
+all META debt tables whose section labels name a note issuance (`August 2022 debt:`), not a period.
+
+The guard costs more coverage than the spec first stated. Besides D1 and TSM #105, it returns 85 tables to `main`'s
+output, which is 1,687 fewer numeric cells than revision 5.
+
+Two groups of newly exported tables still have amounts under period headers without a year: NVDA's change columns
+(58 tables, arithmetic verified) and CRM's percent-of-revenue columns (6 tables). The CRM columns are a
+misattribution risk for the user to accept or reject.
 
 ### How to rerun (revision 6)
 
@@ -376,15 +410,19 @@ $PY -I $A/all_facts.py $O/new6 --report $O/task-7/all-facts-new6.md --details $O
 ```
 
 `all-facts.md` holds the two all-facts reports, unchanged except that their headings are one level lower. The
-all-facts report on `base` is byte-identical to the one Task 6 produced. The extra scripts and their outputs are in
-`outputs/xlsx-header-detection/task-7/` (git-ignored):
+all-facts report on `base` is byte-identical to the one Task 6 produced.
 
-- `guard_trace.py` runs the branch's `prepare_table` on every table twice, with the guard and with `_period_row`
-  forced to `False`, and records where the guard changes the header count and which row fired it;
-- `diff_new6.py` compares `new` and `new6` table by table, and each changed table with `base`;
-- `yearless_check.py` counts the amounts and facts under each yearless header;
-- `mixed_columns.py` finds columns whose facts span more than one period;
-- `show7.py` and `htmlfacts.py` show export tables and the filing's own HTML rows, with each fact's period.
+The extra scripts and their outputs are in `outputs/xlsx-header-detection/task-7/` (git-ignored). The first
+revision 6 run's export is kept as `new6-429f1fd`.
+
+| Script | What it does |
+|---|---|
+| `guard_trace.py` | Runs the branch's `prepare_table` on every table twice, with the guard and with `_period_row` forced to `False`. It records where the guard changes the header count and which row fired it. |
+| `diff_new6.py` | Compares `new` and `new6` table by table, and compares each changed table with `base`. |
+| `stacked_scan.py` | The gate 6 scans: scan A is the audit reviewer's `stacked2.py` rule, unchanged; scan B is broader. |
+| `yearless_check.py` | Counts the amounts and facts under each yearless header. |
+| `mixed_columns.py` | Finds columns whose facts span more than one period. |
+| `show7.py`, `htmlfacts.py` | Show export tables and the filing's own HTML rows, with each fact's period. |
 
 ### Numbers: group table, base → revision 6
 
@@ -395,7 +433,7 @@ all-facts report on `base` is byte-identical to the one Task 6 produced. The ext
 | META | 18 | 408 → 66 | 8,309 → 15,176 | 28 → 36 | 0 | 0 | 775 | 0 | 0 / 0 |
 | NVDA | 14 | 270 → 15 | 6,550 → 12,886 | 22 → 28 | 0 | 0 | 650 | 0 | 0 / 0 |
 | RDDT | 10 | 174 → 21 | 6,092 → 8,574 | 16 → 20 | 0 | 0 | 357 | 0 | 0 / 0 |
-| Others | 18 | 1004 → 652 | 9,511 → 19,497 | 23 → 37 | 89 | 14 | 1217 | 0 | 0 / 0 |
+| Others | 18 | 1004 → 654 | 9,511 → 19,402 | 23 → 37 | 89 | 14 | 1210 | 0 | 0 / 0 |
 
 Change from revision 5:
 
@@ -404,52 +442,58 @@ Change from revision 5:
 | META | 57 → 66 (+9) | 16,091 → 15,176 (−915) | 810 → 775 | 0 → 0 | The 9 META D1 tables fall back again, as on `main`. 4 dividend tables return to `main`'s `needs_review` output with the same numbers. |
 | NVDA | 8 → 15 (+7) | 13,084 → 12,886 (−198) | 677 → 650 | 0 → 0 | 17 segment-information and Schedule II tables return to `main`'s output; 7 of them fall back. |
 | RDDT | 10 → 21 (+11) | 9,407 → 8,574 (−833) | 417 → 357 | 0 → 0 | The 12 RDDT D1 tables return to `main` (11 source text, 1 `needs_review`); 6 exhibit indexes return to `main`'s headers. |
-| Others | 626 → 652 (+26) | 20,887 → 19,497 (−1,390) | 1314 → 1217 | 93 → 89 | 56 tables return to `main`'s output, 26 of them to source text. TSM #105 gets back its 4 numeric rates. |
+| Others | 626 → 654 (+28) | 20,887 → 19,402 (−1,485) | 1314 → 1210 | 93 → 89 | 59 tables return to `main`'s output, 28 of them to source text. TSM #105 gets back its 4 numeric rates. |
 
 In the vault, the fallback count over the three groups goes from 852 to 102 (revision 5: 75). Task 4's CHANGELOG
 figure `852 to 75` needs to become `852 to 102`.
 
 ### Guard-fired tables
 
-`guard_trace.py` traced every table of the 60 filings. The guard fired in 165 of them.
+`guard_trace.py` traced every table of the 60 filings at `5f779c0`. The guard fired in 169 of them.
 
-- **104 tables differ between revision 5 and revision 6** (META 13, NVDA 17, RDDT 18, Others 56). Every one:
+- **107 tables differ between revision 5 and revision 6** (META 13, NVDA 17, RDDT 18, Others 59). Every one:
   - is a table where the guard fired;
   - is identical to `main` in every field the export records: title, status, issues, headers, typed rows, cell
     sources, source cells, provenance and facts.
 
   So no Rule 3 difference from `main` remains in them, and no cell value differs from `main`.
-- **61 tables where the guard fired are source text in both revisions.** Revision 5 already fell back on them.
+- **62 tables where the guard fired are source text in both revisions.** Revision 5 already fell back on them.
 - **0 tables differ for any other reason.**
 
-What fired the guard in the 104:
+What fired the guard in the 107:
 
 | Kind | Tables | Examples |
 |---|---|---|
 | D1, stacked equity statements | 21 | META 10-Q #9, RDDT 10-Q #8 and #9. All are back to `main`'s output: 20 source text, plus RDDT 2024-Q2 #8, `needs_review` with `Column N` headers. 0 facts are mismatched in them. |
 | I1, a stranded date row | 1 | TSM #105: the `December 31, 2023 \| December 31, 2024` row. `main`'s output is back: `needs_review`, with the 4 rates as numbers. |
 | Exhibit indexes with dated rows | 8 | CRM #79, MSFT #80, RDDT 10-K FY2024 #63 and #64, FY2025 #62 and #63, 10-Q 2024-Q1 #48 and 2026-Q2 #47. Rows such as `10.2(a)# \| … \| S-1 \| 2/22/2024` count as period rows. |
-| A period row below the extended header | 74 | NVDA segment information: `Three Months Ended April 30, 2023` and then `… May 1, 2022` as body captions. MSFT investment tables: a `June 30, 2025` caption row below the column headings. KO, UNH and JPM year blocks. META dividends: `2025` and then `2024` section labels. BAC #92 and #93 `(Dollars in millions) \| December 31, 2024`. Repeated header blocks (TSM #165). Period rows right under the header (NTRA #43, UNH #12, UNH #52). |
+| A period row below the extended header | 77 | NVDA segment information: `Three Months Ended April 30, 2023` and then `… May 1, 2022` as body captions. MSFT investment tables: a `June 30, 2025` caption row below the column headings. KO, UNH and JPM year blocks. META dividends: `2025` and then `2024` section labels. JPM #159, #161 and #241: `Year ended December 31, 2022 (in millions)`. BAC #92 and #93 `(Dollars in millions) \| December 31, 2024`. Repeated header blocks (TSM #165). Period rows right under the header (NTRA #43, UNH #12, UNH #52). |
 
-In 64 of the 74 "period row" tables, revision 5's headers had no period wording at all; the periods sat in body
-caption rows. The other 10:
+In 63 of the 77 "period row" tables, revision 5's headers had no period wording at all, in any column; the periods
+sat in body caption rows. The other 14:
 
-- JPM #194 was a stacked block. The label column's header read `December 31, 2024` over both the 2024 and the
-  2023 blocks, which is a D1-like risk that the all-table check could not see. It is now source text, as on `main`.
+- **Stacked blocks with a period in the label column's header, each now source text or `main`'s output:**
+  - JPM #159, #161 and #241 (the audit review's finding): the label column's header named one year, such as
+    `Year ended December 31, 2023 (in millions)`, above both the 2023 block and the 2022 block.
+  - JPM #194: the label column's header read `December 31, 2024` over both the 2024 and the 2023 blocks.
+
+  Each is a D1-like risk that the all-table check could not see, because the value columns' headers name no date.
 - JPM #290 had a label-column caption.
 - JPM #296 had the First Republic checker-limit mismatches.
 - NTRA #43, UNH #12 and UNH #52 had yearless `December 31,` or `For the Years Ended December 31,` headers, with
   their years stranded in the body (the I1 shape).
+- SPCX #51 had `As of` headers, with the dates `June 30, 2026 | June 30, 2025` in the body.
 - TSM #108-#110 had `First Quarter — of 2022 — NT$` headers. The guard fired on a row of board-meeting dates.
 - TSM #165 repeats the same years for a second section.
 
-None of the 82 tables outside D1 and TSM #105 had a mismatch on revision 5, apart from JPM #296's checker limits.
-JPM #194 and the three yearless I1-shaped tables are improvements. For the rest, the guard costs coverage and fixes
-nothing the checks could see.
+None of the 85 tables outside D1 and TSM #105 had a mismatch on revision 5, apart from JPM #296's checker limits.
 
-The table below lists the 104. The last column shows the first period row the guard found below the extended
+- **Improvements:** the four label-column stacked blocks (JPM #159, #161, #194, #241) and the four yearless
+  I1-shaped tables (NTRA #43, UNH #12, UNH #52, SPCX #51).
+- **Coverage cost only:** the rest. The guard fixes nothing the checks could see there.
+
+The table below lists the 107. The last column shows the first period row the guard found below the extended
 header, as source origins.
-
 
 | Filing | Table | Title | Status: main → rev 5 → rev 6 | Numbers: main / rev 5 / rev 6 | Header rows: main / rev 5 | First period row below the extended header (source row: origins) |
 |---|---|---|---|---|---|---|
@@ -509,9 +553,12 @@ header, as source origins.
 | JPM-10-K | #137 | Year ended December 31, 2024 (in millions) | source text → source text → source text | 0 / 0 / 0 | 0 / 4 | r40: Year ended December 31, 2024 (in millions) \| Fair value at Jan. 1, 2024 \| Total realized/unrealized (gains)/losses \| Transfers (out of) level 3 … |
 | JPM-10-K | #138 | Notes to consolidated financial statements | source text → source text → source text | 0 / 0 / 0 | 0 / 4 | r40: Year ended December 31, 2023 (in millions) \| Fair value at Jan. 1, 2023 \| Total realized/unrealized (gains)/losses \| Transfers (out of) level 3 … |
 | JPM-10-K | #139 | Year ended December 31, 2022 (in millions) | source text → source text → source text | 0 / 0 / 0 | 0 / 4 | r40: Year ended December 31, 2022 (in millions) \| Fair value at Jan. 1, 2022 \| Total realized/unrealized (gains)/losses \| Transfers into level 3 … |
+| JPM-10-K | #159 | December 31, 2024 (in millions) | needs_review → needs_review → needs_review | 20 / 20 / 20 | 0 / 3 | r10: December 31, 2023 (in millions) \| Carrying amount of the hedged items(a)(b) \| Active hedging relationships \| Discontinued hedging relationships(e) … |
+| JPM-10-K | #161 | Year ended December 31, 2023 (in millions) | source text → exported → source text | 0 / 18 / 0 | 0 / 3 | r9: Year ended December 31, 2022 (in millions) \| Amounts reclassified from AOCI to income \| Amounts recorded in OCI \| Total change in OCI for period |
 | JPM-10-K | #194 | Retained | source text → exported → source text | 0 / 28 / 0 | 0 / 3 | r8: December 31, 2023 \| Consumer, excluding credit card \| Credit card \| Wholesale … |
 | JPM-10-K | #230 | Payment status of FDMs | source text → needs_review → source text | 0 / 23 / 0 | 0 / 3 | r3: (in millions) \| Year ended December 31, 2024 \| Year ended December 31, 2023 |
 | JPM-10-K | #231 | Defaults of FDMs | source text → needs_review → source text | 0 / 16 / 0 | 0 / 3 | r3: (in millions) \| Year ended December 31, 2024 \| Year ended December 31, 2023 |
+| JPM-10-K | #241 | Consolidated VIE assets and liabilities | source text → exported → source text | 0 / 77 / 0 | 0 / 3 | r12: December 31, 2023 (in millions) \| Trading assets \| Loans \| Other(c) … |
 | JPM-10-K | #290 | Note 31 – International operations | source text → needs_review → source text | 0 / 90 / 0 | 0 / 2 | r2: 2024 |
 | JPM-10-K | #296 | Notes to consolidated financial statements | source text → exported → source text | 0 / 19 / 0 | 0 / 2 | r2: (in millions) \| Fair value purchase price allocation as of Ma |
 | KO-10-K | #33 | Net operating revenues disaggregated between  | source text → exported → source text | 0 / 27 / 0 | 0 / 2 | r2: Year Ended December 31, 2024 |
@@ -558,9 +605,9 @@ header, as source origins.
 | UNH-10-K | #52 | Share-Based Compensation Recognition and Esti | needs_review → needs_review → needs_review | 4 / 4 / 4 | 0 / 2 | r2: 2024 \| 2023 \| 2022 |
 | UNH-10-K | #55 | Reportable segment financial information | source text → exported → source text | 0 / 251 / 0 | 0 / 3 | r3: 2024 |
 
-The 61 guard-fired tables that are source text on both revisions:
+The 62 guard-fired tables that are source text on both revisions:
 
-BAC-10-K #18, #113, #134; CAT-10-K #19, #36, #49, #60, #61, #70, #72, #73, #82, #84, #85, #97; GOOGL-10-Q #41; JPM-10-K #37, #38, #81, #90, #106, #152, #163, #190, #205, #206, #212, #214, #215, #216, #217, #218, #219, #220, #221, #222, #223, #247; KO-10-K #40, #41, #44, #63, #64, #67, #68, #69, #70, #71, #72, #89; MSFT-10-K #64; TSLA-10-K #35; TSM-20-F #29, #30, #72; UNH-10-K #9, #10, #11, #13, #38, #39.
+BAC-10-K #18, #113, #134; CAT-10-K #19, #36, #49, #60, #61, #70, #72, #73, #82, #84, #85, #97; GOOGL-10-Q #41; JPM-10-K #37, #38, #81, #90, #106, #152, #158, #163, #190, #205, #206, #212, #214, #215, #216, #217, #218, #219, #220, #221, #222, #223, #247; KO-10-K #40, #41, #44, #63, #64, #67, #68, #69, #70, #71, #72, #89; MSFT-10-K #64; TSLA-10-K #35; TSM-20-F #29, #30, #72; UNH-10-K #9, #10, #11, #13, #38, #39.
 
 ### Primary statements (Acceptance 3)
 
@@ -600,8 +647,8 @@ hold:
 | rev 6 | META | 798 | 12,958 | 10,277 | 0 | 0 | 2,553 | 128 | 0 |
 | rev 6 | NVDA | 652 | 11,308 | 8,808 | 25 | 0 | 2,224 | 251 | 0 |
 | rev 6 | RDDT | 465 | 6,002 | 5,087 | 0 | 0 | 743 | 172 | 0 |
-| rev 6 | Others | 1,033 | 17,889 | 11,103 | 79 | 0 | 6,440 | 267 | 0 |
-| rev 6 | Total | 2,948 | 48,157 | 35,275 | 104 | 0 | 11,960 | 818 | 0 |
+| rev 6 | Others | 1,031 | 17,787 | 11,103 | 79 | 0 | 6,338 | 267 | 0 |
+| rev 6 | Total | 2,946 | 48,055 | 35,275 | 104 | 0 | 11,858 | 818 | 0 |
 
 The other lists in the check compare as follows:
 
@@ -612,7 +659,9 @@ The other lists in the check compare as follows:
 | Unlocated-fact tables | 5 | 7 | 7 |
 | Unparsed-length headers | 0 | 249 in 79 tables | 249 in 79 tables |
 
-Revision 6's 249 unparsed-length headers are the same as revision 5's. They are 226 aging-bucket headers, whose
+Between the first revision 6 run (`429f1fd`) and the final one, only JPM #161 and #241 change these counts: their
+102 `no header date` facts left with the tables. Revision 6's 249 unparsed-length headers are the same as
+revision 5's. They are 226 aging-bucket headers, whose
 facts are all `ok` instants at the header date, and 23 useful-life columns with no facts.
 
 **Mismatches, every one classified.** None is a real misattribution.
@@ -625,7 +674,8 @@ Existing on `main` (the same 26 facts in the same 11 tables on `base` and on rev
 | NVDA 10-K FY2024 #44, #53; FY2025 #43, #52; FY2026 #39, #49; 10-Q 2025-Q1 #20, #28 | 19 | `Balance at beginning of period`, e.g. FY2024 #44 r4 `572 \| 502` (instants 2023-01-29, 2022-01-30) under `Jan 28, 2024 \| Jan 29, 2023` | Checker limit: opening balances. |
 | TSM 20-F #135 | 2 | r4 `No expiry date \| $ 640.0 \| $ 11,896.9` under `December 31, 2023 \| December 31, 2024`. In the filing's HTML, `640.0` carries context `PAsOn12_31_2024` and `11,896.9` carries `PAsOn12_31_2023`. Every other fact in the table is tagged with its own column's date (`2,781.4` and `52,686.2` with 2023, `83,705.6` with 2024). | The filing's own tags disagree with its columns. The export places each number in the column the filing shows. Not an export misattribution. |
 
-New on the branch. All 14 tables fall back on `main`, and each has the same count on revision 5:
+New on the branch: 14 tables, each with the same count on revision 5. 13 of them fall back on `main`; AMZN #23 is
+`needs_review` on `main`, with yearless headers, so its facts there have no header date:
 
 | Table | Facts | Source cells | Verdict |
 |---|---|---|---|
@@ -643,11 +693,16 @@ with 0 mismatches.
 **Yearless period headers, every one classified.** `base` has 15 tables, revision 5 had 117 and revision 6 has
 112.
 
-- **Existing (14).** They are on `base` with identical headers:
+- **Existing (14).** They are on `base`, and their yearless header cells are identical:
   - BABA #23, #33, #37, #41, #50, #61; CRDO #26; META FY2025 10-K #57; NTRA #33, #36; SPCX #47, #48, #50; TSM #99.
-  - The 15th `base` table, AMZN #23, is fixed on the branch. On `main` its 5 vesting facts sit under
-    `Three Months Ended December 31,` and `Year Ended December 31,`, with the years `2025 … 2029` in the first body
-    row. On the branch the headers read `… — 2025` to `… — 2029`.
+  - Other header cells or the status differ in 7 of them:
+    - BABA #33, #37, #41, #50 and #61 gained an `RMB` caption on their dated headers
+      (`Year ended March 31, — 2023 — RMB`);
+    - TSM #99 gained `NT$ (In Millions)`;
+    - NTRA #36 went from `exported` to `needs_review`. Its values are the same, but Rule 3 removed the identifier
+      veto, so `5.20` under `Year ended December 31,` is now flagged "Numeric role unresolved" instead of
+      silent text.
+  - The other `base` table, AMZN #23, now carries the years.
   - **No amounts under the yearless header (9): harmless.** BABA ×6, META #57, NTRA #36 and TSM #99. The yearless
     header is a spacer column with no number and no digit text, for example BABA #33's `Year ended March 31,` between
     the `2023` and `2024` columns.
@@ -659,7 +714,8 @@ with 0 mismatches.
       amounts are flagged text, except SPCX #50's ARPU.
 
     Every one is `needs_review`.
-- **New on the branch (98).** Each is on revision 5 with identical headers. 5 of revision 5's tables are gone: JPM
+- **New on the branch (98).** Each is on revision 5 with identical headers, and all 98 tables are identical between
+  the two revision 6 runs. 5 of revision 5's tables are gone: JPM
   #290, NTRA #43, SPCX #51, UNH #12 and UNH #52, which the guard returned to `main`'s output.
   - **Harmless, column 0 only (23):**
     - JPM #32, #65, #69, #113, #117, #148, #150, #183, #243, #271, #283, #285;
@@ -684,6 +740,10 @@ with 0 mismatches.
     - Checked: every numeric `$ Change` (219 cells) equals the difference of its block's two dated columns, and every
       numeric `% Change` (134 cells) matches their ratio. 573 rows were skipped because an operand is text, blank or a dash.
     - Risk: low. The compared years are only in the neighbouring headers. **Called out.**
+    - The mixed-scale gap also shows here. NVDA 10-Q 2024-Q1 #38 is `exported` with no issues, yet its
+      `Three Months Ended — % Change` column holds 4 cells in percentage points (`16`, `7`, `—`, `−30`, with the `%`
+      sign in a separate column) beside fractions (`0.26`, `0.20`) in the dated columns' `% of net revenue` rows.
+      NVDA 10-Q 2024-Q3 #40 (`needs_review`) has one such cell, `Total` `552`.
   - **Amounts under the yearless header, CRM percent-of-revenue columns (6 tables): a misattribution risk.**
     - CRM #10, #11, #14, #15, #16 and #17.
     - The headers read `Fiscal Year Ended January 31, — % of Total Revenues`, `— As a % of Total …` and
@@ -712,16 +772,88 @@ against the filing's tagged copy:
 | GOOGL 10-Q #13 (new) | others | All 40 values match HTML table 27, with three- and nine-month facts for 2024 and 2025 under the matching headers. |
 | GOOGL 10-Q #48 (new) | others | All 12 values match HTML table 67, with the same periods. |
 
-**Extra check: columns mixing periods.**
+**Extra check: columns mixing periods (corrected after the audit review).**
 
 - **Method.** For each copy column, `mixed_columns.py` collects the periods of its facts. A column that holds more
   than one duration, or instants at more than two dates, is listed.
-- **What it found.** Revision 6 has 76 such tables; 60 of them have headers or a status that differ from `main`. In
-  those 60, no listed column has a header with a year. They are equity statements, roll-forwards and segment tables
-  whose column headings name no period; their periods come from rows such as `Balance as of December 31, 2023`, as
-  in the filings.
-- **What it means.** No header names one period over another period's facts, so the D1 shape is absent beyond what
-  the guard removed.
+- **What was wrong.** The first record then checked only the listed column's own header for a year, and ignored the
+  label column's header. So it missed JPM #161, even though its own review list had flagged #161; the record then
+  dropped it.
+- **The correction.** The check now also looks for period wording in the label column's header: a year, a month and
+  day, `ended`, `ending`, `as of` or `as at`.
+- **Validation.** On revision 5 the corrected check flags 23 tables: the 21 D1 tables, JPM #161 and JPM #290. On the
+  first revision 6 run it flags JPM #161.
+- **Final run.** 75 tables have a listed column, and 59 of them differ from `main` in headers or status. None of the
+  59 has period wording in the label column's header or in the listed column's header. They are equity statements,
+  roll-forwards and segment tables whose column headings name no period; their periods come from rows such as
+  `Balance as of December 31, 2023`, as in the filings.
+- **Limit.** A column whose instants fall on only two dates is not listed. So JPM #159 and #241, with one instant per
+  block (2024-12-31 and 2023-12-31), passed this check even on the first run. The check supports gate 6; the
+  structural scans below catch these tables, and the check does not replace them.
+
+### Gate 6: stacked period blocks
+
+`stacked_scan.py` runs two scans over every table that is not `source_text_only`, and lists hits on the branch that
+are not also on `main`.
+
+**Scan A** is the audit reviewer's `stacked2.py` rule, unchanged.
+
+- **Rule.** The headers name a year, the label column's header included. A body row holds no number but has a dated
+  caption: a bare year, a full date, `ended`, `ending` or `as of` with a year, or `fiscal`, `FY` or `year` with a
+  year. Numbers follow below that row.
+- **Results:**
+
+  | Run | Hits | Not on `base` |
+  |---|---|---|
+  | `base` | 1 (TSM #165) | |
+  | revision 5 | 29 | 28: the 21 D1 tables, JPM #159, #161, #194 and #241, and TSM #108-#110 |
+  | first revision 6 run | 4 | 3: JPM #159, #161 and #241, the audit finding |
+  | final run | 1 (TSM #165, as on `base`) | **0** |
+
+  The reviewer's script itself also reports `new6 not on base 0` on the final export.
+
+**Scan B** is broader.
+
+- **Rule.** Any header cell, the label column's included, names a year, a month and day, or `ended`, `ending` or
+  `as of`. A body row holds no number, and one of its cells (under 120 characters) carries a year, a month and day, a
+  numeric date, `Q1`-`Q4`, `FY` with a year, or `ended`, `ending`, `as of`, `as at` or `through`. Numbers follow below
+  that row.
+- **Results:**
+
+  | Run | Hits | Not on `base` |
+  |---|---|---|
+  | `base` | 8 | |
+  | revision 5 | 40 | 34 |
+  | first revision 6 run | 12 | 6 |
+  | final run | 9 | 3 |
+
+**Every final hit, classified:**
+
+- **Existing on `main`, the same tables on `base` (6):**
+  - CRDO #26 and NTRA #33 (`main` leaves the date row in the body, see the yearless headers);
+  - JPM #162;
+  - SPCX #50;
+  - TSM #147;
+  - TSM #165, a second section repeating the same years.
+
+  The two other `base` hits are gone on the branch. AMZN #23 now carries its years in the header, and TSM #143 no
+  longer matches.
+- **Not on `base` (3): META 10-K FY2023 #52, 10-Q 2023-Q2 #33 and 10-Q 2023-Q3 #33, long-term debt.**
+  - Source, FY2023 #52:
+    - r1 `Maturity | Stated Interest Rate | Effective Interest Rate | December 31, 2023 | December 31, 2022`;
+    - r2 `August 2022 debt:`;
+    - r3 `2027 Notes | 2027 | 3.50% | 3.63% | $ 2,750 | $ 2,750`;
+    - r8 `May 2023 debt:`, followed by `2028 Notes … 1,500` in the 2023 column only.
+  - The section labels name the month a series of notes was issued. They are neither period text nor a period phrase
+    in the spec's sense.
+  - Every carrying amount sits under its own balance-sheet date. In each table, 19 facts are `ok` and 18 are rate
+    facts in undated columns; 0 are mismatched.
+  - Not a stacked period block. These tables fell back on `main`, and revision 5 exported them the same way.
+
+**JPM #159, #161 and #241** now equal `base` in every field: #159 is `needs_review` with `main`'s headers, and #161
+and #241 are source text.
+
+**Gate 6: pass.**
 
 ### Other filings (Acceptance 5): changes since Task 3
 
@@ -730,7 +862,7 @@ against the filing's tagged copy:
 | Lost cells | 93 | 89 | Only TSM #105's 4 cells left the list. The table is `main`'s output again, with its rates 0.0140, 0.0160, 0.0400 and 0.0400. |
 | Classification of the lost cells | | | Task 3's still holds: 41 fixes (MSFT #50 21, TSM #48 12, TSM #49 8) and 48 regressions (NTRA #8 4, TSM #150-#152 13, TSM #19 and #20 31). |
 | Changed cells | 14 | 14 | The same 14 items, all fixes. |
-| Promoted rows | 3,218 | 2,999 | Every revision 6 promoted row is one of revision 5's, which Task 3 reviewed. The 219 that are gone were in the reverted tables. |
+| Promoted rows | 3,218 | 2,992 | Every revision 6 promoted row is one of revision 5's, which Task 3 reviewed. The 226 that are gone were in the reverted tables. |
 | Balanced columns lost | 0 | 0 | |
 | Tables missing or added | 0 / 0 | 0 / 0 | |
 
@@ -746,18 +878,20 @@ Task 3's I1 status changes, revisited:
 
 | Gate | Result | Evidence |
 |---|---|---|
-| 1. Every table that differs between rev 5 and rev 6 is guard-fired, with `main`'s headers and status | **Pass** | 104 differ. All 104 are guard-fired and identical to `main` in every field, so no value differs from `main` and there is no Rule 3 difference to classify. 0 differ otherwise. The 21 D1 tables and TSM #105 are among them. |
+| 1. Every table that differs between rev 5 and rev 6 is guard-fired, with `main`'s headers and status | **Pass** | 107 differ. All 107 are guard-fired and identical to `main` in every field, so no value differs from `main` and there is no Rule 3 difference to classify. 0 differ otherwise. The 21 D1 tables, TSM #105 and JPM #159, #161 and #241 are among them. |
 | 2. Vault primary statements | **Pass** | All 126 export. OK facts: META 3,322, NVDA 2,662, RDDT 2,056. 0 failures, 0 yearless, 0 untagged, 0 arithmetic and 0 ambiguous. The results are identical to revision 5. |
 | 3. Vault, all tables | **Pass** | 0 lost, 0 changed, 0 balanced lost, 0 / 0 missing and added. |
 | 4. Acceptance 3b | **Pass** | 0 real misattributions. Every mismatch (26 on `base`, 104 on the branch) and every yearless header (15 and 112) is classified above. The 3 vault unlocated tables were checked by hand and pass. Called out: the CRM percent columns (a risk) and the NVDA change columns. |
-| 5. Others | **Pass** | Only TSM #105 changed since Task 3, and it is no longer a regression. |
+| 5. Others | **Pass** | Only TSM #105 changed since Task 3 among the classified cells, and it is no longer a regression. |
+| 6. Stacked period blocks | **Pass** | The reviewer's scan finds 0 tables on the branch that are not on `main`. The broader scan finds 3, all META debt tables whose labels name a note issuance; they are not period blocks, and their 19 dated facts each are `ok`. JPM #159, #161 and #241 equal `base`. |
 
 ### Needs the user's acceptance (revision 6)
 
 Resolved by revision 6:
 
 - D1, the 21 vault equity statements;
-- TSM #105.
+- TSM #105;
+- the JPM stacked blocks #159, #161, #194 and #241.
 
 Still open:
 
@@ -770,22 +904,27 @@ Still open:
    - Where it shows: the tables fell back on `main`; they are `needs_review` now.
    - Why it matters: a misattribution risk, though not a misattribution. No number sits under another period.
 5. **The guard's coverage cost.**
-   - What: besides D1 and TSM #105, 82 tables return to `main`'s output. That is 1,592 fewer numeric cells than
-     revision 5 (NVDA −198, Others −1,394), and 33 of these tables fall back again.
-   - Scale against the spec: the spec's "Period-row guard coverage cost" names 10 tables in this corpus.
+   - What: besides D1 and TSM #105, 85 tables return to `main`'s output. That is 1,687 fewer numeric cells than
+     revision 5 (NVDA −198, Others −1,489), and 35 of these tables fall back again.
+   - Scale against the spec: the spec now gives the first run's figures (82 tables, 1,592 cells, 33). This run adds
+     JPM #159, #161 and #241.
    - Vault totals: fallback tables go from 852 to 102, not 75.
    - Decision needed: accept this cost, or narrow the guard in the follow-up spec.
 
 ### Concerns (revision 6)
 
-- **The spec's "Period-row guard coverage cost" list does not match this corpus.**
-  - Tables it lists that the guard does not change here: NTRA 2025 #45 and #46. There `_header_count` already takes
-    3 header rows, and the extension adds none, so the guard cannot fire. MU 2021 #10 is not in the 60 filings.
-  - Tables it does not list that the guard does change: most of the 82 tables besides D1 and TSM #105. Of those 82,
-    the list covers only the exhibit indexes and NTRA #32.
-  - The spec's claim that none is a primary statement holds, as does the claim that none can misplace a number.
+- **The spec's "Period-row guard coverage cost" figures are the first run's.** Commit `0b9cede` set them to 82
+  tables, 1,592 cells and 33 tables falling back. The final run has 85, 1,687 and 35, because the guard now also
+  covers JPM #159, #161 and #241. The spec's claims hold: none of these tables is a primary statement, and none can
+  misplace a number.
 - **Task 4.** Its CHANGELOG figure `852 to 75` must become `852 to 102`.
-- **The check is blind to undated columns.** `no header date` covers 11,960 facts (25%), which the all-table check
-  cannot judge. The mixed-period scan above covers the D1 shape among them, but not every possible error.
+- **The check is blind to undated columns.** `no header date` covers 11,858 facts (25%), which the all-table check
+  cannot judge.
+  - The mixed-period check misses stacked blocks whose columns hold instants at only two dates, as JPM #159 and #241
+    did.
+  - Gate 6's structural scans cover the stacked-block shape, but only the forms their patterns recognise. A caption
+    such as `Q1 2025` alone is caught by scan B, not by the guard (see the spec's known gaps).
 - **Existing yearless risk on `main`.** In CRDO #26, NTRA #33 and SPCX #47, #48 and #50, `main` itself leaves the
   date row in the body. The branch does not change them.
+- **NVDA mixed percent scale.** NVDA 10-Q 2024-Q1 #38 is `exported` with no issues, yet its `% Change` column holds
+  values in percentage points beside fractions. This is the known mixed-scale gap.
