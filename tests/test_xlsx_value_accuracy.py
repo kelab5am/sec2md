@@ -519,3 +519,110 @@ def test_conflicting_percent_proofs_keep_text(header, value, shown):
 ])
 def test_percent_declaration(text, declared):
     assert xlsx_tables._percent_declaration(text) is declared
+
+
+# --- Rule I: identifier columns, per-cell quantity proof (I1, I2) -----------------------
+
+_QUANTITIES = 'Identifier heading over quantities; verify the column.'
+_AMOUNT_FORMATTED = 'Identifier heading over amount-formatted values; verify the column.'
+
+
+def test_identifier_heading_converts_only_cells_with_their_own_dollar():
+    """JPM #91: 'Within 1 year(a)' over '$ 21,442' and '19,404'."""
+    table = prepared(heading('Within 1 year(a)') + sec_row('Residential real estate', '$ 21,442')
+                     + sec_row('Auto and other', '19,404'))
+    assert table.headers == ('Item', 'Within 1 year(a)')
+    assert cell_rows(table) == [
+        [text_cell('Residential real estate'), (Decimal('21442'), '"$"#,##0', '$ 21,442', None)],
+        [text_cell('Auto and other'), text_cell('19,404', _QUANTITIES)],
+    ]
+    assert table.issues == (f'Source row 2, column 1: {_QUANTITIES}',)
+    assert table.status == 'needs_review'
+
+
+def test_facts_under_an_identifier_heading_convert():
+    """TSM #150: 'Other Changes (Note)' over tagged amounts."""
+    amount = {'unit': 'U_USD', 'scale': '9', 'name': 'ifrs-full:OtherChangesLiabilitiesArisingFromFinancingActivities'}
+    table = prepared(heading('Other Changes (Note)')
+                     + sec_row('Short-term loans', '$ (' + fact('589.3', sign='-', **amount) + ')')
+                     + sec_row('Bonds payable', fact('303.4', **amount))
+                     + sec_row('Long-term bank loans', '(' + fact('5.2', sign='-', **amount) + ')'))
+    assert table.headers == ('Item', 'Other Changes (Note)')
+    assert cell_rows(table) == [
+        [text_cell('Short-term loans'), (Decimal('-589.3'), '"$"#,##0.0;("$"#,##0.0)', '$ (589.3)', None)],
+        [text_cell('Bonds payable'), (Decimal('303.4'), '#,##0.0', '303.4', None)],
+        [text_cell('Long-term bank loans'), (Decimal('-5.2'), '#,##0.0;(#,##0.0)', '(5.2)', None)],
+    ]
+    assert table.status == 'exported'
+
+
+def test_split_percent_signs_under_an_identifier_heading_convert_after_attachment():
+    """NVDA 10-Q 2027-Q1 #32: 'Year-over-Year Change' heads the values, and each '%' sits in
+    an unheaded cell of its own. A points value keeps its own reason (Ruling 4)."""
+    table = prepared('<tr><th>Item</th><th>Year-over-Year Change</th><th></th></tr>'
+                     '<tr><td>Revenue</td><td>85</td><td>%</td></tr>'
+                     '<tr><td>Gross margin</td><td>14.4 pts</td><td></td></tr>'
+                     '<tr><td>Operating expenses</td><td>(30)</td><td>%</td></tr>')
+    assert table.headers == ('Item', 'Year-over-Year Change')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('0.85'), '0%', '85 %', None)],
+        [text_cell('Gross margin'), text_cell('14.4 pts', _POINTS_REASON)],
+        [text_cell('Operating expenses'), (Decimal('-0.30'), '0%;(0%)', '(30) %', None)],
+    ]
+    # Each '%' joined its value; the emptied '%' column is not kept.
+    assert [row[1] for row in table.cell_sources] == [((1, 1), (1, 2)), ((2, 1),), ((3, 1), (3, 2))]
+    assert table.issues == (f'Source row 2, column 1: {_POINTS_REASON}',)
+
+
+def test_one_dollar_cell_never_converts_the_note_references_beside_it():
+    """Codex's counterexample: 'Notes' over '7', '8' and '$ 12'."""
+    table = prepared(heading('Notes') + sec_row('Cash', '7') + sec_row('Receivables', '8')
+                     + sec_row('Other', '$ 12'))
+    assert cell_rows(table) == [
+        [text_cell('Cash'), text_cell('7', _QUANTITIES)],
+        [text_cell('Receivables'), text_cell('8', _QUANTITIES)],
+        [text_cell('Other'), (Decimal('12'), '"$"#,##0', '$ 12', None)],
+    ]
+    assert table.issues == tuple(f'Source row {r}, column 1: {_QUANTITIES}' for r in (1, 2))
+
+
+@pytest.mark.parametrize('header, label, value', [
+    ('Notes', 'Property, plant and equipment', '7'),
+    ('Exhibit', 'Amended and Restated Bylaws', '3.1'),
+    ('Filing Date', 'Amended and Restated Bylaws', '07/09/2015'),
+    ('Maturities (calendar year)', 'Senior unsecured notes', '2028'),
+    ('Incorporated by Reference', 'Amended and Restated Bylaws', '10-Q'),
+], ids=['notes', 'exhibit', 'filing-date', 'maturity-year', 'form-type'])
+def test_true_identifiers_stay_unflagged_text(header, label, value):
+    table = prepared(f'<tr><th>Item</th><th>{header}</th></tr><tr><td>{label}</td><td>{value}</td></tr>')
+    assert table.headers == ('Item', header)
+    assert cell_rows(table) == [[text_cell(label), text_cell(value)]]
+    assert table.issues == ()
+    assert table.status == 'exported'
+
+
+def test_dollar_inside_an_exhibit_description_proves_nothing():
+    table = prepared('<tr><th>Exhibit Number</th><th>Exhibit Description</th></tr>'
+                     '<tr><td>4.1</td><td>Indenture, dated as of February 5, 2015</td></tr>'
+                     '<tr><td>10.1</td><td>Credit Agreement for a $1,000,000 revolving facility, '
+                     'dated as of May 2, 2017</td></tr>')
+    assert table.headers == ('Exhibit Number', 'Exhibit Description')
+    assert cell_rows(table) == [
+        [text_cell('4.1'), text_cell('Indenture, dated as of February 5, 2015')],
+        [text_cell('10.1'), text_cell('Credit Agreement for a $1,000,000 revolving facility, dated as of May 2, 2017')],
+    ]
+    assert table.issues == ()
+
+
+def test_amount_formatted_cells_without_quantity_evidence_are_flagged():
+    """CAT #12 without its '$' rows: '13,373' and '(154)' are formatted as amounts, '164' is not."""
+    table = prepared(heading('Full Year 2024') + sec_row('Profit', '13,373') + sec_row('Restructuring costs', '164')
+                     + sec_row('Pension/OPEB mark-to-market (gains) losses', '(154)'))
+    assert table.headers == ('Item', 'Full Year 2024')
+    assert cell_rows(table) == [
+        [text_cell('Profit'), text_cell('13,373', _AMOUNT_FORMATTED)],
+        [text_cell('Restructuring costs'), text_cell('164')],
+        [text_cell('Pension/OPEB mark-to-market (gains) losses'), text_cell('(154)', _AMOUNT_FORMATTED)],
+    ]
+    assert table.issues == tuple(f'Source row {r}, column 1: {_AMOUNT_FORMATTED}' for r in (1, 3))
+    assert table.status == 'needs_review'

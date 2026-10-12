@@ -644,11 +644,14 @@ def test_measured_columns_hold_numbers_in_tables(top, leaf):
     assert table.rows[0][1].value == Decimal('1234')
 
 
-def test_identifier_columns_keep_text_even_for_facts():
+def test_identifier_columns_convert_facts():
+    """Value-accuracy spec I3 (2026-10-12): a tagged number under 'Notes' proves a quantity,
+    so it converts, where Rule 3 alone kept it as text."""
     table = prepared('<table><tr><th></th><th colspan="2">December 31, 2024</th></tr>'
                      '<tr><th>Item</th><th>Notes</th><th>Amount</th></tr>'
                      '<tr><td>Revenue</td><td><ix:nonfraction>7</ix:nonfraction></td><td>$100</td></tr></table>')
-    assert table.rows[0][1].value == '7'
+    assert [(c.value, c.number_format, c.original, c.review_reason) for c in table.rows[0][1:]] == [
+        (Decimal('7'), '#,##0', '7', None), (Decimal('100'), '"$"#,##0', '$100', None)]
 
 
 def test_measured_column_without_context_is_flagged_not_silent():

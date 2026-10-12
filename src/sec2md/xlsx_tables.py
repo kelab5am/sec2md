@@ -735,10 +735,11 @@ def _identifier_heading(header):
     return _identifier_column(header) and not all(_PERIOD.fullmatch(part) for part in header.split(' — '))
 
 
-def _numeric_role(text, header, label, cells, units, financial, table_percent, proof=None):
+def _numeric_role(text, header, label, cells, units, financial, table_percent, proof=None, proves_quantity=False):
     """The cell's role. proof is the role a cell-, row- or column-level proof gives (spec
-    P1-P3); a table-wide percent declaration applies only without one."""
-    if _identifier_heading(header):
+    P1-P3); a table-wide percent declaration applies only without one. Under an identifier
+    heading only a cell that proves a quantity itself takes this path (spec I1)."""
+    if _identifier_heading(header) and not proves_quantity:
         return 'text'
     if proof:
         return proof
@@ -865,7 +866,8 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True) -> _Pr
 
 
 class _BodyCell(NamedTuple):
-    """A copy cell once its role is decided, before the percent-column pass (spec P4)."""
+    """A copy cell once its role is decided, before the percent-column and identifier-column
+    passes (spec P4, I2)."""
     text: str
     origins: list
     role: str
@@ -873,6 +875,8 @@ class _BodyCell(NamedTuple):
     marks_column: bool
     unproven: bool
     by_fact: bool
+    identifier_text: bool  # a digit cell its identifier heading keeps as text (spec I1)
+    identifier_quantity: bool  # a digit cell that proves a quantity under one (spec I1)
 
 
 def _unproven_value(text, origins):
@@ -882,6 +886,37 @@ def _unproven_value(text, origins):
     if reading.review_reason or reading.value.is_zero():
         return reading
     return CellValue(text, '@', text, _UNPROVEN)
+
+
+# Rule I (2026-10-12 value-accuracy spec): an identifier heading keeps a cell as text
+# unless the cell itself proves a quantity.
+_QUANTITIES = 'Identifier heading over quantities; verify the column.'
+_AMOUNT_FORMATTED = 'Identifier heading over amount-formatted values; verify the column.'
+_AMOUNT_NUMBER = r'(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?'
+# Spec I2: a thousands-separated number ('13,373'), or a number in accounting parentheses ('(154)').
+_AMOUNT_FORMAT = re.compile(rf'[+\-−]?\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|\(\s*{_AMOUNT_NUMBER}\s*\)')
+
+
+def _proves_quantity(text, origins) -> bool:
+    """Spec I1: the cell's value origin is an ix:nonFraction fact, or its text is one
+    complete token carrying its own '$' or '%' (a split '%' after attachment). A '$'
+    inside longer text, such as an exhibit description, is no complete token."""
+    if _value_facts(origins):
+        return True
+    reading = _convert_prepared(text, 'number', origins)
+    return isinstance(reading.value, Decimal) and ('"$"' in reading.number_format or '%' in reading.number_format)
+
+
+def _identifier_reason(text, quantities) -> str | None:
+    """Spec I2: the review reason of a digit cell its identifier heading keeps as text.
+    quantities: another cell of its column proves a quantity. True identifiers (note
+    references, exhibit numbers, dates, years, form types) get none."""
+    if quantities:
+        return _QUANTITIES
+    # User decision (2026-10-13): a whole-cell footnote mark ('(1)', '(12)') is a
+    # reference, not a number in accounting parentheses: 'Note | (1)' stays unflagged.
+    text = text.strip()
+    return _AMOUNT_FORMATTED if _AMOUNT_FORMAT.fullmatch(text) and not _FOOTNOTE_MARK.fullmatch(text) else None
 
 
 # Standalone structural fragments. ')%' reaches a copy cell only through the
@@ -1119,9 +1154,13 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             proof = (_cell_proof(text, headers[index], header_labels[index], original[r][0], origins,
                                  header_proves=index not in shared)
                      if digits and not label_column else _NO_PROOF)
+            # Spec I1: under an identifier heading a digit cell takes the role path only
+            # with its own quantity proof; every other one stays text.
+            identifier = digits and not label_column and _identifier_heading(headers[index])
+            quantity = identifier and _proves_quantity(text, origins)
             role = 'text' if label_column else _numeric_role(
                 text, headers[index], original[r][0], origins, units, financial,
-                table_percent and index not in shared, proof.role)
+                table_percent and index not in shared, proof.role, quantity)
             value = _convert_prepared(text, role, origins)
             # Explicit units on either axis (or on the value itself) must agree.
             # Broader table units can still have specific row/column exceptions.
@@ -1133,21 +1172,26 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
             # Spec P4: no proof of either kind, and no table-wide declaration proving it.
             unproven = (digits and not label_column and not points and proof.role is None and not proof.conflict
-                        and role != 'percent' and not _identifier_heading(headers[index]))
+                        and role != 'percent' and not (identifier and not quantity))
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
-                                     unproven, proof.by_fact))
+                                     unproven, proof.by_fact, identifier and not quantity, quantity))
         body.append(decided)
     # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
     # column a percent column, as does a withheld declaration (Rulings 10 and 11).
     # Unproven digit cells there stay source text.
     percent_columns = shared_percent | {index for decided in body for index, cell in enumerate(decided)
                                         if cell.marks_column}
+    # Spec I2: identifier columns in which some cell proves a quantity.
+    quantity_columns = {index for decided in body for index, cell in enumerate(decided) if cell.identifier_quantity}
     rows, sources = [], []
     for r, decided in enumerate(body, start=header_count):
         row_values = []
         for index, cell in enumerate(decided):
             value = (_unproven_value(cell.text, cell.origins) if cell.unproven and index in percent_columns
                      else cell.value)
+            # Spec I2. A cell's own reason (points, conflicting units) stays (Ruling 4).
+            if cell.identifier_text and not value.review_reason:
+                value = replace(value, review_reason=_identifier_reason(cell.text, index in quantity_columns))
             column = groups[kept[index]][0]
             if value.review_reason:
                 issues.append(f'Source row {r}, column {column}: {value.review_reason}')
