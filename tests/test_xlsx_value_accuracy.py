@@ -261,6 +261,50 @@ def test_refused_split_percent_flags_a_plain_value_as_p4_text():
     assert table.status == 'needs_review'
 
 
+def test_ancestor_heading_never_attaches_across_another_leaf_heading():
+    """Ruling 14: a stray '%' under the period heading '2025' would reach '5' only across
+    the separately headed, blank '% of revenue' cell. It is refused, so '5' and '4' are
+    P4 text, never 0.05 and 0.04. Revenue's markers sit beside their values and attach."""
+    table = prepared('<tr><td></td><td colspan="4">2025</td><td colspan="4">2024</td></tr>'
+                     '<tr><td></td><td colspan="2">Amount</td><td>% of revenue</td><td></td>'
+                     '<td colspan="2">Amount</td><td>% of revenue</td><td></td></tr>'
+                     '<tr><td>Revenue</td><td>$</td><td>1,000</td><td>100.0</td><td>%</td>'
+                     '<td>$</td><td>900</td><td>100.0</td><td>%</td></tr>'
+                     '<tr><td>Other income</td><td></td><td>5</td><td></td><td>%</td>'
+                     '<td></td><td>4</td><td></td><td>%</td></tr>')
+    empty = (None, '@', '', None)
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1000'), '"$"#,##0', '$ 1,000', None),
+         (Decimal('1.000'), '0.0%', '100.0 %', None), empty,
+         (Decimal('900'), '"$"#,##0', '$ 900', None), (Decimal('1.000'), '0.0%', '100.0 %', None), empty],
+        [('Other income', '@', 'Other income', None), ('5', '@', '5', _UNPROVEN), empty, ('%', '@', '%', None),
+         ('4', '@', '4', _UNPROVEN), empty, ('%', '@', '%', None)],
+    ]
+    assert table.cell_sources[1] == (((3, 0),), ((3, 1), (3, 2)), ((3, 3),), ((3, 4),),
+                                     ((3, 5), (3, 6)), ((3, 7),), ((3, 8),))
+    assert table.issues == (f'Source row 3, column 1: {_UNPROVEN}', f'Source row 3, column 5: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
+def test_refused_split_percent_on_a_zero_keeps_the_zero():
+    """Spec P4's zero exception: zero is right at any scale, so a refused zero converts."""
+    table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">% change</th></tr>'
+                     '<tr><td>Revenue</td><td>0</td><td></td><td>%</td></tr>'
+                     '<tr><td>Costs</td><td>0.0</td><td></td><td>%</td></tr>')
+    assert [row[1] for row in cell_rows(table)] == [(Decimal('0'), '#,##0', '0', None),
+                                                    (Decimal('0.0'), '#,##0.0', '0.0', None)]
+    assert table.issues == ()
+
+
+def test_period_text_value_in_a_data_row_takes_no_split_percent():
+    """A year is never a split percent's value, and its refusal is not flagged."""
+    table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">% change</th></tr>'
+                     '<tr><td>Revenue</td><td>2020</td><td></td><td>%</td></tr>')
+    assert cell_rows(table) == [[('Revenue', '@', 'Revenue', None), (Decimal('2020'), '#,##0', '2020', None),
+                                 (None, '@', '', None), ('%', '@', '%', None)]]
+    assert table.issues == ()
+
+
 def test_refused_split_percent_under_an_identifier_heading_keeps_the_identifier_reason():
     """Existing reason precedence: an identifier heading keeps the cell text with its I2 reason."""
     table = prepared('<tr><th>Item</th><th>Notes</th><th colspan="2">% change</th></tr>'

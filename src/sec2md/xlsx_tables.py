@@ -877,7 +877,7 @@ class _BodyCell(NamedTuple):
     by_fact: bool
     identifier_text: bool  # a digit cell its identifier heading keeps as text (spec I1)
     identifier_quantity: bool  # a digit cell that proves a quantity under one (spec I1)
-    refused_percent: bool  # its value's split '%' was refused by the leaf-header rule (Fix A)
+    refused_percent: bool  # user decision (2026-10-13): its value's split '%' was refused by a leaf rule
 
 
 def _unproven_value(text, origins):
@@ -958,8 +958,12 @@ def _attached_percent_signs(grid, header_count):
     A marker under a leaf header attaches only when that heading also spans the
     value's column (user decision 2026-10-13, amending Ruling 5): TSM's '%' under
     'For the year ended December 31,' joins the value under its '2022' leaf, while
-    a '%' under '% change' never joins the amount under '2025'. Such a refused
-    value is returned as refused, so it is flagged rather than left a plain number.
+    a '%' under '% change' never joins the amount under '2025'. Through such an
+    ancestor heading it attaches only when no column between the value and the
+    marker has a leaf heading of its own (Ruling 14): a stray '%' under '2025'
+    never reaches '5' across a blank '% of revenue' cell. A value refused by
+    either leaf rule is returned as refused and becomes P4 text, so it is never
+    left a plain number; a zero still converts, under spec P4's zero exception.
     """
     attached, refused = {}, {}
     for r in range(header_count, len(grid)):
@@ -974,8 +978,13 @@ def _attached_percent_signs(grid, header_count):
                     or '%' in value.text or _period_text(value.text)):
                 continue
             marker_leaf = _leaf(grid, header_count, col)
-            if marker_leaf is None or (marker_leaf.column <= value.column + value.colspan - 1
-                                       < marker_leaf.column + marker_leaf.colspan):
+            right = value.column + value.colspan - 1
+            value_leaf = _leaf(grid, header_count, right)
+            covers = marker_leaf is None or marker_leaf.column <= right < marker_leaf.column + marker_leaf.colspan
+            separated = marker_leaf is not None and marker_leaf is not value_leaf and any(
+                _leaf(grid, header_count, between) not in (None, value_leaf, marker_leaf)
+                for between in range(right + 1, col))
+            if covers and not separated:
                 attached[value] = marker
             else:
                 refused[value] = marker
