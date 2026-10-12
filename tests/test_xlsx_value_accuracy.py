@@ -310,8 +310,14 @@ def test_split_percent_never_attaches_across_an_unheaded_gap_column():
          (Decimal('0.20'), '0%', '20 %', None), _EMPTY],
         [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _EMPTY, _STRAY],
     ]
-    assert table.cell_sources[2] == (((4, 0),), ((4, 1),), ((4, 2),), ((4, 3),), ((4, 4),))
-    assert f'Source row 4, column 2: {_UNPROVEN}' in table.issues
+    assert table.cell_sources == (
+        (((2, 0),), ((2, 1),), ((2, 2),), ((2, 3), (2, 4)), ()),
+        (((3, 0),), ((3, 1),), ((3, 2),), ((3, 3), (3, 4)), ()),
+        (((4, 0),), ((4, 1),), ((4, 2),), ((4, 3),), ((4, 4),)),
+    )
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 2: {_UNRESOLVED}',
+                            f'Source row 4, column 1: {_UNRESOLVED}', f'Source row 4, column 2: {_UNPROVEN}')
+    assert table.status == 'needs_review'
 
 
 def test_split_percent_never_attaches_past_a_blank_change_percent_cell():
@@ -328,10 +334,13 @@ def test_split_percent_never_attaches_past_a_blank_change_percent_cell():
         [('Costs', '@', 'Costs', None), ('600', '@', '600', _UNRESOLVED), ('500', '@', '500', _UNRESOLVED),
          ('100', '@', '100', _UNPROVEN), _EMPTY, _STRAY],
     ]
-    assert table.cell_sources[1] == (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5), (3, 6)),
-                                     ((3, 7),), ((3, 8),))
+    assert table.cell_sources == (
+        (((2, 0),), ((2, 1), (2, 2)), ((2, 3), (2, 4)), ((2, 5), (2, 6)), ((2, 7), (2, 8)), ()),
+        (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5), (3, 6)), ((3, 7),), ((3, 8),)),
+    )
     assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 3: {_UNRESOLVED}',
                             f'Source row 3, column 5: {_UNPROVEN}')
+    assert table.status == 'needs_review'
 
 
 def test_split_percent_under_its_values_leaf_never_crosses_an_empty_origin():
@@ -348,10 +357,39 @@ def test_split_percent_under_its_values_leaf_never_crosses_an_empty_origin():
         [('Costs', '@', 'Costs', None), ('600', '@', '600', _UNRESOLVED), ('500', '@', '500', _UNRESOLVED),
          _EMPTY, ('100', '@', '100', _UNPROVEN), _EMPTY, _STRAY],
     ]
-    assert table.cell_sources[1] == (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5),), ((3, 6),),
-                                     ((3, 7),), ((3, 8),))
+    assert table.cell_sources == (
+        (((2, 0),), ((2, 1), (2, 2)), ((2, 3), (2, 4)), ((2, 5),), ((2, 6),), ((2, 7), (2, 8)), ()),
+        (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5),), ((3, 6),), ((3, 7),), ((3, 8),)),
+    )
     assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 3: {_UNRESOLVED}',
                             f'Source row 3, column 6: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
+_GAP_HEADINGS = _tr('', ('Year Ended December 31,', 4)) + _tr('', '2025', '2024', '', '')
+_GAP_REVENUE = _tr('Revenue', '1,100', '1,000', '10', '%')
+
+
+@pytest.mark.parametrize('other', [
+    _tr('Other', '5', '4', ('%', 2)),  # s2: the '%' spans the blank percent-value column
+    _tr('Other', '5', '4', '%'),  # s3: a short row puts the '%' in the percent-value column
+], ids=['marker_spans_value_column', 'marker_in_value_column'])
+def test_ancestor_heading_percent_in_a_value_column_never_attaches(other):
+    """Ruling 17: Other's '%' sits under only the period heading and in a column that holds
+    Revenue's '10'. It is not 4's percent sign: '4' is P4 text, never 0.04, and Revenue's
+    '1,000' keeps its number."""
+    table = prepared(_GAP_HEADINGS + _GAP_REVENUE + other)
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '#,##0', '1,100', None),
+         (Decimal('1000'), '#,##0', '1,000', None), (Decimal('0.10'), '0%', '10 %', None), _EMPTY],
+        [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _STRAY, _EMPTY],
+    ]
+    assert table.cell_sources == (
+        (((2, 0),), ((2, 1),), ((2, 2),), ((2, 3), (2, 4)), ()),
+        (((3, 0),), ((3, 1),), ((3, 2),), ((3, 3),), ()),
+    )
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 2: {_UNPROVEN}')
+    assert table.status == 'needs_review'
 
 
 def test_refused_split_percent_on_a_zero_keeps_the_zero():

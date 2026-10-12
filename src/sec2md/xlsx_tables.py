@@ -877,7 +877,7 @@ class _BodyCell(NamedTuple):
     by_fact: bool
     identifier_text: bool  # a digit cell its identifier heading keeps as text (spec I1)
     identifier_quantity: bool  # a digit cell that proves a quantity under one (spec I1)
-    refused_percent: bool  # user decision (2026-10-13): its value's split '%' was refused by a leaf rule
+    refused_percent: bool  # user decision (2026-10-13): the attachment pass refused its value's split '%'
 
 
 def _unproven_value(text, origins):
@@ -945,6 +945,12 @@ def _leaf(grid, header_count, col):
                  if grid[r][col] and grid[r][col].text and not _UNIT_LINE.search(grid[r][col].text)), None)
 
 
+def _value_in_columns(grid, value_rows, row, columns):
+    """Whether a digit-bearing origin of another of the value rows occupies any of the columns."""
+    return any(cell is not None and cell.row == r and re.search(r'\d', cell.text)
+               for r in value_rows if r != row for cell in (grid[r][c] for c in columns))
+
+
 def _attached_percent_signs(grid, header_count):
     """The attachment pass (spec P4): ({value origin: marker origin}, {value origin: refused marker}).
 
@@ -960,15 +966,18 @@ def _attached_percent_signs(grid, header_count):
     spans the value's column (user decision 2026-10-13, amending Ruling 5):
     TSM's '%' under 'For the year ended December 31,' joins the value under its
     '2022' leaf, while a '%' under '% change' never joins the amount under '2025'.
-    A value the search reached but that fails either rule is returned as refused
+    Through such an ancestor heading (the marker's leaf is not the value's) it
+    never attaches from a column that holds a value in another body row
+    (Ruling 17): a '%' spanning, or written in, a blank percent-value column is
+    not the percent sign of the amount beside it.
+    A value the search reached but that fails any of these rules is returned as refused
     and becomes P4 text, so it is never left a plain number; a zero still
     converts, under spec P4's zero exception.
     """
     attached, refused = {}, {}
-    for r in range(header_count, len(grid)):
+    value_rows = [r for r in range(header_count, len(grid)) if not _period_row(grid[r])]
+    for r in value_rows:
         row = grid[r]
-        if _period_row(row):
-            continue
         for col, marker in enumerate(row):
             if marker is None or (marker.row, marker.column) != (r, col) or marker.text not in {'%', ')%'}:
                 continue
@@ -979,7 +988,9 @@ def _attached_percent_signs(grid, header_count):
             marker_leaf = _leaf(grid, header_count, col)
             right = value.column + value.colspan - 1
             covers = marker_leaf is None or marker_leaf.column <= right < marker_leaf.column + marker_leaf.colspan
-            if right + 1 == col and covers:
+            in_value_column = (marker_leaf is not None and marker_leaf is not _leaf(grid, header_count, right)
+                               and _value_in_columns(grid, value_rows, r, range(col, col + marker.colspan)))
+            if right + 1 == col and covers and not in_value_column:
                 attached[value] = marker
             else:
                 refused[value] = marker
@@ -1185,8 +1196,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             # Spec P4: no proof of either kind, and no table-wide declaration proving it.
             flaggable = digits and not label_column and not points and not proof.conflict and not (identifier and not quantity)
             unproven = flaggable and proof.role is None and role != 'percent'
-            # User decision (2026-10-13): a value whose split '%' the leaf-header rule
-            # refused is P4 text, never a plain number.
+            # User decision (2026-10-13): a value whose split '%' the attachment pass
+            # refused (leaf rule, Ruling 16 adjacency, Ruling 17) is P4 text, never a plain number.
             refused_percent = flaggable and any(o in refused and refused[o] not in origins for o in origins)
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
                                      unproven, proof.by_fact, identifier and not quantity, quantity, refused_percent))
