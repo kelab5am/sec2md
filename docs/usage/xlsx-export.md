@@ -83,13 +83,16 @@ prose, review sections, cell-coordinate ledgers and extracted-text dumps are omi
 They remain available in internal extraction records and API/CLI diagnostics.
 
 Header rows are read from the table's own layout. Besides `<th>` rows and period
-rows, a row joins the header when it reads as a heading and the row directly above
-the data spans the `$` and amount cells beneath it, as `December 31, 2024` does.
-Each column header joins its levels with ` — `, such as `December 31, — 2024` or
+rows, the header can take in rows that read as headings, but only with span
+evidence: the last header row must have a heading wider than an amount beneath
+it, as `December 31, 2024` spans its `$` and amount cells. Each column header
+joins its levels with ` — `, such as `December 31, — 2024` or
 `Year Ended December 31, — 2024 vs 2023 % change`. Rows that might be data stay
 in the body. A table that stacks period blocks, each under its own caption row,
-gets no extended header, so no number sits under another block's period. When a header cannot be established, the
-table keeps its original grid instead.
+gets no extended header when the exporter recognises the second block's
+caption. Captions such as `Q1 2025` or `FY2024` are not recognised, so a block
+under one of them can still sit under the first block's period. When a header
+cannot be established, the table keeps its original grid instead.
 
 **No rows or columns are frozen.** Prepared copy grids are unmerged; original
 references preserve source merges. Local named ranges `CopyTable` and `OriginalTable`
