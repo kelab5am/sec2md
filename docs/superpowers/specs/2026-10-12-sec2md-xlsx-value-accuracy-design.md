@@ -2,7 +2,7 @@
 
 Date: 2026-10-12 (revision 2)
 
-Status: Draft for review. Not implemented.
+Status: Implemented on branch fix/xlsx-value-accuracy (pending PR). Plan: ../plans/2026-10-12-sec2md-xlsx-value-accuracy.md. Acceptance: ../audits/2026-10-12-xlsx-value-accuracy/README.md.
 
 Scope:
 - `src/sec2md/xlsx_tables.py` and `src/sec2md/xlsx_values.py` only.
