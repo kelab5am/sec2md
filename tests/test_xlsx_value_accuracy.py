@@ -286,6 +286,74 @@ def test_ancestor_heading_never_attaches_across_another_leaf_heading():
     assert table.status == 'needs_review'
 
 
+def _tr(*cells):
+    """A source row; a (text, colspan) pair is a spanning cell."""
+    return '<tr>' + ''.join(f'<td colspan="{c[1]}">{c[0]}</td>' if isinstance(c, tuple) else f'<td>{c}</td>'
+                            for c in cells) + '</tr>'
+
+
+_EMPTY = (None, '@', '', None)
+_STRAY = ('%', '@', '%', None)
+
+
+def test_split_percent_never_attaches_across_an_unheaded_gap_column():
+    """Ruling 16 (r1b): Other's '%' is not beside '4'; a blank, unheaded percent column
+    lies between them. '4' is P4 text, never 0.04, and Revenue's and Costs' adjacent
+    markers attach."""
+    table = prepared(_tr('', ('Year Ended December 31,', 4)) + _tr('', '2025', '2024', '', '')
+                     + _tr('Revenue', '1,100', '1,000', '10', '%') + _tr('Costs', '600', '500', '20', '%')
+                     + _tr('Other', '5', '4', '', '%'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '#,##0', '1,100', None),
+         (Decimal('1000'), '#,##0', '1,000', None), (Decimal('0.10'), '0%', '10 %', None), _EMPTY],
+        [('Costs', '@', 'Costs', None), ('600', '@', '600', _UNRESOLVED), ('500', '@', '500', _UNRESOLVED),
+         (Decimal('0.20'), '0%', '20 %', None), _EMPTY],
+        [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _EMPTY, _STRAY],
+    ]
+    assert table.cell_sources[2] == (((4, 0),), ((4, 1),), ((4, 2),), ((4, 3),), ((4, 4),))
+    assert f'Source row 4, column 2: {_UNPROVEN}' in table.issues
+
+
+def test_split_percent_never_attaches_past_a_blank_change_percent_cell():
+    """Ruling 16 (r3): 'Change' heads the $ change; Costs' '%' lies past a blank, unheaded
+    percent cell, so the $ change '100' is P4 text, never 1.00."""
+    table = prepared(_tr('', ('Year Ended December 31,', 8))
+                     + _tr('', ('2025', 2), ('2024', 2), ('Change', 2), '', '')
+                     + _tr('Revenue', '$', '1,100', '$', '1,000', '$', '100', '10', '%')
+                     + _tr('Costs', '', '600', '', '500', '', '100', '', '%'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '"$"#,##0', '$ 1,100', None),
+         (Decimal('1000'), '"$"#,##0', '$ 1,000', None), (Decimal('100'), '"$"#,##0', '$ 100', None),
+         (Decimal('0.10'), '0%', '10 %', None), _EMPTY],
+        [('Costs', '@', 'Costs', None), ('600', '@', '600', _UNRESOLVED), ('500', '@', '500', _UNRESOLVED),
+         ('100', '@', '100', _UNPROVEN), _EMPTY, _STRAY],
+    ]
+    assert table.cell_sources[1] == (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5), (3, 6)),
+                                     ((3, 7),), ((3, 8),))
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 3: {_UNRESOLVED}',
+                            f'Source row 3, column 5: {_UNPROVEN}')
+
+
+def test_split_percent_under_its_values_leaf_never_crosses_an_empty_origin():
+    """Ruling 16 (r4'): 'Change' heads the $ and % columns; Costs' '%' shares that leaf
+    with the $ change '100' but lies past an empty origin. '100' is P4 text, never 1.00."""
+    table = prepared(_tr('', ('Year Ended December 31,', 8))
+                     + _tr('', ('2025', 2), ('2024', 2), ('Change', 4))
+                     + _tr('Revenue', '$', '1,100', '$', '1,000', '$', '100', '10', '%')
+                     + _tr('Costs', '', '600', '', '500', '', '100', '', '%'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '"$"#,##0', '$ 1,100', None),
+         (Decimal('1000'), '"$"#,##0', '$ 1,000', None), ('$', '@', '$', None),
+         (Decimal('100'), '#,##0', '100', None), (Decimal('0.10'), '0%', '10 %', None), _EMPTY],
+        [('Costs', '@', 'Costs', None), ('600', '@', '600', _UNRESOLVED), ('500', '@', '500', _UNRESOLVED),
+         _EMPTY, ('100', '@', '100', _UNPROVEN), _EMPTY, _STRAY],
+    ]
+    assert table.cell_sources[1] == (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5),), ((3, 6),),
+                                     ((3, 7),), ((3, 8),))
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 3: {_UNRESOLVED}',
+                            f'Source row 3, column 6: {_UNPROVEN}')
+
+
 def test_refused_split_percent_on_a_zero_keeps_the_zero():
     """Spec P4's zero exception: zero is right at any scale, so a refused zero converts."""
     table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">% change</th></tr>'

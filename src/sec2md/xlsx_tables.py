@@ -948,22 +948,21 @@ def _leaf(grid, header_count, col):
 def _attached_percent_signs(grid, header_count):
     """The attachment pass (spec P4): ({value origin: marker origin}, {value origin: refused marker}).
 
-    A body origin whose whole text is '%' or ')%' attaches to the nearest value
-    origin on its left in the same source row. Only empty origins or '$' and '('
-    fragments may lie between them, so two values are never joined. The row
-    label, a value spanning from another row and a value that already shows a
-    '%' take no marker. Neither does period text or any origin of a period row
-    (heading rows left in the body: '| | 2025 | 2024 | $ | % |').
+    A body origin whose whole text is '%' or ')%' looks for the nearest value
+    origin on its left in the same source row, across only empty origins or '$'
+    and '(' fragments, so two values are never joined. The row label, a value
+    spanning from another row and a value that already shows a '%' take no
+    marker. Neither does period text or any origin of a period row (heading rows
+    left in the body: '| | 2025 | 2024 | $ | % |').
 
-    A marker under a leaf header attaches only when that heading also spans the
-    value's column (user decision 2026-10-13, amending Ruling 5): TSM's '%' under
-    'For the year ended December 31,' joins the value under its '2022' leaf, while
-    a '%' under '% change' never joins the amount under '2025'. Through such an
-    ancestor heading it attaches only when no column between the value and the
-    marker has a leaf heading of its own (Ruling 14): a stray '%' under '2025'
-    never reaches '5' across a blank '% of revenue' cell. A value refused by
-    either leaf rule is returned as refused and becomes P4 text, so it is never
-    left a plain number; a zero still converts, under spec P4's zero exception.
+    The marker attaches only when it is directly beside that value, with no
+    origin between them (Ruling 16), and its leaf heading is the value's or
+    spans the value's column (user decision 2026-10-13, amending Ruling 5):
+    TSM's '%' under 'For the year ended December 31,' joins the value under its
+    '2022' leaf, while a '%' under '% change' never joins the amount under '2025'.
+    A value the search reached but that fails either rule is returned as refused
+    and becomes P4 text, so it is never left a plain number; a zero still
+    converts, under spec P4's zero exception.
     """
     attached, refused = {}, {}
     for r in range(header_count, len(grid)):
@@ -979,12 +978,8 @@ def _attached_percent_signs(grid, header_count):
                 continue
             marker_leaf = _leaf(grid, header_count, col)
             right = value.column + value.colspan - 1
-            value_leaf = _leaf(grid, header_count, right)
             covers = marker_leaf is None or marker_leaf.column <= right < marker_leaf.column + marker_leaf.colspan
-            separated = marker_leaf is not None and marker_leaf is not value_leaf and any(
-                _leaf(grid, header_count, between) not in (None, value_leaf, marker_leaf)
-                for between in range(right + 1, col))
-            if covers and not separated:
+            if right + 1 == col and covers:
                 attached[value] = marker
             else:
                 refused[value] = marker
