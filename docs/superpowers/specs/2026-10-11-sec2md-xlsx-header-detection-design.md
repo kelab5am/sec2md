@@ -127,6 +127,18 @@ was checked against the code before it was accepted.
 | 5. Medium: "Vault filings: 0 mismatches" contradicts 19 checker-limit mismatches already present on `main`. | Confirmed | 0 real misattributions in both cohorts; checker limits are classified. |
 | 6. Medium: a statement with a repeated date section label falls back under the guard. | Confirmed as the stated trade-off; none in the 126 vault statements | Test 12i pins it; Acceptance 3 still requires every vault statement to export. |
 
+**Task 5 review** (Opus, reviewing the guard's implementation). The code matched
+the definitions, but the definitions let realistic variants through, some
+exporting as `exported` with amounts under the wrong period: letter footnotes
+(`… 2025 (a)`, `2024 (a)`), `(Unaudited)`, a trailing colon, `Thirteen Weeks
+Ended`, `Period from … through`, numeric dates (`12/31/2024`), and a footnote
+marker in its own cell (read as a data cell). Reproduced and accepted. Footnote
+markers, qualifiers, colons, week counts, `from` and numeric dates join the
+period-text definition; a heading containing a period phrase also makes a period
+row; footnote-only cells do not count as data; month names need a word boundary
+(`Market 10` was period text). A label that merely contains a period phrase
+stays excluded, so primary-statement section labels do not trigger the guard.
+
 The other filings' lost cells were also classified (audit README): 41 fixes and 52
 regressions. The regressions are TSM #105 (I1, fixed by the guard), NTRA #8
 (`Less Than` / `1 Year`), TSM #150–#152 (`Other Changes (Note)`) and TSM #19/#20
@@ -232,22 +244,42 @@ Three approaches were considered:
   or `Date…`, optionally followed by a footnote marker such as `(1)`. The list
   comes from every labelled header row in the 60-filing evidence set; a label
   outside it stops the extension, which is the safe direction.
+- **Footnote marker:** `(1)`, `(a)`, `(ab)` (one or two letters or digits in
+  parentheses) or a run of `*`.
 - **Period text:** text made only of period vocabulary that names a period.
-  Remove footnote markers (`(1)`, `*`), then dates (`<month> <day>`), four-digit
-  years (`(?:19|20)\d{2}`), the words `three`, `six`, `nine`, `twelve`, `fiscal`,
-  `month(s)`, `year(s)`, `quarter(s)`, `week(s)`, `period(s)`, `ended`,
-  `ending`, `as`, `of`, `at`, `for`, `the`, `and`, `through`, `to`, and the
-  punctuation `,` `.` `-` `–` `—`. The text is period text when nothing
-  remains and the original contained a date, a year or `ended`. Period text:
+  Remove footnote markers; the parenthesised qualifiers `(unaudited)`,
+  `(audited)`, `(restated)`, `(as restated)`, `(as adjusted)`, `(as reported)`
+  and `(as previously reported)`; and a trailing `:`. Then remove dates
+  (`<month> <day>`, the month name starting at a word boundary), numeric dates
+  (`<m>/<d>/<yy or yyyy>`), four-digit years (`(?:19|20)\d{2}`), week counts
+  (`13 weeks`, `thirteen weeks`, `twenty-six weeks`, `thirty-nine weeks`,
+  `fifty-two weeks`, `fifty-three weeks`, digits or words, hyphen or space),
+  the words `three`, `six`, `nine`, `twelve`, `fiscal`, `month(s)`, `year(s)`,
+  `quarter(s)`, `week(s)`, `period(s)`, `ended`, `ending`, `as`, `of`, `at`,
+  `for`, `the`, `and`, `from`, `through`, `to`, and the punctuation `,` `.`
+  `-` `–` `—`. The text is period text when nothing remains and the original
+  contained a date, a numeric date, a year or `ended`. Period text:
   `Three months ended March 31, 2025`, `Three Months Ended June 30, 2025 and
   2024`, `December 31, 2025 (1)`, `Six Months Ended`, `December 31,`,
-  `2023 (2)`, `As of December 31, 2024`. Not period text:
+  `2023 (2)`, `As of December 31, 2024`, `Three Months Ended March 31, 2025 (a)`,
+  `Three Months Ended March 31, 2025 (Unaudited)`,
+  `Three months ended March 31, 2025:`, `Thirteen Weeks Ended May 3, 2025`,
+  `Period from January 1, 2025 through March 31, 2025`, `12/31/2024`,
+  `2024 (a)`, `March 31, 2025 (Restated)`. Not period text:
   `Balance as of December 31, 2024`, `2024 vs 2023 % change`, `Common Stock`,
-  `Fiscal Year`.
-- **Period row:** a row with no data cell in which at least one origin, label
-  included, is period text. Other origins may be column headings
+  `Fiscal Year`, `Market 10`,
+  `Cash paid for income taxes for the years ended December 31,`.
+- **Period phrase:** `(weeks?|months?|quarters?|years?|periods?) ended`, a full
+  date `<month> <day>, <year>`, or a numeric date, anywhere in the text.
+- **Period row:** a row with no data cell, not counting cells that hold only a
+  footnote marker, in which at least one origin is period text, or a heading
+  (an origin outside the label column) contains a period phrase. Other origins
+  may be column headings
   (`Three Months Ended June 30, 2025 | Common Stock | Retained Earnings`) or a
-  heading-word label (`Date | December 31, 2023 | December 31, 2024`).
+  heading-word label (`Date | December 31, 2023 | December 31, 2024`). A label
+  that only contains a period phrase (`Supplemental cash flow information for
+  the years ended December 31:`) does not make a period row, so section labels
+  in primary statements do not trigger the guard.
 
 ### Rule 1: header extension (`_export_header_count`)
 
@@ -494,7 +526,11 @@ checker did not recognise the others (CAT, NVO and several income statements).
   numbers are still unflagged text. Flagging them is a separate change.
 - **Stacked period blocks (revision 6).** The period-row guard keeps today's
   output for tables that stack two period blocks, such as the META and RDDT
-  10-Q equity statements. The follow-up is a separate spec: keep the statement
+  10-Q equity statements, when the second caption is in a form the period-text
+  and period-phrase definitions recognise. A caption in another form (for
+  example `Q1 2025`) is not caught at runtime; the all-table XBRL check
+  (Acceptance 3b) catches it only in swept filings. A runtime XBRL guard (see
+  "No runtime XBRL guard") would close this. The follow-up is a separate spec: keep the statement
   on one sheet and give each block its own header row, so the 2025 block sits
   beneath the 2024 block under its own period.
 - **Table-wide percent captions.** `_numeric_role` reads plain amounts as
@@ -598,13 +634,27 @@ equality with it.
      shares its row with the column headings; it reads
      `Three Months Ended June 30, 2025 and 2024`; it carries a footnote
      (`Three Months Ended June 30, 2025 (1)`); it sits in the label column.
+     Further variants (Task 5 review): `Three Months Ended March 31, 2025 (a)`
+     as a caption row; `… 2025 (Unaudited)` beside the column headings;
+     `Three months ended March 31, 2025:` in the label column;
+     `Thirteen Weeks Ended May 3, 2025` over a first block captioned
+     `Thirteen Weeks Ended May 4, 2024`; `Period from January 1, 2025 through
+     March 31, 2025`; `Three months ended March 31, 2025, as restated` as a
+     caption row (not period text; caught by the period phrase in a heading);
+     a caption row with the footnote `(1)` in its own cell; a label-column
+     caption with `*` in its own cell.
 12g. Period-row guard, stranded rows (I1): `December 31,` (colspan 4) over a
      1-column `2024 | 2023` row over `$`/amount pairs; an unlabelled
      `December 31, 2023 | December 31, 2024` row under `Measurement Date`; and
-     the same row labelled `Date`. Each gives today's header rows.
+     the same row labelled `Date`. Further variants: `December 31, 2023 (a) |
+     December 31, 2024 (a)` and `12/31/2023 | 12/31/2024` under
+     `Measurement Date`; `2024 (a) | 2023 (a)` under `December 31,`. Each gives
+     today's header rows.
 12h. The guard does not fire on rows with amounts: a body row
      `Balance as of December 31, 2024 | $ | 2,130,749` leaves the extended
-     header in place. The body rows `Revenue | 2024 | 2025` and
+     header in place, and so does a label-only body row
+     `Supplemental cash flow information for the years ended December 31:`.
+     The body rows `Revenue | 2024 | 2025` and
      `Alpha | March 31, 2025 | June 30, 2025` (formerly in 12a) are period rows
      and give today's header rows.
 12i. The guard's cost, pinned: a balance sheet (`December 31,` over `2025 |

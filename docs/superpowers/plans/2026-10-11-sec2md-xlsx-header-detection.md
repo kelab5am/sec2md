@@ -939,6 +939,13 @@ git commit -m "docs: acceptance record for XLSX header detection"
 - [ ] **Step 5: Extend the mutation check (main).** Add three mutants to `MUTANTS` in `mutation_check.py`, each of which a new test must catch: the guard disabled (`return base` never taken); `_period_row` requiring every origin to be period text (the mixed-row variant of 12f fails); footnote removal dropped from `_period_text` (the footnoted variant fails). Run it as in Task 2 Step 4: `all mutants behaved as expected`, with the same four expected survivors, and the source file restored.
 - [ ] **Step 6: Commit.** Branch: `git add src/sec2md/xlsx_tables.py tests/test_xlsx_header_detection.py`, message `fix: keep today's XLSX header when a period row follows it`. Main: `git add docs/superpowers/audits/2026-10-11-xlsx-header-detection/mutation_check.py`, message `docs: mutation check covers the period-row guard`.
 
+- [ ] **Step 7: Fix round from the Task 5 review** (spec revision 6, "Task 5 review" in the review history; Definitions "Footnote marker", "Period text", "Period phrase", "Period row"; Testing 12f, 12g, 12h, 12j as extended).
+  - Behaviour: widen `_period_text` (footnote markers with letters, the listed parenthesised qualifiers, a trailing `:`, numeric dates, week counts, `from`, a word boundary before month names); add `_PERIOD_PHRASE`-style matching for headings (non-label origins) in `_period_row`, never for the label; cells holding only a footnote marker are not data in `_period_row`.
+  - Tests: 8 more `test_guard_stacked_period_blocks` variants (13 in all), 3 more `test_guard_stranded_period_rows` variants (6), a new `test_guard_ignores_label_with_period_phrase` (the supplemental cash flow label row), and 10 more `test_period_text` cases (21: the spec's 15 period-text and 6 non-period examples).
+  - RED: `20 failed, 105 passed` (the 8 new 12f variants, the 3 new 12g variants, the 8 new period-text examples and `Market 10`; the new label test and the `Cash paid …` example already pass). GREEN: `125 passed`. Full suite: `1 failed, 2101 passed, 14 deselected`.
+  - Mutation check (main): three more mutants, each caught: the heading period-phrase clause removed (the `, as restated` variant fails); footnote-only cells counted as data (the separate `(1)` cell variant fails); the period phrase allowed in the label (the supplemental label test fails).
+  - Commit the branch change as `fix: widen the XLSX period-row guard` and the mutants on main as `docs: mutation check covers the widened period-row guard`.
+
 ---
 
 ### Task 6: All-table XBRL period check (spec Acceptance 3b)
@@ -978,7 +985,7 @@ git commit -m "docs: acceptance record for XLSX header detection"
 
 ### Task 4: CHANGELOG, usage doc and handoff
 
-Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2079 passed`, and `git log --oneline main..HEAD` shows four commits.
+Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2101 passed`, and `git log --oneline main..HEAD` shows four commits.
 
 **Files:**
 - Modify (branch): `CHANGELOG.md`, `docs/usage/xlsx-export.md`
