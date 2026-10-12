@@ -2,9 +2,7 @@
 
 Date: 2026-10-11 (revision 5); revision 6 on 2026-10-12
 
-Status: Draft for review. Revision 5 is implemented on branch
-`fix/xlsx-header-detection` (not merged); revision 6 adds the period-row guard.
-Implementation plan: `../plans/2026-10-11-sec2md-xlsx-header-detection.md`.
+Status: Implemented on branch fix/xlsx-header-detection (pending PR). Acceptance: ../audits/2026-10-11-xlsx-header-detection/README.md.
 
 Scope: `src/sec2md/xlsx_tables.py` only. The Markdown renderer, strict's numeric
 trace and the table completeness check must not change.
