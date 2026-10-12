@@ -53,6 +53,7 @@ MUTANTS = [
     ('period row one period origin', "            and (any(_period_text(cell.text) for cell in cells)",
      "            and (all(_period_text(cell.text) for cell in cells)"),
     ('period text footnotes', "    rest = _FOOTNOTE_MARK.sub(' ', text)\n", "    rest = text\n"),
+    ('period text unit captions', "_PARENTHESISED.sub(lambda m: ' ' if", "_PARENTHESISED.sub(lambda m: m[0] if"),
     ('period row heading phrase', "any(_PERIOD_PHRASE.search(cell.text) or _NUMERIC_DATE.search(cell.text)",
      "any(False"),
     ('period row footnote-only cells', "_is_data_cell(cell) and not _FOOTNOTE_MARK.fullmatch(cell.text.strip())",
