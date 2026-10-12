@@ -16,7 +16,7 @@ This records the acceptance run for:
 
 The decisions this record judges by:
 - the spec's Rule P and Rule I;
-- the rulings and user decisions in the plan's ledger (`.superpowers/sdd/2026-10-12-sec2md-xlsx-value-accuracy/progress.md`), Rulings 3–19 and the user decisions of 2026-10-13 (footnote marks and the TSM split-`%` fix).
+- the rulings and user decisions of the plan's ledger, Rulings 3–19 and the user decisions of 2026-10-13 (footnote marks and the TSM split-`%` fix). They are committed verbatim in [`rulings.md`](rulings.md) and restated in the spec's "Revision 3: amendments during implementation".
 
 ## First run on `7484006`: blocked, then fixed
 
@@ -25,7 +25,7 @@ The first acceptance run exported the branch at `7484006`. It failed the disposi
 - **Example, TSM #8 `Net revenue | 100.0 | % | 100.0 | % | 100.0 %`.** The 2022 and 2023 columns exported the number `100.0`, while 2024 exported `1.000`.
 - **Cause: Ruling 5.** The ruling refused a `%` whose leaf heading differs from the value's. TSM's markers sit under the spanning `For the year ended December 31,`, not under the year cells. Nothing else proved or flagged the values.
 
-The user decided the fix (ledger, user decision of 2026-10-13, and Rulings 13–18a). The branch implements it in `bcdfe4f`, `dc53e06`, `1466b39`, `ad816e0` and `732544d`.
+The user decided the fix (user decision of 2026-10-13 and Rulings 13–18a in [`rulings.md`](rulings.md)). The branch implements it in `bcdfe4f`, `dc53e06`, `1466b39`, `ad816e0` and `732544d`.
 - **When a split `%` attaches:** it may attach through a heading that spans its value's column, but only when:
   - it sits directly beside the value (Ruling 16);
   - its columns hold nothing else in any other body row, with `)` / `%)` fragments and unit-caption rows aside (Rulings 18, 18a).
@@ -92,7 +92,7 @@ Notes on the inputs:
 ### The two scripts
 
 **[`dispositions.py`](dispositions.py)** covers Acceptance 3 and 6.
-- **How far it is independent of the branch.** It is not independent of the branch's code as a whole. What it writes again from the spec and the ledger's rulings are the value-accuracy decisions:
+- **How far it is independent of the branch.** It is not independent of the branch's code as a whole. What it writes again from the spec and the rulings ([`rulings.md`](rulings.md)) are the value-accuracy decisions:
   - proofs, conflicts and percent columns;
   - the attachment rules and the safety net;
   - the dispositions.

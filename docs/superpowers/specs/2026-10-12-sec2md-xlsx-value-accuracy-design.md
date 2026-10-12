@@ -135,7 +135,7 @@ Proofs are ranked by how local they are: cell level (P1.1, P1.2, P2.1, P2.2), th
 - **Columns with header- or table-level proof.** In a column whose header is a percent declaration, or under a table-wide declaration, plain cells are proven by it. They are not unproven. NVDA's 495 percent-of-revenue values stay as they are.
 - **Columns that are not percent columns** keep today's behaviour.
 
-**Attachment pass (split `%`).** This runs in the XLSX path only, before `_column_groups`.
+**Attachment pass (split `%`).** This runs in the XLSX path only, before `_column_groups`. Revision 3 narrows it: see the user decision on TSM split `%`, Rulings 16, 18 and 18a, and the final review fixes.
 - A source origin whose whole text is `%` or `)%` attaches to the nearest value origin to its left in the same source row. Only empty origins or `$`/`(` fragments may lie between them.
 - The value's copy text then includes the attached marker: `(29) | %` gives `(29) %`; `(4.5 | )%` gives `(4.5)%`. The marker's own copy position shows no text for that row.
 - `cell_sources` for the value lists the marker's coordinates too.
@@ -273,12 +273,42 @@ All runs use the same 60 filings, one export at a time, at most 3 workers, low p
 7. **Coverage cost:** cells that turn from numbers into flagged text are counted per group and table, and reported to the user.
 8. **Header-detection checks:** `all_facts.py` and the stacked-block scan still pass.
 
+## Revision 3: amendments during implementation
+
+Recorded 2026-10-13. The controller's rulings and the user's decisions during implementation amend revision 2 where they differ. Each keeps its ledger number, which code comments and tests cite. Their full text is in [`../audits/2026-10-12-xlsx-value-accuracy/rulings.md`](../audits/2026-10-12-xlsx-value-accuracy/rulings.md). Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and records, not the export, and appear only there.
+
+- **Ruling 3.** A fact nested inside another fact counts as a second fact, so the cell holds no percent-fact proof.
+- **Ruling 4.** Under an identifier heading, a `pts` cell keeps `Percentage points; verify the unit.` rather than an I2 reason.
+- **Ruling 5 (superseded by the user decision on TSM split `%` and by Rulings 16 and 18).** A split `%` was refused when its leaf heading was not empty and differed from the value's.
+- **Ruling 7.** A percent heading proves nothing in a copy column whose leaf heading also heads another kept copy column holding a value in the same row (NFLX `$ | 1,323,096 | 7 | %` under one `% Change` leaf).
+- **Ruling 8, as amended by Ruling 21.** An amount heading (`_VALUE`: `Amount`, `Total` …) never takes a table-wide percent declaration, and under one its digit cells without a local proof are P4 text, where Ruling 8 had kept them as displayed numbers that may be percentage points.
+- **Ruling 9.** A `$` in a header or row label beside a percent proof stays a conflict, and an unproven cell the converter rejects keeps the converter's reason, not the P4 reason.
+- **Ruling 10 (amends 7).** A copy column whose header proof Ruling 7 withholds, and whose header labels include a percent declaration, is a percent column: its digit cells without a cell- or row-level proof are P4 text.
+- **Ruling 11 (amends 7 and 10).** Withholding removes proof, never conflict: a withheld declaration still conflicts with a `$`, an amount fact or a unit word, and a table-wide declaration is withheld from shared-leaf columns as well, which then become Ruling 10 percent columns.
+- **User decision (2026-10-13), footnote marks.** A whole-cell footnote mark (`(1)`, `(12)`, `(a)`) is not a number in accounting parentheses for I2's amount-format test.
+- **Ruling 12.** Under an identifier heading, a conflicting-units reason takes precedence over the I2 reasons, as the points reason does (Ruling 4).
+- **User decision (2026-10-13), TSM split `%`.** A split `%` may also attach when its leaf heading spans the value's column, amending Ruling 5, and a value whose `%` the attachment pass refuses becomes P4 text (the safety net), unless column grouping under one leaf or the merge of a column of `%` signs still joins that `%` to the value, which then converts with it.
+- **Ruling 13.** The safety net applies literally: a refused value becomes P4 text even when it has its own `$` or sits under a percent heading.
+- **Ruling 14 (superseded by Ruling 16).** Attaching through an ancestor heading was refused when a column between value and marker had a leaf other than theirs.
+- **Ruling 15.** A refused zero converts as 0 under P4's zero exception.
+- **Ruling 16 (narrows P4's attachment pass and Rulings 5 and 14).** A split `%` attaches only when it sits directly beside its value, with no origin between them, so P4's "only empty origins or `$`/`(` fragments may lie between them" no longer holds; a value the old search reached that is now refused goes to the safety net.
+- **Ruling 17 (superseded by Ruling 18).** In the ancestor-heading case only, attachment was refused when a column of the marker held a digit value in another body row.
+- **Ruling 18 (generalizes 17).** A split `%` attaches only from a marker-only position, where in every other body row, period rows included, the marker's columns hold only empty origins or `%` and `)%` markers, whether the marker has the value's leaf, an ancestor heading or no heading; refusals go to the safety net.
+- **Ruling 18a (amends 18).** In that check, `)` and `%)` closing fragments and a body row whose only content is a spanning unit caption do not count as content.
+- **Ruling 21 (final review).** A percent proof never overrides contrary evidence in the same column, row or cell, and such cells become flagged text: a row label naming another unit (`(in years)`, `Days sales outstanding`, `(times)`, `(x)`, `bps`, `basis points`, `percentage points`) and a pure fact whose scale is not -2 conflict with every percent claim on the cell, a table-wide declaration included; a copy column holding a cell's own `$` or an amount fact takes neither its percent heading nor a table-wide declaration and is a percent column when either covers it; and under a heading that names a percent without being a declaration (`% Change in NT$ from …`, `Percent Change 2024 versus 2023`) a digit cell without a proof of its own is P4 text.
+- **Final review fixes (2026-10-13).** A split `%` spanning two rows is refused, and a table-wide declaration outside `_UNIT_DECLARATION` alternatives 2 and 3 must be one of the four parenthesised forms in Definitions.
+
 ## Known remaining gaps
 
 - **Percent columns with no proof at all.** A column of percents with no `%`, percent header, row label, fact or table declaration keeps its displayed numbers. That is exactly what the filing prints, but its scale is unknown. No case is known in the corpus.
 - **Section headings are not proof.** A label-only row such as `Percentage of revenue:` does not prove the rows below it, because its scope cannot be proven. Those rows stay flagged unless another proof applies.
 - **The convention of a `%` on the first row is not proof.** META's and RDDT's percent-of-revenue rows, JPM's capital ratios and CRM's rates become flagged text unless a fact, header or row label proves them. The cost is coverage; the gain is that no number in them is wrong.
 - **Facts prove only scale, and only on their own cell.** A runtime XBRL guard that checks every tagged value and period remains a follow-up.
+- **Contrary evidence is judged per copy column (Ruling 21).** A `$` in another column of the same row does not withhold a table-wide declaration: under `(in percentages)`, `Revenue | $ 1,000 | 100` with distinct leaves still gives `100` → 1.00. No case is known in the corpus.
+- **Other units are recognised only where a row label names them as a unit:** in parentheses, after `in`, after a separator that ends the label, as the label's first word, or as `bps`, `basis points` or `percentage points`. A label such as `Average years to maturity` is not recognised.
+- **Joined refused markers.** A `%` the attachment pass refuses still converts its value when column grouping under one leaf or the merge of a column of `%` signs joins it, as before this change. The reviewed shapes convert correctly, but they bypass the safety net.
+- **A `)` column under an amount leaf.** A short row `5 | %` there still gives 0.05; it cannot be told apart from TSM's layout.
+- **A whole-cell `(1)` in a value row** exports as −1, as on `main`. Telling a footnote mark from a negative needs its own spec.
 
 ## Sequencing
 

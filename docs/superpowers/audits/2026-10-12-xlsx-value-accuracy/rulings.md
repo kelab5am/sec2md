@@ -1,0 +1,63 @@
+# XLSX value accuracy: rulings and user decisions
+
+These are the `Ruling` and `User decision` lines of the implementation ledger for the
+XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
+(`.superpowers/sdd/2026-10-12-sec2md-xlsx-value-accuracy/progress.md`) is not committed.
+
+- The spec's "Revision 3: amendments during implementation"
+  ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
+  restates each ruling that shapes the export in one sentence and marks Rulings 5, 14
+  and 17 as superseded.
+- Code comments and tests cite these rulings by number.
+- Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
+  records rather than the export.
+- "Spec" below means revision 2 of that spec; "T1"-"T7" and "Fix A" are tasks and
+  fix rounds of the plan ([`../../plans/2026-10-12-sec2md-xlsx-value-accuracy.md`](../../plans/2026-10-12-sec2md-xlsx-value-accuracy.md)).
+
+Ruling 1: FactAttributes.unit_measures uses the same representation as the harness — sorted numerator measures, then '/' and sorted denominator measures only for a divide unit — so pure = ('xbrli:pure',) — the plan names one example and the spec says "resolved measures as a tuple of strings" — cost if wrong: a repr change inside tests/one helper.
+
+Ruling 2: Review fix-round commits are new commits (no history rewrite); T7's "five commits" check is read as five task commits plus any listed fix commits — the plan did not anticipate fix rounds — cost if wrong: user squashes on merge.
+
+Ruling 3: A nested ix:nonFraction inside another counts as a second fact, so the cell is not percent-fact proof — spec says "the only fact on the cell's value origin"; conservative (stays flagged text / other proofs) — cost if wrong: some percent-fact cells stay flagged text (coverage only, never a wrong number).
+
+Ruling 4: Under an identifier header, a `pts` cell keeps `Percentage points; verify the unit.` rather than the I2 reason — the pts reason is the cell's own, more specific evidence and the cell is text either way — cost if wrong: reason string differs on a few NVDA Year-over-Year cells. (Carry to Task 5.)
+
+Ruling 5: Split-% attachment refuses when the marker's leaf header is non-empty and differs from the value's leaf header — the spec's principle (convert only on proof; wrong number blocks merge) governs over P4's literal "only empty origins may lie between" — cost if wrong: some split-% cells stay unattached (old behaviour), caught by T6 dispositions of the 123 manifest split cells.
+
+Ruling 6: Fix rounds may add regression tests for review findings; downstream expected test counts (T3 14/2120, T4 60/2166, T5 71/2177, T7 2177) shift by exactly the number of such tests, tracked here — adding tests strengthens, does not weaken; the plan did not anticipate fix rounds — cost if wrong: user wanted exact plan counts; trivially visible in ledger/final report.
+
+Ruling 7: Header percent proof (P1.3) does not apply when the declaring leaf heads two or more kept copy columns that hold values in the same row (NFLX `$ | 1,323,096 | 7 | %` under `% Change` would give 13230.96); +1 regression test — a wrong number blocks the merge; the header cannot prove which of two values it describes — cost if wrong: such cells fall back to own proof/P4 flag (coverage only). Sent back to implementer before review.
+
+Ruling 8: `_VALUE` headers keep outranking the table-wide percent flag, as today, rather than a literal P3 reading that would divide `Amount`/`Total` columns by 100 under a table-wide declaration — never introduces a new scale change; spec requires NVDA's 495 values unchanged — cost if wrong: a true percent column headed by an amount word under a table-wide declaration keeps displayed numbers (as today).
+
+Ruling 9: A `$` in a header/row label beside a percent proof stays conflict text (today's rule kept alongside P3); unproven cells the converter rejects keep the converter's reason, not the P4 reason — both conservative, cell is text either way — cost if wrong: reason strings differ.
+
+Ruling 10 (amends 7): A copy column whose header proof is withheld by the shared-leaf guard and whose header labels include a percent declaration is a percent column: digit cells without own cell/row-level proof become P4-reason text — Ruling 7 removed proof without saying what replaces it; text is the only no-guess outcome — cost if wrong: coverage (two-value % columns become flagged text), measured in T6. Ruling 7 test expectation for 1,323,096 changes (my own ruling's test, not a plan result). +1 regression test → 65 / 2171.
+
+Ruling 11 (amends 7, 10): in shared-leaf columns withholding removes proof, never conflict — a withheld % declaration still feeds the P3 conflict test; P1.5 table-wide proof is also withheld there and such columns become Ruling-10 percent columns (P4 text) — these are wrong/unflagged numbers inside this task's own code, so they enter the loop as round 2 rather than deferred minors — cost if wrong: more flagged text in shared-leaf columns (coverage), measured in T6. +4 tests → 69 / 2175.
+
+User decision (2026-10-13): Exempt footnote marks — a whole-cell footnote mark ((1), (12), (a), via _FOOTNOTE_MARK) is not accounting parentheses for I2's amount-format test; existing test passes unchanged; T6 dispositions verify no misread flag lost. Expected T5 counts unchanged: 80 / 130 / 1F 2186P.
+
+Ruling 12: Under an identifier heading, a conflicting-units reason (like the points reason, Ruling 4) takes precedence over the I2 reason — keeps HEAD's behaviour; cell is text either way — cost if wrong: reason string differs.
+
+User decision (2026-10-13): fix TSM split-% gate failure with BOTH (1) attach when the marker's leaf heading also spans the value's column (amends Ruling 5) and (2) safety net — a marker refused only by the leaf rule turns the value into P4 text. Ruling 5's own regression test expectation (1,000 kept) changes to P4 text under the safety net.
+
+Ruling 13: The safety net applies literally (user's words), including a refused value with its own `$` or under a percent heading — text is never a wrong number — cost if wrong: coverage on `$`-amounts beside refused markers, visible in T6 changes.
+
+Ruling 14 (narrows user's Fix A attach rule to its intent): attaching through an ancestor heading is refused when any column between value and marker has a leaf other than the value's or the marker's; refusal goes to the safety net — the user's goal was TSM conversion with no wrong numbers; TSM unaffected — cost if wrong: some non-adjacent ancestor-heading markers flag instead of convert.
+
+Ruling 15: a refused zero stays 0 via spec P4's zero exception (not flagged) — zero is right at any scale — cost if wrong: an unflagged 0 beside a stray %.
+
+Ruling 16 (narrows P4 "only empty origins or $/( between" and Rulings 5/14): split-% markers attach only when directly adjacent to the value (no origin between), plus the leaf rules; anything the old search reached but now refused goes to the safety net (P4 text) — every gap-crossing variant found so far is a wrong number; all 63 TSM widened attachments are adjacent — cost if wrong: manifest split cells with spacer columns between value and % become P4 text (coverage), measured by the T6 rerun; primary-statement fact counts gate any statement impact.
+
+Ruling 17: in the ancestor-heading case only, refuse attachment (→ P4 text) when any column the marker occupies holds a digit value origin in another body row — such a marker is that column's sign, not the value's; TSM unaffected — cost if wrong: coverage in odd layouts. Entered as fix round 3 (wrong numbers in this fix's own code), with stale-comment and test-exactness minors.
+
+Ruling 18 (generalizes 17): a split % attaches only from a marker-only position — in every other body row incl. period rows, the marker's columns hold only empty or %/)% origins — in every case (same leaf, ancestor, no heading); refusals → safety net — each per-shape patch kept leaving a sibling shape; this closes the whole class — cost if wrong: 2 TSM #9 split cells become P4 text instead of conflict text; any layout with stray content in a % column flags its neighbours.
+
+Ruling 18a (amends 18): in the marker-only check, `)` / `%)` closing fragments and a body row whose only content is a non-digit spanning caption (unit caption) do not count as content — neither is a value of the marker column, so they cannot make the marker belong elsewhere — cost if wrong: a marker column whose only other content is such a fragment/caption could still attach; TSM returns to 63 kept / 0 refused, the 8 new wrong-number tests still pass.
+
+Ruling 19: the column-grouping category stands (pre-existing `_column_groups` same-leaf join the spec keeps; 144 independently verified) but is tightened to its exact conditions and disclosed in the README — it fixed the checker's model of a legitimate mechanism, not an expectation — cost if wrong: a grouping-joined value outside those conditions would fail the gate (safe).
+
+Ruling 20: the `except` claim stays in the CHANGELOG (the plan's Step 1 requires it), supported by the fact pack in the same audit directory, code and tests, and reworded to the latent singular `except … percentage data` case — the README covers the corpus, where the case does not occur — cost if wrong: a CHANGELOG claim backed by tests rather than the corpus record.
+
+Ruling 21: a percent proof never overrides contrary evidence in the same column, row or cell (other-unit row label, `$`/amount fact in the column, pure fact scale≠-2) — those cells become flagged text; also amends Ruling 8 (under a table-wide declaration a _VALUE-headed column's unproven cells become P4 text) and flags digit cells under non-declaration % headings — the user's principle is no unflagged scale change on contested evidence; constructed paths only — cost if wrong: coverage, verified by an acceptance rerun (NVDA unchanged is a stop gate).
