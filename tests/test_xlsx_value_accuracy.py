@@ -173,3 +173,43 @@ def test_percentage_points_stay_text_and_do_not_split_the_column():
         [('Operating expenses', '@', 'Operating expenses', None), (Decimal('0.10'), '0%', '10 %', None)],
     ]
     assert table.issues == (f'Source row 2, column 1: {_POINTS_REASON}',)
+
+
+_UNRESOLVED = 'Numeric role unresolved; verify the column heading and units.'
+
+
+def test_percent_heading_never_attaches_to_a_year_in_a_body_heading_row():
+    """MD&A 'Year Ended | Change ($, %)' blocks: the heading rows stay in the body, and
+    their '%' sub-heading is not a percent sign of the year on its left."""
+    table = prepared('<tr><td></td><td colspan="2">Year Ended December 31,</td><td colspan="2">Change</td></tr>'
+                     '<tr><td></td><td>2025</td><td>2024</td><td>$</td><td>%</td></tr>'
+                     '<tr><td>Revenue</td><td>110</td><td>100</td><td>10</td><td>10</td></tr>'
+                     '<tr><td></td><td>2024</td><td>2023</td><td>$</td><td>%</td></tr>'
+                     '<tr><td>Revenue</td><td>100</td><td>90</td><td>10</td><td>11</td></tr>')
+    heading = [(None, '@', '', None)]
+    assert [cell_rows(table)[i] for i in (0, 2)] == [
+        heading + [(Decimal('2025'), '#,##0', '2025', None), (Decimal('2024'), '#,##0', '2024', None),
+                   ('$', '@', '$', None), ('%', '@', '%', None)],
+        heading + [(Decimal('2024'), '#,##0', '2024', None), (Decimal('2023'), '#,##0', '2023', None),
+                   ('$', '@', '$', None), ('%', '@', '%', None)],
+    ]
+    assert [table.cell_sources[i] for i in (0, 2)] == [tuple(((r, c),) for c in range(5)) for r in (1, 3)]
+
+
+def test_percent_heading_never_attaches_in_a_period_row_without_headers():
+    """A plain '| | 2025 | % |' heading row: no leaf header guards it, the period row does."""
+    table = prepared('<tr><td></td><td>2025</td><td>%</td></tr>'
+                     '<tr><td>Revenue</td><td>110</td><td>12 %</td></tr>'
+                     '<tr><td>Costs</td><td>90</td><td>(5) %</td></tr>')
+    assert cell_rows(table)[0] == [(None, '@', '', None), ('2025', '@', '2025', _UNRESOLVED), ('%', '@', '%', None)]
+    assert table.cell_sources[0] == (((0, 0),), ((0, 1),), ((0, 2),))
+    assert cell_rows(table)[2][2] == (Decimal('-0.05'), '0%;(0%)', '(5) %', None)
+
+
+def test_percent_never_attaches_across_into_another_leaf_header():
+    """The '%' under '% change' is not the percent sign of the amount under '2025'."""
+    table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">% change</th></tr>'
+                     '<tr><td>Revenue</td><td>1,000</td><td></td><td>%</td></tr>')
+    assert cell_rows(table) == [[('Revenue', '@', 'Revenue', None), (Decimal('1000'), '#,##0', '1,000', None),
+                                 (None, '@', '', None), ('%', '@', '%', None)]]
+    assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),), ((1, 3),)),)

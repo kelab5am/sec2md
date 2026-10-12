@@ -766,6 +766,12 @@ def _joined(cells):
     return ' '.join(parts)
 
 
+def _leaf(grid, header_count, col):
+    """The lowest header cell with text above a column, unit lines excluded."""
+    return next((grid[r][col] for r in reversed(range(header_count))
+                 if grid[r][col] and grid[r][col].text and not _UNIT_LINE.search(grid[r][col].text)), None)
+
+
 def _attached_percent_signs(grid, header_count):
     """The attachment pass (spec P4): {value origin: marker origin}.
 
@@ -773,17 +779,25 @@ def _attached_percent_signs(grid, header_count):
     origin on its left in the same source row. Only empty origins or '$' and '('
     fragments may lie between them, so two values are never joined. The row
     label, a value spanning from another row and a value that already shows a
-    '%' take no marker.
+    '%' take no marker. Neither does period text or any origin of a period row
+    (heading rows left in the body: '| | 2025 | 2024 | $ | % |'), nor a value
+    under a different leaf header than a headed marker ('2025' over an amount,
+    '% change' over the '%').
     """
     attached = {}
     for r in range(header_count, len(grid)):
         row = grid[r]
+        if _period_row(row):
+            continue
         for col, marker in enumerate(row):
             if marker is None or (marker.row, marker.column) != (r, col) or marker.text not in {'%', ')%'}:
                 continue
             value = next((c for c in reversed(row[:col]) if c is not None and c.text not in {'', '$', '('}), None)
-            if (value is not None and value.row == r and value.column > 0
-                    and re.search(r'\d', value.text) and '%' not in value.text):
+            if (value is None or value.row != r or value.column == 0 or not re.search(r'\d', value.text)
+                    or '%' in value.text or _period_text(value.text)):
+                continue
+            marker_leaf = _leaf(grid, header_count, col)
+            if marker_leaf is None or marker_leaf is _leaf(grid, header_count, value.column + value.colspan - 1):
                 attached[value] = marker
     return attached
 
@@ -828,12 +842,9 @@ def _column_groups(grid, original, header_count, attached):
     for col in sorted(active):
         if any(col in group for group in groups):
             continue
-        leaf = next((grid[r][col] for r in reversed(range(header_count))
-                     if grid[r][col] and grid[r][col].text and not _UNIT_LINE.search(grid[r][col].text)), None)
+        leaf = _leaf(grid, header_count, col)
         candidates = tuple(c for c in sorted(active) if leaf and leaf.column <= c < leaf.column + leaf.colspan)
-        safe = len(candidates) > 1 and all(
-            next((grid[r][c] for r in reversed(range(header_count))
-                  if grid[r][c] and grid[r][c].text and not _UNIT_LINE.search(grid[r][c].text)), None) is leaf for c in candidates)
+        safe = len(candidates) > 1 and all(_leaf(grid, header_count, c) is leaf for c in candidates)
         evidence = False
         for r in range(header_count, len(grid)):
             origins = _with_attached(dict.fromkeys(grid[r][c] for c in candidates if grid[r][c] and original[r][c]),
