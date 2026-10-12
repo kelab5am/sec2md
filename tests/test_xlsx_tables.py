@@ -672,11 +672,12 @@ XLSX_POLICY_CONTROLS = {
         '<tr><td>Margin</td><td>(3.2</td><td>)%</td></tr>'
         '<tr><td>Growth</td><td>(1.5</td><td>)%</td></tr></table>',
         ('Item', '2025', 'Column 3'),
-        [[('Margin', '@', 'Margin', None), ('(3.2', '@', '(3.2', _UNRESOLVED), (')%', '@', ')%', None)],
-         [('Growth', '@', 'Growth', None), ('(1.5', '@', '(1.5', _UNRESOLVED), (')%', '@', ')%', None)]],
-        _own_sources((1, 2), 3),
-        ('Missing source header for Column 3; verify its meaning.',
-         f'Source row 1, column 1: {_UNRESOLVED}', f'Source row 2, column 1: {_UNRESOLVED}'),
+        # Spec P4 (value accuracy): the ')%' attaches to the value on its left, which
+        # converts as a negative percent; the marker's own copy position is empty.
+        [[('Margin', '@', 'Margin', None), ('-0.032', '0.0%;(0.0%)', '(3.2)%', None), (None, '@', '', None)],
+         [('Growth', '@', 'Growth', None), ('-0.015', '0.0%;(0.0%)', '(1.5)%', None), (None, '@', '', None)]],
+        tuple((((row, 0),), ((row, 1), (row, 2)), ()) for row in (1, 2)),
+        ('Missing source header for Column 3; verify its meaning.',),
     ),
     'zero_width_marker_slot': (
         f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>$</td><td>100</td></tr>'

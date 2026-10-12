@@ -10,7 +10,7 @@ from bs4 import Tag
 from bs4.element import Comment, Declaration, Doctype, NavigableString, ProcessingInstruction
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
-from sec2md.table_parser import Cell, GridCell, TableParser
+from sec2md.table_parser import EXTENDED, LEGACY, Cell, GridCell, TableParser
 from sec2md.xlsx_values import CellValue, convert_cell
 
 
@@ -747,14 +747,59 @@ def _numeric_role(text, header, label, cells, units, financial, percent_header):
     return 'text'
 
 
+# Standalone structural fragments. ')%' reaches a copy cell only through the
+# attachment pass, which joins '(4.5' and ')%' as '(4.5)%' (the EXTENDED rule).
+_FRAGMENTS = frozenset({'$', '(', ')', '%', ')%'})
+# Percentage points (spec P4): a value '26.6 pts', or its unit in a cell of its own.
+_POINTS = re.compile(r'[+\-−]?\(?(?:\d[\d,]*)?\.?\d+\)?\s*(?:pts|pt|points)', re.I)
+_POINTS_UNIT = re.compile(r'pts|pt|points', re.I)
+
+
 def _joined(cells):
     """Only standalone structural fragments may be joined without a space."""
     parts = [c.text for c in cells if c.text]
-    values = [i for i, part in enumerate(parts) if part not in {'$', '(', ')', '%'}]
+    values = [i for i, part in enumerate(parts) if part not in _FRAGMENTS]
     if len(values) == 1:
         i = values[0]
-        return TableParser._join_structural_text(parts[:i], parts[i], parts[i + 1:])
+        return TableParser._join_structural_text(parts[:i], parts[i], parts[i + 1:],
+                                                 policy=EXTENDED if ')%' in parts else LEGACY)
     return ' '.join(parts)
+
+
+def _attached_percent_signs(grid, header_count):
+    """The attachment pass (spec P4): {value origin: marker origin}.
+
+    A body origin whose whole text is '%' or ')%' attaches to the nearest value
+    origin on its left in the same source row. Only empty origins or '$' and '('
+    fragments may lie between them, so two values are never joined. The row
+    label, a value spanning from another row and a value that already shows a
+    '%' take no marker.
+    """
+    attached = {}
+    for r in range(header_count, len(grid)):
+        row = grid[r]
+        for col, marker in enumerate(row):
+            if marker is None or (marker.row, marker.column) != (r, col) or marker.text not in {'%', ')%'}:
+                continue
+            value = next((c for c in reversed(row[:col]) if c is not None and c.text not in {'', '$', '('}), None)
+            if (value is not None and value.row == r and value.column > 0
+                    and re.search(r'\d', value.text) and '%' not in value.text):
+                attached[value] = marker
+    return attached
+
+
+def _with_attached(origins, attached):
+    """A copy cell's origins after the attachment pass: each attached marker
+    follows its value and leaves its own copy position."""
+    markers = set(attached.values())
+    cells = []
+    for origin in origins:
+        if origin in markers:
+            continue
+        cells.append(origin)
+        if origin in attached:
+            cells.append(attached[origin])
+    return list(dict.fromkeys(cells))
 
 
 def _convert_prepared(text, role, origins):
@@ -768,7 +813,7 @@ def _convert_prepared(text, role, origins):
     return replace(convert_cell(token, role=role), original=text)
 
 
-def _column_groups(grid, original, header_count):
+def _column_groups(grid, original, header_count, attached):
     """Consolidate a leaf header's source span only when it contains one value.
 
     Financial HTML often alternates '$' + value with a value spanning the same
@@ -791,12 +836,15 @@ def _column_groups(grid, original, header_count):
                   if grid[r][c] and grid[r][c].text and not _UNIT_LINE.search(grid[r][c].text)), None) is leaf for c in candidates)
         evidence = False
         for r in range(header_count, len(grid)):
-            origins = list(dict.fromkeys(grid[r][c] for c in candidates if grid[r][c] and original[r][c]))
-            nonmarkers = [c for c in origins if c.text not in {'$', '(', ')', '%'}]
+            origins = _with_attached(dict.fromkeys(grid[r][c] for c in candidates if grid[r][c] and original[r][c]),
+                                     attached)
+            # A points unit beside its value is not a second value (spec P4).
+            nonmarkers = [c for c in origins if c.text not in _FRAGMENTS and not _POINTS_UNIT.fullmatch(c.text)]
             if len(nonmarkers) > 1:
                 safe = False
             text = _joined(origins)
-            if any(c.text in {'$', '(', ')', '%'} for c in origins) and _convert_prepared(text, 'number', origins).review_reason:
+            if (any(c.text in _FRAGMENTS for c in origins) and not _POINTS.fullmatch(text)
+                    and _convert_prepared(text, 'number', origins).review_reason):
                 safe = False
             evidence |= bool(nonmarkers and re.search(r'\d', nonmarkers[0].text))
         groups.append(candidates if safe and evidence else (col,))
@@ -848,7 +896,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                       and c.column + c.colspan == width and c.colspan > 1
                       and _UNIT_DECLARATION.fullmatch(c.text.strip()) and c.text not in unit_texts)
     units = '\n'.join(unit_texts)
-    groups = _column_groups(grid, original, header_count)
+    attached = _attached_percent_signs(grid, header_count)
+    groups = _column_groups(grid, original, header_count, attached)
     group_origins = [[list(dict.fromkeys(grid[r][col] for col in group
                                         if grid[r][col] and (grid[r][col].row, grid[r][col].column) == (r, col)))
                       for group in groups] for r in range(height)]
@@ -898,7 +947,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
         for index, col in enumerate(kept):
             contributors = [col] + [src for src, moves in actions.items() if moves.get(r - header_count + 1) == col]
             contributors.sort()
-            origins = list(dict.fromkeys(c for src in contributors for c in group_origins[r][src]))
+            origins = _with_attached(dict.fromkeys(c for src in contributors for c in group_origins[r][src]), attached)
             text = _joined(origins)
             # Labels are never promoted merely because they look numeric.
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
@@ -914,6 +963,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                         bool(_ROW_UNIT.search(local_units) or '$' in local_units))
             if conflict:
                 value = CellValue(text, '@', text, 'Conflicting explicit units; verify the row, column and displayed value units.')
+            elif not label_column and _POINTS.fullmatch(text):
+                value = CellValue(text, '@', text, 'Percentage points; verify the unit.')
             elif role == 'text' and index > 0 and re.search(r'\d', text) and not _identifier_column(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
             if value.review_reason:
