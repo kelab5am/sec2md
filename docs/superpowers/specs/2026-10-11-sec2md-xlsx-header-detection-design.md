@@ -147,6 +147,15 @@ XBRL facts disagree with the label column's period. The `(in millions)` suffix
 kept the caption from being period text. Reproduced and accepted: a
 parenthesised unit caption is removed before the period-text test.
 
+**Final review** (Opus, whole branch). One accuracy gap: `_caption_label`
+accepts `As of or for the year ended …` as a label heading an extended header,
+but period text lacked `or`, so the same caption repeated in the body did not
+trigger the guard (a JPM-layout probe exported 2022 amounts under a 2023
+label-column header). Reproduced and accepted: `or` joins the vocabulary, with a
+test that every caption label containing a date, a year or `ended` is period
+text. The CHANGELOG and usage wording are limited to the captions the guard
+recognises.
+
 The other filings' lost cells were also classified (audit README): 41 fixes and 52
 regressions. The regressions are TSM #105 (I1, fixed by the guard), NTRA #8
 (`Less Than` / `1 Year`), TSM #150–#152 (`Other Changes (Note)`) and TSM #19/#20
@@ -267,7 +276,7 @@ Three approaches were considered:
   `fifty-two weeks`, `fifty-three weeks`, digits or words, hyphen or space),
   the words `three`, `six`, `nine`, `twelve`, `fiscal`, `month(s)`, `year(s)`,
   `quarter(s)`, `week(s)`, `period(s)`, `ended`, `ending`, `as`, `of`, `at`,
-  `for`, `the`, `and`, `from`, `through`, `to`, and the punctuation `,` `.`
+  `for`, `the`, `and`, `or`, `from`, `through`, `to`, and the punctuation `,` `.`
   `-` `–` `—`. The text is period text when nothing remains and the original
   contained a date, a numeric date, a year or `ended`. Period text:
   `Three months ended March 31, 2025`, `Three Months Ended June 30, 2025 and
@@ -277,7 +286,9 @@ Three approaches were considered:
   `Three months ended March 31, 2025:`, `Thirteen Weeks Ended May 3, 2025`,
   `Period from January 1, 2025 through March 31, 2025`, `12/31/2024`,
   `2024 (a)`, `March 31, 2025 (Restated)`,
-  `Year ended December 31, 2022 (in millions)`. Not period text:
+  `Year ended December 31, 2022 (in millions)`,
+  `As of or for the year ended December 31, 2022 (in millions)`. Not period
+  text:
   `Balance as of December 31, 2024`, `2024 vs 2023 % change`, `Common Stock`,
   `Fiscal Year`, `Market 10`,
   `Cash paid for income taxes for the years ended December 31,`.
@@ -563,7 +574,15 @@ checker did not recognise the others (CAT, NVO and several income statements).
   a header such as `Year Ended December 31, 2024` as an identifier (it is not a
   full `_PERIOD` match), so the column stays text; Rule 3 exempts the period
   wording, so the column's plain amounts reach the percent rule. Revision 5's
-  corpus run, which includes Rule 3, found 0 such cells.
+  corpus run, which includes Rule 3, found 0 such cells. The final review
+  showed the behaviour also exists on `main`: a caption
+  `(In thousands, except share, per share and percentage data)` above a
+  `Year Ended December 31,` table turns `Revenue 161,690` into `1616.90`,
+  `exported` with no flag. It needs its own value-conversion fix.
+- **Label-column captions with a non-period suffix.** A repeated column-0
+  caption such as `Year ended December 31, 2022, as restated`,
+  `… (As Revised)` or `… (Successor)` is not period text, and labels are kept
+  out of the period-phrase test, so the guard does not see it.
 - **Rule 3 misreads in wrapped or annotated headings.** `Less Than` / `1 Year`
   (NTRA #8, 4 amounts) and `Other Changes (Note)` (TSM #150–#152, 13 tagged
   amounts) read as identifier columns, so their amounts become unflagged text
@@ -580,7 +599,7 @@ checker did not recognise the others (CAT, NVO and several income statements).
 
 ## Testing
 
-Write the tests first, in `tests/test_xlsx_tables.py`, using the existing
+Write the tests first, in `tests/test_xlsx_header_detection.py`, using a
 `prepared(html)` helper. Each case asserts headers, typed values, retained body
 rows and `cell_sources`. Use SEC-style spans: headings spanning the `$`, amount
 and padding cells, as in the evidence filings.
@@ -668,7 +687,8 @@ equality with it.
      caption with `*` in its own cell; the JPM layout, where the label column's
      header cell is `Year ended December 31, 2023 (in millions)` and the second
      block starts with a row `Year ended December 31, 2022 (in millions) |
-     <column headings>`.
+     <column headings>`; the same with `As of or for the year ended …`
+     captions (final review).
 12g. Period-row guard, stranded rows (I1): `December 31,` (colspan 4) over a
      1-column `2024 | 2023` row over `$`/amount pairs; an unlabelled
      `December 31, 2023 | December 31, 2024` row under `Measurement Date`; and
