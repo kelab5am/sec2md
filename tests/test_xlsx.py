@@ -89,6 +89,12 @@ def test_descriptive_percentage_does_not_scale_amount_in_saved_workbook(tmp_path
     assert (sheet['B4'].data_type, sheet['B4'].number_format) == ('s', '@')
     assert all('%' in sheet[f'B{r}'].number_format for r in range(5, 8))
     wb.close()
+    # Strict refuses the workbook: the unscaled 120 needs review.
+    with pytest.raises(sec2md.XlsxQualityError) as caught:
+        sec2md.export_xlsx(html, tmp_path / 'tax-strict.xlsx', quality_policy='strict')
+    assert caught.value.issues == (
+        'Table 1: Source row 1, column 1: Percent sign on other rows of this column; verify the scale.',)
+    assert not (tmp_path / 'tax-strict.xlsx').exists()
 
 
 def test_layered_percentage_headers_scale_only_their_source_span(tmp_path):

@@ -25,6 +25,17 @@ UNITS = ('<div style="display:none"><ix:header><ix:resources>'
          '</ix:resources></ix:header></div>')
 
 
+# Review reasons (sec2md.xlsx_tables and sec2md.xlsx_values).
+_POINTS_REASON = 'Percentage points; verify the unit.'
+_UNRESOLVED = 'Numeric role unresolved; verify the column heading and units.'
+_INCOMPLETE = 'Not a complete supported US numeric token; verify the source value and markers.'
+_UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
+_CONFLICT = 'Conflicting explicit units; verify the row, column and displayed value units.'
+_NEGATIVE_ZERO = 'Negative zero retained; verify the source meaning.'
+_QUANTITIES = 'Identifier heading over quantities; verify the column.'
+_AMOUNT_FORMATTED = 'Identifier heading over amount-formatted values; verify the column.'
+
+
 def snapshot_cells(rows):
     """Source cells of a one-table filing whose units are defined in its ix:header."""
     source = f'<html><body>{UNITS}<table>{rows}</table></body></html>'
@@ -103,9 +114,6 @@ def cell_rows(table):
     return [[(c.value, c.number_format, c.original, c.review_reason) for c in row] for row in table.rows]
 
 
-_POINTS_REASON = 'Percentage points; verify the unit.'
-
-
 @pytest.mark.parametrize('text, value, number_format', [
     ('(29) %', Decimal('-0.29'), '0%;(0%)'),
     ('(4.5)%', Decimal('-0.045'), '0.0%;(0.0%)'),
@@ -175,9 +183,6 @@ def test_percentage_points_stay_text_and_do_not_split_the_column():
         [('Operating expenses', '@', 'Operating expenses', None), (Decimal('0.10'), '0%', '10 %', None)],
     ]
     assert table.issues == (f'Source row 2, column 1: {_POINTS_REASON}',)
-
-
-_UNRESOLVED = 'Numeric role unresolved; verify the column heading and units.'
 
 
 def test_percent_heading_never_attaches_to_a_year_in_a_body_heading_row():
@@ -482,9 +487,6 @@ def test_split_percent_never_attaches_from_a_column_of_dashes():
     assert table.status == 'needs_review'
 
 
-_INCOMPLETE = 'Not a complete supported US numeric token; verify the source value and markers.'
-
-
 def test_split_percent_attaches_past_closing_fragments_and_a_unit_caption_row():
     """Ruling 18a, TSM 20-F 2025 #9-#12: the body's unit caption row spans the marker
     columns, and the ')' of a negative amount sits in them. Neither is a value of the
@@ -567,10 +569,6 @@ def test_refused_split_percent_under_an_identifier_heading_keeps_the_identifier_
 
 
 # --- Rule P: percent proofs (P1-P3), mixed columns (P4) and except captions (P5) --------
-
-_UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
-_CONFLICT = 'Conflicting explicit units; verify the row, column and displayed value units.'
-_NEGATIVE_ZERO = 'Negative zero retained; verify the source meaning.'
 
 
 def fact(text, unit='U_pure', scale='-2', name='us-gaap:CapitalRatio', format='ixt:num-dot-decimal', sign=None):
@@ -870,10 +868,28 @@ def test_percent_declaration(text, declared):
     assert xlsx_tables._percent_declaration(text) is declared
 
 
-# --- Rule I: identifier columns, per-cell quantity proof (I1, I2) -----------------------
+@pytest.mark.parametrize('line, declared', [
+    ('(in percent)', True),
+    ('(In percentages)', True),
+    ('(as a percentage of revenue)', True),
+    ('(as a percentage of total revenue)', True),
+    ('Expressed as a percentage of revenue', True),  # _UNIT_DECLARATION alternative 2
+    ('The following table sets forth, for the periods indicated, certain items in our Consolidated '
+     'Statements of Income expressed as a percentage of revenue.', True),  # alternative 3 (NVDA)
+    ('In percent', False),
+    ('in percentages', False),
+    ('(in percent', False),
+    ('in percentages)', False),
+    ('as a percentage of revenue)', False),
+    ('(In thousands, except share, per share and percentage data)', False),
+])
+def test_table_percent_declaration(line, declared):
+    """A7: the table-wide forms are the spec's list, parenthesised, plus _UNIT_DECLARATION
+    alternatives 2 and 3."""
+    assert xlsx_tables._table_percent_declaration(line) is declared
 
-_QUANTITIES = 'Identifier heading over quantities; verify the column.'
-_AMOUNT_FORMATTED = 'Identifier heading over amount-formatted values; verify the column.'
+
+# --- Rule I: identifier columns, per-cell quantity proof (I1, I2) -----------------------
 
 
 def test_identifier_heading_converts_only_cells_with_their_own_dollar():
@@ -975,3 +991,211 @@ def test_amount_formatted_cells_without_quantity_evidence_are_flagged():
     ]
     assert table.issues == tuple(f'Source row {r}, column 1: {_AMOUNT_FORMATTED}' for r in (1, 3))
     assert table.status == 'needs_review'
+
+
+# --- Ruling 21: a percent proof never overrides contrary evidence (final review) --------
+
+_RATE_ROWS = (sec_row('Risk-free interest rate', '4.2', '3.9'), sec_row('Expected volatility', '45', '50'))
+_RATES = ([text_cell('Risk-free interest rate'), (Decimal('0.042'), '0.0%', '4.2', None),
+           (Decimal('0.039'), '0.0%', '3.9', None)],
+          [text_cell('Expected volatility'), (Decimal('0.45'), '0%', '45', None), (Decimal('0.50'), '0%', '50', None)])
+
+
+@pytest.mark.parametrize('label', [
+    'Expected term (in years)', 'Vesting period (months)', 'Remaining life in years', 'Days sales outstanding',
+    'Times interest earned', 'Interest coverage (times)', 'Net leverage ratio (x)', 'Credit spread (bps)',
+    'Change in spread, basis points', 'Gross margin change (percentage points)',
+])
+def test_row_label_naming_another_unit_conflicts_with_a_table_wide_declaration(label):
+    """Ruling 21 (A1): '(in percent)' declares the table percents, but a row label naming
+    another unit contradicts it on that row. Its values are conflict text, never 0.055;
+    the other rows keep the declaration."""
+    table = prepared(heading('2025', '2024') + _RATE_ROWS[0] + sec_row(label, '5.5', '6.0') + _RATE_ROWS[1],
+                     before='<p>(in percent)</p>')
+    assert cell_rows(table) == [
+        _RATES[0], [text_cell(label), text_cell('5.5', _CONFLICT), text_cell('6.0', _CONFLICT)], _RATES[1]]
+    assert table.issues == tuple(f'Source row 2, column {c}: {_CONFLICT}' for c in (1, 4))
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('header, value, shown', [
+    ('2025', '5.5 %', '5.5 %'),
+    ('% Change', '5.5', '5.5'),
+    ('2025', fact('5.5'), '5.5'),
+], ids=['own-percent', 'percent-header', 'percent-fact'])
+def test_row_label_naming_another_unit_conflicts_with_every_percent_proof(header, value, shown):
+    """Ruling 21 (A1): the row's other unit conflicts with the cell's own '%', a percent
+    heading and a percent fact alike."""
+    table = prepared(heading(header) + sec_row('Expected term (in years)', value))
+    assert cell_rows(table) == [[text_cell('Expected term (in years)'), text_cell(shown, _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+def test_row_labels_that_name_no_unit_keep_the_table_wide_declaration():
+    """'Six months ended June 30' names a period and 'Changes in prior years' tax positions'
+    a time, not a unit of their values: the table-wide declaration still proves them."""
+    table = prepared(heading('2025', '2024') + _RATE_ROWS[0] + sec_row('Six months ended June 30', '5.5', '6.0')
+                     + sec_row("Changes in prior years' tax positions", '(0.3)', '0.2'), before='<p>(in percent)</p>')
+    assert cell_rows(table) == [
+        _RATES[0],
+        [text_cell('Six months ended June 30'), (Decimal('0.055'), '0.0%', '5.5', None),
+         (Decimal('0.060'), '0.0%', '6.0', None)],
+        [text_cell("Changes in prior years' tax positions"), (Decimal('-0.003'), '0.0%;(0.0%)', '(0.3)', None),
+         (Decimal('0.002'), '0.0%', '0.2', None)]]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('first', ['$ 1,000', fact('1,000', unit='U_USD', scale='6', name='us-gaap:Revenues')],
+                         ids=['dollar', 'amount-fact'])
+def test_cell_level_amount_withholds_a_table_wide_declaration_from_its_column(first):
+    """Ruling 21 (A2): under '(in percentages)' a column holding a cell's own '$' or amount
+    fact takes no table-wide proof, so its plain values are P4 text, never 5.00. Its own
+    '%' still proves a percent, and a column without such a cell keeps the declaration."""
+    table = prepared(heading('2025', 'Change') + sec_row('Revenue', first, '11.1')
+                     + sec_row('Cost of revenue', '500', '25.0') + sec_row('Gross margin', '50 %', '(2.0)'),
+                     before='<p>(in percentages)</p>')
+    revenue = ((Decimal('1000'), '"$"#,##0', '$ 1,000', None) if first.startswith('$')
+               else (Decimal('1000'), '#,##0', '1,000', None))
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), revenue, (Decimal('0.111'), '0.0%', '11.1', None)],
+        [text_cell('Cost of revenue'), text_cell('500', _UNPROVEN), (Decimal('0.250'), '0.0%', '25.0', None)],
+        [text_cell('Gross margin'), (Decimal('0.50'), '0%', '50 %', None),
+         (Decimal('-0.020'), '0.0%;(0.0%)', '(2.0)', None)],
+    ]
+    assert table.issues == (f'Source row 2, column 1: {_UNPROVEN}',)
+    assert table.status == 'needs_review'
+
+
+def test_dollar_cell_withholds_a_percent_heading_from_its_column():
+    """Ruling 21: a '$' amount under '% Change' contradicts the heading for its whole
+    column. The '$' cell keeps its conflict (spec Testing 11) and the heading proves no
+    other value there: '5' is P4 text, never 0.05. A zero still converts."""
+    table = prepared(heading('2025', '% Change') + sec_row('Revenue', '$ 1,000', '$ 12')
+                     + sec_row('Cost of revenue', '400', '5') + sec_row('Other', '10', '0'))
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1000'), '"$"#,##0', '$ 1,000', None), text_cell('$ 12', _CONFLICT)],
+        [text_cell('Cost of revenue'), (Decimal('400'), '#,##0', '400', None), text_cell('5', _UNPROVEN)],
+        [text_cell('Other'), (Decimal('10'), '#,##0', '10', None), (Decimal('0'), '#,##0', '0', None)],
+    ]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}', f'Source row 2, column 4: {_UNPROVEN}')
+
+
+@pytest.mark.parametrize('header, label, before', [
+    ('% Change', 'Revenue', ''),
+    ('2025', '% of net revenue', ''),
+    ('2025', 'Revenue', '<p>(in percentages)</p>'),
+], ids=['percent-header', 'percent-row-label', 'table-wide'])
+@pytest.mark.parametrize('scale', ['0', '-4'])
+def test_pure_fact_off_scale_conflicts_with_every_percent_proof(header, label, before, scale):
+    """Ruling 21 (A3): a pure fact whose scale is not -2 says the value is no percent of
+    that scale; under a percent heading, row label or table-wide declaration it is a
+    conflict, never 0.35."""
+    table = prepared(heading(header) + sec_row(label, fact('35', scale=scale)), before=before)
+    assert cell_rows(table) == [[text_cell(label), text_cell('35', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 1: {_CONFLICT}',)
+
+
+def test_amount_heading_under_a_table_wide_declaration_proves_nothing():
+    """Ruling 8 as amended by Ruling 21 (A4): under '(in percentages)' an amount heading
+    ('Total') neither proves its plain values percents nor exports them as displayed
+    numbers (percentage points): they are P4 text, a zero aside. The other column keeps
+    the declaration."""
+    table = prepared(heading('2025', 'Total') + sec_row('Gross margin', '45.2', '43.1')
+                     + sec_row('Operating margin', '12.0', '11.5') + sec_row('Other', '0.5', '0'),
+                     before='<p>(in percentages)</p>')
+    assert cell_rows(table) == [
+        [text_cell('Gross margin'), (Decimal('0.452'), '0.0%', '45.2', None), text_cell('43.1', _UNPROVEN)],
+        [text_cell('Operating margin'), (Decimal('0.120'), '0.0%', '12.0', None), text_cell('11.5', _UNPROVEN)],
+        [text_cell('Other'), (Decimal('0.005'), '0.0%', '0.5', None), (Decimal('0'), '#,##0', '0', None)],
+    ]
+    assert table.issues == (f'Source row 1, column 4: {_UNPROVEN}', f'Source row 2, column 4: {_UNPROVEN}')
+
+
+def test_own_proofs_under_an_amount_heading_and_a_table_wide_declaration_stand():
+    """Ruling 8 as amended: an amount heading withholds only the table-wide declaration.
+    A cell's own '%', its own '$' and a percent heading keep proving their values."""
+    table = prepared(heading('Total', '% of Total Revenues') + sec_row('Revenue', '$ 1,000', '100.0')
+                     + sec_row('Gross margin', '45.2 %', '45.2'), before='<p>(in percentages)</p>')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1000'), '"$"#,##0', '$ 1,000', None),
+         (Decimal('1.000'), '0.0%', '100.0', None)],
+        [text_cell('Gross margin'), (Decimal('0.452'), '0.0%', '45.2 %', None),
+         (Decimal('0.452'), '0.0%', '45.2', None)],
+    ]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('label', ['% Change in NT$ from 2023 to 2024', 'Percent Change 2024 versus 2023',
+                                   '$ and % Change'])
+def test_heading_naming_a_percent_without_declaring_one_flags_plain_values(label):
+    """Ruling 21 (A5): TSM's '% Change in NT$ from …' and KO's 'Percent Change 2024 versus
+    2023' name a percent but are no declaration. Their plain values may be percents, so
+    they are P4 text, never 33.9; a zero still converts."""
+    table = prepared(heading('2024', label) + sec_row('Net revenue', '$ 2,894,308', '33.9')
+                     + sec_row('Cost of revenue', '1,269,954', '(5.2)') + sec_row('Other', '10', '0'))
+    assert table.headers == ('Item', '2024', label)
+    assert cell_rows(table) == [
+        [text_cell('Net revenue'), (Decimal('2894308'), '"$"#,##0', '$ 2,894,308', None),
+         text_cell('33.9', _UNPROVEN)],
+        [text_cell('Cost of revenue'), (Decimal('1269954'), '#,##0', '1,269,954', None),
+         text_cell('(5.2)', _UNPROVEN)],
+        [text_cell('Other'), (Decimal('10'), '#,##0', '10', None), (Decimal('0'), '#,##0', '0', None)],
+    ]
+    assert table.issues == tuple(f'Source row {r}, column 4: {_UNPROVEN}' for r in (1, 2))
+    assert table.status == 'needs_review'
+
+
+def test_own_proofs_under_a_heading_naming_a_percent_keep_their_path():
+    """Ruling 21 (A5) flags only cells without proof of their own: a cell's own '%', its
+    percent fact and its own '$' keep the existing path."""
+    table = prepared(heading('Percent Change 2024 versus 2023') + sec_row('Revenue', '12 %')
+                     + sec_row('Operating margin', fact('3.5')) + sec_row('Other', '$ 12'))
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('0.12'), '0%', '12 %', None)],
+        [text_cell('Operating margin'), (Decimal('0.035'), '0.0%', '3.5', None)],
+        [text_cell('Other'), (Decimal('12'), '"$"#,##0', '$ 12', None)],
+    ]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('header', ['LTV under 80 %', '2025 (in millions, except percentages)'])
+def test_number_percent_and_except_clause_in_a_heading_name_no_percent(header):
+    """A number's own percent sign and an except clause name no percent of the column: its
+    amounts keep their numbers."""
+    table = prepared(heading(header) + sec_row('Revenue', '1,250') + sec_row('Cost of revenue', '(310)'))
+    assert [row[1] for row in cell_rows(table)] == [
+        (Decimal('1250'), '#,##0', '1,250', None), (Decimal('-310'), '#,##0;(#,##0)', '(310)', None)]
+    assert table.status == 'exported'
+
+
+def test_percent_sign_spanning_two_rows_never_attaches():
+    """A6: a '%' spanning two rows names no one row's value. It is refused, so '4' is P4
+    text, never 0.04."""
+    table = prepared('<tr><th>Item</th><th>2025</th><th></th></tr>'
+                     '<tr><td>Gross margin</td><td>4</td><td rowspan="2">%</td></tr>'
+                     '<tr><td>Operating margin</td><td>5</td></tr>')
+    assert cell_rows(table) == [
+        [text_cell('Gross margin'), text_cell('4', _UNPROVEN), _STRAY],
+        [text_cell('Operating margin'), text_cell('5', _UNRESOLVED), _EMPTY],
+    ]
+    assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),)), (((2, 0),), ((2, 1),), ()))
+
+
+def test_conflict_reason_outranks_the_identifier_reason():
+    """Ruling 12: under an identifier heading a cell whose units conflict keeps the conflict
+    reason, not the I2 reason, while the column's other cells keep theirs."""
+    table = prepared(heading('Notes') + sec_row('Payout per share (%)', '12') + sec_row('Cash', '13,373'))
+    assert cell_rows(table) == [[text_cell('Payout per share (%)'), text_cell('12', _CONFLICT)],
+                                [text_cell('Cash'), text_cell('13,373', _AMOUNT_FORMATTED)]]
+    assert table.issues == (f'Source row 1, column 1: {_CONFLICT}', f'Source row 2, column 1: {_AMOUNT_FORMATTED}')
+
+
+def test_refused_split_percent_flags_a_value_with_its_own_dollar():
+    """Ruling 13: the safety net applies literally. The '%' under '% change' is refused for
+    the amount under '2025', so '$ 1,000' is P4 text, though its own '$' proves an amount."""
+    table = prepared('<tr><th>Item</th><th colspan="2">2025</th><th colspan="2">% change</th></tr>'
+                     '<tr><td>Revenue</td><td>$</td><td>1,000</td><td></td><td>%</td></tr>')
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('$ 1,000', _UNPROVEN), _EMPTY, _STRAY]]
+    assert table.cell_sources == ((((1, 0),), ((1, 1), (1, 2)), ((1, 3),), ((1, 4),)),)
+    assert table.issues == (f'Source row 1, column 1: {_UNPROVEN}',)

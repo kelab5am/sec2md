@@ -743,7 +743,8 @@ def _numeric_role(text, header, label, cells, units, financial, table_percent, p
         return 'text'
     if proof:
         return proof
-    # Amount headings keep plain values as displayed under a table-wide percent description.
+    # Amount headings never take a table-wide percent declaration; under one, prepare_table
+    # flags their unproven values (Ruling 8 as amended by Ruling 21).
     if _VALUE.search(header):
         return 'number'
     if table_percent:
@@ -765,9 +766,24 @@ _PERCENT_BASE = r'(?:(?:total )?(?:net )?revenues?|net sales|sales)'
 _PERCENT_WORDS = re.compile(
     rf'(?:percent|percentages?|percent(?:age)? change|(?:as a )?percent(?:age)? of {_PERCENT_BASE}'
     rf'|percent of retained loans to total retained loans)(?:\s*(?:\([a-z\d]{{1,2}}\)|\*+))?', re.I)
-_TABLE_PERCENT = re.compile(r'\(?(?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)?\.?', re.I)
+_TABLE_PERCENT = re.compile(r'\((?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)', re.I)
 _PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'})
 _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
+# Ruling 21: a row label naming a unit other than a percent: in parentheses ('Expected
+# term (in years)', 'Interest coverage (times)', 'Net leverage ratio (x)'), after 'in'
+# ('Remaining life in years'), as the label's measure ('Days sales outstanding'), or
+# bps, basis points and percentage points anywhere. Period wording is stripped first
+# ('Six months ended June 30'); a word that names no unit ('Changes in prior years' tax
+# positions') is none.
+_OTHER_UNIT = re.compile(
+    r'\(\s*(?:in\s+)?(?:years|months|days|times|x|bps|basis points|percentage points|points|pts)\s*\)'
+    r'|\bin (?:years|months|days)\b|^(?:number of )?(?:years|months|days)\b|^times\b'
+    r'|\b(?:bps|basis points|percentage points)\b', re.I)
+# Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
+# 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
+# method name no percent (spec Testing 7).
+_PERCENT_NAME = re.compile(r'%|\bpercent(?:ages?)?\b', re.I)
+_NOT_PERCENT_NAME = re.compile(r'\bpoints?\b|\bpts\b|\bpercentage[- ]of[- ]completion\b', re.I)
 
 
 def _percent_declaration(text: str) -> bool:
@@ -782,12 +798,25 @@ def _percent_declaration(text: str) -> bool:
 
 
 def _table_percent_declaration(line: str) -> bool:
-    """A unit line declaring the whole table percents (spec Definitions): '(in percentages)',
-    NVDA's 'The following table … expressed as a percentage of revenue.' A percent word in
-    an except clause never is: '(In thousands, except share, per share and percentage data)'."""
+    """A unit line declaring the whole table percents (spec Definitions): '(in percent)',
+    '(in percentages)', '(as a percentage of revenue)', '(as a percentage of total
+    revenue)', and _UNIT_DECLARATION's alternatives 2 and 3, such as NVDA's 'The following
+    table … expressed as a percentage of revenue.' A percent word in an except clause never
+    is: '(In thousands, except share, per share and percentage data)'."""
     line = line.strip()
     return bool(_TABLE_PERCENT.fullmatch(line)
                 or (_UNIT_DECLARATION.fullmatch(line) and re.search(r'percentage of revenue', line, re.I)))
+
+
+def _percent_heading(text: str) -> bool:
+    """Ruling 21: a header label that names a percent without declaring one: '% Change in
+    NT$ from 2023 to 2024', 'Percent Change 2024 versus 2023', '$ and % Change'. A number's
+    own percent sign ('LTV under 80 %') and an except clause ('(in millions, except
+    percentages)') name none; a table-wide caption ('(in percentages)') declares."""
+    text = re.sub(r'\s+', ' ', text).strip()
+    named = _NUMBER_PERCENT.sub(' ', re.sub(r'\bexcept\b[^)]*', ' ', text, flags=re.I))
+    return (bool(_PERCENT_NAME.search(named)) and not _NOT_PERCENT_NAME.search(text)
+            and not _percent_declaration(text) and not _table_percent_declaration(text))
 
 
 def _value_facts(origins):
@@ -820,9 +849,10 @@ class _Proof(NamedTuple):
     conflict: bool  # spec P3: percent and non-percent proofs, or two percent proofs disagree
     marks_column: bool  # P1.1, P1.2 or P1.4: its copy column is a percent column (spec P4)
     by_fact: bool  # the percent fact proves it without a percent heading or row label
+    own: bool  # a cell-level proof: its own '%' or '$', a percent fact or an amount fact
 
 
-_NO_PROOF = _Proof(None, False, False, False)
+_NO_PROOF = _Proof(None, False, False, False, False)
 
 
 def _shared_leaf_columns(leaves, copies):
@@ -839,10 +869,11 @@ def _shared_leaf_columns(leaves, copies):
     return shared
 
 
-def _cell_proof(text, header, labels, label, origins, header_proves=True) -> _Proof:
+def _cell_proof(text, header, labels, label, origins, header_proves=True, table_percent=False) -> _Proof:
     """Rule P's cell-, row- and column-level proofs for a digit copy cell (spec P1-P3).
-    header_proves is False for a column that shares its leaf header (Ruling 7): its
-    percent declaration then proves nothing but still conflicts (Ruling 11)."""
+    header_proves is False for a column whose header proof is withheld (Rulings 7 and 21):
+    its percent declaration then proves nothing but still conflicts (Ruling 11).
+    table_percent: a table-wide percent declaration covers the table (spec P1.5)."""
     reading = _convert_prepared(text, 'number', origins)
     own_percent = isinstance(reading.value, Decimal) and '%' in reading.number_format
     fact = _percent_fact(origins)
@@ -856,13 +887,18 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True) -> _Pr
     # beside a '$' or a unit word anywhere on the cell's axes.
     shown_percent = bool(_PERCENT.search(text)) or any(_PERCENT_UNIT.fullmatch(part.strip())
                                                        for part in (*labels, label))
+    claimed = percent or declared or shown_percent
     local = f'{header} {label} {text}'
-    disagree = '%' in text and any(item.unit_measures == ('xbrli:pure',) and item.scale != -2
-                                   for item in _value_facts(origins))
-    conflict = disagree or ((percent or declared or shown_percent)
-                            and (amount or bool(_ROW_UNIT.search(local)) or '$' in local))
+    # Ruling 21: no percent claim, a table-wide declaration included, overrides contrary
+    # evidence on the cell or its row: a pure fact whose scale is not -2, or a row label
+    # naming another unit ('Expected term (in years)').
+    contrary = (any(item.unit_measures == ('xbrli:pure',) and item.scale != -2 for item in _value_facts(origins))
+                or bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', label).strip())))
+    conflict = (((claimed or table_percent) and contrary)
+                or (claimed and (amount or bool(_ROW_UNIT.search(local)) or '$' in local)))
     return _Proof('percent' if percent else 'number' if not_percent else None, conflict,
-                  own_percent or fact or row, fact and not (heading or row))
+                  own_percent or fact or row, fact and not (heading or row),
+                  own_percent or fact or '$' in text or amount)
 
 
 class _BodyCell(NamedTuple):
@@ -878,6 +914,7 @@ class _BodyCell(NamedTuple):
     identifier_text: bool  # a digit cell its identifier heading keeps as text (spec I1)
     identifier_quantity: bool  # a digit cell that proves a quantity under one (spec I1)
     refused_percent: bool  # user decision (2026-10-13): the attachment pass refused its value's split '%'
+    percent_named: bool  # Ruling 21: under a heading naming a percent, without a proof of its own
 
 
 def _unproven_value(text, origins):
@@ -920,8 +957,9 @@ def _identifier_reason(text, quantities) -> str | None:
     return _AMOUNT_FORMATTED if _AMOUNT_FORMAT.fullmatch(text) and not _FOOTNOTE_MARK.fullmatch(text) else None
 
 
-# Standalone structural fragments. ')%' reaches a copy cell only through the
-# attachment pass, which joins '(4.5' and ')%' as '(4.5)%' (the EXTENDED rule).
+# Standalone structural fragments. ')%' joins its value as '(4.5)%' (the EXTENDED rule)
+# through the attachment pass, or through _column_groups when one leaf heads both, even
+# where the attachment pass refused it.
 _FRAGMENTS = frozenset({'$', '(', ')', '%', ')%'})
 # Percentage points (spec P4): a value '26.6 pts', or its unit in a cell of its own.
 _POINTS = re.compile(r'[+\-−]?\(?(?:\d[\d,]*)?\.?\d+\)?\s*(?:pts|pt|points)', re.I)
@@ -982,7 +1020,8 @@ def _attached_percent_signs(grid, header_count):
     marker. Neither does period text or any origin of a period row (heading rows
     left in the body: '| | 2025 | 2024 | $ | % |').
 
-    The marker attaches only when it is directly beside that value, with no
+    The marker attaches only when it spans one row (a '%' spanning two rows
+    names no one row's value), sits directly beside that value, with no
     origin between them (Ruling 16), and its leaf heading is the value's or
     spans the value's column (user decision 2026-10-13, amending Ruling 5):
     TSM's '%' under 'For the year ended December 31,' joins the value under its
@@ -1012,7 +1051,7 @@ def _attached_percent_signs(grid, header_count):
             marker_leaf = _leaf(grid, header_count, col)
             right = value.column + value.colspan - 1
             covers = marker_leaf is None or marker_leaf.column <= right < marker_leaf.column + marker_leaf.colspan
-            if right + 1 == col and covers and _marker_only(grid, header_count, marker):
+            if marker.rowspan == 1 and right + 1 == col and covers and _marker_only(grid, header_count, marker):
                 attached[value] = marker
             else:
                 refused[value] = marker
@@ -1183,11 +1222,21 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             copy_row.append((origins, _joined(origins)))
         copies.append(copy_row)
     shared = _shared_leaf_columns([_leaf(grid, header_count, groups[col][0]) for col in kept], copies)
-    # Rulings 10 and 11: neither a header nor a table-wide declaration proves a shared
-    # column, but either one makes it a percent column, so values they cannot prove
-    # are flagged, never plain or scaled numbers.
-    shared_percent = {index for index in shared
-                      if table_percent or any(_percent_declaration(part) for part in header_labels[index])}
+    # Ruling 21: a copy column holding a cell's own non-percent proof, a '$' or an amount fact.
+    money = {index for copy_row in copies for index, (origins, text) in enumerate(copy_row)
+             if re.search(r'\d', text) and ('$' in text or _amount_fact(origins))}
+    withheld = shared | money
+    # Rulings 10, 11 and 21: neither a header nor a table-wide declaration proves a column
+    # that shares its leaf or holds a '$' or amount fact, and under a table-wide declaration
+    # an amount heading ('Total') proves nothing (Ruling 8 as amended). Such a column is a
+    # percent column when either declaration covers it, so values nothing else proves are
+    # flagged, never plain or scaled numbers.
+    withheld_percent = {index for index in withheld
+                        if table_percent or any(_percent_declaration(part) for part in header_labels[index])}
+    if table_percent:
+        withheld_percent |= {index for index, header in enumerate(headers) if _VALUE.search(header)}
+    # Ruling 21: a heading naming a percent without declaring one proves nothing either way.
+    percent_named = {index for index, labels in enumerate(header_labels) if any(map(_percent_heading, labels))}
     body = []
     for r, copy_row in enumerate(copies, start=header_count):
         decided = []
@@ -1197,7 +1246,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
             points = not label_column and bool(_POINTS.fullmatch(text))
             proof = (_cell_proof(text, headers[index], header_labels[index], original[r][0], origins,
-                                 header_proves=index not in shared)
+                                 header_proves=index not in withheld, table_percent=table_percent)
                      if digits and not label_column else _NO_PROOF)
             # Spec I1: under an identifier heading a digit cell takes the role path only
             # with its own quantity proof; every other one stays text.
@@ -1205,7 +1254,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             quantity = identifier and _proves_quantity(text, origins)
             role = 'text' if label_column else _numeric_role(
                 text, headers[index], original[r][0], origins, units, financial,
-                table_percent and index not in shared, proof.role, quantity)
+                table_percent and index not in withheld, proof.role, quantity)
             value = _convert_prepared(text, role, origins)
             # Explicit units on either axis (or on the value itself) must agree.
             # Broader table units can still have specific row/column exceptions.
@@ -1220,15 +1269,18 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             unproven = flaggable and proof.role is None and role != 'percent'
             # User decision (2026-10-13): a value whose split '%' the attachment pass
             # refused (leaf rule, Ruling 16 adjacency, Ruling 18) is P4 text, never a plain number.
+            # The safety net skips a refused marker that column grouping or the structural
+            # marker merge joined to the value anyway: the value then shows its own '%'.
             refused_percent = flaggable and any(o in refused and refused[o] not in origins for o in origins)
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
-                                     unproven, proof.by_fact, identifier and not quantity, quantity, refused_percent))
+                                     unproven, proof.by_fact, identifier and not quantity, quantity, refused_percent,
+                                     flaggable and not proof.own and index in percent_named))
         body.append(decided)
     # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
-    # column a percent column, as does a withheld declaration (Rulings 10 and 11).
+    # column a percent column, as does a withheld declaration (Rulings 10, 11 and 21).
     # Unproven digit cells there stay source text.
-    percent_columns = shared_percent | {index for decided in body for index, cell in enumerate(decided)
-                                        if cell.marks_column}
+    percent_columns = withheld_percent | {index for decided in body for index, cell in enumerate(decided)
+                                          if cell.marks_column}
     # Spec I2: identifier columns in which some cell proves a quantity.
     quantity_columns = {index for decided in body for index, cell in enumerate(decided) if cell.identifier_quantity}
     rows, sources = [], []
@@ -1236,7 +1288,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
         row_values = []
         for index, cell in enumerate(decided):
             value = (_unproven_value(cell.text, cell.origins)
-                     if (cell.unproven and index in percent_columns) or cell.refused_percent else cell.value)
+                     if (cell.unproven and index in percent_columns) or cell.refused_percent or cell.percent_named
+                     else cell.value)
             # Spec I2. A cell's own reason (points, conflicting units) stays (Ruling 4).
             if cell.identifier_text and not value.review_reason:
                 value = replace(value, review_reason=_identifier_reason(cell.text, index in quantity_columns))
