@@ -840,11 +840,13 @@ def _shared_leaf_columns(leaves, copies):
 
 def _cell_proof(text, header, labels, label, origins, header_proves=True) -> _Proof:
     """Rule P's cell-, row- and column-level proofs for a digit copy cell (spec P1-P3).
-    header_proves is False for a column that shares its leaf header (Ruling 7)."""
+    header_proves is False for a column that shares its leaf header (Ruling 7): its
+    percent declaration then proves nothing but still conflicts (Ruling 11)."""
     reading = _convert_prepared(text, 'number', origins)
     own_percent = isinstance(reading.value, Decimal) and '%' in reading.number_format
     fact = _percent_fact(origins)
-    heading = header_proves and any(_percent_declaration(part) for part in labels)
+    declared = any(_percent_declaration(part) for part in labels)
+    heading = header_proves and declared
     row = _percent_declaration(label)
     amount = _amount_fact(origins)
     percent = own_percent or fact or heading or row
@@ -856,7 +858,7 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True) -> _Pr
     local = f'{header} {label} {text}'
     disagree = '%' in text and any(item.unit_measures == ('xbrli:pure',) and item.scale != -2
                                    for item in _value_facts(origins))
-    conflict = disagree or ((percent or shown_percent)
+    conflict = disagree or ((percent or declared or shown_percent)
                             and (amount or bool(_ROW_UNIT.search(local)) or '$' in local))
     return _Proof('percent' if percent else 'number' if not_percent else None, conflict,
                   own_percent or fact or row, fact and not (heading or row))
@@ -1101,9 +1103,11 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             copy_row.append((origins, _joined(origins)))
         copies.append(copy_row)
     shared = _shared_leaf_columns([_leaf(grid, header_count, groups[col][0]) for col in kept], copies)
-    # Ruling 10: a percent declaration withheld by that guard still makes its column
-    # a percent column, so values it cannot prove are flagged, never plain numbers.
-    shared_percent = {index for index in shared if any(_percent_declaration(part) for part in header_labels[index])}
+    # Rulings 10 and 11: neither a header nor a table-wide declaration proves a shared
+    # column, but either one makes it a percent column, so values they cannot prove
+    # are flagged, never plain or scaled numbers.
+    shared_percent = {index for index in shared
+                      if table_percent or any(_percent_declaration(part) for part in header_labels[index])}
     body = []
     for r, copy_row in enumerate(copies, start=header_count):
         decided = []
@@ -1116,7 +1120,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                                  header_proves=index not in shared)
                      if digits and not label_column else _NO_PROOF)
             role = 'text' if label_column else _numeric_role(
-                text, headers[index], original[r][0], origins, units, financial, table_percent, proof.role)
+                text, headers[index], original[r][0], origins, units, financial,
+                table_percent and index not in shared, proof.role)
             value = _convert_prepared(text, role, origins)
             # Explicit units on either axis (or on the value itself) must agree.
             # Broader table units can still have specific row/column exceptions.
@@ -1126,16 +1131,14 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                 value = CellValue(text, '@', text, 'Percentage points; verify the unit.')
             elif role == 'text' and index > 0 and digits and not _identifier_column(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
-            # Spec P4: no proof of either kind, and no table-wide declaration proving it
-            # (which never proves a column under a withheld percent header, Ruling 10).
+            # Spec P4: no proof of either kind, and no table-wide declaration proving it.
             unproven = (digits and not label_column and not points and proof.role is None and not proof.conflict
-                        and (role != 'percent' or index in shared_percent)
-                        and not _identifier_heading(headers[index]))
+                        and role != 'percent' and not _identifier_heading(headers[index]))
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
                                      unproven, proof.by_fact))
         body.append(decided)
     # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
-    # column a percent column, as does a withheld percent header (Ruling 10).
+    # column a percent column, as does a withheld declaration (Rulings 10 and 11).
     # Unproven digit cells there stay source text.
     percent_columns = shared_percent | {index for decided in body for index, cell in enumerate(decided)
                                         if cell.marks_column}

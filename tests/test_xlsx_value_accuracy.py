@@ -343,6 +343,38 @@ def test_shared_percent_header_flags_values_it_cannot_prove():
     assert table.issues == tuple(f'Source row {r}, column {c}: {_UNPROVEN}' for r in (1, 2) for c in (1, 2))
 
 
+@pytest.mark.parametrize('rows, headers, body_row', [
+    ('<tr><th>Item</th><th colspan="2">Shares</th></tr><tr><th></th><th colspan="2">% Change</th></tr>'
+     '<tr><td>Revenue</td><td>100</td><td>18</td></tr>', ('Item', 'Shares — % Change', 'Shares — % Change'), 2),
+    ('<tr><th>Item</th><th colspan="2">% Change</th></tr><tr><td>Shares outstanding</td><td>100</td><td>18</td></tr>',
+     ('Item', '% Change', '% Change'), 1),
+], ids=['column-unit', 'row-unit'])
+def test_withheld_percent_header_still_conflicts_with_a_unit(rows, headers, body_row):
+    """Ruling 11: withholding a shared leaf's percent header removes its proof, not its
+    conflict with a non-percent unit on the column or the row."""
+    table = prepared(rows)
+    assert table.headers == headers
+    assert [row[1:] for row in cell_rows(table)] == [[text_cell('100', _CONFLICT), text_cell('18', _CONFLICT)]]
+    assert table.issues == tuple(f'Source row {body_row}, column {c}: {_CONFLICT}' for c in (1, 2))
+
+
+def test_table_wide_declaration_never_scales_values_that_share_a_leaf():
+    """Ruling 11: '(in percentages)' over NFLX's 'Change' leaf proves neither value it heads."""
+    table = prepared('<tr><th>Item</th><th colspan="4">Change</th></tr>'
+                     '<tr><td>Revenue</td><td>$</td><td>1,323,096</td><td>7</td><td>%</td></tr>',
+                     before='<p>(in percentages)</p>')
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('$'), text_cell('1,323,096', _UNPROVEN),
+                                 (Decimal('0.07'), '0%', '7 %', None), (None, '@', '', None)]]
+    assert table.issues == (f'Source row 1, column 2: {_UNPROVEN}',)
+
+
+def test_table_wide_declaration_never_proves_a_shared_percent_leaf():
+    table = prepared('<tr><th>Item</th><th colspan="2">%</th></tr><tr><td>Revenue</td><td>100</td><td>18</td></tr>',
+                     before='<p>(in percentages)</p>')
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('100', _UNPROVEN), text_cell('18', _UNPROVEN)]]
+    assert table.issues == tuple(f'Source row 1, column {c}: {_UNPROVEN}' for c in (1, 2))
+
+
 def test_percent_row_label_proves_its_plain_value():
     table = prepared(heading('2025') + sec_row('Net revenue', '$ 1,000') + sec_row('% of net revenue', '26'))
     assert cell_rows(table) == [
