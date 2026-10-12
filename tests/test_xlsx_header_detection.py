@@ -180,8 +180,7 @@ def test_label_and_units_row_stays_in_the_body():
     assert table.rows[0][0].value == 'Inventories:'
 
 
-@pytest.mark.parametrize('first, second', [('N/A', 'NM'), ('NM', '—'), ('March 31, 2025', 'June 30, 2025'),
-                                           ('Foo', 'Bar')])
+@pytest.mark.parametrize('first, second', [('N/A', 'NM'), ('NM', '—'), ('Foo', 'Bar')])
 def test_labelled_text_row_as_wide_as_the_years_stays_in_the_body(first, second):
     table = prepared('<table>' + DATE_OVER_YEARS
                      + f'<tr><td>Alpha</td><td colspan="3">{first}</td><td colspan="3">{second}</td></tr>'
@@ -364,6 +363,108 @@ def test_header_count_is_unchanged_for_the_completeness_check():
     assert _header_count(grid_of(BALANCE_SHEET)) == 0
     assert _header_count(grid_of('<table><tr><th>Item</th><th>Amount</th></tr>'
                                  '<tr><td>Alpha</td><td>N/A</td></tr></table>')) == 1
+
+
+# --- Rule 1, period-row guard ---------------------------------------------------
+
+def todays(source, monkeypatch):
+    """The table prepared with today's header rows: _export_header_count replaced by _header_count."""
+    with monkeypatch.context() as patch:
+        patch.setattr(xlsx_tables, '_export_header_count', xlsx_tables._header_count)
+        return prepared(source)
+
+
+def outcome(table):
+    return table.status, table.headers, values(table), table.cell_sources, table.issues
+
+
+def headers_over_amounts(table, first_row):
+    """The column header of every amount converted from source row first_row on."""
+    return [header for row, sources in zip(table.rows, table.cell_sources)
+            for header, cell, origins in zip(table.headers, row, sources)
+            if origins and origins[0][0] >= first_row and isinstance(cell.value, Decimal)]
+
+
+# A stockholders' equity statement stacking two period blocks, as in the RDDT and
+# META 10-Qs: the first block's caption row over column headings over amounts.
+EQUITY_HEADINGS = ('<tr><td></td><td colspan="3">Accumulated Deficit</td>'
+                   "<td colspan=\"3\">Total Stockholders' Equity (Deficit)</td></tr>")
+FIRST_BLOCK = ('<tr><td></td><td colspan="6">Three months ended March 31, 2024</td></tr>' + EQUITY_HEADINGS
+               + money('Balance as of December 31, 2023', '(1,190,563)', '1,893,071')
+               + money('Net loss', '(575,076)', '(575,076)'))
+SECOND_BLOCK_ROW = 4  # the source row of the second block's caption
+SECOND_BLOCK_AMOUNTS = (money('Balance as of December 31, 2024', '(1,705,853)', '2,130,749')
+                        + money('Net income', '26,158', '26,158'))
+
+
+@pytest.mark.parametrize('second_caption', [
+    '<tr><td></td><td colspan="6">Three months ended March 31, 2025</td></tr>' + EQUITY_HEADINGS,
+    '<tr><td>Three months ended March 31, 2025</td><td colspan="3">Accumulated Deficit</td>'
+    "<td colspan=\"3\">Total Stockholders' Equity (Deficit)</td></tr>",
+    '<tr><td></td><td colspan="6">Three Months Ended June 30, 2025 and 2024</td></tr>' + EQUITY_HEADINGS,
+    '<tr><td></td><td colspan="6">Three Months Ended June 30, 2025 (1)</td></tr>' + EQUITY_HEADINGS,
+    '<tr><td>Three months ended March 31, 2025</td><td colspan="6"></td></tr>' + EQUITY_HEADINGS,
+], ids=['caption-row', 'caption-beside-headings', 'two-years', 'footnoted', 'label-column'])
+def test_guard_stacked_period_blocks(second_caption, monkeypatch):
+    # D1: the extended header would put the second block's amounts under the first block's period.
+    source = '<table>' + FIRST_BLOCK + second_caption + SECOND_BLOCK_AMOUNTS + '</table>'
+    table = prepared(source)
+    assert outcome(table) == outcome(todays(source, monkeypatch))
+    assert not any('March 31, 2024' in header for header in headers_over_amounts(table, SECOND_BLOCK_ROW))
+
+
+@pytest.mark.parametrize('source', [
+    '<table><tr><td></td><td colspan="4">December 31,</td></tr>'
+    '<tr><td></td><td></td><td>2024</td><td></td><td>2023</td></tr>'
+    '<tr><td>Cash</td><td>$</td><td>43,889</td><td>$</td><td>41,862</td></tr></table>',
+    '<table><tr><td></td><td colspan="4">Measurement Date</td></tr>'
+    '<tr><td></td><td colspan="2">December 31, 2023</td><td colspan="2">December 31, 2024</td></tr>'
+    '<tr><td>Expected volatility</td><td colspan="2">30.5%</td><td colspan="2">28.1%</td></tr></table>',
+    '<table><tr><td></td><td colspan="4">Measurement Date</td></tr>'
+    '<tr><td>Date</td><td colspan="2">December 31, 2023</td><td colspan="2">December 31, 2024</td></tr>'
+    '<tr><td>Expected volatility</td><td colspan="2">30.5%</td><td colspan="2">28.1%</td></tr></table>',
+], ids=['years-under-instant', 'dates-under-measurement-date', 'dates-labelled-date'])
+def test_guard_stranded_period_rows(source, monkeypatch):
+    # I1: an accepted period row below the evidenced row would leave its periods out of the headers.
+    assert outcome(prepared(source)) == outcome(todays(source, monkeypatch))
+
+
+def test_guard_ignores_rows_with_amounts():
+    # Rows of amounts hold data cells, so they are not period rows, even under a year label.
+    table = prepared('<table>' + DATE_OVER_YEARS
+                     + money('Balance as of December 31, 2024', '2,130,749', '1,893,071')
+                     + money('2026', '1,234', '1,100') + '</table>')
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert values(table) == [['Balance as of December 31, 2024', Decimal('2130749'), Decimal('1893071')],
+                             ['2026', Decimal('1234'), Decimal('1100')]]
+
+
+@pytest.mark.parametrize('label, first, second', [('Revenue', '2024', '2025'),
+                                                  ('Alpha', 'March 31, 2025', 'June 30, 2025')])
+def test_guard_fires_on_labelled_period_rows(label, first, second, monkeypatch):
+    source = ('<table>' + DATE_OVER_YEARS
+              + f'<tr><td>{label}</td><td colspan="3">{first}</td><td colspan="3">{second}</td></tr>'
+              + money('Beta', '10', '20') + '</table>')
+    assert outcome(prepared(source)) == outcome(todays(source, monkeypatch))
+
+
+def test_guard_cost_on_repeated_section_label(monkeypatch):
+    # The stated trade-off: a section label repeating a period falls back to today's header rows.
+    source = ('<table><tr><td></td><td colspan="6">December 31,</td></tr>'
+              '<tr><td></td><td colspan="3">2025</td><td colspan="3">2024</td></tr>'
+              + money('Cash', '43,889', '41,862')
+              + '<tr><td>December 31, 2025</td><td colspan="6"></td></tr>'
+              + money('Accounts receivable', '16,169', '14,519') + '</table>')
+    assert outcome(prepared(source)) == outcome(todays(source, monkeypatch))
+
+
+@pytest.mark.parametrize('text, expected', [
+    ('Three months ended March 31, 2025', True), ('Three Months Ended June 30, 2025 and 2024', True),
+    ('December 31, 2025 (1)', True), ('Six Months Ended', True), ('December 31,', True), ('2023 (2)', True),
+    ('As of December 31, 2024', True), ('Balance as of December 31, 2024', False),
+    ('2024 vs 2023 % change', False), ('Common Stock', False), ('Fiscal Year', False)])
+def test_period_text(text, expected):
+    assert xlsx_tables._period_text(text) is expected
 
 
 # --- Rule 3: identifier columns -------------------------------------------------

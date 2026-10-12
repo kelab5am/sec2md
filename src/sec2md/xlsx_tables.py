@@ -461,6 +461,12 @@ _HEADING_WORD = re.compile(
     r'(?:description|exhibit(?: number| no\.?)?|period|issuance(?: period)?|name(?:/title| of [a-z ]+)?'
     r'|record date|payment date|plan category|instrument|fiscal year|investment type|pricing category'
     r'|range of exercise prices|type|category|item|class|security|date[a-z ]*)(?:\s*\(\d\))?', re.I)
+# Period text (revision 6): footnote markers, dates, years, period words and
+# punctuation, and nothing else.
+_FOOTNOTE_MARK = re.compile(r'\(\d{1,2}\)|\*+')
+_DATE_WORDS = re.compile(rf'{_MONTH} \d{{1,2}}', re.I)
+_PERIOD_VOCABULARY = re.compile(r'\b(?:three|six|nine|twelve|fiscal|months?|years?|quarters?|weeks?|periods?'
+                                r'|ended|ending|as|of|at|for|the|and|through|to)\b|[,.\-–—]', re.I)
 
 
 def _row_origins(row):
@@ -497,6 +503,26 @@ def _heading_label(text):
     return _caption_label(text) or bool(_HEADING_WORD.fullmatch(re.sub(r'\s+', ' ', text).strip()))
 
 
+def _period_text(text):
+    """Text that only names a period: 'Three months ended March 31, 2025',
+    'December 31, 2025 (1)', '2023 (2)'. Not 'Balance as of December 31, 2024' or
+    'Fiscal Year' (no date, year or 'ended')."""
+    text = re.sub(r'\s+', ' ', text).strip()
+    rest = _FOOTNOTE_MARK.sub(' ', text)
+    for pattern in (_DATE_WORDS, _HAS_YEAR, _PERIOD_VOCABULARY):
+        rest = pattern.sub(' ', rest)
+    return not rest.strip() and bool(_DATE_WORDS.search(text) or _HAS_YEAR.search(text)
+                                     or re.search(r'\bended\b', text, re.I))
+
+
+def _period_row(row):
+    """A row without data in which some origin, label included, is period text:
+    a caption, a row of years or dates, or a caption beside column headings."""
+    cells = _row_origins(row)
+    return (bool(cells) and not any(_is_data_cell(cell) for cell in cells)
+            and any(_period_text(cell.text) for cell in cells))
+
+
 def _export_header_count(grid):
     """Header rows for the XLSX copy table.
 
@@ -504,7 +530,8 @@ def _export_header_count(grid):
     the first row with an amount. The header ends at the last accepted row with
     span evidence: a heading wider than an amount beneath it, as
     'December 31, 2024' spans '$' and '2,750'. Accepted rows after it stay in the
-    body. Without a data row the count is unchanged, so text tables are too.
+    body. Without a data row the count is unchanged, so text tables are too. If a
+    period row follows the extended header, the count stays _header_count's.
     """
     base = _header_count(grid)
     data = next((r for r in range(base, len(grid))
@@ -579,6 +606,11 @@ def _export_header_count(grid):
             break
         if any(cell.colspan > amount.colspan for cell in headings for amount in amounts_under(cell)):
             evidenced = index + 1
+    # Period-row guard (revision 6): a period row below the header is a second
+    # period block, whose amounts would sit under the first block's period, or a
+    # period row stranded below the evidenced row. Keep today's header rows.
+    if evidenced > base and any(_period_row(grid[r]) for r in range(evidenced, len(grid))):
+        return base
     return evidenced
 
 
