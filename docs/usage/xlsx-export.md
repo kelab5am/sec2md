@@ -112,6 +112,29 @@ scale. Percentages become fractions with percentage formatting (`12.3%` becomes
 `0.123`). Dates, identifiers and numeric-looking labels stay text. Explicit zero
 stays zero, blank stays blank, and a reported dash stays the exact text dash.
 
+A number becomes a fraction only on proof that it is a percent: its own `%`, an
+inline XBRL percent fact in the cell, a percent heading such as `% Change`, a
+percent row label, or a table-wide percent caption. A `%` in the next column
+counts as the number's own only when it sits directly beside it and its column
+holds nothing else; negative percents such as `(29) %` become `-0.29`. A percent
+word in an `except` caption, such as `(in millions, except percentages)`, proves
+nothing. Under an identifier-like heading, a cell converts only with its own
+`$`, `%` or inline XBRL fact. Cells without proof stay source text, the table
+becomes `needs_review`, and the export report gives the reason:
+
+- `Percent sign on other rows of this column; verify the scale.`: a plain number
+  in a column whose other rows carry `%` (zeros still convert), or a number
+  whose separate `%` could not be attached safely.
+- `Percentage points; verify the unit.`: a change such as `26.6 pts`.
+- `Identifier heading over quantities; verify the column.`: a plain number under
+  an identifier-like heading such as `Full Year 2024`, where other cells of the
+  column prove amounts.
+- `Identifier heading over amount-formatted values; verify the column.`: a
+  comma-grouped or parenthesised number under such a heading when no cell
+  proves an amount. Footnote marks such as `(1)` stay text without a reason.
+- `Conflicting explicit units; verify the row, column and displayed value
+  units.`: proofs disagree, such as a `$` amount under a percent heading.
+
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding
 Excel's reliable precision stay text with issues in the export report. Source strings beginning
