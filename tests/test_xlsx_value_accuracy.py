@@ -392,6 +392,153 @@ def test_ancestor_heading_percent_in_a_value_column_never_attaches(other):
     assert table.status == 'needs_review'
 
 
+def test_split_percent_never_attaches_from_a_column_holding_a_year_in_a_body_period_row():
+    """Ruling 18 (C1): a body period row writes '2023' in the column of Other's '%', so
+    that column is not marker-only and the '%' is not 4's percent sign. '4' is P4 text,
+    never 0.04, and Revenue's '1,000' keeps its number."""
+    table = prepared(_GAP_HEADINGS + _tr('Revenue', '1,100', '1,000', '', '')
+                     + _tr('', '2025', '2024', '2023', '') + _tr('Other', '5', '4', '%'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '#,##0', '1,100', None),
+         (Decimal('1000'), '#,##0', '1,000', None), _EMPTY],
+        [_EMPTY, ('2025', '@', '2025', _UNRESOLVED), ('2024', '@', '2024', _UNRESOLVED),
+         ('2023', '@', '2023', _UNRESOLVED)],
+        [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _STRAY],
+    ]
+    assert table.cell_sources == tuple(tuple(((r, c),) for c in range(4)) for r in (2, 3, 4))
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 2: {_UNRESOLVED}',
+                            f'Source row 3, column 3: {_UNRESOLVED}', f'Source row 4, column 1: {_UNRESOLVED}',
+                            f'Source row 4, column 2: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('marker', ['%', ('%', 2)], ids=['short_row', 'marker_colspan'])
+def test_split_percent_under_its_values_leaf_never_attaches_from_a_value_column(marker):
+    """Ruling 18 (shape 1): 'Change' heads the $ change, the percent change and its '%'.
+    Costs' '%' sits beside its $ change '100' but in the column of Revenue's percent
+    change '10', so it is not 100's percent sign: '100' is P4 text, never 1.00."""
+    table = prepared(_tr('', ('Year Ended December 31,', 8)) + _tr('', ('2025', 2), ('2024', 2), ('Change', 4))
+                     + _tr('Revenue', '$', '1,100', '$', '1,000', '$', '100', '10', '%')
+                     + _tr('Costs', '', '600', '', '500', '', '100', marker))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '"$"#,##0', '$ 1,100', None),
+         (Decimal('1000'), '"$"#,##0', '$ 1,000', None), ('$', '@', '$', None),
+         (Decimal('100'), '#,##0', '100', None), (Decimal('0.10'), '0%', '10 %', None), _EMPTY],
+        [('Costs', '@', 'Costs', None), ('600', '@', '600', _UNRESOLVED), ('500', '@', '500', _UNRESOLVED),
+         _EMPTY, ('100', '@', '100', _UNPROVEN), _STRAY, _EMPTY],
+    ]
+    assert table.cell_sources == (
+        (((2, 0),), ((2, 1), (2, 2)), ((2, 3), (2, 4)), ((2, 5),), ((2, 6),), ((2, 7), (2, 8)), ()),
+        (((3, 0),), ((3, 1), (3, 2)), ((3, 3), (3, 4)), ((3, 5),), ((3, 6),), ((3, 7),), ()),
+    )
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 3: {_UNRESOLVED}',
+                            f'Source row 3, column 6: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('marker', ['%', ('%', 2)], ids=['short_row', 'marker_colspan'])
+@pytest.mark.parametrize('headed', [True, False], ids=['year_headings', 'no_headings'])
+def test_unheaded_split_percent_never_attaches_from_a_value_column(headed, marker):
+    """Ruling 18 (shape 2): no heading lies over Other's '%', which sits in (or spans) the
+    column of Revenue's percent '10'. It is not 4's percent sign: '4' is P4 text, never
+    0.04, and Revenue's '1,000' keeps its number."""
+    table = prepared((_tr('', '2025', '2024', '', '') if headed else '') + _GAP_REVENUE
+                     + _tr('Other', '5', '4', marker))
+    r = 1 if headed else 0
+    assert table.headers == (('Column 1', '2025', '2024', 'Column 4', 'Column 5') if headed
+                             else ('Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '#,##0', '1,100', None),
+         (Decimal('1000'), '#,##0', '1,000', None), (Decimal('0.10'), '0%', '10 %', None), _EMPTY],
+        [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _STRAY, _EMPTY],
+    ]
+    assert table.cell_sources == (
+        (((r, 0),), ((r, 1),), ((r, 2),), ((r, 3), (r, 4)), ()),
+        (((r + 1, 0),), ((r + 1, 1),), ((r + 1, 2),), ((r + 1, 3),), ()),
+    )
+    headings = (('Missing source header for Column 4; verify its meaning.',
+                 'Missing source header for Column 5; verify its meaning.') if headed
+                else ('No explicit headers; positional column names generated and every source row retained.',))
+    assert table.issues == headings + (f'Source row {r + 1}, column 1: {_UNRESOLVED}',
+                                       f'Source row {r + 1}, column 2: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
+def test_split_percent_never_attaches_from_a_column_of_dashes():
+    """Ruling 18 (shape 3): Revenue's percent change is '—'. No digit lies in the column of
+    Other's '%', but the column holds a value, not only markers, so '4' is P4 text, never
+    0.04, and Revenue's '1,000' keeps its number."""
+    table = prepared(_GAP_HEADINGS + _tr('Revenue', '1,100', '1,000', '—', '%') + _tr('Other', '5', '4', '%'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '#,##0', '1,100', None),
+         (Decimal('1000'), '#,##0', '1,000', None), ('—', '@', '—', None), _STRAY],
+        [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _STRAY, _EMPTY],
+    ]
+    assert table.cell_sources == (
+        tuple(((2, c),) for c in range(5)),
+        (((3, 0),), ((3, 1),), ((3, 2),), ((3, 3),), ()),
+    )
+    assert table.issues == (f'Source row 3, column 1: {_UNRESOLVED}', f'Source row 3, column 2: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
+_INCOMPLETE = 'Not a complete supported US numeric token; verify the source value and markers.'
+
+
+def test_split_percent_attaches_past_closing_fragments_and_a_unit_caption_row():
+    """Ruling 18a, TSM 20-F 2025 #9-#12: the body's unit caption row spans the marker
+    columns, and the ')' of a negative amount sits in them. Neither is a value of the
+    marker column, so the margins' '%' still attach (2023 through the spanning period
+    heading, 2024 with no heading above its marker)."""
+    def row(label, *cells):
+        return f'<tr><td>{label}</td>' + ''.join(f'<td>{c}</td>' for c in cells) + '</tr>'
+    table = prepared('<tr>' + '<td></td>' * 9 + '</tr>'
+                     '<tr><td></td><td></td><td colspan="6">For the year ended December 31,</td><td></td></tr>'
+                     '<tr><td></td><td></td><td colspan="2">2023</td><td></td><td></td>'
+                     '<td colspan="2">2024</td><td></td></tr>'
+                     '<tr><td></td><td></td><td colspan="6">(in millions, except percentages)</td><td></td></tr>'
+                     + row('Cost of revenue', '', '', '(986', ')', '', '', '(1,270', ')')
+                     + row('Gross margin', '', '', '54.4', '%', '', '', '56.1', '%'))
+    caption = '(in millions, except percentages)'
+    assert cell_rows(table) == [
+        [_EMPTY, (caption, '@', caption, None), _EMPTY, _EMPTY, _EMPTY],
+        [('Cost of revenue', '@', 'Cost of revenue', None), ('(986', '@', '(986', _INCOMPLETE), (')', '@', ')', None),
+         ('(1,270', '@', '(1,270', _INCOMPLETE), (')', '@', ')', None)],
+        [('Gross margin', '@', 'Gross margin', None), (Decimal('0.544'), '0.0%', '54.4 %', None), _EMPTY,
+         (Decimal('0.561'), '0.0%', '56.1 %', None), _EMPTY],
+    ]
+    assert table.cell_sources == (
+        (((3, 0),), ((3, 2),), (), (), ((3, 8),)),
+        (((4, 0),), ((4, 2), (4, 3)), ((4, 4),), ((4, 6), (4, 7)), ((4, 8),)),
+        (((5, 0),), ((5, 2), (5, 3), (5, 4)), (), ((5, 6), (5, 7), (5, 8)), ()),
+    )
+    assert table.issues == ('Missing source header for Column 5; verify its meaning.',
+                            f'Source row 4, column 2: {_INCOMPLETE}', f'Source row 4, column 6: {_INCOMPLETE}')
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('middle, shown', [
+    (_tr('Other X', '', '', ('—', 2)), [('Other X', '@', 'Other X', None), _EMPTY, _EMPTY, ('—', '@', '—', None)]),
+    (_tr('', '', '', ('NM', 2)), [_EMPTY, _EMPTY, _EMPTY, ('NM', '@', 'NM', None)]),
+    (_tr('', '', '', ('Change', 2)), [_EMPTY, _EMPTY, _EMPTY, ('Change', '@', 'Change', None)]),
+], ids=['labelled_dash', 'unlabelled_nm', 'body_heading'])
+def test_digitless_spanning_row_that_is_no_unit_caption_still_refuses(middle, shown):
+    """Ruling 18a skips only a unit caption row. A digitless row whose dash, 'NM' or
+    heading spans the percent-value and marker columns shows a value column there, so
+    Other's '%' is not 4's percent sign: '4' is P4 text, never 0.04."""
+    table = prepared(_GAP_HEADINGS + _tr('Revenue', '1,100', '1,000', '', '') + middle
+                     + _tr('Other', '5', '4', '%'))
+    assert cell_rows(table) == [
+        [('Revenue', '@', 'Revenue', None), (Decimal('1100'), '#,##0', '1,100', None),
+         (Decimal('1000'), '#,##0', '1,000', None), _EMPTY],
+        shown,
+        [('Other', '@', 'Other', None), ('5', '@', '5', _UNRESOLVED), ('4', '@', '4', _UNPROVEN), _STRAY],
+    ]
+    assert table.cell_sources == tuple(tuple(((r, c),) for c in range(4)) for r in (2, 3, 4))
+    assert table.issues == (f'Source row 4, column 1: {_UNRESOLVED}', f'Source row 4, column 2: {_UNPROVEN}')
+    assert table.status == 'needs_review'
+
+
 def test_refused_split_percent_on_a_zero_keeps_the_zero():
     """Spec P4's zero exception: zero is right at any scale, so a refused zero converts."""
     table = prepared('<tr><th>Item</th><th>2025</th><th colspan="2">% change</th></tr>'

@@ -945,10 +945,31 @@ def _leaf(grid, header_count, col):
                  if grid[r][col] and grid[r][col].text and not _UNIT_LINE.search(grid[r][col].text)), None)
 
 
-def _value_in_columns(grid, value_rows, row, columns):
-    """Whether a digit-bearing origin of another of the value rows occupies any of the columns."""
-    return any(cell is not None and cell.row == r and re.search(r'\d', cell.text)
-               for r in value_rows if r != row for cell in (grid[r][c] for c in columns))
+_SPLIT_PERCENT = frozenset({'%', ')%'})
+# Ruling 18a: the closing fragment of another row's value on its left is not a value.
+_CLOSING_FRAGMENTS = frozenset({')', '%)'})
+
+
+def _unit_caption_row(row, columns):
+    """Ruling 18a: a body row whose only content is a spanning unit caption ('(in millions,
+    except for percentages and wafer shipment)'). Every non-empty origin in the row holds
+    no digit and is a unit line, and at least one of them spans more than one column,
+    one of the given columns included. A digitless row whose dash, 'NM' or heading spans
+    the columns is no unit caption: it shows a value column there."""
+    cells = _row_origins(row)
+    return (bool(cells) and all(not re.search(r'\d', c.text) and _UNIT_LINE.search(c.text) for c in cells)
+            and any(c.colspan > 1 and any(c.column <= k < c.column + c.colspan for k in columns) for c in cells))
+
+
+def _marker_only(grid, header_count, marker):
+    """Ruling 18, as amended by 18a: whether, in every other body row (period rows
+    included), every origin occupying a column of the marker is empty, a '%' or ')%'
+    marker, or a ')' or '%)' closing fragment. A unit caption row does not count."""
+    columns = range(marker.column, marker.column + marker.colspan)
+    return all(cell is None or cell is marker or not cell.text or cell.text in _SPLIT_PERCENT
+               or cell.text in _CLOSING_FRAGMENTS
+               for r in range(header_count, len(grid)) if not _unit_caption_row(grid[r], columns)
+               for cell in (grid[r][c] for c in columns))
 
 
 def _attached_percent_signs(grid, header_count):
@@ -966,10 +987,13 @@ def _attached_percent_signs(grid, header_count):
     spans the value's column (user decision 2026-10-13, amending Ruling 5):
     TSM's '%' under 'For the year ended December 31,' joins the value under its
     '2022' leaf, while a '%' under '% change' never joins the amount under '2025'.
-    Through such an ancestor heading (the marker's leaf is not the value's) it
-    never attaches from a column that holds a value in another body row
-    (Ruling 17): a '%' spanning, or written in, a blank percent-value column is
-    not the percent sign of the amount beside it.
+    In every case (same leaf, ancestor heading or no heading) the marker must
+    also sit in a marker-only position (Ruling 18): in every other body row,
+    period rows included, whatever occupies its columns is empty or another
+    '%' or ')%' marker. A '%' in, or spanning, a column that holds anything else
+    in another row (a value, a year, a dash, a word) is not the percent sign of
+    the value beside it. Ruling 18a: a ')' or '%)' closing fragment and a unit
+    caption row (see _unit_caption_row) are not values of the marker column.
     A value the search reached but that fails any of these rules is returned as refused
     and becomes P4 text, so it is never left a plain number; a zero still
     converts, under spec P4's zero exception.
@@ -979,7 +1003,7 @@ def _attached_percent_signs(grid, header_count):
     for r in value_rows:
         row = grid[r]
         for col, marker in enumerate(row):
-            if marker is None or (marker.row, marker.column) != (r, col) or marker.text not in {'%', ')%'}:
+            if marker is None or (marker.row, marker.column) != (r, col) or marker.text not in _SPLIT_PERCENT:
                 continue
             value = next((c for c in reversed(row[:col]) if c is not None and c.text not in {'', '$', '('}), None)
             if (value is None or value.row != r or value.column == 0 or not re.search(r'\d', value.text)
@@ -988,9 +1012,7 @@ def _attached_percent_signs(grid, header_count):
             marker_leaf = _leaf(grid, header_count, col)
             right = value.column + value.colspan - 1
             covers = marker_leaf is None or marker_leaf.column <= right < marker_leaf.column + marker_leaf.colspan
-            in_value_column = (marker_leaf is not None and marker_leaf is not _leaf(grid, header_count, right)
-                               and _value_in_columns(grid, value_rows, r, range(col, col + marker.colspan)))
-            if right + 1 == col and covers and not in_value_column:
+            if right + 1 == col and covers and _marker_only(grid, header_count, marker):
                 attached[value] = marker
             else:
                 refused[value] = marker
@@ -1197,7 +1219,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             flaggable = digits and not label_column and not points and not proof.conflict and not (identifier and not quantity)
             unproven = flaggable and proof.role is None and role != 'percent'
             # User decision (2026-10-13): a value whose split '%' the attachment pass
-            # refused (leaf rule, Ruling 16 adjacency, Ruling 17) is P4 text, never a plain number.
+            # refused (leaf rule, Ruling 16 adjacency, Ruling 18) is P4 text, never a plain number.
             refused_percent = flaggable and any(o in refused and refused[o] not in origins for o in origins)
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
                                      unproven, proof.by_fact, identifier and not quantity, quantity, refused_percent))
