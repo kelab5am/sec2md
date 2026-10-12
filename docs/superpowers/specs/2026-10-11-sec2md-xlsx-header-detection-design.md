@@ -565,10 +565,11 @@ Rule 1, negative cases (each asserts the output equals today's):
     (the TSM pattern).
 12a. Check 4b and the evidence rule: under `December 31,` / `2024 | 2023`
      (each year spanning 3), insert a labelled row whose cells are as wide as
-     the years: `Alpha | Foo | Bar`, `Alpha | N/A | NM` and
-     `Alpha | March 31, 2025 | June 30, 2025`. Each stays a body row with its
-     text, and the amounts below stay `Decimal`. With `Alpha | 2027 - 2062 |
-     3.50% - 4.65%`, the table falls back to source text, as today.
+     the years: `Alpha | Foo | Bar` and `Alpha | N/A | NM`. Each stays a body
+     row with its text, and the amounts below stay `Decimal`. With
+     `Alpha | 2027 - 2062 | 3.50% - 4.65%`, the table falls back to source text,
+     as today. `Alpha | March 31, 2025 | June 30, 2025` is a period row
+     (revision 6), so it gives today's header rows (the guard's test 12h).
 12b. An unlabelled text row as the last row before the data. With cells as wide
      as the amounts, it carries no evidence and stays in the body. With cells as
      wide as the years (`As Reported | As Adjusted`), it joins the header as a
@@ -603,8 +604,9 @@ equality with it.
      the same row labelled `Date`. Each gives today's header rows.
 12h. The guard does not fire on rows with amounts: a body row
      `Balance as of December 31, 2024 | $ | 2,130,749` leaves the extended
-     header in place. A body row `Revenue | 2024 | 2025` is a period row and
-     gives today's header rows.
+     header in place. The body rows `Revenue | 2024 | 2025` and
+     `Alpha | March 31, 2025 | June 30, 2025` (formerly in 12a) are period rows
+     and give today's header rows.
 12i. The guard's cost, pinned: a balance sheet (`December 31,` over `2025 |
      2024`, `$`/amount rows) with a repeated `December 31, 2025` section label
      in the body gives today's header rows.
@@ -699,19 +701,25 @@ Unchanged-behaviour guards:
      (`Three months` and `Quarter` are 3 months, `Six months` 6, `Nine months`
      9, `Year` and `Twelve months` 12); a duration starting the day after the
      header date is accepted only under a header that states no length;
-   - every fact gets a verdict: ok, mismatch, no header date, or not placed
-     (no copy cell); the counts of each are reported per group;
+   - every fact gets a verdict: ok, mismatch, no header date, label column (a
+     fact in column 0, which has no period header), or not placed (no copy
+     cell); the counts of each are reported per group;
    - every table whose column headers carry period wording without a year is
-     listed (a yearless period header).
+     listed (a yearless period header);
+   - every exported table with `is_numeric_fact` source cells but no located
+     facts (the export harness could not match its source element) is listed
+     with its fact-cell count; in vault filings each is checked by hand
+     against the filing, since the script cannot check it.
 
    The script's own tests cover a 6-month fact under a `Three Months Ended`
    header, a fact starting the day after a `Three Months Ended` header date,
-   and a 6-month fact under `Quarter ended`; each must be a mismatch.
+   a 6-month fact under `Quarter ended`, and durations starting on or the day
+   before a bare `December 31, 2024` header date; each must be a mismatch.
    Acceptance, for vault and other filings alike: 0 real misattributions. Each
-   mismatch is classified as a real misattribution or a checker limit (such as
-   NVDA's opening deferred revenue under a bare date, present on `main`), with
-   its source cells. Mismatches and yearless period headers present on `main`
-   are listed as existing; new ones are classified one by one. None of the 21
+   mismatch, on `main` and on the branch, is classified as a real
+   misattribution or a checker limit (such as NVDA's opening deferred revenue
+   under a bare date), with its source cells. Mismatches and yearless period
+   headers present on `main` are marked as existing. None of the 21
    D1 tables may export a number under another block's period. Any real
    misattribution blocks the merge.
 4. Vault filings, all tables: no lost or changed numeric cell, no balanced

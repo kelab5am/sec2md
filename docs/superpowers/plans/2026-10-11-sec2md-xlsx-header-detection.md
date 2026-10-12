@@ -11,7 +11,9 @@
 
 **Tech Stack:** Python 3.12, BeautifulSoup with lxml, openpyxl, pytest, ruff.
 
-**Spec:** [`../specs/2026-10-11-sec2md-xlsx-header-detection-design.md`](../specs/2026-10-11-sec2md-xlsx-header-detection-design.md), revision 5 (committed with this plan). Rules 1–3, Testing and Acceptance are the contract. Large caps that put the period caption in the label column (JPM, BAC, KO, MSFT, CAT, CRM) are a follow-up and out of scope.
+**Spec:** [`../specs/2026-10-11-sec2md-xlsx-header-detection-design.md`](../specs/2026-10-11-sec2md-xlsx-header-detection-design.md), revision 6. Rules 1–3, Testing and Acceptance are the contract. Large caps that put the period caption in the label column (JPM, BAC, KO, MSFT, CAT, CRM) are a follow-up and out of scope. So is giving each stacked period block its own header row (a separate spec).
+
+**Execution order (revision 6):** Tasks 1, 2 and 3 implemented revision 5 and are done (branch `4373afd`, `ad131b0`; audit `3894d2b` on `main`). Task 3's acceptance run found stacked period blocks exported under the wrong period (D1), so revision 6 adds Tasks 5, 6 and 7. Run them in that order, then Task 4 last.
 
 **Acceptance harness:** [`../audits/2026-10-11-xlsx-header-detection/`](../audits/2026-10-11-xlsx-header-detection/) holds `export_tables.py`, `compare.py`, `primary_statements.py`, `mutation_check.py` and `filings.txt`, committed on `main` in the same commit as this plan. Every expected result below comes from running them against a scratch copy of this exact implementation.
 
@@ -901,7 +903,82 @@ git commit -m "docs: acceptance record for XLSX header detection"
 
 ---
 
+### Task 5: Period-row guard (spec revision 6, Rule 1)
+
+**Files:**
+- Modify (branch): `src/sec2md/xlsx_tables.py` (the Rule 1/2 block from Task 2), `tests/test_xlsx_header_detection.py`
+- Modify (main): `docs/superpowers/audits/2026-10-11-xlsx-header-detection/mutation_check.py`
+
+**Interfaces:**
+- Consumes: `_export_header_count`, `_row_origins`, `_is_data_cell`, `_MONTH`, `_header_count` (Task 2 and existing).
+- Produces: `_period_text(text: str) -> bool` and `_period_row(row) -> bool` (a grid row, as `_row_origins` takes). `_export_header_count(grid)` keeps its signature.
+
+**Behaviour** (spec Definitions "Period text" and "Period row", Rule 1 "Period-row guard"):
+- `_period_text`: strip the text; remove footnote markers `\(\d{1,2}\)` and `\*+`; remove dates (`{_MONTH} \d{1,2}`), years (`(?:19|20)\d{2}`), the spec's period words (`three six nine twelve fiscal month(s) year(s) quarter(s) week(s) period(s) ended ending as of at for the and through to`, whole words, case-insensitive) and the punctuation `, . - – —`. True when only whitespace remains and the original held a date, a year or the word `ended`.
+- `_period_row(row)`: the row has origins, none is a data cell (`_is_data_cell(cell)`), and at least one origin, label included, is period text.
+- In `_export_header_count`, after the scan: when `evidenced > base` and any row from `evidenced` to `len(grid) - 1` is a period row, return `base`. Otherwise return `evidenced` as before.
+- `_header_count`, `_PERIOD`, `_numeric_role` and `table_completeness.py` stay unchanged; the fingerprint test must still pass.
+
+- [ ] **Step 1: Write the failing tests** (spec Testing 12f–12j), in a new section `# --- Rule 1, period-row guard` placed before `# --- Rule 3`.
+  - A helper `todays(source, monkeypatch)` prepares the table with `xlsx_tables._export_header_count` monkeypatched to `xlsx_tables._header_count`. Guard cases assert `(status, headers, rows values, cell_sources, issues)` of `prepared(source)` equal those of `todays(...)`.
+  - Reach the new helpers as `xlsx_tables._period_text` inside tests, not by import, so a missing helper fails only its own tests.
+  - `test_guard_stacked_period_blocks` parametrized over 5 variants (12f): separate caption row; caption sharing its row with the column headings; `Three Months Ended June 30, 2025 and 2024`; `Three Months Ended June 30, 2025 (1)`; caption in the label column. Use SEC-style spans and `$`/amount pairs in both blocks, as in the D1 RDDT and META 10-Q equity statements. Each also asserts no header names the first block's period over a second-block amount.
+  - `test_guard_stranded_period_rows` parametrized over 3 variants (12g): 1-column `2024 | 2023` under `December 31,` (colspan 4); unlabelled `December 31, 2023 | December 31, 2024` under `Measurement Date`; the same row labelled `Date`.
+  - `test_guard_ignores_rows_with_amounts` (12h): body row `Balance as of December 31, 2024 | $ | 2,130,749` keeps the extended header (assert the extended headers explicitly).
+  - `test_guard_fires_on_labelled_period_rows` parametrized over 2 variants (12h): body rows `Revenue | 2024 | 2025` and `Alpha | March 31, 2025 | June 30, 2025` (under `DATE_OVER_YEARS`, each cell spanning 3) give today's header rows.
+  - Remove the `('March 31, 2025', 'June 30, 2025')` case from `test_labelled_text_row_as_wide_as_the_years_stays_in_the_body` (spec 12a, revision 6): it is a period row now, covered by the test above. This is the one existing expectation revision 6 changes; no other existing test may change.
+  - `test_guard_cost_on_repeated_section_label` (12i): balance sheet with a repeated `December 31, 2025` label row gives today's header rows.
+  - `test_period_text` parametrized over the spec's 7 period-text examples (True) and 4 non-period examples (False) (12j).
+- [ ] **Step 2: Run them; verify they fail.** `$PY -m pytest -q -p no:cacheprovider tests/test_xlsx_header_detection.py`. Expected: `22 failed, 81 passed` (the 23 new cases except `test_guard_ignores_rows_with_amounts` fail: 11 guard cases and the 11 `test_period_text` cases; the 80 remaining existing cases and that one pass). A guard case that passes here does not exercise the guard (revision 5 already gives today's header rows): fix its fixture so revision 5 extends the header, never the expectation.
+- [ ] **Step 3: Implement the behaviour above** in the Rule 1/2 block of `xlsx_tables.py`.
+- [ ] **Step 4: Verify.**
+  - `tests/test_xlsx_header_detection.py`: `103 passed`.
+  - Full suite: `1 failed, 2079 passed, 14 deselected`, the failure being the known `test_internal_version_matches_distribution`.
+  - `git diff main -- src/sec2md/table_completeness.py` prints nothing; `_header_count` and `_PERIOD` lines unchanged (as Task 2 Step 4).
+  - `$PY -m ruff check src tests`: `All checks passed!`
+- [ ] **Step 5: Extend the mutation check (main).** Add three mutants to `MUTANTS` in `mutation_check.py`, each of which a new test must catch: the guard disabled (`return base` never taken); `_period_row` requiring every origin to be period text (the mixed-row variant of 12f fails); footnote removal dropped from `_period_text` (the footnoted variant fails). Run it as in Task 2 Step 4: `all mutants behaved as expected`, with the same four expected survivors, and the source file restored.
+- [ ] **Step 6: Commit.** Branch: `git add src/sec2md/xlsx_tables.py tests/test_xlsx_header_detection.py`, message `fix: keep today's XLSX header when a period row follows it`. Main: `git add docs/superpowers/audits/2026-10-11-xlsx-header-detection/mutation_check.py`, message `docs: mutation check covers the period-row guard`.
+
+---
+
+### Task 6: All-table XBRL period check (spec Acceptance 3b)
+
+**Files (main):**
+- Create: `docs/superpowers/audits/2026-10-11-xlsx-header-detection/all_facts.py`, `docs/superpowers/audits/2026-10-11-xlsx-header-detection/test_all_facts.py`
+- Read: `outputs/xlsx-header-detection/task-3/allfacts.py` (Task 3's scratch version, the starting point), `primary_statements.py` (its `header_period`, `displayed`)
+
+**Interfaces:**
+- `python -I all_facts.py EXPORT_DIR --report REPORT_MD --details DETAILS_JSON`, run once per export directory.
+- Keep `primary_statements.py` unchanged; add any period parsing all_facts needs in all_facts.py.
+
+**Behaviour** (spec Acceptance 3b): for every table that is not `source_text_only` and every inline XBRL fact, one verdict: `ok`, `mismatch`, `no header date`, `label column` (column 0), or `not placed` (no copy cell). Separately, list every such table that has `is_numeric_fact` source cells but no located facts, with the count (Codex found 7 in revision 5's exports, 3 of them NVDA). Instants: within 7 days of the header date, or at the start of a stated period. Durations: ending within 7 days of the header date with the stated length (`three months` and `quarter` 3, `six months` 6, `nine months` 9, `year`, `fiscal year` and `twelve months` 12); a duration starting the day after the header date is `ok` only under a header that states no length. The report gives verdict counts per group (META, NVDA, RDDT, Others), every mismatch with filing, ordinal, title, source cell, fact context and header, and every table with a yearless period header (a header with period wording and no year).
+
+- [ ] **Step 1: Tests first.** `test_all_facts.py` checks the period rule directly: a 6-month duration under `Three Months Ended June 30, 2025` → mismatch; a duration starting the day after `Three Months Ended March 31, 2025` → mismatch; a 6-month duration under `Quarter ended June 30, 2025` → mismatch; a duration starting the day after a bare `December 31, 2024` header → ok; durations starting on `December 31, 2024` or `December 30, 2024` under that bare header → mismatch (Task 3's scratch checker wrongly accepts both); an instant at the start of `Three Months Ended March 31, 2025` (opening balance) → ok; a 3-month duration under `Three Months Ended March 31, 2025` → ok. Run `$PY -m pytest -q -p no:cacheprovider docs/superpowers/audits/2026-10-11-xlsx-header-detection/test_all_facts.py`: they fail before `all_facts.py` exists, then `8 passed`.
+- [ ] **Step 2: Implement `all_facts.py`** and run it on Task 3's exports: `outputs/xlsx-header-detection/base` and `new` (revision 5). The D1 tables (9 META and 12 RDDT 10-Q equity statements) must show as mismatches on `new` and not on `base`; if not, the checker is wrong. Record the counts in the task report.
+- [ ] **Step 3: Commit (main):** the two files, message `docs: all-table XBRL period check for XLSX header detection`.
+
+---
+
+### Task 7: Acceptance rerun for revision 6 and audit update
+
+**Files (main):** Modify `docs/superpowers/audits/2026-10-11-xlsx-header-detection/README.md`, `compare.md`, `statements.md`; Create `all-facts.md`. Outputs (not committed): `outputs/xlsx-header-detection/new6/`.
+
+- [ ] **Step 1: Export with the branch** (Task 5's code) into `outputs/xlsx-header-detection/new6`; reuse `base` from Task 3 (the main checkout's `src` has not changed). 60 files.
+- [ ] **Step 2: Run** `compare.py base new6`, `primary_statements.py new6`, and `all_facts.py` on `base` and `new6`, writing `compare.md`, `statements.md` and `all-facts.md` into the audit directory. Also compare `new` (revision 5) with `new6` table by table.
+- [ ] **Step 3: Gates.** Any failure stops the work and goes to the user, with no expectation adjusted:
+  1. Every table that differs between `new` and `new6` is one where the guard fired, and its `new6` headers and status equal `base`'s (list them all; a cell value that still differs from `base` must be a Rule 3 difference, classified). The 21 D1 tables and TSM #105 are among them.
+  2. Vault primary statements (spec Acceptance 3): all 126 still export; every fact `ok`; the same counts as Task 3 (META 3,322, NVDA 2,662, RDDT 2,056 ok facts), 0 failures, 0 yearless headers. A vault balance sheet, income statement or cash flow statement falling back is a stop.
+  3. Vault, all tables (Acceptance 4): 0 lost, 0 changed, 0 balanced lost, 0 missing or added.
+  4. Acceptance 3b: 0 real misattributions in any filing. Every mismatch and yearless period header, on `base` and on `new6`, is classified with its source cells (those on `base` marked existing). Every vault table with numeric-fact cells but no located facts is checked by hand against the filing (headers carry the right periods, values match) and the result recorded.
+  5. Others (Acceptance 5): reclassify only what changed since Task 3; TSM #105 should no longer be a regression.
+- [ ] **Step 4: Update the audit README** with a "Revision 6" section: the rerun commands, the new group table, primary-statement totals, all-facts totals (base vs new6), the guard-fired table list, the gate results and the remaining regressions needing the user's acceptance. Keep the revision 5 record above it.
+- [ ] **Step 5: Commit (main):** `README.md`, `compare.md`, `statements.md`, `all-facts.md`, message `docs: acceptance record for XLSX header detection revision 6`.
+
+---
+
 ### Task 4: CHANGELOG, usage doc and handoff
+
+Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2079 passed`, and `git log --oneline main..HEAD` shows four commits.
 
 **Files:**
 - Modify (branch): `CHANGELOG.md`, `docs/usage/xlsx-export.md`
