@@ -15,6 +15,19 @@ from sec2md.xlsx_values import CellValue, convert_cell
 
 
 @dataclass(frozen=True)
+class FactAttributes:
+    """An ix:nonFraction in a cell, with its unit resolved through the filing's xbrli:unit
+    definitions: sorted measures, and for a divide '/' then the sorted denominator measures."""
+    name: str
+    unit_measures: tuple[str, ...]
+    scale: int | None
+    decimals: str | None
+    format: str | None
+    sign: str | None
+    displayed: str
+
+
+@dataclass(frozen=True)
 class SourceCell:
     text: str
     row: int
@@ -26,6 +39,7 @@ class SourceCell:
     is_numeric_fact: bool
     source_anchor: str | None = None
     numeric_markers: tuple[str, ...] = ()
+    facts: tuple[FactAttributes, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -87,7 +101,53 @@ def _anchor(node: Tag, native_anchors: Mapping[int, str | None] | None) -> str |
     return native_anchors.get(id(node)) if native_anchors is not None else node.get('id') or node.get('name')
 
 
-def _cell(node, row, column, rowspan, colspan, source_url, native_anchors):
+def _document_root(node):
+    root = node
+    while isinstance(root.parent, Tag):
+        root = root.parent
+    return root
+
+
+def _measures(node) -> tuple[str, ...]:
+    return tuple(sorted(measure.get_text().strip() for measure in node.find_all('xbrli:measure')))
+
+
+def _unit_map(root) -> Mapping[str, tuple[str, ...]]:
+    """{unit id: measures} from the document's xbrli:unit definitions, built once per
+    document and kept on the root itself, so it lives and dies with that document."""
+    if root is None:
+        return {}
+    units = vars(root).get('_sec2md_unit_map')
+    if units is None:
+        units = {}
+        for unit in root.find_all('xbrli:unit'):
+            divide = unit.find('xbrli:divide')
+            if divide is not None:
+                numerator, denominator = divide.find('xbrli:unitnumerator'), divide.find('xbrli:unitdenominator')
+                measures = ((*_measures(numerator), '/', *_measures(denominator))
+                            if numerator is not None and denominator is not None else ())
+            else:
+                measures = _measures(unit)
+            if unit.get('id'):
+                units[unit.get('id')] = measures
+        root._sec2md_unit_map = units
+    return units
+
+
+def _scale(raw) -> int | None:
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _fact(node: Tag, units: Mapping[str, tuple[str, ...]]) -> FactAttributes:
+    unit = node.get('unitref', node.get('unitRef'))
+    return FactAttributes(str(node.get('name') or ''), units.get(unit, ()), _scale(node.get('scale')),
+                          node.get('decimals'), node.get('format'), node.get('sign'), _visible_text(node))
+
+
+def _cell(node, row, column, rowspan, colspan, source_url, native_anchors, units=None):
     return SourceCell(
         _visible_text(node), row, column, rowspan, colspan,
         tuple((_visible_text(a), urljoin(source_url or '', a['href']))
@@ -95,6 +155,7 @@ def _cell(node, row, column, rowspan, colspan, source_url, native_anchors):
         node.name == 'th', any(_visible_nodes(node, ['ix:nonfraction', 'ix:fraction', 'nonfraction', 'fraction'])),
         _anchor(node, native_anchors),
         tuple(_visible_text(marker) for marker in _visible_nodes(node, ['sup', 'a']) if _numeric_marker(marker)),
+        tuple(_fact(fact, units or {}) for fact in _visible_nodes(node, ['ix:nonfraction', 'nonfraction'])),
     )
 
 
@@ -282,11 +343,10 @@ def native_metadata(soup: Tag):
 def snapshot_html_table(node: Tag, *, ordinal: int, page: int, source_url: str | None,
                         native_anchors=None, note_targets=None) -> TableSnapshot:
     """Capture direct table ownership and report unreliable spans without clipping."""
+    root = _document_root(node)
     if note_targets is None:
-        root = node
-        while isinstance(root.parent, Tag):
-            root = root.parent
         _, note_targets = native_metadata(root)
+    units = _unit_map(root)
     rows = [tr for tr in _visible_nodes(node, 'tr') if tr.find_parent('table') is node]
     cells, issues = [], []
     # Intervals avoid expanding a malicious or malformed huge span into a grid.
@@ -319,7 +379,7 @@ def snapshot_html_table(node: Tag, *, ordinal: int, page: int, source_url: str |
             if any(top < bottom and stop > row and start < end and finish > column
                    for top, stop, start, finish in occupied):
                 issues.append(f'Span overlap at ({row}, {column}).')
-            cells.append(_cell(td, row, column, rowspan, colspan, source_url, native_anchors))
+            cells.append(_cell(td, row, column, rowspan, colspan, source_url, native_anchors, units))
             occupied.append((row, bottom, column, end))
             column = end
     flattened_width = max((sum(max(cell.colspan, 1) for cell in cells if cell.row == row)
@@ -340,6 +400,7 @@ def snapshot_positioned_table(nodes: Sequence[Tag], *, ordinal: int, page: int,
     """Use the selected positioned group's grid only when every visible origin is unique."""
     parser = AbsolutelyPositionedTableParser(list(nodes))
     grid = parser.to_grid()
+    units = _unit_map(_document_root(nodes[0]) if nodes else None)
     cells, issues, seen = [], [], set()
     if grid is not None:
         for row, entries in enumerate(grid):
@@ -349,7 +410,7 @@ def snapshot_positioned_table(nodes: Sequence[Tag], *, ordinal: int, page: int,
                     issues.append('Ambiguous positioned cell geometry; source_text_only.')
                 for el in visible:
                     seen.add(id(el))
-                    cells.append(_cell(el, row, column, 1, 1, source_url, native_anchors))
+                    cells.append(_cell(el, row, column, 1, 1, source_url, native_anchors, units))
     if grid is None or any(_visible_text(el) and id(el) not in seen for el in nodes):
         issues.append('Incomplete positioned grid; source_text_only.')
     if issues:
