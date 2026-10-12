@@ -115,8 +115,11 @@ stays zero, blank stays blank, and a reported dash stays the exact text dash.
 A number becomes a fraction only on proof that it is a percent: its own `%`, an
 inline XBRL percent fact in the cell, a percent heading such as `% Change`, a
 percent row label, or a table-wide percent caption. A heading or caption over
-two values in one row proves neither of them. A `%` in the next column counts as
-the number's own only when it sits directly beside it and its column holds
+two values in one row proves neither of them. A percent proof never overrides
+contrary evidence: a heading or caption proves nothing in a column that holds a
+`$` amount or an amount fact, and a caption proves nothing under an amount
+heading such as `Total`. A `%` in the next column counts as the number's own
+only when it spans one row, sits directly beside the number and its column holds
 nothing else; negative percents such as `(29) %` become `-0.29`. A percent word
 in an `except` caption proves nothing, as in
 `(In millions, except per share and percentage data)`. Under an identifier-like
@@ -130,9 +133,14 @@ unflagged as before.
   A number without proof in a column where another row has its own `%`, a
   percent fact or a percent row label. This includes amounts:
   `Tier 1 capital 294,881` below `$ 275,513` is flagged although the number is
-  right. It also applies to a number under a percent heading or caption over two
-  values in one row, and to a number whose separate `%` could not be attached
-  safely. Zeros still convert.
+  right. It also applies to a number under a percent heading or caption that
+  proves nothing in its column (over two values in one row, or withheld by
+  contrary evidence), to a number without its own `%`, `$` or fact under a
+  heading that names a percent without declaring one (`Percent Change 2024
+  versus 2023`), and to a number whose separate `%` could not be attached
+  safely. That `%` can still reach the number as before, through column grouping
+  under one heading over both or the merge of a column of `%` signs; the number
+  then converts with it. Zeros still convert.
 - `Percentage points; verify the unit.`
   A change such as `26.6 pts`.
 - `Identifier heading over quantities; verify the column.`
@@ -144,7 +152,11 @@ unflagged as before.
   unflagged.
 - `Conflicting explicit units; verify the row, column and displayed value units.`
   A `$` together with a percent proof, such as a `$` amount under a percent
-  heading or a `$` in the heading of a percent column (`% Change in NT$`).
+  heading or a `$` in the heading of a percent column (`% Change in NT$`). Also
+  a pure inline XBRL fact whose scale is not -2 under any percent proof, a
+  table-wide caption included, and a percent proof on a row whose label names
+  another unit (`Expected term (in years)`, `Days sales outstanding`, `(x)`,
+  `bps`, `percentage points`).
 
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding

@@ -14,6 +14,10 @@
     under a percent heading such as `% Change` or beside a percent row label, or
     is under a table-wide percent caption. A percent heading over two values in
     one row proves neither of them, and neither does a table-wide caption there.
+    A percent proof never overrides contrary evidence: neither a percent heading
+    nor a table-wide caption proves a column that holds a `$` amount or an amount
+    fact, and a table-wide caption proves nothing under an amount heading such as
+    `Total`.
   - In a column where some row has its own `%`, a percent fact or a percent row
     label, every other number without proof stays text with
     `Percent sign on other rows of this column; verify the scale.`
@@ -21,16 +25,27 @@
     `Revenue 100 %` no longer exports in percentage points, and amounts that
     exported correctly, such as JPM's `Tier 1 capital 294,881` below
     `$ 275,513` and TSM's `Net revenue 2,263,891`, are now flagged too. The same
-    holds for unproven numbers under such a heading. A zero still converts.
+    holds for unproven numbers under a percent heading or table-wide caption
+    that proves nothing in their column: one over two values in one row, or one
+    withheld by contrary evidence as above. It also holds for a number without its
+    own `%`, `$` or fact under a heading that names a percent without declaring
+    one, such as KO's `Percent Change 2024 versus 2023`. A zero still converts.
   - A `$` together with a percent proof stays text as a conflict, whether the `$`
     is in the heading or row label (TSM's `% Change in NT$ …`) or in the value
     under a percent heading. So does a `%` whose fact is an amount or has another
-    scale.
+    scale, and so does a value whose pure fact has a scale other than -2 under
+    any percent proof, a table-wide caption included. A row label that names
+    another unit, such as `Expected term (in years)`, `Days sales outstanding`,
+    `(times)`, `(x)`, `bps` or `percentage points`, conflicts with every percent
+    proof on its row in the same way.
   - A `%` printed in its own column joins the value directly to its left when the
-    `%` has no heading or sits under the value's heading or one spanning the
-    value's column, and its column holds nothing else in any other body row (`)`
-    and `%)` fragments and unit captions aside). A value whose `%` is refused
-    becomes text with the reason above, whatever its other proof. Negative
+    `%` spans one row, has no heading or sits under the value's heading or one
+    spanning the value's column, and its column holds nothing else in any other
+    body row (`)` and `%)` fragments and unit captions aside). A value whose `%`
+    is refused becomes text with the reason above, whatever its other proof,
+    unless the `%` still reaches the value as it did before this change: through
+    column grouping under one heading over both, or through the merge of a column
+    of `%` signs. The value then converts with that `%`. Negative
     percents convert: `(34) %` gives -0.34, and `(40.4` with `)%` in the next
     column gives -0.404. In 54 tables, 71 `%` and `pts` columns whose signs now
     sit with their values drop out of the copy grid; a `%` column emptied this way
@@ -61,8 +76,8 @@
   percent fact equals the fact / 100 with its sign. The 126 vault primary
   statements export as before (META 3,322, NVDA 2,662 and RDDT 2,056 verified
   facts, 0 failures). The cost is 1,127 numbers that became flagged text, in 74
-  tables and no primary statement: 820 META and RDDT percent-of-revenue rows,
-  82 joined percent rows in other filings, 20 split-`%` cells (17 TSM conflicts
+  tables and no primary statement: 820 META and RDDT percent-of-revenue cells,
+  82 joined percent cells in other filings, 20 split-`%` cells (17 TSM conflicts
   and 3 refused `%`), and 205 numbers outside the manifest (200 unproven numbers
   in `%` columns, among them amounts in JPM, AMZN, GOOGL, NFLX and TSM tables,
   NVDA's SG&A amounts and MU's lease terms; 4 NVDA `pts` changes; 1 conflict).
