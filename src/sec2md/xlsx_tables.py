@@ -824,12 +824,27 @@ class _Proof(NamedTuple):
 _NO_PROOF = _Proof(None, False, False, False)
 
 
-def _cell_proof(text, header, labels, label, origins) -> _Proof:
-    """Rule P's cell-, row- and column-level proofs for a digit copy cell (spec P1-P3)."""
+def _shared_leaf_columns(leaves, copies):
+    """Ruling 7: copy columns whose leaf header also heads another kept copy column that
+    holds a value in the same row. No header label can prove which value it describes
+    (NFLX #13: '$ | 1,323,096 | 7 | %' under one leaf), so none proves a percent there."""
+    shared = set()
+    for copy_row in copies:
+        columns = {}
+        for index, (leaf, (_, text)) in enumerate(zip(leaves, copy_row)):
+            if leaf is not None and re.search(r'\d', text):
+                columns.setdefault(leaf, []).append(index)
+        shared.update(index for group in columns.values() if len(group) > 1 for index in group)
+    return shared
+
+
+def _cell_proof(text, header, labels, label, origins, header_proves=True) -> _Proof:
+    """Rule P's cell-, row- and column-level proofs for a digit copy cell (spec P1-P3).
+    header_proves is False for a column that shares its leaf header (Ruling 7)."""
     reading = _convert_prepared(text, 'number', origins)
     own_percent = isinstance(reading.value, Decimal) and '%' in reading.number_format
     fact = _percent_fact(origins)
-    heading = any(_percent_declaration(part) for part in labels)
+    heading = header_proves and any(_percent_declaration(part) for part in labels)
     row = _percent_declaration(label)
     amount = _amount_fact(origins)
     percent = own_percent or fact or heading or row
@@ -1076,19 +1091,26 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     if not header_count:
         issues.append('No explicit headers; positional column names generated and every source row retained.')
     financial = sum(bool(_VALUE.search(row[0])) for row in original[header_count:] if row) >= 2
-    body = []
+    copies = []
     for r in range(header_count, height):
-        decided = []
-        for index, col in enumerate(kept):
+        copy_row = []
+        for col in kept:
             contributors = [col] + [src for src, moves in actions.items() if moves.get(r - header_count + 1) == col]
             contributors.sort()
             origins = _with_attached(dict.fromkeys(c for src in contributors for c in group_origins[r][src]), attached)
-            text = _joined(origins)
+            copy_row.append((origins, _joined(origins)))
+        copies.append(copy_row)
+    shared = _shared_leaf_columns([_leaf(grid, header_count, groups[col][0]) for col in kept], copies)
+    body = []
+    for r, copy_row in enumerate(copies, start=header_count):
+        decided = []
+        for index, (origins, text) in enumerate(copy_row):
             digits = bool(re.search(r'\d', text))
             # Labels are never promoted merely because they look numeric.
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
             points = not label_column and bool(_POINTS.fullmatch(text))
-            proof = (_cell_proof(text, headers[index], header_labels[index], original[r][0], origins)
+            proof = (_cell_proof(text, headers[index], header_labels[index], original[r][0], origins,
+                                 header_proves=index not in shared)
                      if digits and not label_column else _NO_PROOF)
             role = 'text' if label_column else _numeric_role(
                 text, headers[index], original[r][0], origins, units, financial, table_percent, proof.role)

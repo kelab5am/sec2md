@@ -317,6 +317,17 @@ def test_percent_of_retained_loans_header_proves_its_plain_values():
     ]
 
 
+def test_percent_header_never_proves_values_that_share_its_leaf():
+    """Ruling 7: NFLX #13's '$ | 1,323,096 | 7 | %' under one '% Change' leaf. The header
+    cannot say which value it describes, so only the '%' proves the percent."""
+    table = prepared('<tr><th>Item</th><th colspan="4">% Change</th></tr>'
+                     '<tr><td>Revenue</td><td>$</td><td>1,323,096</td><td>7</td><td>%</td></tr>')
+    assert table.headers == ('Item', '% Change', '% Change', '% Change', '% Change')
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('$'),
+                                 (Decimal('1323096'), '#,##0', '1,323,096', None),
+                                 (Decimal('0.07'), '0%', '7 %', None), (None, '@', '', None)]]
+
+
 def test_percent_row_label_proves_its_plain_value():
     table = prepared(heading('2025') + sec_row('Net revenue', '$ 1,000') + sec_row('% of net revenue', '26'))
     assert cell_rows(table) == [
