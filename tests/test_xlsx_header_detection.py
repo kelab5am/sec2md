@@ -6,6 +6,8 @@ cells beneath it, as in the evidence filings.
 
 import hashlib
 import inspect
+import itertools
+import re
 from decimal import Decimal
 
 import pytest
@@ -430,9 +432,11 @@ def jpm_block(caption, interest_rate, total):
             + money('Interest rate', *interest_rate) + money('Total', *total))
 
 
-JPM_LAYOUT = ('<table>' + jpm_block('Year ended December 31, 2023 (in millions)', ('(1,839)', '274'), ('(1,775)', '483'))
-              + jpm_block('Year ended December 31, 2022 (in millions)', ('(153)', '(7,131)'), ('(420)', '(7,473)'))
-              + '</table>')
+def jpm_layout(period):
+    # period: 'Year ended', or 'As of or for the year ended' (a caption _caption_label accepts).
+    return ('<table>' + jpm_block(f'{period} December 31, 2023 (in millions)', ('(1,839)', '274'), ('(1,775)', '483'))
+            + jpm_block(f'{period} December 31, 2022 (in millions)', ('(153)', '(7,131)'), ('(420)', '(7,473)'))
+            + '</table>')
 
 
 @pytest.mark.parametrize('first_period, source', [
@@ -452,10 +456,11 @@ JPM_LAYOUT = ('<table>' + jpm_block('Year ended December 31, 2023 (in millions)'
                             + EQUITY_HEADINGS)),
     (FIRST_CAPTION, stacked('<tr><td>Three months ended March 31, 2025</td><td colspan="5"></td><td>*</td></tr>'
                             + EQUITY_HEADINGS)),
-    ('Year ended December 31, 2023', JPM_LAYOUT),
+    ('Year ended December 31, 2023', jpm_layout('Year ended')),
+    ('As of or for the year ended December 31, 2023', jpm_layout('As of or for the year ended')),
 ], ids=['caption-row', 'caption-beside-headings', 'two-years', 'footnoted', 'label-column', 'letter-footnote',
         'unaudited-beside-headings', 'colon-label-column', 'thirteen-weeks', 'period-from-through', 'as-restated',
-        'footnote-own-cell', 'star-own-cell-label-column', 'jpm-unit-captions'])
+        'footnote-own-cell', 'star-own-cell-label-column', 'jpm-unit-captions', 'jpm-as-of-or-for-captions'])
 def test_guard_stacked_period_blocks(first_period, source, monkeypatch):
     # D1: the extended header would put the second block's amounts under the first block's period.
     table = prepared(source)
@@ -538,11 +543,54 @@ def test_guard_cost_on_repeated_section_label(monkeypatch):
     ('Thirteen Weeks Ended May 3, 2025', True), ('Period from January 1, 2025 through March 31, 2025', True),
     ('12/31/2024', True), ('2024 (a)', True), ('March 31, 2025 (Restated)', True),
     ('Year ended December 31, 2022 (in millions)', True),
+    ('As of or for the year ended December 31, 2022 (in millions)', True),
     ('Balance as of December 31, 2024', False), ('2024 vs 2023 % change', False), ('Common Stock', False),
     ('Fiscal Year', False), ('Market 10', False),
     ('Cash paid for income taxes for the years ended December 31,', False)])
 def test_period_text(text, expected):
     assert xlsx_tables._period_text(text) is expected
+
+
+# Caption labels (spec definition): a unit declaration, a parenthesised scale, 'As of' / 'As at', or a period
+# caption optionally preceded by 'As of', 'As at', 'As of or for the' or 'For the' and optionally followed by a
+# parenthesised scale.
+CAPTION_LABELS = [
+    'December 31,', 'December 31, (in millions)', 'December 31, 2024', 'Dec. 31, 2024', 'Sept. 30, 2024',
+    'As of December 31, 2024', 'As at December 31, 2024', 'As of December 31,', 'For the year ended December 31, 2024',
+    'As of or for the year ended December 31,', 'As of or for the year ended December 31, 2024',
+    'As of or for the three months ended March 31, 2025 (in millions)', 'As of or for the quarters ended,',
+    'Three months ended March 31,', 'Six Months Ended', 'Nine months ended September 30, 2025',
+    'Twelve Months Ended June 30, 2025', 'Fiscal years ended January 31,', 'Fiscal Year Ended', 'Years ended',
+    'Year ended December 31, 2023 (in millions)', 'Quarter ended June 30, 2025', 'Quarters ended,',
+    'For the years ended December 31, 2024, (dollars in millions)',
+    'Year Ended December 31, 2024 (Amounts in thousands, except per share data)',
+    '(in millions)', '(Dollars in millions)', 'In thousands', 'As of', 'As at',
+]
+NAMES_A_PERIOD = re.compile(r'(?:19|20)\d{2}|\bended\b'
+                            r'|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.? \d{1,2}\b', re.I)
+
+
+def caption_label_enumeration():
+    # Every combination of the caption-label grammar's parts (final review probe).
+    prefixes = ['', 'As of ', 'As at ', 'As of or for the ', 'For the ']
+    cores = ['Three months ended', 'Six Month Ended', 'Fiscal Year Ended', 'Years ended', 'Quarter ended',
+             'Quarters ended,', '']
+    dates = ['', ' December 31,', ' December 31, 2024', ' Dec. 31, 2024', ' Sept. 30, 2024', ' Sept 30']
+    scales = ['', ' (in millions)', ', (dollars in millions)', ' (Amounts in thousands, except per share data)',
+              ' (in millions, except ratios)']
+    for prefix, core, date, scale in itertools.product(prefixes, cores, dates, scales):
+        if core or date:
+            yield (prefix + core + date).strip() + scale if core else prefix + date.strip() + scale
+
+
+def test_caption_labels_naming_a_period_are_period_text():
+    # Final review: a caption label can head an extended header, so the same caption repeated in the body must
+    # be period text, or the guard misses the second block ('As of or for the year ended ...').
+    assert [text for text in CAPTION_LABELS if not xlsx_tables._caption_label(text)] == []
+    labels = CAPTION_LABELS + [text for text in caption_label_enumeration() if xlsx_tables._caption_label(text)]
+    naming = [text for text in labels if NAMES_A_PERIOD.search(text)]
+    assert len(naming) > 1000
+    assert [text for text in naming if not xlsx_tables._period_text(text)] == []
 
 
 # --- Rule 3: identifier columns -------------------------------------------------

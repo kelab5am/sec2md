@@ -473,8 +473,10 @@ _DATE_WORDS = re.compile(r'\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?
 _NUMERIC_DATE = re.compile(r'\b\d{1,2}/\d{1,2}/(?:\d{4}|\d{2})\b')
 _WEEK_COUNT = re.compile(r'\b(?:\d{1,2}|thirteen|twenty[- ]six|thirty[- ]nine|fifty[- ]two|fifty[- ]three)'
                          r'[- ]weeks?\b', re.I)
+# Every caption label that names a period is period text: 'or' covers
+# 'As of or for the year ended …', which _CAPTION_PERIOD accepts.
 _PERIOD_VOCABULARY = re.compile(r'\b(?:three|six|nine|twelve|fiscal|months?|years?|quarters?|weeks?|periods?'
-                                r'|ended|ending|as|of|at|for|the|and|from|through|to)\b|[,.\-–—]', re.I)
+                                r'|ended|ending|as|of|at|for|the|and|or|from|through|to)\b|[,.\-–—]', re.I)
 
 
 def _row_origins(row):
