@@ -2,6 +2,25 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- XLSX export reads more header rows, so statement and note tables export as
+  numbers under period headers instead of as source text. A header now extends
+  through rows such as a bare `December 31,` over the years, `% change` columns,
+  footnoted years (`2023 (2)`) and labelled heading rows (`Description`,
+  `Pricing Category`), but only with span evidence: the row directly above the
+  data must have a heading wider than an amount beneath it. Rows that look like
+  data, a heading across two parent periods and labelled rows of year-shaped
+  amounts keep today's output or fall back to source text. When a body row below
+  the header holds a period caption and no amounts, as in stacked 10-Q equity
+  statements, the table keeps today's header, so no number lands under another
+  block's period. Identifier columns are judged per header part, so
+  `Number of Shares` and `Year ended March 31, — 2023 — RMB` hold numbers while
+  `CUSIP as of December 31, 2024` and `December 31, 2024 — Notes` stay text.
+  `_header_count`, Markdown output, strict and the table completeness check are
+  unchanged. On the RCQ vault's 42 META, NVDA and RDDT filings, fallback tables
+  fall from 852 to 102, no number that converted before changes, and every number
+  in the balance sheets, income statements and cash flow statements equals the
+  inline XBRL fact in its own source cell, with that fact's period in its column
+  header (`docs/superpowers/audits/2026-10-11-xlsx-header-detection/`).
 - Merging columns no longer discards source values, and each value is put under the
   header its source column carries. Table layout changes wherever that needed it;
   code that reads Markdown tables by column position should be re-checked.
