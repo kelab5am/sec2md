@@ -16,7 +16,7 @@ Facts for the next XLSX spec ("Spec A"). Gathered on 2026-10-12, read-only, from
   - The 24 tables that differ are exhibit, signature and text tables. They differ because the JSON drops `is_header` (TH) and numeric markers. No percent or identifier finding below depends on them: part D reads new6's own headers.
 - **HTML:** the source filings were read with regexes, without the sec2md parser. This read covered caption wordings and the `ix:nonFraction` attributes `scale`, `unitRef` and `format`.
 - **Nothing was exported.** No corpus run was made, and no checkout was changed.
-- **Scripts** are in `scripts/` beside this file. They were run from a session scratchpad, so their paths need adjusting before a rerun. Their raw JSON outputs were not kept. The scripts:
+- **Scripts** are in `fact-pack-scripts/` beside this file. They were run from a session scratchpad, so their paths need adjusting before a rerun. Their raw JSON outputs were not kept. The scripts:
   - `classify.py` produces `cls-new6.json` and `cls-base.json`.
   - `partb.py` produces `partb.txt` and `split.json`.
   - `recon.py` produces `recon.json`.
