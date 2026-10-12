@@ -139,6 +139,16 @@ row; footnote-only cells do not count as data; month names need a word boundary
 (`Market 10` was period text). A label that merely contains a period phrase
 stays excluded, so primary-statement section labels do not trigger the guard.
 
+**Audit review of revision 6** (Opus, verifying the acceptance record). Gates 1,
+2, 3 and 5 reproduced exactly. One claim was false: JPM 10-K #159, #161 and #241
+(new on the branch; #161 and #241 `exported` with no issues) still stack a
+second period block, with both captions in the label column
+(`Year ended December 31, 2023 (in millions)` heading the label column, then a
+body row `Year ended December 31, 2022 (in millions) | <column headings>`); 63
+XBRL facts disagree with the label column's period. The `(in millions)` suffix
+kept the caption from being period text. Reproduced and accepted: a
+parenthesised unit caption is removed before the period-text test.
+
 The other filings' lost cells were also classified (audit README): 41 fixes and 52
 regressions. The regressions are TSM #105 (I1, fixed by the guard), NTRA #8
 (`Less Than` / `1 Year`), TSM #150–#152 (`Other Changes (Note)`) and TSM #19/#20
@@ -249,7 +259,10 @@ Three approaches were considered:
 - **Period text:** text made only of period vocabulary that names a period.
   Remove footnote markers; the parenthesised qualifiers `(unaudited)`,
   `(audited)`, `(restated)`, `(as restated)`, `(as adjusted)`, `(as reported)`
-  and `(as previously reported)`; and a trailing `:`. Then remove dates
+  and `(as previously reported)`; a parenthesised unit caption (`(in millions)`,
+  `(dollars in millions)`, `(in millions, except per share data)`: a full match
+  of `_UNIT_DECLARATION` or the scale caption in parentheses); and a trailing
+  `:`. Then remove dates
   (`<month> <day>`, the month name starting at a word boundary), numeric dates
   (`<m>/<d>/<yy or yyyy>`), four-digit years (`(?:19|20)\d{2}`), week counts
   (`13 weeks`, `thirteen weeks`, `twenty-six weeks`, `thirty-nine weeks`,
@@ -265,7 +278,8 @@ Three approaches were considered:
   `Three Months Ended March 31, 2025 (Unaudited)`,
   `Three months ended March 31, 2025:`, `Thirteen Weeks Ended May 3, 2025`,
   `Period from January 1, 2025 through March 31, 2025`, `12/31/2024`,
-  `2024 (a)`, `March 31, 2025 (Restated)`. Not period text:
+  `2024 (a)`, `March 31, 2025 (Restated)`,
+  `Year ended December 31, 2022 (in millions)`. Not period text:
   `Balance as of December 31, 2024`, `2024 vs 2023 % change`, `Common Stock`,
   `Fiscal Year`, `Market 10`,
   `Cash paid for income taxes for the years ended December 31,`.
@@ -653,7 +667,10 @@ equality with it.
      March 31, 2025`; `Three months ended March 31, 2025, as restated` as a
      caption row (not period text; caught by the period phrase in a heading);
      a caption row with the footnote `(1)` in its own cell; a label-column
-     caption with `*` in its own cell.
+     caption with `*` in its own cell; the JPM layout, where the label column's
+     header cell is `Year ended December 31, 2023 (in millions)` and the second
+     block starts with a row `Year ended December 31, 2022 (in millions) |
+     <column headings>`.
 12g. Period-row guard, stranded rows (I1): `December 31,` (colspan 4) over a
      1-column `2024 | 2023` row over `$`/amount pairs; an unlabelled
      `December 31, 2023 | December 31, 2024` row under `Measurement Date`; and

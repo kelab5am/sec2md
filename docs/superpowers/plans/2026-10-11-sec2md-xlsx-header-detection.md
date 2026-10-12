@@ -946,6 +946,13 @@ git commit -m "docs: acceptance record for XLSX header detection"
   - Mutation check (main): three more mutants, each caught: the heading period-phrase clause removed (the `, as restated` variant fails); footnote-only cells counted as data (the separate `(1)` cell variant fails); the period phrase allowed in the label (the supplemental label test fails).
   - Commit the branch change as `fix: widen the XLSX period-row guard` and the mutants on main as `docs: mutation check covers the widened period-row guard`.
 
+- [ ] **Step 8: Fix round from the audit review** (spec revision 6, "Audit review of revision 6"; Definition "Period text": parenthesised unit captions removed).
+  - Behaviour: `_period_text` also removes a parenthesised unit caption (a full match of `_UNIT_DECLARATION` or `_SCALE_CAPTION` in parentheses) before the vocabulary test.
+  - Tests: one more `test_guard_stacked_period_blocks` variant, the JPM layout (14 in all), and one more `test_period_text` case, `Year ended December 31, 2022 (in millions)` (22 in all).
+  - RED: `2 failed, 125 passed`. GREEN: `127 passed`. Full suite: `1 failed, 2103 passed, 14 deselected`.
+  - Mutation check (main): one more mutant, unit-caption removal dropped, caught by the JPM variant.
+  - Commits: branch `fix: XLSX period-row guard reads captions with a unit suffix`; main `docs: mutation check covers unit-suffixed period captions`.
+
 ---
 
 ### Task 6: All-table XBRL period check (spec Acceptance 3b)
@@ -980,12 +987,13 @@ git commit -m "docs: acceptance record for XLSX header detection"
   5. Others (Acceptance 5): reclassify only what changed since Task 3; TSM #105 should no longer be a regression.
 - [ ] **Step 4: Update the audit README** with a "Revision 6" section: the rerun commands, the new group table, primary-statement totals, all-facts totals (base vs new6), the guard-fired table list, the gate results and the remaining regressions needing the user's acceptance. Keep the revision 5 record above it.
 - [ ] **Step 5: Commit (main):** `README.md`, `compare.md`, `statements.md`, `all-facts.md`, message `docs: acceptance record for XLSX header detection revision 6`.
+- [ ] **Step 6: Rerun after Task 5 Step 8.** Re-export the branch into `new6`, rerun Steps 2–4, and add gate 6: a structural scan for stacked period blocks (a body row whose label or headings carry period text or a period phrase below an exported header, including the label column's header) finds no table on `new6` that is not also on `base`; JPM #159, #161 and #241 equal `base`. Correct the audit review's count findings in README.md (13 of 14 new yearless tables fall back on `main`; the existing 14 match on yearless cells only; 63 and 11, adding SPCX #51; the NVDA percentage-point cells). Commit on main as `docs: acceptance record for XLSX header detection revision 6, after the audit review`. Task 4's fallback figure comes from this rerun.
 
 ---
 
 ### Task 4: CHANGELOG, usage doc and handoff
 
-Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2101 passed`, and `git log --oneline main..HEAD` shows five commits (Tasks 1, 2, 5, the Task 5 fix round, 4).
+Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2103 passed`, and `git log --oneline main..HEAD` shows six commits (Tasks 1, 2, 5, the two Task 5 fix rounds, 4).
 
 **Files:**
 - Modify (branch): `CHANGELOG.md`, `docs/usage/xlsx-export.md`
