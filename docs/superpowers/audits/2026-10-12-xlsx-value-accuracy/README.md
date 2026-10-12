@@ -16,7 +16,7 @@ This records the acceptance run for:
 
 The decisions this record judges by:
 - the spec's Rule P and Rule I;
-- the rulings and user decisions in the plan's ledger (`.superpowers/sdd/2026-10-12-sec2md-xlsx-value-accuracy/progress.md`), Rulings 3–18a and the user decisions of 2026-10-13 (footnote marks and the TSM split-`%` fix).
+- the rulings and user decisions in the plan's ledger (`.superpowers/sdd/2026-10-12-sec2md-xlsx-value-accuracy/progress.md`), Rulings 3–19 and the user decisions of 2026-10-13 (footnote marks and the TSM split-`%` fix).
 
 ## First run on `7484006`: blocked, then fixed
 
@@ -47,54 +47,64 @@ Every gate passes on `732544d`.
 - **Primary statements (Acceptance 4).** The 126 vault primary statements export, with the same verified fact counts (META 3,322, NVDA 2,662, RDDT 2,056) and 0 failures. The whole `primary_statements.py` result is identical to the baseline's.
 - **Other changed cells (Acceptance 5).** Every changed cell outside the manifest is classified: 1,751 cells, plus 164 tables whose status or headers changed. **0 numbers are wrong.**
   - Each of the 12 numbers whose value changed from one number to another was checked individually. Each is a rate proven by its own inline XBRL percent fact.
+  - Every one of the 948 numbers in changed cells carries a named proof and sits under its own heading.
+  - No cell's header path or row label changed. Each of the 54 header changes only removes a `%` or `pts` column joined into its neighbour.
 - **Percent facts (Acceptance 6).** Every cell proven by a percent fact (789) equals the fact / 100 with its sign.
 - **Coverage cost (Acceptance 7):** 1,127 numbers became flagged text, in 74 tables. None is in a primary statement.
 - **Header-detection checks (Acceptance 8).** `all_facts.py` and the stacked-block scans find nothing new.
 
 ## How to rerun
 
-From the checkout root (the export JSONs name their filings by paths relative to it). Every python run is low priority; the export uses 3 workers.
+Run from the checkout root (the export JSONs name their filings by paths relative to it), in PowerShell. Every python run goes through `low`, which runs it at Idle priority. `start /b /wait` alone always returns 0, so `& call exit %^errorlevel%` passes the script's own exit status back. The export uses 3 workers; run only one export at a time.
 
-```bash
-cd /c/Users/einstein/kelab5am/sec2md
-PY=.worktrees/xlsx-export/.venv/Scripts/python.exe   # cmd: start "" /low /b /wait <PY> ...
-H=docs/superpowers/audits/2026-10-11-xlsx-header-detection
-A=docs/superpowers/audits/2026-10-12-xlsx-value-accuracy
-O=outputs/xlsx-value-accuracy
-SRC=.worktrees/xlsx-value-accuracy/src                 # the branch at 732544d
-$PY -I $H/export_tables.py --src $SRC --out $O/new --workers 3 $(cat $H/filings.txt)
-$PY -I $A/dispositions.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/dispositions.json
-$PY -I $H/primary_statements.py $O/new --report $O/statements-new.md --details $O/statements-new.json --workers 3
-$PY -I $H/primary_statements.py $O/base --report $O/statements-base.md --details $O/statements-base.json --workers 3
-$PY -I $H/all_facts.py $O/base --report $O/all-facts-base.md --details $O/all-facts-base.json --workers 3
-$PY -I $H/all_facts.py $O/new --report $O/all-facts-new.md --details $O/all-facts-new.json --workers 3
-$PY -I $A/changes.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/changes.json \
-    --all-facts $O/all-facts-base.json $O/all-facts-new.json \
-    --stacked-scan outputs/xlsx-header-detection/task-7/stacked_scan.py
+```powershell
+Set-Location C:\Users\einstein\kelab5am\sec2md
+$PY = '.worktrees\xlsx-export\.venv\Scripts\python.exe'
+function low { cmd /c "start `"`" /low /b /wait $PY $args & call exit %^errorlevel%" }
+$H = 'docs/superpowers/audits/2026-10-11-xlsx-header-detection'
+$A = 'docs/superpowers/audits/2026-10-12-xlsx-value-accuracy'
+$O = 'outputs/xlsx-value-accuracy'
+$SRC = '.worktrees/xlsx-value-accuracy/src'     # the branch at 732544d
+$F = (Get-Content $H/filings.txt) -join ' '   # the 60 filings, one argument string
+low -I $H/export_tables.py --src $SRC --out $O/new --workers 3 $F
+low -I $A/dispositions.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/dispositions.json > $O/dispositions.log
+low -I $H/primary_statements.py $O/base --report $O/statements-base.md --details $O/statements-base.json --workers 3
+low -I $H/primary_statements.py $O/new --report $O/statements-new.md --details $O/statements-new.json --workers 3
+low -I $H/all_facts.py $O/base --report $O/all-facts-base.md --details $O/all-facts-base.json --workers 3
+low -I $H/all_facts.py $O/new --report $O/all-facts-new.md --details $O/all-facts-new.json --workers 3
+low -I $A/changes.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/changes.json --statements $O/statements-base.json $O/statements-new.json --all-facts $O/all-facts-base.json $O/all-facts-new.json --stacked-scan $A/stacked_scan.py > $O/changes.log
 ```
 
 | Step | Duration |
 |---|---|
 | Export, 60 filings | 11m12s (04:33:05–04:44:17) |
-| `dispositions.py` | about 10 s |
+| `dispositions.py` | about 9 s |
 | `primary_statements.py`, each side | 0.6 s |
 | `all_facts.py`, each side | 0.6 s |
 | `changes.py` | about 8 s |
 
-Two runs of each script gave byte-identical output.
+Every command except the export was rerun as written above after fix round 1, with the `primary_statements.py` and `all_facts.py` printouts also redirected to logs. Both scripts exit 0, and two runs of each gave byte-identical output.
 
 Notes on the inputs:
-- **The stacked-block scan** is the header-detection audit's gate 6 script (`stacked_scan.py`, git-ignored with that audit's outputs). `changes.py` imports its `scan_a` and `scan_b` unchanged.
+- **The stacked-block scan.** [`stacked_scan.py`](stacked_scan.py) is a byte-identical copy (sha256 `563cc154…57808`) of the header-detection audit's gate 6 script, which lives in that audit's git-ignored `outputs/xlsx-header-detection/task-7/`. `changes.py` imports only its `scan_a` and `scan_b`, unchanged. Its `main()` writes into that audit's outputs, so do not run it.
 - **Outputs:** all outputs are in `outputs/xlsx-value-accuracy/` (git-ignored), with each script's printout in a `.log` beside its JSON.
 
 ### The two scripts
 
 **[`dispositions.py`](dispositions.py)** covers Acceptance 3 and 6.
-- **How it reads the rules.** It re-reads Rule P and Rule I from the spec and the ledger's rulings, against the export JSON. It does not use the branch's code, so any disagreement with the branch shows up as a failure.
-- **What it takes from the branch's `src`:**
-  - the patterns the spec calls today's (`_ROW_UNIT`, `_PERCENT`, `_PERCENT_UNIT`, `_FOOTNOTE_MARK`, `_UNIT_LINE`, `_VALUE`);
-  - the unchanged header-detection helpers (`_identifier_heading`, `_period_row`, `_period_text`);
-  - `convert_cell`, for the converter's own review reasons.
+- **How far it is independent of the branch.** It is not independent of the branch's code as a whole. What it writes again from the spec and the ledger's rulings are the value-accuracy decisions:
+  - proofs, conflicts and percent columns;
+  - the attachment rules and the safety net;
+  - the dispositions.
+
+  A disagreement with the branch on any of these shows up as a failure.
+- **What it takes from the branch.** It shares the following with the branch. A defect in any of them is outside what it can catch on its own.
+  - **From the branch's `src`:**
+    - the patterns the spec calls today's (`_ROW_UNIT`, `_PERCENT`, `_PERCENT_UNIT`, `_FOOTNOTE_MARK`, `_UNIT_LINE`, `_VALUE`);
+    - the header-detection helpers `_identifier_heading`, `_period_row` and `_period_text`, which the branch leaves unchanged;
+    - `convert_cell`, for the converter's own review reasons.
+  - **From the branch's export:** the headers, the joined copy text and `cell_sources`, which are the evidence it judges.
+- **What covers the shared parts.** `changes.py`'s axis gate compares every header path and row label with the baseline. The primary-statement and `all_facts.py` checks verify facts against the headers.
 - **What it does:**
   - **Locates each manifest entry.** It finds the copy cell whose `cell_sources` hold the entry's source coordinates. It asserts that coordinates are unique per table on both sides, and they are.
   - **Gathers the proofs.** For each entry it collects the evidence: own `%`, own `$`, percent fact, amount fact, percent header (withheld in shared leaves, Rulings 7, 10 and 11), percent row label, in-table table-wide caption, non-percent unit and conflicts.
@@ -106,7 +116,20 @@ Notes on the inputs:
 **[`changes.py`](changes.py)** covers Acceptance 5, 7 and 8.
 - **Matching cells.** It keys every copy cell by its value origin, as the manifest does, and lists each cell whose type, value, original, format or review reason differs from `base`, outside the manifest.
 - **Classes.** It classifies each changed cell by a stated rule (below) and checks the new cell against the expectation `dispositions.py` gives for it.
+- **Proof for every new number.** Every number in a changed cell must carry a named proof (`dispositions.named_proof`). The proofs are:
+  - own `%` or `$`;
+  - a percent or amount fact;
+  - a percent header or row label;
+  - a table-wide caption;
+  - a non-percent unit;
+  - under an identifier heading, the cell's own quantity proof.
+
+  A number without one fails. A base number that becomes text with no reason also fails.
 - **Headings.** It checks that every new number sits under its own heading: its copy column's header must be the header above its value origin's source column.
+- **Axes.** Every cell that exists on both sides, changed or not, must keep the baseline's copy-column header path and row label.
+  - Where a table's headers changed, the new headers must be the baseline's with removed columns only.
+  - A column may be removed only when every non-empty cell in it is a split-percent or points fragment (`%`, `)%`, `)`, `%)`, `pts`, `pt`, `points`) that now sits in a neighbour's copy cell.
+- **Statement tables.** Given `primary_statements.py`'s details for both sides, it requires the two to be identical. It also requires the tables they identify as primary statements to hold no differing cell, no status or header change and no axis change.
 - **Coverage cost.** It counts the coverage cost.
 - **Header-detection checks.** It compares the `all_facts.py` mismatches and the stacked-block scan hits of the two exports.
 
@@ -117,7 +140,7 @@ Notes on the inputs:
 | 1. Export | **Pass** | 60 JSONs, 3,702 tables. Run at Idle priority with 3 workers; no workers left over. |
 | 2. Dispositions (Acc. 3) | **Pass** | 0 of 4,048 entries without a valid disposition. `identifier_true`: 2,658 of 2,658 unchanged in value, type, format and reason. Split-`%` audit: 0 disagreements. |
 | 3. Primary statements (Acc. 4) | **Pass** | All 126 vault statements export (META 54, NVDA 42, RDDT 30). OK facts: META 3,322, NVDA 2,662, RDDT 2,056. Failures 0, arithmetic failures 0. `statements-new.json` is identical to `statements-base.json`. |
-| 4. Changed cells (Acc. 5) | **Pass** | 1,751 changed cells, all as the spec gives. 0 wrong numbers; 0 new numbers outside their own heading. |
+| 4. Changed cells (Acc. 5) | **Pass** | 1,751 changed cells, all as the spec gives. 0 wrong numbers. 948 numbers in changed cells, 0 without a named proof and 0 outside their own heading. Axes: 0 cells whose header path or row label changed. 54 tables whose headers changed, all only by removed columns. Statement tables: 167 (126 vault), with 0 differing cells, 0 table changes and 0 axis changes. |
 | 5. Percent facts (Acc. 6) | **Pass** | 789 numbers equal the fact / 100 with its sign; 0 differ. |
 | 6. Coverage and header checks (Acc. 7, 8) | **Pass** | Coverage cost: 1,127 cells in 74 tables, counted per group and table below. `all_facts.py`: 104 mismatches on both sides, 0 new. Stacked-block scan A: 1 and 1 hits, 0 new. Scan B: 9 and 9 hits, 0 new. |
 
@@ -164,9 +187,23 @@ The attachment pass reaches 2,673 markers.
 |---|---|---|
 | Joined on `main` too | 2,323 | Column grouping already joined them in the baseline. Unchanged. |
 | Attached | 198 | The rules allow it: adjacent, heading the value's or spanning it, and marker-only. META 73, RDDT 4, Others 121. |
-| Joined by column grouping under one leaf | 144 | The attachment rules refuse these markers, because another row's value spans the marker's column. But value and marker sit under the same leaf heading, and `_column_groups` merged that leaf's columns, as `main` does whenever every row converts. Spec P4 now lets `(x) %` rows pass that test. META 84, NVDA 46, RDDT 14. Example: META 10-K FY2025 #5 `Operating margin 52 \| %` under `2025`, where `$ 198,759` spans the same columns. |
+| Joined by column grouping under one leaf | 144 | The attachment rules refuse these markers, because another row's value spans the marker's column. But value and marker sit under the same leaf heading, and `_column_groups` merged that leaf's columns, as `main` does whenever every row converts. Spec P4 now lets `(x) %` rows pass that test. META 84, NVDA 46, RDDT 14. Example: META 10-K FY2025 #5 `Operating margin 52 \| %` under `2025`, where `$ 198,759` spans the same columns. See the disclosure below. |
 | Refused | 8 | Every one fails the marker-only rule, and every value is P4 text. They are BAC #4 (3), CRDO #25, #26, KO #11 (2) and KO #54. |
 | Branch and rules disagree | **0** | |
+
+**Disclosure: the grouping outcome was added after the audit failed.** The first form of the split-`%` audit had no such outcome. On this run it reported these 144 markers as "joined against the rules", so the gate failed.
+
+- **Why the outcome was added.** I investigated and found these joins are not the attachment pass at all. They come from `_column_groups`' same-leaf merge, the pre-existing join mechanism the spec keeps ("`_column_groups` refuses to merge them as today"). That merge now succeeds because spec P4 lets `(x) %` rows convert cleanly. I then added the outcome.
+- **Review and Ruling 19.** The task review flagged that this change after a failure was undisclosed. The controller's Ruling 19 keeps the outcome, on two conditions:
+  - it is tightened to its exact conditions;
+  - it is disclosed, here and in the `dispositions.py` docstring.
+- **The exact conditions.** A marker keeps this outcome only when all of these hold; otherwise it is "JOINED AGAINST THE RULES" and the gate fails:
+  - the value and the marker share a leaf heading;
+  - the value is the only digit origin in its row under that leaf;
+  - the joined token is one complete number ending in its own `%`;
+  - the cell is a valid proven percent by its own `%`.
+- **Independent verification.** The reviewer verified all 144 independently. `dispositions.py` now prints the checks: 144 have one digit origin, 144 have their own `%` and 144 are valid.
+- **Mutation test.** Removing the `%` from the META FY2025 #5 `52 %` cell in a scratch copy makes the audit report 1 marker "JOINED AGAINST THE RULES", and the gate fails.
 
 ### Percent facts (Acceptance 6)
 
@@ -190,7 +227,7 @@ There are 869 digit cells whose only fact is pure, at scale -2, in a plain forma
 | RDDT | 30 | 30 | 2,228 | **2,056** | 0 | 0 |
 | Others | 54 | 29 | 3,242 | 2,099 | 978, as on `main` | 0 |
 
-`statements-new.json` and `statements-base.json` are identical, and so are the two reports. The 167 tables identified as primary statements (126 vault and 41 others) hold no changed cell, no status or header change and no manifest entry.
+`statements-new.json` and `statements-base.json` are identical, and so are the two reports. `changes.py`'s statement gate (`--statements`) prints: 167 statement tables (126 vault); details identical; 0 differing cells in them (manifest entries included); 0 status or header changes; 0 axis changes; 0 manifest entries in them.
 
 ## Changed cells outside the manifest (Acceptance 5)
 
@@ -277,7 +314,11 @@ There are 1,751 changed cells outside the manifest. Separately, 164 tables chang
   - `needs_review` → exported: 70 (negative percents now convert);
   - `source_text_only` → exported or `needs_review`: 20 (the META tables above);
   - header changes only, no status change: 19.
-- **Header changes in tables exported on both sides (54):** every one only removes a duplicate column. A `%` marker column that repeated its value column's header has been joined into the value's column.
+- **Header changes in tables exported on both sides (54).** `changes.py`'s removed-columns gate prints: 54 tables, all explained by removed columns only, with 71 columns removed.
+  - Each removed column repeats the header on its left.
+  - Their contents are `%` in all 71 columns and `pts` in 8 of them.
+  - Each such cell now sits in its neighbour's copy cell.
+  - No other cell's header path or row label changed (axis gate: 0).
 
 ## Coverage cost (Acceptance 7)
 
@@ -363,6 +404,31 @@ There are also coverage gains:
 - **TSM 20-F #8 (the first run's blocker).**
   - Every year now converts: `Net revenue` → 1.000 in 2022, 2023 and 2024, `Cost of revenue (40.4 | )%` → −0.404, and `Gross profit 59.6 | %` → 0.596.
   - The emptied marker columns keep their headers (`For the year ended December 31,`) with no text.
+
+## Fix round 1 (task review of `edbedc8`)
+
+The review confirmed every count and found no wrong number and no change in any statement table. It found gaps in the checks and the record. All were fixed on the existing outputs; there was no new export.
+
+1. **Unproven new numbers could pass.** `changes.py` accepted a text-to-number or new-only number with no proof as "D, today's behaviour". The reviewer's mutation, GOOGL #56 EMEA `73,943` made a plain number, passed.
+   - **Fix:** every number in a changed cell must now carry a named proof, and a base number may not become unflagged text.
+   - **Result:** 948 numbers, 0 without a named proof.
+2. **The grouping outcome was undisclosed (Ruling 19).** It is now tightened and disclosed; see "Split `%` markers".
+3. **Headers and row labels were not compared.**
+   - **Fix:** `changes.py` now has an axis gate (header path and row label of every cell keyed on both sides) and a removed-columns gate. It also has a statement-table gate, which produces the "167 statement tables untouched" figure, and it produces the "54 header changes only remove columns" figure.
+   - **Result:** 0, 54 of 54 and pass.
+4. **The README overstated `dispositions.py`'s independence.** It now states exactly what the script shares with the branch.
+5. **Unflagged text could pass for a manifest cell.** `dispositions.py` would have accepted a percent row, or a misread amount, under an identifier heading as unflagged text (I2's "no reason" case). That is now invalid for every manifest digit cell, per Acceptance 3. No entry took that path before or after.
+6. **The rerun commands lacked the low-priority wrapper and depended on a git-ignored file.**
+   - **Fix:** the commands now carry the wrapper, and the stacked-block scan is committed as a byte-identical copy.
+   - **A side finding.** The wrapper used for the exports (Task 1's and this one) was `start /b /wait` without `call exit`, so their logged `exit: 0` carries no information. The evidence for both exports is 60 JSON files, 60 log lines and 3,702 tables on each side.
+
+**Mutation tests.** These ran on scratch copies of `outputs/xlsx-value-accuracy/new`, never on the real outputs, with the commands above.
+
+| Test | Mutation | Result |
+|---|---|---|
+| Reviewer 1 | GOOGL 10-Q #56 EMEA `73,943` (text on both sides) becomes the number 73943 | `changes.py` exits 1: `UNPROVEN … '73,943' -> 73943 [no proof outside a percent column]`; gates `changes` and `unproven_numbers` FAIL. |
+| Reviewer 2 | AMZN 10-Q #8 (the balance sheet) column 1 relabelled `December 31, 2023` | `changes.py` exits 1. Axes: 25 cells moved. Removed columns: AMZN #8 not explained. Statements: 1 header change and 25 axis changes. `all_facts.py`: 26 new mismatches. Gates `axes`, `removed_columns`, `statements` and `all_facts` FAIL. |
+| Ruling 19 | META 10-K FY2025 #5 `52 %` loses its own `%` | `dispositions.py` exits 1: 1 marker "JOINED AGAINST THE RULES" (own % 143 of 144, valid 143 of 144). |
 
 ## Concerns (none blocks the merge)
 

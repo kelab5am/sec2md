@@ -5,12 +5,18 @@
 
 Run it from the checkout root: each export JSON names its filing by a path relative to it.
 BASE_DIR is main's export (the manifest's baseline) and NEW_DIR the branch's, both written by
-export_tables.py of the header-detection audit. --src is the branch's src: it supplies only
-the patterns the spec names as today's (_ROW_UNIT, _PERCENT, _PERCENT_UNIT, _FOOTNOTE_MARK,
-_UNIT_LINE, _VALUE), the header test of Rule 3 (_identifier_heading, unchanged by the branch)
-and convert_cell, whose own review reasons the spec keeps. Every Rule P and Rule I decision
-below is written from the spec's text and the rulings in the plan's ledger, not taken from
-the branch's code, so a disagreement with the branch shows up as an invalid disposition.
+export_tables.py of the header-detection audit. --src is the branch's src. From it the script
+imports the patterns the spec names as today's (_ROW_UNIT, _PERCENT, _PERCENT_UNIT,
+_FOOTNOTE_MARK, _UNIT_LINE, _VALUE), the header-detection helpers _identifier_heading,
+_period_row and _period_text (Rule 3 and the period-row guard, which the branch leaves
+unchanged), and convert_cell, whose own review reasons the spec keeps. It also reads the
+branch's own output: NEW_DIR's headers, joined copy text and cell_sources are the evidence it
+judges. What it does not take from the branch are the value-accuracy decisions: every Rule P
+and Rule I decision below (proofs, conflicts, percent columns, the attachment rules, the safety
+net, the dispositions) is written again from the spec and the ledger's rulings, so a
+disagreement with the branch's decisions shows up as a failure. A defect in a shared helper, the
+converter or the export's headers is outside what it can see; changes.py checks headers and row
+labels against the baseline.
 
 Locating an entry. The copy cell whose cell_sources hold (source_row, source_column), in the
 same filing and table ordinal. The script asserts that no source coordinate sits in two copy
@@ -66,8 +72,11 @@ Dispositions (spec Acceptance 3):
   (Rulings 4, 12), else 'Identifier heading over quantities; verify the column.' when another
   cell of its copy column proves a quantity, else 'Identifier heading over amount-formatted
   values; verify the column.' when the whole cell is a thousands-separated number or a number
-  in accounting parentheses that is not a footnote mark (user decision, 2026-10-13), else no
-  reason. A cell without digits must equal the baseline.
+  in accounting parentheses that is not a footnote mark (user decision, 2026-10-13). Spec I2
+  leaves any other such cell unflagged, but unflagged text is never a valid disposition for a
+  manifest digit cell, of any kind (Acceptance 3: no manifest cell may be unflagged text that
+  holds an amount); the same holds for a percent row under an identifier heading. A cell
+  without digits must equal the baseline.
 - identifier_true: the copy cell equals the baseline's in type, value, original, format and reason.
 
 Percent facts (spec Acceptance 6): every digit copy cell of NEW_DIR, in every table that is not
@@ -102,6 +111,8 @@ PERCENT_KINDS = ('percent_row_joined', 'percent_row_split')
 KINDS = (*PERCENT_KINDS, 'identifier_misread', 'identifier_true')
 FACT_FORMATS = {None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'}
 GROUPS = ('META', 'NVDA', 'RDDT', 'Others')
+# The dispositions that convert a cell on a named proof (expected_outcome names it).
+PROVEN = ('proven percent', 'proven not a percent', 'proven quantity')
 SPLIT_MARKERS = {'%', ')%'}
 CLOSING_FRAGMENTS = {')', '%)'}  # Ruling 18a
 # A source cell, with the attribute names the header-detection helpers read.
@@ -323,10 +334,14 @@ def audit_splits(base, new):
     In NEW_DIR the marker is joined when it sits in its value's copy cell. Outcomes:
     - 'joined on main too': the baseline copy cell already held both (column grouping, unchanged);
     - 'attached': the rules allow it and NEW_DIR joined it;
-    - 'joined by column grouping under one leaf': the rules refuse the attachment, but value and
-      marker sit under the same leaf heading and _column_groups merged that leaf's columns into
-      one copy column, as main does whenever every row of the span converts cleanly (spec P4 lets
-      '(x) %' rows pass that test); the value then has its own '%' (checked as any other cell);
+    - 'joined by column grouping under one leaf' (Ruling 19): the rules refuse the attachment, but
+      value and marker sit under the same leaf heading and _column_groups merged that leaf's
+      columns into one copy column, as main does whenever every row of the span converts cleanly
+      (spec P4 lets '(x) %' rows pass that test). It holds only when, in addition, the value is
+      the row's one digit origin under that leaf, the joined token is one complete number ending
+      in its own '%', and the cell is a valid proven percent by its own '%'; otherwise the
+      marker is 'JOINED AGAINST THE RULES'. This outcome was added after the first form of this
+      audit flagged these 144 joins (see the README);
     - 'refused': the rules forbid it and NEW_DIR did not join it; the value goes to the safety net;
     - 'JOINED AGAINST THE RULES' or 'REFUSED AGAINST THE RULES': the branch disagrees with the rules.
     Sets new.refused and returns one record per reached marker."""
@@ -363,7 +378,8 @@ def audit_splits(base, new):
                 outcome = 'attached'
             elif joined and leaf is not None and leaf == new.leaf(last):
                 # Not the attachment pass: _column_groups merged the one leaf heading's span, which
-                # spec P4 now lets a '(x) %' row pass (main's merge test refused it).
+                # spec P4 now lets a '(x) %' row pass (main's merge test refused it). Ruling 19's
+                # exact conditions are checked below, once every refusal is known.
                 outcome = 'joined by column grouping under one leaf'
             elif joined:
                 outcome = 'JOINED AGAINST THE RULES'
@@ -372,7 +388,25 @@ def audit_splits(base, new):
                 new.refused.add(v)
             records.append(dict(filing=new.filing, ordinal=new.ordinal, value=list(v), marker=list(m),
                                 value_text=value.text, marker_text=marker.text, rules=rules, outcome=outcome,
-                                copy=list(new.where[v]) if v in new.where else None))
+                                copy=list(new.where[v]) if v in new.where else None, leaf=leaf, row=r))
+    for record in records:
+        if record['outcome'] != 'joined by column grouping under one leaf':
+            continue
+        # Ruling 19: one digit origin in the row under that leaf (the value), the joined token is
+        # one complete number ending in its own '%', and the cell's disposition is valid.
+        leaf_cell = grid[record['leaf'][0]][record['leaf'][1]]
+        under = {c for c in grid[record['row']][leaf_cell.column:leaf_cell.column + leaf_cell.colspan]
+                 if c is not None and has_digit(c.text)}
+        cell = new.cell(*record['copy'])
+        token = cell['original'].strip()
+        disposition, expected, proofs = expected_outcome(new, *record['copy'])
+        checks = dict(one_digit_origin=len(under) == 1, own_percent=displayed(token) is not None and token.endswith('%'),
+                      valid=disposition == 'proven percent' and 'own %' in proofs and matches(cell, expected))
+        record['grouping_checks'] = checks
+        if not all(checks.values()):
+            record['outcome'] = 'JOINED AGAINST THE RULES'
+    for record in records:
+        record.pop('leaf'), record.pop('row')
     return records
 
 
@@ -488,9 +522,22 @@ def expected_outcome(table, ri, ci):
             return 'text: identifier over amount-formatted', dict(type='text', reasons={AMOUNT_FORMATTED}), []
         return 'text: identifier, no reason', dict(type='text', reasons={None}), []
     disposition, expected, proofs = rule_p(table, ci, e)
-    if disposition in ('proven not a percent', 'no proof outside a percent column') and e['d'] is not None:
+    if (disposition in ('proven not a percent', 'no proof outside a percent column') and e['quantity']
+            and M._identifier_heading(e['header'])):
+        # Spec I1: the cell proves a quantity itself (its fact, or its own '$').
+        disposition, proofs = 'proven quantity', e['not_percent'] or ['fact']
+    if disposition in ('proven not a percent', 'proven quantity', 'no proof outside a percent column') \
+            and e['d'] is not None:
         expected = dict(type='number', value=e['d'], format=expected_format(e['token'], False))
     return disposition, expected, proofs
+
+
+def named_proof(disposition, proofs):
+    """Whether a number converts on a named proof: own '%' or '$', a percent or amount fact, a
+    percent header or row label, a table-wide caption, a non-percent unit, or (under an
+    identifier heading) the cell's own quantity proof. A zero converted under spec P4's exception
+    and a number with no proof outside a percent column have none."""
+    return disposition in PROVEN and bool(proofs)
 
 
 def matches(cell, expected):
@@ -552,7 +599,10 @@ def check_entry(entry, base, new):
         else:
             disposition, reasons = 'text: identifier, no reason', {None}
         expected, proofs = dict(type='text', reasons=reasons), []
-        valid = matches(cell, expected)
+        # Spec Acceptance 3: no manifest cell may be unflagged text that holds an amount. Spec I2
+        # leaves a plain cell of a column without quantity evidence unflagged; for a manifest
+        # cell (a percent row or a misread amount) that is not a valid disposition.
+        valid = disposition != 'text: identifier, no reason' and matches(cell, expected)
     out.update(disposition=disposition, proofs=proofs, valid=valid,
                expected=None if expected is None else {k: (sorted(v, key=str) if isinstance(v, set) else str(v))
                                                        for k, v in expected.items()})
@@ -687,6 +737,10 @@ def main():
         print(f'  {outcome}: {n}')
     for k, n in sorted(collections.Counter((group(x['filing']), x['outcome']) for x in splits).items()):
         print(f'    {k[0]} {k[1]}: {n}')
+    grouped = [x for x in splits if 'grouping_checks' in x]
+    print(f'  same-leaf grouping joins checked against Ruling 19: {len(grouped)}; '
+          + ', '.join(f'{k} {sum(x["grouping_checks"][k] for x in grouped)}'
+                      for k in ('one_digit_origin', 'own_percent', 'valid')))
     refusals = collections.Counter(' + '.join(r for r, ok in x['rules'].items() if not ok)
                                    for x in splits if x['outcome'] == 'refused')
     print('  refused, by failed rule: ' + ', '.join(f'{k} {v}' for k, v in sorted(refusals.items())))

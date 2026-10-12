@@ -3,8 +3,9 @@
 
     python -I changes.py BASE_DIR NEW_DIR --manifest manifest.json --src <branch checkout>/src
                          [--details changes.json]
+                         [--statements BASE_STATEMENTS.json NEW_STATEMENTS.json]
                          [--all-facts BASE_ALL_FACTS.json NEW_ALL_FACTS.json]
-                         [--stacked-scan <header-detection outputs>/task-7/stacked_scan.py]
+                         [--stacked-scan stacked_scan.py]
 
 Run it from the checkout root (the export JSONs name their filings by paths relative to it).
 BASE_DIR is main's export and NEW_DIR the branch's (export_tables.py). --src is the branch's
@@ -26,6 +27,7 @@ Classes. Each changed cell gets the first class whose rule holds:
   neighbour's own disposition is checked where it is listed (manifest or changed cell).
 - number to flagged text: a base number, now text with a review reason. The reason must be the
   one the spec's rules give the cell (dispositions.rule_p, or Rule I under an identifier heading).
+- number to unflagged text: a base number, now text without a review reason. Never valid.
 - number rescaled: a base number, now a different number. It must be a proven percent equal to
   D / 100 (D, the displayed number) with the proof named. Each is listed.
 - text to number: a base text cell, now a number. It must be D / 100 with a percent proof, or D
@@ -33,9 +35,24 @@ Classes. Each changed cell gets the first class whose rule holds:
 - format or reason only: the same type and value, with another format or reason. A number's
   format must be the one its token and proof give; a reason must be the spec's.
 - other: anything else, listed in full.
-Every new number must also sit under its own heading: its copy column's header must be the
-header above its value origin's source column (header_ok). A new number that fails its class's
-expectation or this check is not as the spec gives: the gate fails.
+Every number in a changed cell must carry a named proof (dispositions.named_proof): own '%' or
+'$', a percent or amount fact, a percent header or row label, a table-wide caption, a non-percent
+unit, or, under an identifier heading, the cell's own quantity proof. A number with no proof
+outside a percent column, or a zero converted under spec P4's exception, has none; it is listed
+as an unproven new number and fails the gate. Every new number must also sit under its own
+heading: its copy column's header must be the header above its value origin's source column
+(header_ok). A cell that fails any of these is not as the spec gives: the gate fails.
+
+Axes. Every cell keyed on both sides, changed or not, keeps its copy column's header path and its
+row label: both must equal the baseline's. Where a table's headers changed, the new headers must
+be the baseline's with removed columns only, and a column may be removed only when every
+non-empty cell in it is a split-percent or points fragment ('%', ')%', ')', '%)', 'pts', 'pt',
+'points') whose origin now sits in a copy cell together with an origin of another column (it was
+joined to a neighbour).
+
+Statement tables (--statements, primary_statements.py's --details JSON on each export): the two
+must be identical, and the tables they identify as primary statements must hold no differing
+cell (manifest entries included), no status or header change and no axis change.
 
 Coverage cost (Acceptance 7): every cell, manifest entries included, that is a base number and a
 new text cell with a review reason, counted per group, per manifest kind (or 'outside the
@@ -44,9 +61,10 @@ manifest') and per table.
 Header-detection checks (Acceptance 8):
 - --all-facts: all_facts.py's --details JSON on each export. Every mismatch on NEW_DIR must be a
   mismatch on BASE_DIR (filing, ordinal and source cell).
-- --stacked-scan: the gate 6 scans of the header-detection audit (scan_a and scan_b, imported
-  unchanged from the given file) on both exports. Every hit table on NEW_DIR must be a hit on
-  BASE_DIR.
+- --stacked-scan: the gate 6 scans of the header-detection audit. stacked_scan.py beside this
+  script is a byte-identical copy of that audit's outputs/xlsx-header-detection/task-7/
+  stacked_scan.py; only its scan_a and scan_b are imported, unchanged (its main() writes to that
+  audit's outputs and is not used). Every hit table on NEW_DIR must be a hit on BASE_DIR.
 
 Exit status 1 when any gate fails.
 """
@@ -61,6 +79,7 @@ from decimal import Decimal
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MARKERS = {'$', '(', ')', '%', ')%'}
+REMOVABLE = {'%', ')%', ')', '%)', 'pts', 'pt', 'points'}
 GROUPS = ('META', 'NVDA', 'RDDT', 'Others')
 FIELDS = ('type', 'value', 'original', 'format', 'reason')
 
@@ -110,6 +129,13 @@ def header_ok(table, ri, ci):
     return not origins or own == {header} or (own == {''} and header.startswith('Column '))
 
 
+def check_number(item, new, n, disposition, proofs):
+    """The checks every number in a changed cell must pass: a named proof and its own heading."""
+    item['proof_named'] = D.named_proof(disposition, proofs)
+    item['header_ok'] = header_ok(new, *n)
+    return item['proof_named'] and item['header_ok']
+
+
 def classify(name, ordinal, key, base, new, b, n):
     """One changed cell: its class, the spec's expectation for the new cell, and whether it holds."""
     item = dict(filing=name, ordinal=ordinal, origin=list(key), base=b and describe(base, *b),
@@ -129,9 +155,8 @@ def classify(name, ordinal, key, base, new, b, n):
         if nc['type'] == 'number' or D.has_digit(nc['original']):
             disposition, expected, proofs = D.expected_outcome(new, *n)
             item.update(disposition=disposition, proofs=proofs, valid=D.matches(new.cell(*n), expected))
-        if nc['type'] == 'number':
-            item['header_ok'] = header_ok(new, *n)
-            item['valid'] = item['valid'] and item['header_ok']
+            if nc['type'] == 'number':
+                item['valid'] = check_number(item, new, n, disposition, proofs) and item['valid']
         return item
     bc, nc = item['base'], item['new']
     digit = D.has_digit(nc['original'])
@@ -139,6 +164,8 @@ def classify(name, ordinal, key, base, new, b, n):
     holds = D.matches(new.cell(*n), expected) if digit else None
     if bc['type'] == 'number' and nc['type'] == 'text' and nc['reason']:
         cls = 'number to flagged text'
+    elif bc['type'] == 'number' and nc['type'] == 'text':
+        cls, holds = 'number to unflagged text', False
     elif bc['type'] == 'number' and nc['type'] == 'number' and Decimal(bc['value']) != Decimal(nc['value']):
         cls = 'number rescaled'
     elif bc['type'] == 'text' and nc['type'] == 'number':
@@ -150,14 +177,66 @@ def classify(name, ordinal, key, base, new, b, n):
     if cls == 'number rescaled':
         holds = holds and disposition == 'proven percent'
     if not digit:
-        holds = nc['type'] != 'number'
+        holds = nc['type'] != 'number' and holds is not False
     if nc['type'] == 'number':
-        item['header_ok'] = header_ok(new, *n)
-        holds = holds and item['header_ok']
+        holds = check_number(item, new, n, disposition, proofs) and holds
     item.update(cls=cls, disposition=disposition, proofs=proofs, valid=bool(holds),
                 expected=None if expected is None else {k: (sorted(v, key=str) if isinstance(v, set) else str(v))
                                                         for k, v in expected.items()})
     return item
+
+
+def axes(name, ordinal, base, new, bk, nk):
+    """Cells keyed on both sides whose copy column header path or row label differs from base."""
+    out = []
+    for key in sorted(set(bk) & set(nk)):
+        (bri, bci), (nri, nci) = bk[key], nk[key]
+        bh, nh = base.t['headers'][bci], new.t['headers'][nci]
+        bl, nl = base.t['rows'][bri][0][2], new.t['rows'][nri][0][2]
+        if bh != nh or bl != nl:
+            out.append(dict(filing=name, ordinal=ordinal, origin=list(key), base_header=bh, new_header=nh,
+                            base_label=bl, new_label=nl))
+    return out
+
+
+def removed_columns(base, new):
+    """Where the headers changed: (ok, removed) when the new headers are the baseline's with only
+    removable columns taken out (see Axes); removed lists each one's header and contents."""
+    texts = collections.defaultdict(list)
+    joined = collections.defaultdict(list)
+    for ri, row in enumerate(base.t['rows']):
+        for ci, cell in enumerate(row):
+            text = (cell[2] or '').strip()
+            if not text:
+                continue
+            texts[ci].append(text)
+            hosts = {new.where[tuple(s)] for s in base.t['cell_sources'][ri][ci] if tuple(s) in new.where}
+            others = any(base.where.get(tuple(s), (None, ci))[1] != ci
+                         for h in hosts for s in new.t['cell_sources'][h[0]][h[1]])
+            joined[ci].append(bool(hosts) and others)
+    removable = {ci for ci in range(len(base.t['headers']))
+                 if texts[ci] and all(t in REMOVABLE for t in texts[ci]) and all(joined[ci])}
+    bh, nh = base.t['headers'], new.t['headers']
+
+    def align(i, j):
+        """The base columns to remove so that base[i:] becomes new[j:], or None."""
+        if j == len(nh):
+            rest = list(range(i, len(bh)))
+            return rest if all(k in removable for k in rest) else None
+        if i == len(bh):
+            return None
+        if i in removable:
+            skipped = align(i + 1, j)
+            if skipped is not None:
+                return [i, *skipped]
+        if bh[i] == nh[j]:
+            return align(i + 1, j + 1)
+        return None
+
+    sys.setrecursionlimit(max(1000, 4 * len(bh) + 100))
+    removed = align(0, 0)
+    return removed is not None, [dict(column=ci, header=bh[ci], contents=sorted(set(texts[ci])))
+                                 for ci in (removed or [])]
 
 
 def stacked(scan, directory):
@@ -182,6 +261,7 @@ def main():
     parser.add_argument('--manifest', required=True)
     parser.add_argument('--src', required=True)
     parser.add_argument('--details')
+    parser.add_argument('--statements', nargs=2, metavar=('BASE_JSON', 'NEW_JSON'))
     parser.add_argument('--all-facts', nargs=2, metavar=('BASE_JSON', 'NEW_JSON'))
     parser.add_argument('--stacked-scan')
     args = parser.parse_args()
@@ -197,7 +277,8 @@ def main():
     kinds = {(e['filing'], e['ordinal'], e['source_row'], e['source_column']): e['kind'] for e in manifest}
     names = sorted(n[:-5] for n in os.listdir(args.new))
     assert names == sorted(n[:-5] for n in os.listdir(args.base))
-    changed, tables, cost = [], [], collections.Counter()
+    changed, tables, cost, moved, removals = [], [], collections.Counter(), [], []
+    differing = collections.Counter()  # (filing, ordinal): differing keyed cells, manifest entries included
     for name in names:
         base_tables = {t['ordinal']: t for t in json.load(open(os.path.join(args.base, name + '.json'), encoding='utf-8'))['tables']}
         new_tables = {t['ordinal']: t for t in json.load(open(os.path.join(args.new, name + '.json'), encoding='utf-8'))['tables']}
@@ -205,13 +286,18 @@ def main():
         nested = D.nested_facts(json.load(open(os.path.join(args.new, name + '.json'), encoding='utf-8'))['path'])
         for ordinal in sorted(new_tables):
             bt, nt = base_tables[ordinal], new_tables[ordinal]
-            if (bt['status'], bt['headers']) != (nt['status'], nt['headers']):
-                tables.append(dict(filing=name, ordinal=ordinal, base_status=bt['status'], new_status=nt['status'],
-                                   base_headers=bt['headers'], new_headers=nt['headers']))
             base, new = D.Table(name, bt, nested), D.Table(name, nt, nested)
+            if (bt['status'], bt['headers']) != (nt['status'], nt['headers']):
+                entry = dict(filing=name, ordinal=ordinal, base_status=bt['status'], new_status=nt['status'],
+                             base_headers=bt['headers'], new_headers=nt['headers'])
+                if bt['headers'] != nt['headers'] and 'source_text_only' not in (bt['status'], nt['status']):
+                    entry['removal_ok'], entry['removed'] = removed_columns(base, new)
+                    removals.append(entry)
+                tables.append(entry)
             if nt['status'] != 'source_text_only':
                 D.audit_splits(base, new)  # marks the values whose split '%' was refused
             bk, nk = keyed(base), keyed(new)
+            moved.extend(axes(name, ordinal, base, new, bk, nk))
             for key in sorted(set(bk) | set(nk), key=lambda k: (k is None, k)):
                 b, n = bk.get(key), nk.get(key)
                 if b and n:
@@ -221,6 +307,7 @@ def main():
                     if bc['type'] == 'number' and nc['type'] == 'text' and nc['reason']:
                         kind = kinds.get((name, ordinal, *key), 'outside the manifest')
                         cost[(group(name), kind, name, ordinal)] += 1
+                differing[(name, ordinal)] += 1
                 if (name, ordinal, *key) in kinds:
                     continue
                 changed.append(classify(name, ordinal, key, base, new, b, n))
@@ -244,11 +331,18 @@ def main():
             print(f'  {g}: ' + ', '.join(f'{k} {v}' for k, v in sorted(counts.items())))
     wrong = [c for c in changed if not c['valid']]
     numbers = [c for c in wrong if c['new'] and c['new']['type'] == 'number']
+    unproven = [c for c in changed if c['new'] and c['new']['type'] == 'number' and not c.get('proof_named')]
     print(f'\nChanged cells not as the spec gives: {len(wrong)}, of which new numbers: {len(numbers)}')
     for c in wrong:
         print(f"  [{c['cls']}] {c['filing']} #{c['ordinal']} {c['origin']} base {c['base'] and {k: c['base'][k] for k in FIELDS}}"
               f"\n      new {c['new'] and {k: c['new'][k] for k in FIELDS}} [{c.get('disposition')}] expected {c.get('expected')}"
+              f" proof named {c.get('proof_named')} header ok {c.get('header_ok')}"
               f"\n      header {c['new'] and c['new']['header']!r} label {c['new'] and c['new']['label']!r}")
+    new_numbers = [c for c in changed if c['new'] and c['new']['type'] == 'number']
+    print(f'\nNumbers in changed cells: {len(new_numbers)}; without a named proof: {len(unproven)}')
+    for c in unproven:
+        print(f"  UNPROVEN {c['filing']} #{c['ordinal']} {c['origin']} {c['new']['original']!r} -> {c['new']['value']} "
+              f"[{c.get('disposition')}]")
     print('\nEvery number rescaled or turned from text, one by one:')
     for c in changed:
         if c['cls'] in ('number rescaled', 'text to number') or (c['cls'].startswith('other') and c['new']
@@ -257,6 +351,20 @@ def main():
                   f"{c['base']['original'] if c['base'] else None!r} {c['base']['value'] if c['base'] else None} -> "
                   f"{c['new']['original']!r} {c['new']['value']} {c['new']['format']} [{c.get('disposition')}: "
                   f"{' + '.join(c.get('proofs') or [])}] {'ok' if c['valid'] else 'NOT AS THE SPEC GIVES'}")
+
+    print(f'\nAxes: cells keyed on both sides whose header path or row label changed: {len(moved)}')
+    for m in moved:
+        print(f"  MOVED {m['filing']} #{m['ordinal']} {m['origin']} header {m['base_header']!r} -> {m['new_header']!r} "
+              f"label {m['base_label']!r} -> {m['new_label']!r}")
+    bad_removals = [t for t in removals if not t['removal_ok']]
+    contents = collections.Counter(x for t in removals for r in t['removed'] for x in r['contents'])
+    duplicates = sum(1 for t in removals for r in t['removed']
+                     if r['column'] > 0 and r['header'] == t['base_headers'][r['column'] - 1])
+    print(f"Tables exported on both sides whose headers changed: {len(removals)}; only removable columns removed: "
+          f"{len(removals) - len(bad_removals)}; columns removed: {sum(len(t['removed']) for t in removals)} "
+          f"(repeating the header on their left: {duplicates}); their contents: {dict(contents)}")
+    for t in bad_removals:
+        print(f"  HEADERS NOT EXPLAINED {t['filing']} #{t['ordinal']}: {t['base_headers']} -> {t['new_headers']}")
 
     print('\nCoverage cost, number -> flagged text (Acceptance 7):')
     per_group = collections.Counter()
@@ -274,7 +382,20 @@ def main():
         kinds_here = {k: m for (g, k, nm, o), m in cost.items() if (nm, o) == (name, ordinal)}
         print(f'    {name} #{ordinal}: {n} {kinds_here}')
 
-    gates = dict(changes=not numbers and not wrong)
+    gates = dict(changes=not wrong, unproven_numbers=not unproven, axes=not moved, removed_columns=not bad_removals)
+    if args.statements:
+        base_st, new_st = (json.load(open(path, encoding='utf-8')) for path in args.statements)
+        found = {(f['file'], s['ordinal']) for f in new_st for s in f['statements'] if s.get('ordinal') is not None}
+        vault = sum(1 for f in new_st for s in f['statements']
+                    if s.get('ordinal') is not None and group(f['file']) != 'Others')
+        touched_cells = sum(differing[k] for k in found)
+        touched_tables = [t for t in tables if (t['filing'], t['ordinal']) in found]
+        touched_axes = [m for m in moved if (m['filing'], m['ordinal']) in found]
+        entries = sum(1 for e in manifest if (e['filing'], e['ordinal']) in found)
+        print(f'\nStatement tables (primary_statements.py): {len(found)} ({vault} vault); details identical: '
+              f'{base_st == new_st}; differing cells in them: {touched_cells}; status or header changes: '
+              f'{len(touched_tables)}; axis changes: {len(touched_axes)}; manifest entries in them: {entries}')
+        gates['statements'] = base_st == new_st and not touched_cells and not touched_tables and not touched_axes
     if args.all_facts:
         def mismatches(path):
             return {(r['file'], m['ordinal'], tuple(m['cell'])) for r in json.load(open(path, encoding='utf-8'))
@@ -300,7 +421,7 @@ def main():
     print('\nGATES: ' + ', '.join(f'{k} {"pass" if v else "FAIL"}' for k, v in gates.items()))
     if args.details:
         with open(args.details, 'w', encoding='utf-8', newline='\n') as handle:
-            json.dump(dict(tables=tables, changed=changed,
+            json.dump(dict(tables=tables, changed=changed, axes=moved,
                            cost=[dict(group=g, kind=k, filing=nm, ordinal=o, cells=n) for (g, k, nm, o), n in sorted(cost.items())]),
                       handle, ensure_ascii=False, indent=1, default=str)
     sys.exit(0 if all(gates.values()) else 1)
