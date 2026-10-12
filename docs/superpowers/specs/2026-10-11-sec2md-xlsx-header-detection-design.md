@@ -2,7 +2,7 @@
 
 Date: 2026-10-11 (revision 5); revision 6 on 2026-10-12
 
-Status: Implemented on branch fix/xlsx-header-detection (pending PR). Acceptance: ../audits/2026-10-11-xlsx-header-detection/README.md.
+Status: Implemented on branch fix/xlsx-header-detection (pending PR). Plan: ../plans/2026-10-11-sec2md-xlsx-header-detection.md. Acceptance: ../audits/2026-10-11-xlsx-header-detection/README.md.
 
 Scope: `src/sec2md/xlsx_tables.py` only. The Markdown renderer, strict's numeric
 trace and the table completeness check must not change.
