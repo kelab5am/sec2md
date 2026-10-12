@@ -17,6 +17,7 @@ UNITS = ('<div style="display:none"><ix:header><ix:resources>'
          '<xbrli:unit id="U_USD"><xbrli:measure>iso4217:USD</xbrli:measure></xbrli:unit>'
          '<xbrli:unit id="U_shares"><xbrli:measure>xbrli:shares</xbrli:measure></xbrli:unit>'
          '<xbrli:unit id="U_pure"><xbrli:measure>xbrli:pure</xbrli:measure></xbrli:unit>'
+         '<xbrli:unit id="U_years"><xbrli:measure>utr:Y</xbrli:measure></xbrli:unit>'
          '<xbrli:unit id="U_USDPerShare"><xbrli:divide>'
          '<xbrli:unitNumerator><xbrli:measure>iso4217:USD</xbrli:measure></xbrli:unitNumerator>'
          '<xbrli:unitDenominator><xbrli:measure>xbrli:shares</xbrli:measure></xbrli:unitDenominator>'
@@ -88,9 +89,10 @@ def test_two_facts_in_one_cell_keep_both_entries():
 
 # --- P4: the split '%', negative percents and percentage points -------------------------
 
-def prepared(rows):
-    """prepare_table for a one-table filing whose units are defined in its ix:header."""
-    source = f'<html><body>{UNITS}<table>{rows}</table></body></html>'
+def prepared(rows, before=''):
+    """prepare_table for a one-table filing whose units are defined in its ix:header,
+    with any blocks of context before the table."""
+    source = f'<html><body>{UNITS}{before}<table>{rows}</table></body></html>'
     soup = BeautifulSoup(source, 'lxml')
     return xlsx_tables.prepare_table(
         snapshot_html_table(soup.table, ordinal=1, page=1, source_url='https://example.com/main.htm'))
@@ -213,3 +215,249 @@ def test_percent_never_attaches_across_into_another_leaf_header():
     assert cell_rows(table) == [[('Revenue', '@', 'Revenue', None), (Decimal('1000'), '#,##0', '1,000', None),
                                  (None, '@', '', None), ('%', '@', '%', None)]]
     assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),), ((1, 3),)),)
+
+
+# --- Rule P: percent proofs (P1-P3), mixed columns (P4) and except captions (P5) --------
+
+_UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
+_CONFLICT = 'Conflicting explicit units; verify the row, column and displayed value units.'
+_NEGATIVE_ZERO = 'Negative zero retained; verify the source meaning.'
+
+
+def fact(text, unit='U_pure', scale='-2', name='us-gaap:CapitalRatio', format='ixt:num-dot-decimal', sign=None):
+    """An SEC-style ix:nonFraction; format=None leaves the attribute out."""
+    attributes = f' format="{format}"' if format else ''
+    attributes += f' sign="{sign}"' if sign else ''
+    return (f'<ix:nonFraction unitRef="{unit}" contextRef="FY2025" name="{name}" decimals="1" '
+            f'scale="{scale}"{attributes}>{text}</ix:nonFraction>')
+
+
+def sec_cells(value):
+    """One value as SEC filings lay it out under a heading spanning three cells:
+    '$ 275,513' gives '$' | '275,513' | '', and '15.7 %' gives '' | '15.7' | '%'."""
+    dollar = '$' if value.startswith('$ ') else ''
+    percent = '%' if value.endswith(' %') else ''
+    return f'<td>{dollar}</td><td>{value.removeprefix("$ ").removesuffix(" %")}</td><td>{percent}</td>'
+
+
+def sec_row(label, *values):
+    return f'<tr><td>{label}</td>{"".join(sec_cells(value) for value in values)}</tr>'
+
+
+def heading(*labels):
+    """The heading row: 'Item' over the labels, then each label over its three value cells."""
+    return '<tr><th>Item</th>' + ''.join(f'<th colspan="3">{label}</th>' for label in labels) + '</tr>'
+
+
+def text_cell(text, reason=None):
+    return (text, '@', text, reason)
+
+
+def test_own_percent_sign_proves_a_percent():
+    table = prepared(heading('2025') + sec_row('Gross margin', '15.7 %'))
+    assert cell_rows(table) == [[text_cell('Gross margin'), (Decimal('0.157'), '0.0%', '15.7 %', None)]]
+
+
+CAPITAL_RATIOS = heading('2025') + sec_row('CET1 capital ratio', '15.7 %')
+
+
+def test_percent_fact_proves_a_plain_value():
+    """JPM capital ratios: a pure fact at scale -2 proves '13.8' beneath '15.7 %'."""
+    table = prepared(CAPITAL_RATIOS + sec_row('Tier 1 capital ratio', fact('13.8')))
+    assert cell_rows(table) == [
+        [text_cell('CET1 capital ratio'), (Decimal('0.157'), '0.0%', '15.7 %', None)],
+        [text_cell('Tier 1 capital ratio'), (Decimal('0.138'), '0.0%', '13.8', None)],
+    ]
+    assert table.status == 'exported'
+
+
+def test_percent_fact_sign_is_applied_once():
+    """BAC #146: the displayed parentheses and sign="-" are the same sign."""
+    table = prepared(heading('Change') + sec_row('Net interest yield', '(' + fact('0.3', sign='-') + ')'))
+    assert cell_rows(table) == [[text_cell('Net interest yield'), (Decimal('-0.003'), '0.0%;(0.0%)', '(0.3)', None)]]
+
+
+@pytest.mark.parametrize('value, expected', [
+    (fact('13.8', scale='-4'), text_cell('13.8', _UNPROVEN)),
+    (fact('13.8', unit='U_years', scale='-1', name='us-gaap:ExpectedTerm'), text_cell('13.8', _UNPROVEN)),
+    (fact('13.8', unit='U_USD', scale='6', name='us-gaap:Revenues'), (Decimal('13.8'), '#,##0.0', '13.8', None)),
+    (fact(fact('13.8')), text_cell('13.8', _UNPROVEN)),  # a nested fact is a second fact
+    (fact('13.8', format='ixt:num-comma-decimal'), text_cell('13.8', _UNPROVEN)),
+    (fact('13.8', sign='-'), text_cell('13.8', _UNPROVEN)),
+], ids=['scale-4', 'years-scale-1', 'amount-fact', 'two-facts', 'transformed-format', 'sign-mismatch'])
+def test_facts_that_do_not_prove_a_percent(value, expected):
+    table = prepared(CAPITAL_RATIOS + sec_row('Tier 1 capital ratio', value))
+    assert cell_rows(table)[1] == [text_cell('Tier 1 capital ratio'), expected]
+
+
+def test_percent_change_header_proves_its_plain_values():
+    """RDDT: '% Change' over '54 %' and '(75)'."""
+    table = prepared(heading('2025', '2024', '% Change')
+                     + sec_row('Revenue', '$ 1,300', '$ 844', '54 %')
+                     + sec_row('Net income (loss)', '(45)', '(180)', '(75)'))
+    assert table.headers == ('Item', '2025', '2024', '% Change')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1300'), '"$"#,##0', '$ 1,300', None),
+         (Decimal('844'), '"$"#,##0', '$ 844', None), (Decimal('0.54'), '0%', '54 %', None)],
+        [text_cell('Net income (loss)'), (Decimal('-45'), '#,##0;(#,##0)', '(45)', None),
+         (Decimal('-180'), '#,##0;(#,##0)', '(180)', None), (Decimal('-0.75'), '0%;(0%)', '(75)', None)],
+    ]
+
+
+def test_percent_of_retained_loans_header_proves_its_plain_values():
+    """JPM: 'Percent of retained loans to total retained loans' beside the loan amounts."""
+    table = prepared(heading('2025', 'Percent of retained loans to total retained loans')
+                     + sec_row('Consumer, excluding credit card', '$ 412,850', '30.9')
+                     + sec_row('Credit card', '233,145', '17.4'), before='<p>(in millions)</p>')
+    assert cell_rows(table) == [
+        [text_cell('Consumer, excluding credit card'), (Decimal('412850'), '"$"#,##0', '$ 412,850', None),
+         (Decimal('0.309'), '0.0%', '30.9', None)],
+        [text_cell('Credit card'), (Decimal('233145'), '#,##0', '233,145', None),
+         (Decimal('0.174'), '0.0%', '17.4', None)],
+    ]
+
+
+def test_percent_row_label_proves_its_plain_value():
+    table = prepared(heading('2025') + sec_row('Net revenue', '$ 1,000') + sec_row('% of net revenue', '26'))
+    assert cell_rows(table) == [
+        [text_cell('Net revenue'), (Decimal('1000'), '"$"#,##0', '$ 1,000', None)],
+        [text_cell('% of net revenue'), (Decimal('0.26'), '0%', '26', None)],
+    ]
+    assert table.status == 'exported'
+
+
+def test_nvda_table_wide_sentence_makes_plain_values_percents():
+    sentence = ('<p>The following table sets forth, for the periods indicated, certain items in our '
+                'Consolidated Statements of Income expressed as a percentage of revenue.</p>')
+    table = prepared(heading('Jan 26, 2025', 'Jan 28, 2024') + sec_row('Revenue', '100.0', '100.0')
+                     + sec_row('Cost of revenue', '24.7', '27.3') + sec_row('Gross profit', '75.3', '72.7'),
+                     before=sentence)
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1.000'), '0.0%', '100.0', None), (Decimal('1.000'), '0.0%', '100.0', None)],
+        [text_cell('Cost of revenue'), (Decimal('0.247'), '0.0%', '24.7', None),
+         (Decimal('0.273'), '0.0%', '27.3', None)],
+        [text_cell('Gross profit'), (Decimal('0.753'), '0.0%', '75.3', None),
+         (Decimal('0.727'), '0.0%', '72.7', None)],
+    ]
+
+
+@pytest.mark.parametrize('before, caption', [
+    ('<p>(in percentages)</p>', ''),
+    ('', '<tr><th></th><th colspan="6">(in percentages)</th></tr>'),
+], ids=['context-line', 'in-table-caption'])
+def test_in_percentages_declares_a_percent_table(before, caption):
+    table = prepared(caption + heading('2025', '2024') + sec_row('Gross margin', '45.2', '43.1')
+                     + sec_row('Operating margin', '(3.5)', '12.0'), before=before)
+    assert cell_rows(table) == [
+        [text_cell('Gross margin'), (Decimal('0.452'), '0.0%', '45.2', None),
+         (Decimal('0.431'), '0.0%', '43.1', None)],
+        [text_cell('Operating margin'), (Decimal('-0.035'), '0.0%;(0.0%)', '(3.5)', None),
+         (Decimal('0.120'), '0.0%', '12.0', None)],
+    ]
+    assert table.status == 'exported'
+
+
+_NOT_DECLARATIONS = ['Percentage of completion revenue', 'Percentage point change',
+                     'Increase in percentage of completion revenue']
+
+
+@pytest.mark.parametrize('position', ['header', 'row label'])
+@pytest.mark.parametrize('label', _NOT_DECLARATIONS)
+def test_percent_words_that_are_not_declarations_keep_plain_values(label, position):
+    header, last = (label, 'Other') if position == 'header' else ('2025', label)
+    table = prepared(heading(header) + sec_row('Revenue', '1,250') + sec_row('Cost of revenue', '(310)')
+                     + sec_row(last, '12.5'))
+    assert [row[1] for row in cell_rows(table)] == [
+        (Decimal('1250'), '#,##0', '1,250', None), (Decimal('-310'), '#,##0;(#,##0)', '(310)', None),
+        (Decimal('12.5'), '#,##0.0', '12.5', None)]
+
+
+def test_meta_plain_rows_between_percent_rows_are_unproven():
+    """META MD&A: '%' on the first row and the total only; the rows between stay text."""
+    table = prepared(heading('2025', '2024') + sec_row('Revenue', '100 %', '100 %')
+                     + sec_row('Cost of revenue', '18', '19') + sec_row('Research and development', '25', '27')
+                     + sec_row('Income from operations', '42 %', '35 %'))
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1.00'), '0%', '100 %', None), (Decimal('1.00'), '0%', '100 %', None)],
+        [text_cell('Cost of revenue'), text_cell('18', _UNPROVEN), text_cell('19', _UNPROVEN)],
+        [text_cell('Research and development'), text_cell('25', _UNPROVEN), text_cell('27', _UNPROVEN)],
+        [text_cell('Income from operations'), (Decimal('0.42'), '0%', '42 %', None),
+         (Decimal('0.35'), '0%', '35 %', None)],
+    ]
+    assert table.issues == tuple(f'Source row {r}, column {c}: {_UNPROVEN}' for r in (2, 3) for c in (1, 4))
+    assert table.status == 'needs_review'
+
+
+def test_jpm_amount_and_ratio_rows_without_proof_are_unproven():
+    """JPM #64: '$ 275,513' and '15.7 %' convert; '294,881' and '16.8' stay text."""
+    table = prepared(heading('2025') + sec_row('CET1 capital', '$ 275,513') + sec_row('Tier 1 capital', '294,881')
+                     + sec_row('CET1 capital ratio', '15.7 %') + sec_row('Tier 1 capital ratio', '16.8'))
+    assert cell_rows(table) == [
+        [text_cell('CET1 capital'), (Decimal('275513'), '"$"#,##0', '$ 275,513', None)],
+        [text_cell('Tier 1 capital'), text_cell('294,881', _UNPROVEN)],
+        [text_cell('CET1 capital ratio'), (Decimal('0.157'), '0.0%', '15.7 %', None)],
+        [text_cell('Tier 1 capital ratio'), text_cell('16.8', _UNPROVEN)],
+    ]
+    assert table.issues == (f'Source row 2, column 1: {_UNPROVEN}', f'Source row 4, column 1: {_UNPROVEN}')
+
+
+def test_zero_in_a_percent_column_converts():
+    table = prepared(heading('2025') + sec_row('Revenue', '100 %') + sec_row('Cost of revenue', '0'))
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1.00'), '0%', '100 %', None)],
+        [text_cell('Cost of revenue'), (Decimal('0'), '#,##0', '0', None)],
+    ]
+    assert table.status == 'exported'
+
+
+def test_negative_zero_in_a_percent_column_keeps_its_reason():
+    table = prepared(heading('2025') + sec_row('Revenue', '100 %') + sec_row('Cost of revenue', '(0)'))
+    assert cell_rows(table)[1] == [text_cell('Cost of revenue'), text_cell('(0)', _NEGATIVE_ZERO)]
+
+
+@pytest.mark.parametrize('caption', [
+    '(in millions, except percentages)',
+    '(In thousands, except share, per share and percentage data)',
+])
+def test_except_caption_never_makes_amounts_percents(caption):
+    table = prepared(heading('2025', '2024') + sec_row('Revenue', '$ 161,690', '$ 134,902')
+                     + sec_row('Cost of revenue', '30,161', '25,959'), before=f'<p>{caption}</p>')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('161690'), '"$"#,##0', '$ 161,690', None),
+         (Decimal('134902'), '"$"#,##0', '$ 134,902', None)],
+        [text_cell('Cost of revenue'), (Decimal('30161'), '#,##0', '30,161', None),
+         (Decimal('25959'), '#,##0', '25,959', None)],
+    ]
+
+
+@pytest.mark.parametrize('header, value, shown', [
+    ('% Change', '$ 12', '$ 12'),
+    ('2025', fact('50', unit='U_USD', scale='6', name='us-gaap:Revenues') + ' %', '50 %'),
+    ('2025', fact('50', scale='-4') + ' %', '50 %'),
+], ids=['dollar-under-percent-header', 'percent-with-amount-fact', 'percent-with-pure-fact-scale-4'])
+def test_conflicting_percent_proofs_keep_text(header, value, shown):
+    table = prepared(heading(header) + sec_row('Revenue', value))
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell(shown, _CONFLICT)]]
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('text, declared', [
+    ('% Change', True),
+    ('% of Total Revenues', True),
+    ('Total % of IG', True),
+    ('Gross margin %', True),
+    ('Tax rate (%)', True),
+    ('Percentage', True),
+    ('Percent change', True),
+    ('As a percentage of total net revenues (1)', True),
+    ('Percent of retained loans to total retained loans', True),
+    ('Operating margin (percent)', True),
+    ('Percentage of completion revenue', False),
+    ('Percentage point change', False),
+    ('Increase in percentage of completion revenue', False),
+    ('$ and % Change', False),
+    ('% Change (points)', False),
+    ('% Change (pts)', False),
+])
+def test_percent_declaration(text, declared):
+    assert xlsx_tables._percent_declaration(text) is declared

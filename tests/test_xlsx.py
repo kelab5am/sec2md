@@ -78,11 +78,15 @@ def test_descriptive_percentage_does_not_scale_amount_in_saved_workbook(tmp_path
             '<tr><td>Percentage of revenue</td><td>15</td></tr>'
             '<tr><td>Tax rate (%)</td><td>21</td></tr>'
             '<tr><td>Margin</td><td>12.3%</td></tr></table>')
-    result = sec2md.export_xlsx(html, tmp_path / 'tax.xlsx', quality_policy='strict')
+    # Spec P4 (value accuracy): the percent rows make 2026 a percent column, so 120,
+    # with no proof of either kind, stays unscaled source text for review.
+    result = sec2md.export_xlsx(html, tmp_path / 'tax.xlsx')
+    assert result.tables[0].issues == (
+        'Source row 1, column 1: Percent sign on other rows of this column; verify the scale.',)
     wb = load_workbook(result.path)
     sheet = wb.worksheets[1]
-    assert [sheet[f'B{r}'].value for r in range(4, 8)] == [120, .15, .21, .123]
-    assert '%' not in sheet['B4'].number_format
+    assert [sheet[f'B{r}'].value for r in range(4, 8)] == ['120', .15, .21, .123]
+    assert (sheet['B4'].data_type, sheet['B4'].number_format) == ('s', '@')
     assert all('%' in sheet[f'B{r}'].number_format for r in range(5, 8))
     wb.close()
 

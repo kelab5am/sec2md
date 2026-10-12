@@ -286,7 +286,10 @@ def test_body_percentage_label_does_not_supply_global_units():
     table = prepared('''<table><tr><th>Item</th><th>2026</th></tr>
     <tr><td>Revenue</td><td>120</td></tr><tr><td>Percentage of revenue</td><td>15</td></tr></table>''')
     assert table.units == ''
-    assert [row[1].value for row in table.rows] == [Decimal('120'), Decimal('.15')]
+    # Spec P4 (value accuracy): the row label proves 15 a percent, so 120, with no
+    # proof of either kind, stays source text in this percent column.
+    assert [row[1].value for row in table.rows] == ['120', Decimal('.15')]
+    assert table.rows[0][1].review_reason == 'Percent sign on other rows of this column; verify the scale.'
     assert table.rows[1][0].value == 'Percentage of revenue'
 
 
@@ -352,9 +355,13 @@ def test_preparation_mixed_units_groups_and_numeric_facts_keep_display():
     <tr><td>Tax rate (%)</td><td>15</td><td>—</td></tr></table>''')
     assert table.title == 'Results'
     assert table.units == 'In millions, except per share data'
+    # Spec P4 (value accuracy): 'Tax rate (%)' makes 2026 a percent column. The
+    # unitless fact is not an amount fact, so 1,200 stays source text; 'Per share'
+    # proves 2.50 not a percent.
     assert [[c.value for c in r] for r in table.rows] == [
-        ['Revenue', Decimal('1200'), Decimal('.25')], ['Per share', Decimal('2.50'), None],
+        ['Revenue', '1,200', Decimal('.25')], ['Per share', Decimal('2.50'), None],
         ['Group', None, None], ['Tax rate (%)', Decimal('.15'), '—']]
+    assert table.rows[0][1].review_reason == 'Percent sign on other rows of this column; verify the scale.'
     assert table.original_rows[1][1] == '1,200'
 
 

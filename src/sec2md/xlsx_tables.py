@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from decimal import Decimal
 import re
-from typing import Literal, Mapping, Sequence
+from typing import Literal, Mapping, NamedTuple, Sequence
 from urllib.parse import unquote, urljoin
 
 from bs4 import Tag
@@ -729,22 +730,141 @@ def _identifier_column(header):
     return False
 
 
-def _numeric_role(text, header, label, cells, units, financial, percent_header):
-    period_header = all(_PERIOD.fullmatch(part) for part in header.split(' — '))
-    if _identifier_column(header) and not period_header:
+def _identifier_heading(header):
+    """An identifier column whose heading is not wholly period text: its cells stay text."""
+    return _identifier_column(header) and not all(_PERIOD.fullmatch(part) for part in header.split(' — '))
+
+
+def _numeric_role(text, header, label, cells, units, financial, table_percent, proof=None):
+    """The cell's role. proof is the role a cell-, row- or column-level proof gives (spec
+    P1-P3); a table-wide percent declaration applies only without one."""
+    if _identifier_heading(header):
         return 'text'
-    if percent_header or _PERCENT_UNIT.fullmatch(label.strip()):
-        return 'percent'
-    # Specific currency/count headings override a table-wide percent description.
-    if _VALUE.search(header) or _ROW_UNIT.search(header) or _ROW_UNIT.search(label):
+    if proof:
+        return proof
+    # Amount headings keep plain values as displayed under a table-wide percent description.
+    if _VALUE.search(header):
         return 'number'
-    if _PERCENT.search(units):
+    if table_percent:
         return 'percent'
     if any(c.is_numeric_fact for c in cells) or '$' in text or '%' in text:
         return 'number'
     if units or _VALUE.search(label) or financial:
         return 'number'
     return 'text'
+
+
+# Rule P (2026-10-12 value-accuracy spec): a digit cell converts as a percent only on proof.
+_NOT_PERCENT_LABEL = re.compile(r'\$|\bpoints?\b|\bpts\b', re.I)
+# A number's own percent sign ('21%', 'LTV under 80 %') is not a '%' word; a year
+# before one is ('2024 vs 2023 % change').
+_NUMBER_PERCENT = re.compile(r'(?<![\d.,])(?!(?:19|20)\d{2}\s?%)\d[\d,.]*\s?%')
+_PERCENT_SYMBOL = re.compile(r'^%|%\s+(?:of|change)\b|(?:\(\s*%\s*\)|%)$', re.I)
+_PERCENT_BASE = r'(?:(?:total )?(?:net )?revenues?|net sales|sales)'
+_PERCENT_WORDS = re.compile(
+    rf'(?:percent|percentages?|percent(?:age)? change|(?:as a )?percent(?:age)? of {_PERCENT_BASE}'
+    rf'|percent of retained loans to total retained loans)(?:\s*(?:\([a-z\d]{{1,2}}\)|\*+))?', re.I)
+_TABLE_PERCENT = re.compile(r'\(?(?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)?\.?', re.I)
+_PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'})
+_UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
+
+
+def _percent_declaration(text: str) -> bool:
+    """A header or row label declaring its values percents (spec Definitions): '% Change',
+    'Total % of IG', 'Gross margin %', 'Percent of net sales (1)', 'Margin (%)'. Never with
+    a '$', 'point(s)' or 'pts': 'Percentage point change', '$ and % Change'."""
+    text = re.sub(r'\s+', ' ', text).strip()
+    if _NOT_PERCENT_LABEL.search(text):
+        return False
+    return bool(_PERCENT_SYMBOL.search(_NUMBER_PERCENT.sub(' ', text).strip())
+                or _PERCENT_WORDS.fullmatch(text) or _PERCENT_UNIT.fullmatch(text))
+
+
+def _table_percent_declaration(line: str) -> bool:
+    """A unit line declaring the whole table percents (spec Definitions): '(in percentages)',
+    NVDA's 'The following table … expressed as a percentage of revenue.' A percent word in
+    an except clause never is: '(In thousands, except share, per share and percentage data)'."""
+    line = line.strip()
+    return bool(_TABLE_PERCENT.fullmatch(line)
+                or (_UNIT_DECLARATION.fullmatch(line) and re.search(r'percentage of revenue', line, re.I)))
+
+
+def _value_facts(origins):
+    """The inline XBRL facts on the copy cell's value origins, the origins holding digits."""
+    return [fact for origin in origins if re.search(r'\d', origin.text) for fact in origin.facts]
+
+
+def _percent_fact(origins) -> bool:
+    """The only fact on the value origin proves a percent (spec Definitions): a pure unit,
+    scale -2, a plain US number format, and the token's displayed digits and sign."""
+    values = [origin for origin in origins if re.search(r'\d', origin.text)]
+    if len(values) != 1 or len(values[0].facts) != 1:
+        return False
+    fact, text = values[0].facts[0], _joined(origins)
+    shown = _convert_prepared(text, 'number', origins).value
+    return (isinstance(shown, Decimal) and fact.unit_measures == ('xbrli:pure',) and fact.scale == -2
+            and fact.format in _PERCENT_FACT_FORMATS
+            and re.sub(r'[^\d.]', '', fact.displayed) == re.sub(r'[^\d.]', '', text)
+            and (fact.sign == '-') == shown.is_signed())
+
+
+def _amount_fact(origins) -> bool:
+    """A fact on the value origin measured in a currency or in shares (spec Definitions)."""
+    return any(measure.lower().startswith('iso4217:') or measure.lower() == 'xbrli:shares'
+               for fact in _value_facts(origins) for measure in fact.unit_measures)
+
+
+class _Proof(NamedTuple):
+    role: str | None  # 'percent' or 'number' when a local proof applies (spec P1.1-P1.4, P2)
+    conflict: bool  # spec P3: percent and non-percent proofs, or two percent proofs disagree
+    marks_column: bool  # P1.1, P1.2 or P1.4: its copy column is a percent column (spec P4)
+    by_fact: bool  # the percent fact proves it without a percent heading or row label
+
+
+_NO_PROOF = _Proof(None, False, False, False)
+
+
+def _cell_proof(text, header, labels, label, origins) -> _Proof:
+    """Rule P's cell-, row- and column-level proofs for a digit copy cell (spec P1-P3)."""
+    reading = _convert_prepared(text, 'number', origins)
+    own_percent = isinstance(reading.value, Decimal) and '%' in reading.number_format
+    fact = _percent_fact(origins)
+    heading = any(_percent_declaration(part) for part in labels)
+    row = _percent_declaration(label)
+    amount = _amount_fact(origins)
+    percent = own_percent or fact or heading or row
+    not_percent = '$' in text or amount or bool(_ROW_UNIT.search(header) or _ROW_UNIT.search(label))
+    # Today's explicit-unit conflicts stay conflicts: a percent heading, label or sign
+    # beside a '$' or a unit word anywhere on the cell's axes.
+    shown_percent = bool(_PERCENT.search(text)) or any(_PERCENT_UNIT.fullmatch(part.strip())
+                                                       for part in (*labels, label))
+    local = f'{header} {label} {text}'
+    disagree = '%' in text and any(item.unit_measures == ('xbrli:pure',) and item.scale != -2
+                                   for item in _value_facts(origins))
+    conflict = disagree or ((percent or shown_percent)
+                            and (amount or bool(_ROW_UNIT.search(local)) or '$' in local))
+    return _Proof('percent' if percent else 'number' if not_percent else None, conflict,
+                  own_percent or fact or row, fact and not (heading or row))
+
+
+class _BodyCell(NamedTuple):
+    """A copy cell once its role is decided, before the percent-column pass (spec P4)."""
+    text: str
+    origins: list
+    role: str
+    value: CellValue
+    marks_column: bool
+    unproven: bool
+    by_fact: bool
+
+
+def _unproven_value(text, origins):
+    """An unproven digit cell in a percent column keeps its source text (spec P4). A zero
+    the converter accepts converts; a token it rejects keeps its reason ('(0)')."""
+    reading = _convert_prepared(text, 'number', origins)
+    if reading.review_reason or reading.value.is_zero():
+        return reading
+    return CellValue(text, '@', text, _UNPROVEN)
 
 
 # Standalone structural fragments. ')%' reaches a copy cell only through the
@@ -902,11 +1022,15 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     # declaration must precede data and span all value columns, including the
     # common first grouping row (e.g. Inventories: / (In millions)).
     first_body_row = next((r for r in range(header_count, height) if any(original[r])), height)
-    unit_texts.extend(c.text for c in cells if c.row <= first_body_row
-                      and (c.column == 0 or (grid[c.row][0] and c.column == grid[c.row][0].colspan))
-                      and c.column + c.colspan == width and c.colspan > 1
-                      and _UNIT_DECLARATION.fullmatch(c.text.strip()) and c.text not in unit_texts)
+    captions = [c for c in cells if c.row <= first_body_row
+                and (c.column == 0 or (grid[c.row][0] and c.column == grid[c.row][0].colspan))
+                and c.column + c.colspan == width and c.colspan > 1]
+    unit_texts.extend(c.text for c in captions
+                      if _UNIT_DECLARATION.fullmatch(c.text.strip()) and c.text not in unit_texts)
     units = '\n'.join(unit_texts)
+    # Spec P1.5: a table-wide percent declaration comes from the positions units do.
+    table_percent = any(_table_percent_declaration(text)
+                        for text in (*snapshot.context_before, *(c.text for c in captions)))
     attached = _attached_percent_signs(grid, header_count)
     groups = _column_groups(grid, original, header_count, attached)
     group_origins = [[list(dict.fromkeys(grid[r][col] for col in group
@@ -937,13 +1061,13 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     # accounting fragment whose original successful validation used that part.
     actions = parser._validated_structural_actions(structural_grid, actions)
     kept = [col for col in range(len(groups)) if col not in actions]
-    headers, percent_headers = [], []
+    headers, header_labels = [], []
     for index, col in enumerate(kept):
         header_cells = list(dict.fromkeys(grid[r][groups[col][0]] for r in range(header_count)))
         labels = [c.text for c in header_cells if c and c.text and not _UNIT_LINE.search(c.text)]
         # Unit declarations belong to source components and their spans, not
         # the flattened display label (which can also contain period headings).
-        percent_headers.append(any(_PERCENT_UNIT.fullmatch(label.strip()) for label in labels))
+        header_labels.append(labels)
         headers.append(' — '.join(labels) or f'Column {index + 1}')
         if not labels:
             notes.append(f'Column {index + 1} is an exporter-generated positional header.')
@@ -951,40 +1075,56 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                 issues.append(f'Missing source header for Column {index + 1}; verify its meaning.')
     if not header_count:
         issues.append('No explicit headers; positional column names generated and every source row retained.')
-    rows, sources = [], []
     financial = sum(bool(_VALUE.search(row[0])) for row in original[header_count:] if row) >= 2
+    body = []
     for r in range(header_count, height):
-        row_values, row_sources = [], []
+        decided = []
         for index, col in enumerate(kept):
             contributors = [col] + [src for src, moves in actions.items() if moves.get(r - header_count + 1) == col]
             contributors.sort()
             origins = _with_attached(dict.fromkeys(c for src in contributors for c in group_origins[r][src]), attached)
             text = _joined(origins)
+            digits = bool(re.search(r'\d', text))
             # Labels are never promoted merely because they look numeric.
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
+            points = not label_column and bool(_POINTS.fullmatch(text))
+            proof = (_cell_proof(text, headers[index], header_labels[index], original[r][0], origins)
+                     if digits and not label_column else _NO_PROOF)
             role = 'text' if label_column else _numeric_role(
-                text, headers[index], original[r][0], origins, units, financial, percent_headers[index])
+                text, headers[index], original[r][0], origins, units, financial, table_percent, proof.role)
             value = _convert_prepared(text, role, origins)
             # Explicit units on either axis (or on the value itself) must agree.
             # Broader table units can still have specific row/column exceptions.
-            local_units = f'{headers[index]} {original[r][0]} {text}'
-            conflict = (not label_column and bool(re.search(r'\d', text)) and
-                        bool(percent_headers[index] or
-                             _PERCENT_UNIT.fullmatch(original[r][0].strip()) or _PERCENT.search(text)) and
-                        bool(_ROW_UNIT.search(local_units) or '$' in local_units))
-            if conflict:
+            if proof.conflict:
                 value = CellValue(text, '@', text, 'Conflicting explicit units; verify the row, column and displayed value units.')
-            elif not label_column and _POINTS.fullmatch(text):
+            elif points:
                 value = CellValue(text, '@', text, 'Percentage points; verify the unit.')
-            elif role == 'text' and index > 0 and re.search(r'\d', text) and not _identifier_column(headers[index]):
+            elif role == 'text' and index > 0 and digits and not _identifier_column(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
+            # Spec P4: no proof of either kind, and no table-wide declaration proving it.
+            unproven = (digits and not label_column and not points and proof.role is None and not proof.conflict
+                        and role != 'percent' and not _identifier_heading(headers[index]))
+            decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
+                                     unproven, proof.by_fact))
+        body.append(decided)
+    # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
+    # column a percent column, where unproven digit cells stay source text.
+    percent_columns = {index for decided in body for index, cell in enumerate(decided) if cell.marks_column}
+    rows, sources = [], []
+    for r, decided in enumerate(body, start=header_count):
+        row_values = []
+        for index, cell in enumerate(decided):
+            value = (_unproven_value(cell.text, cell.origins) if cell.unproven and index in percent_columns
+                     else cell.value)
+            column = groups[kept[index]][0]
             if value.review_reason:
-                issues.append(f'Source row {r}, column {groups[col][0]}: {value.review_reason}')
-            if role == 'percent' and '%' not in text and value.value is not None and not isinstance(value.value, str):
-                notes.append(f'Source ({r}, {groups[col][0]}): percentage meaning comes from the displayed heading or units.')
+                issues.append(f'Source row {r}, column {column}: {value.review_reason}')
+            if (cell.role == 'percent' and '%' not in cell.text and value.value is not None
+                    and not isinstance(value.value, str)):
+                meaning = "the cell's inline XBRL fact" if cell.by_fact else 'the displayed heading or units'
+                notes.append(f'Source ({r}, {column}): percentage meaning comes from {meaning}.')
             row_values.append(value)
-            row_sources.append(tuple((c.row, c.column) for c in origins))
         rows.append(tuple(row_values))
-        sources.append(tuple(row_sources))
+        sources.append(tuple(tuple((c.row, c.column) for c in cell.origins) for cell in decided))
     return PreparedTable(snapshot, title, units, tuple(headers), tuple(rows), tuple(sources), original,
                          tuple(notes), references, tuple(issues), 'needs_review' if issues else 'exported')
