@@ -985,7 +985,7 @@ git commit -m "docs: acceptance record for XLSX header detection"
 
 ### Task 4: CHANGELOG, usage doc and handoff
 
-Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2101 passed`, and `git log --oneline main..HEAD` shows four commits.
+Runs after Task 7. Revision 6 changes to this task: the CHANGELOG bullet's fallback numbers (`852 to 75`) and its claims come from Task 7's README, and it adds one sentence: `A body row holding a period caption and no amounts, as in stacked 10-Q equity statements, keeps today's header so no number lands under another block's period.` Step 3's expected full suite is `1 failed (known), 2101 passed`, and `git log --oneline main..HEAD` shows five commits (Tasks 1, 2, 5, the Task 5 fix round, 4).
 
 **Files:**
 - Modify (branch): `CHANGELOG.md`, `docs/usage/xlsx-export.md`
