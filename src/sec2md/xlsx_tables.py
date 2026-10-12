@@ -1101,6 +1101,9 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             copy_row.append((origins, _joined(origins)))
         copies.append(copy_row)
     shared = _shared_leaf_columns([_leaf(grid, header_count, groups[col][0]) for col in kept], copies)
+    # Ruling 10: a percent declaration withheld by that guard still makes its column
+    # a percent column, so values it cannot prove are flagged, never plain numbers.
+    shared_percent = {index for index in shared if any(_percent_declaration(part) for part in header_labels[index])}
     body = []
     for r, copy_row in enumerate(copies, start=header_count):
         decided = []
@@ -1123,15 +1126,19 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                 value = CellValue(text, '@', text, 'Percentage points; verify the unit.')
             elif role == 'text' and index > 0 and digits and not _identifier_column(headers[index]):
                 value = CellValue(text, '@', text, 'Numeric role unresolved; verify the column heading and units.')
-            # Spec P4: no proof of either kind, and no table-wide declaration proving it.
+            # Spec P4: no proof of either kind, and no table-wide declaration proving it
+            # (which never proves a column under a withheld percent header, Ruling 10).
             unproven = (digits and not label_column and not points and proof.role is None and not proof.conflict
-                        and role != 'percent' and not _identifier_heading(headers[index]))
+                        and (role != 'percent' or index in shared_percent)
+                        and not _identifier_heading(headers[index]))
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
                                      unproven, proof.by_fact))
         body.append(decided)
     # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
-    # column a percent column, where unproven digit cells stay source text.
-    percent_columns = {index for decided in body for index, cell in enumerate(decided) if cell.marks_column}
+    # column a percent column, as does a withheld percent header (Ruling 10).
+    # Unproven digit cells there stay source text.
+    percent_columns = shared_percent | {index for decided in body for index, cell in enumerate(decided)
+                                        if cell.marks_column}
     rows, sources = [], []
     for r, decided in enumerate(body, start=header_count):
         row_values = []

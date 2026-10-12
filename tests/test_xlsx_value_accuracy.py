@@ -318,14 +318,29 @@ def test_percent_of_retained_loans_header_proves_its_plain_values():
 
 
 def test_percent_header_never_proves_values_that_share_its_leaf():
-    """Ruling 7: NFLX #13's '$ | 1,323,096 | 7 | %' under one '% Change' leaf. The header
-    cannot say which value it describes, so only the '%' proves the percent."""
+    """Rulings 7 and 10: NFLX #13's '$ | 1,323,096 | 7 | %' under one '% Change' leaf. The
+    header cannot say which value it describes, so only the '%' proves the percent, and the
+    amount it still declares a percent is flagged rather than scaled."""
     table = prepared('<tr><th>Item</th><th colspan="4">% Change</th></tr>'
                      '<tr><td>Revenue</td><td>$</td><td>1,323,096</td><td>7</td><td>%</td></tr>')
     assert table.headers == ('Item', '% Change', '% Change', '% Change', '% Change')
-    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('$'),
-                                 (Decimal('1323096'), '#,##0', '1,323,096', None),
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('$'), text_cell('1,323,096', _UNPROVEN),
                                  (Decimal('0.07'), '0%', '7 %', None), (None, '@', '', None)]]
+    assert table.issues == (f'Source row 1, column 2: {_UNPROVEN}',)
+
+
+def test_shared_percent_header_flags_values_it_cannot_prove():
+    """Ruling 10: a '%' leaf over two values per row cannot say which value it describes,
+    yet declares percents, so plain values under it are flagged, never percentage points."""
+    table = prepared('<tr><th>Item</th><th colspan="2">%</th></tr>'
+                     '<tr><td>Revenue</td><td>100</td><td>100</td></tr>'
+                     '<tr><td>Cost of revenue</td><td>18</td><td>19</td></tr>')
+    assert table.headers == ('Item', '%', '%')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), text_cell('100', _UNPROVEN), text_cell('100', _UNPROVEN)],
+        [text_cell('Cost of revenue'), text_cell('18', _UNPROVEN), text_cell('19', _UNPROVEN)],
+    ]
+    assert table.issues == tuple(f'Source row {r}, column {c}: {_UNPROVEN}' for r in (1, 2) for c in (1, 2))
 
 
 def test_percent_row_label_proves_its_plain_value():
