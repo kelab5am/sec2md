@@ -48,3 +48,32 @@ def test_opening_balance_at_start_of_three_months_is_ok():
 
 def test_three_months_under_three_months_header_is_ok():
     assert period_verdict(duration('2025-01-01', '2025-03-31'), 'Three Months Ended March 31, 2025') == 'ok'
+
+
+# Fix round 1: lengths the first version read as a bare date, so any length passed.
+
+def test_fifty_two_weeks_under_fourteen_weeks_header_is_mismatch():
+    assert period_verdict(duration('2024-02-04', '2025-02-01'), '14 Weeks Ended February 1, 2025') == 'mismatch'
+
+
+def test_fourteen_weeks_under_spelled_out_weeks_header_is_ok():
+    assert period_verdict(duration('2024-10-27', '2025-02-01'), 'Fourteen Weeks Ended February 1, 2025') == 'ok'
+
+
+def test_three_months_under_hyphenated_year_ended_header_is_mismatch():
+    assert period_verdict(duration('2024-10-01', '2024-12-31'), 'Year-Ended December 31, 2024') == 'mismatch'
+
+
+def test_six_months_under_quarterly_period_header_is_mismatch():
+    header = 'For the quarterly period ended June 30, 2025'
+    assert period_verdict(duration('2025-01-01', '2025-06-30'), header) == 'mismatch'
+
+
+def test_duration_under_unparsed_length_is_reported():
+    header = 'Year to Date Ended September 30, 2025'
+    assert period_verdict(duration('2025-01-01', '2025-09-30'), header) == 'unparsed length'
+
+
+def test_instant_at_date_under_aging_bucket_is_ok():
+    header = 'December 31, 2024 — Less than 12 months — Fair Value'
+    assert period_verdict(instant('2024-12-31'), header) == 'ok'
