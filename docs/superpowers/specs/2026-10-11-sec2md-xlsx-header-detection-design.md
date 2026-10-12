@@ -552,8 +552,8 @@ checker did not recognise the others (CAT, NVO and several income statements).
   period row (MU 2021 #10); and exhibit indexes and lease-maturity tables whose
   rows carry dates (`dated March 4, 2025`, `2/22/2024`,
   `Year ending December 31:`) revert to today's header. In the 60 filings the
-  guard returns 82 tables besides the 21 D1 tables and TSM #105 to today's
-  output (1,592 fewer numeric cells than revision 5, 33 of them falling back
+  guard returns 85 tables besides the 21 D1 tables, TSM #105 and JPM #159, #161 and #241 to today's
+  output (1,687 fewer numeric cells than revision 5, 35 of them falling back
   again); the audit README lists them. None is a primary statement, and none
   can misplace a number. The follow-up is a separate spec: keep the statement
   on one sheet and give each block its own header row, so the 2025 block sits
