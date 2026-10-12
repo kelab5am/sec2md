@@ -771,14 +771,14 @@ _PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecim
 _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
 # Ruling 21: a row label naming a unit other than a percent: in parentheses ('Expected
 # term (in years)', 'Interest coverage (times)', 'Net leverage ratio (x)'), after 'in'
-# ('Remaining life in years'), as the label's measure ('Days sales outstanding'), or
-# bps, basis points and percentage points anywhere. Period wording is stripped first
-# ('Six months ended June 30'); a word that names no unit ('Changes in prior years' tax
-# positions') is none.
+# ('Remaining life in years'), after a closing separator ('Average life, years'), as the
+# label's measure ('Days sales outstanding'), or bps, basis points and percentage points
+# anywhere. Period wording is stripped first ('Six months ended June 30'); a word that
+# names no unit ('Changes in prior years' tax positions') is none.
 _OTHER_UNIT = re.compile(
     r'\(\s*(?:in\s+)?(?:years|months|days|times|x|bps|basis points|percentage points|points|pts)\s*\)'
-    r'|\bin (?:years|months|days)\b|^(?:number of )?(?:years|months|days)\b|^times\b'
-    r'|\b(?:bps|basis points|percentage points)\b', re.I)
+    r'|\bin (?:years|months|days)\b|[,:–—-]\s*(?:years|months|days|times|x)$'
+    r'|^(?:number of )?(?:years|months|days)\b|^times\b|\b(?:bps|basis points|percentage points)\b', re.I)
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).

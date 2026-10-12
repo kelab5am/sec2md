@@ -1002,9 +1002,9 @@ _RATES = ([text_cell('Risk-free interest rate'), (Decimal('0.042'), '0.0%', '4.2
 
 
 @pytest.mark.parametrize('label', [
-    'Expected term (in years)', 'Vesting period (months)', 'Remaining life in years', 'Days sales outstanding',
-    'Times interest earned', 'Interest coverage (times)', 'Net leverage ratio (x)', 'Credit spread (bps)',
-    'Change in spread, basis points', 'Gross margin change (percentage points)',
+    'Expected term (in years)', 'Vesting period (months)', 'Remaining life in years', 'Average life, years',
+    'Days sales outstanding', 'Times interest earned', 'Interest coverage (times)', 'Net leverage ratio (x)',
+    'Credit spread (bps)', 'Change in spread, basis points', 'Gross margin change (percentage points)',
 ])
 def test_row_label_naming_another_unit_conflicts_with_a_table_wide_declaration(label):
     """Ruling 21 (A1): '(in percent)' declares the table percents, but a row label naming
