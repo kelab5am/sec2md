@@ -461,12 +461,19 @@ _HEADING_WORD = re.compile(
     r'(?:description|exhibit(?: number| no\.?)?|period|issuance(?: period)?|name(?:/title| of [a-z ]+)?'
     r'|record date|payment date|plan category|instrument|fiscal year|investment type|pricing category'
     r'|range of exercise prices|type|category|item|class|security|date[a-z ]*)(?:\s*\(\d\))?', re.I)
-# Period text (revision 6): footnote markers, dates, years, period words and
-# punctuation, and nothing else.
-_FOOTNOTE_MARK = re.compile(r'\(\d{1,2}\)|\*+')
-_DATE_WORDS = re.compile(rf'{_MONTH} \d{{1,2}}', re.I)
+# Period text (revision 6): footnote markers, qualifiers, dates, years, week
+# counts, period words and punctuation, and nothing else. Month names are whole
+# words here, so 'Market 10' is not a date.
+_FOOTNOTE_MARK = re.compile(r'\([a-z\d]{1,2}\)|\*+', re.I)
+_PERIOD_QUALIFIER = re.compile(
+    r'\((?:unaudited|audited|restated|as restated|as adjusted|as reported|as previously reported)\)', re.I)
+_DATE_WORDS = re.compile(r'\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?'
+                         r'|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\.? \d{1,2}', re.I)
+_NUMERIC_DATE = re.compile(r'\b\d{1,2}/\d{1,2}/(?:\d{4}|\d{2})\b')
+_WEEK_COUNT = re.compile(r'\b(?:\d{1,2}|thirteen|twenty[- ]six|thirty[- ]nine|fifty[- ]two|fifty[- ]three)'
+                         r'[- ]weeks?\b', re.I)
 _PERIOD_VOCABULARY = re.compile(r'\b(?:three|six|nine|twelve|fiscal|months?|years?|quarters?|weeks?|periods?'
-                                r'|ended|ending|as|of|at|for|the|and|through|to)\b|[,.\-–—]', re.I)
+                                r'|ended|ending|as|of|at|for|the|and|from|through|to)\b|[,.\-–—]', re.I)
 
 
 def _row_origins(row):
@@ -505,22 +512,31 @@ def _heading_label(text):
 
 def _period_text(text):
     """Text that only names a period: 'Three months ended March 31, 2025',
-    'December 31, 2025 (1)', '2023 (2)'. Not 'Balance as of December 31, 2024' or
-    'Fiscal Year' (no date, year or 'ended')."""
+    'December 31, 2025 (a)', '2023 (2)', 'Thirteen Weeks Ended May 3, 2025:',
+    '12/31/2024'. Not 'Balance as of December 31, 2024' or 'Fiscal Year' (no date,
+    year or 'ended')."""
     text = re.sub(r'\s+', ' ', text).strip()
     rest = _FOOTNOTE_MARK.sub(' ', text)
-    for pattern in (_DATE_WORDS, _HAS_YEAR, _PERIOD_VOCABULARY):
+    rest = re.sub(r':$', '', _PERIOD_QUALIFIER.sub(' ', rest).strip())
+    for pattern in (_DATE_WORDS, _NUMERIC_DATE, _HAS_YEAR, _WEEK_COUNT, _PERIOD_VOCABULARY):
         rest = pattern.sub(' ', rest)
-    return not rest.strip() and bool(_DATE_WORDS.search(text) or _HAS_YEAR.search(text)
-                                     or re.search(r'\bended\b', text, re.I))
+    return not rest.strip() and bool(_DATE_WORDS.search(text) or _NUMERIC_DATE.search(text)
+                                     or _HAS_YEAR.search(text) or re.search(r'\bended\b', text, re.I))
 
 
 def _period_row(row):
-    """A row without data in which some origin, label included, is period text:
-    a caption, a row of years or dates, or a caption beside column headings."""
+    """A row without data (a cell holding only a footnote marker is not data) in
+    which some origin, label included, is period text, or a heading contains a
+    period phrase ('Three months ended March 31, 2025, as restated'). A label
+    that only mentions a period ('… for the years ended December 31:') does not
+    count, so section labels in statements do not make period rows."""
     cells = _row_origins(row)
-    return (bool(cells) and not any(_is_data_cell(cell) for cell in cells)
-            and any(_period_text(cell.text) for cell in cells))
+    label = row[0] if row[0] is not None and row[0].text.strip() else None
+    return (bool(cells)
+            and not any(_is_data_cell(cell) and not _FOOTNOTE_MARK.fullmatch(cell.text.strip()) for cell in cells)
+            and (any(_period_text(cell.text) for cell in cells)
+                 or any(_PERIOD_PHRASE.search(cell.text) or _NUMERIC_DATE.search(cell.text)
+                        for cell in cells if cell is not label)))
 
 
 def _export_header_count(grid):

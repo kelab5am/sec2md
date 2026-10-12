@@ -389,41 +389,82 @@ def headers_over_amounts(table, first_row):
 # META 10-Qs: the first block's caption row over column headings over amounts.
 EQUITY_HEADINGS = ('<tr><td></td><td colspan="3">Accumulated Deficit</td>'
                    "<td colspan=\"3\">Total Stockholders' Equity (Deficit)</td></tr>")
-FIRST_BLOCK = ('<tr><td></td><td colspan="6">Three months ended March 31, 2024</td></tr>' + EQUITY_HEADINGS
-               + money('Balance as of December 31, 2023', '(1,190,563)', '1,893,071')
-               + money('Net loss', '(575,076)', '(575,076)'))
+FIRST_CAPTION = 'Three months ended March 31, 2024'
+
+
+def first_block(caption):
+    return (f'<tr><td></td><td colspan="6">{caption}</td></tr>' + EQUITY_HEADINGS
+            + money('Balance as of December 31, 2023', '(1,190,563)', '1,893,071')
+            + money('Net loss', '(575,076)', '(575,076)'))
+
+
+def caption_row(caption):
+    return f'<tr><td></td><td colspan="6">{caption}</td></tr>' + EQUITY_HEADINGS
+
+
+def caption_beside_headings(caption):
+    return (f'<tr><td>{caption}</td><td colspan="3">Accumulated Deficit</td>'
+            "<td colspan=\"3\">Total Stockholders' Equity (Deficit)</td></tr>")
+
+
+def label_caption(caption):
+    return f'<tr><td>{caption}</td><td colspan="6"></td></tr>' + EQUITY_HEADINGS
+
+
+FIRST_BLOCK = first_block(FIRST_CAPTION)
 SECOND_BLOCK_ROW = 4  # the source row of the second block's caption
 SECOND_BLOCK_AMOUNTS = (money('Balance as of December 31, 2024', '(1,705,853)', '2,130,749')
                         + money('Net income', '26,158', '26,158'))
 
 
-@pytest.mark.parametrize('second_caption', [
-    '<tr><td></td><td colspan="6">Three months ended March 31, 2025</td></tr>' + EQUITY_HEADINGS,
-    '<tr><td>Three months ended March 31, 2025</td><td colspan="3">Accumulated Deficit</td>'
-    "<td colspan=\"3\">Total Stockholders' Equity (Deficit)</td></tr>",
-    '<tr><td></td><td colspan="6">Three Months Ended June 30, 2025 and 2024</td></tr>' + EQUITY_HEADINGS,
-    '<tr><td></td><td colspan="6">Three Months Ended June 30, 2025 (1)</td></tr>' + EQUITY_HEADINGS,
-    '<tr><td>Three months ended March 31, 2025</td><td colspan="6"></td></tr>' + EQUITY_HEADINGS,
-], ids=['caption-row', 'caption-beside-headings', 'two-years', 'footnoted', 'label-column'])
-def test_guard_stacked_period_blocks(second_caption, monkeypatch):
+@pytest.mark.parametrize('first_caption, second_caption', [
+    (FIRST_CAPTION, caption_row('Three months ended March 31, 2025')),
+    (FIRST_CAPTION, caption_beside_headings('Three months ended March 31, 2025')),
+    (FIRST_CAPTION, caption_row('Three Months Ended June 30, 2025 and 2024')),
+    (FIRST_CAPTION, caption_row('Three Months Ended June 30, 2025 (1)')),
+    (FIRST_CAPTION, label_caption('Three months ended March 31, 2025')),
+    (FIRST_CAPTION, caption_row('Three Months Ended March 31, 2025 (a)')),
+    (FIRST_CAPTION, caption_beside_headings('Three Months Ended March 31, 2025 (Unaudited)')),
+    (FIRST_CAPTION, label_caption('Three months ended March 31, 2025:')),
+    ('Thirteen Weeks Ended May 4, 2024', caption_row('Thirteen Weeks Ended May 3, 2025')),
+    (FIRST_CAPTION, caption_row('Period from January 1, 2025 through March 31, 2025')),
+    (FIRST_CAPTION, caption_row('Three months ended March 31, 2025, as restated')),
+    (FIRST_CAPTION, '<tr><td></td><td colspan="5">Three months ended March 31, 2025</td><td>(1)</td></tr>'
+     + EQUITY_HEADINGS),
+    (FIRST_CAPTION, '<tr><td>Three months ended March 31, 2025</td><td colspan="5"></td><td>*</td></tr>'
+     + EQUITY_HEADINGS),
+], ids=['caption-row', 'caption-beside-headings', 'two-years', 'footnoted', 'label-column', 'letter-footnote',
+        'unaudited-beside-headings', 'colon-label-column', 'thirteen-weeks', 'period-from-through', 'as-restated',
+        'footnote-own-cell', 'star-own-cell-label-column'])
+def test_guard_stacked_period_blocks(first_caption, second_caption, monkeypatch):
     # D1: the extended header would put the second block's amounts under the first block's period.
-    source = '<table>' + FIRST_BLOCK + second_caption + SECOND_BLOCK_AMOUNTS + '</table>'
+    source = '<table>' + first_block(first_caption) + second_caption + SECOND_BLOCK_AMOUNTS + '</table>'
     table = prepared(source)
     assert outcome(table) == outcome(todays(source, monkeypatch))
-    assert not any('March 31, 2024' in header for header in headers_over_amounts(table, SECOND_BLOCK_ROW))
+    assert not any(first_caption in header for header in headers_over_amounts(table, SECOND_BLOCK_ROW))
+
+
+def years_under_instant(first, second):
+    return ('<table><tr><td></td><td colspan="4">December 31,</td></tr>'
+            f'<tr><td></td><td></td><td>{first}</td><td></td><td>{second}</td></tr>'
+            '<tr><td>Cash</td><td>$</td><td>43,889</td><td>$</td><td>41,862</td></tr></table>')
+
+
+def dates_under_measurement_date(label, first, second):
+    return ('<table><tr><td></td><td colspan="4">Measurement Date</td></tr>'
+            f'<tr><td>{label}</td><td colspan="2">{first}</td><td colspan="2">{second}</td></tr>'
+            '<tr><td>Expected volatility</td><td colspan="2">30.5%</td><td colspan="2">28.1%</td></tr></table>')
 
 
 @pytest.mark.parametrize('source', [
-    '<table><tr><td></td><td colspan="4">December 31,</td></tr>'
-    '<tr><td></td><td></td><td>2024</td><td></td><td>2023</td></tr>'
-    '<tr><td>Cash</td><td>$</td><td>43,889</td><td>$</td><td>41,862</td></tr></table>',
-    '<table><tr><td></td><td colspan="4">Measurement Date</td></tr>'
-    '<tr><td></td><td colspan="2">December 31, 2023</td><td colspan="2">December 31, 2024</td></tr>'
-    '<tr><td>Expected volatility</td><td colspan="2">30.5%</td><td colspan="2">28.1%</td></tr></table>',
-    '<table><tr><td></td><td colspan="4">Measurement Date</td></tr>'
-    '<tr><td>Date</td><td colspan="2">December 31, 2023</td><td colspan="2">December 31, 2024</td></tr>'
-    '<tr><td>Expected volatility</td><td colspan="2">30.5%</td><td colspan="2">28.1%</td></tr></table>',
-], ids=['years-under-instant', 'dates-under-measurement-date', 'dates-labelled-date'])
+    years_under_instant('2024', '2023'),
+    dates_under_measurement_date('', 'December 31, 2023', 'December 31, 2024'),
+    dates_under_measurement_date('Date', 'December 31, 2023', 'December 31, 2024'),
+    dates_under_measurement_date('', 'December 31, 2023 (a)', 'December 31, 2024 (a)'),
+    dates_under_measurement_date('', '12/31/2023', '12/31/2024'),
+    years_under_instant('2024 (a)', '2023 (a)'),
+], ids=['years-under-instant', 'dates-under-measurement-date', 'dates-labelled-date', 'letter-footnoted-dates',
+        'numeric-dates', 'letter-footnoted-years'])
 def test_guard_stranded_period_rows(source, monkeypatch):
     # I1: an accepted period row below the evidenced row would leave its periods out of the headers.
     assert outcome(prepared(source)) == outcome(todays(source, monkeypatch))
@@ -437,6 +478,18 @@ def test_guard_ignores_rows_with_amounts():
     assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
     assert values(table) == [['Balance as of December 31, 2024', Decimal('2130749'), Decimal('1893071')],
                              ['2026', Decimal('1234'), Decimal('1100')]]
+
+
+def test_guard_ignores_label_with_period_phrase():
+    # A section label that only mentions a period is not a period row, so the statement keeps its header.
+    label = 'Supplemental cash flow information for the years ended December 31:'
+    table = prepared('<table>' + DATE_OVER_YEARS + money('Net cash provided by operating activities', '91,328', '71,113')
+                     + f'<tr><td>{label}</td><td colspan="6"></td></tr>'
+                     + money('Cash paid for income taxes, net', '9,999', '6,407') + '</table>')
+    assert table.headers == ('Column 1', 'December 31, — 2024', 'December 31, — 2023')
+    assert values(table) == [['Net cash provided by operating activities', Decimal('91328'), Decimal('71113')],
+                             [label, None, None],
+                             ['Cash paid for income taxes, net', Decimal('9999'), Decimal('6407')]]
 
 
 @pytest.mark.parametrize('label, first, second', [('Revenue', '2024', '2025'),
@@ -461,8 +514,13 @@ def test_guard_cost_on_repeated_section_label(monkeypatch):
 @pytest.mark.parametrize('text, expected', [
     ('Three months ended March 31, 2025', True), ('Three Months Ended June 30, 2025 and 2024', True),
     ('December 31, 2025 (1)', True), ('Six Months Ended', True), ('December 31,', True), ('2023 (2)', True),
-    ('As of December 31, 2024', True), ('Balance as of December 31, 2024', False),
-    ('2024 vs 2023 % change', False), ('Common Stock', False), ('Fiscal Year', False)])
+    ('As of December 31, 2024', True), ('Three Months Ended March 31, 2025 (a)', True),
+    ('Three Months Ended March 31, 2025 (Unaudited)', True), ('Three months ended March 31, 2025:', True),
+    ('Thirteen Weeks Ended May 3, 2025', True), ('Period from January 1, 2025 through March 31, 2025', True),
+    ('12/31/2024', True), ('2024 (a)', True), ('March 31, 2025 (Restated)', True),
+    ('Balance as of December 31, 2024', False), ('2024 vs 2023 % change', False), ('Common Stock', False),
+    ('Fiscal Year', False), ('Market 10', False),
+    ('Cash paid for income taxes for the years ended December 31,', False)])
 def test_period_text(text, expected):
     assert xlsx_tables._period_text(text) is expected
 
