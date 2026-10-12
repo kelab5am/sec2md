@@ -537,10 +537,11 @@ checker did not recognise the others (CAT, NVO and several income statements).
   reads as a footnote marker, so a row such as `2020 from 2019 | (34) | %` is a
   period row (MU 2021 #10); and exhibit indexes and lease-maturity tables whose
   rows carry dates (`dated March 4, 2025`, `2/22/2024`,
-  `Year ending December 31:`) revert to today's header. In the 60 filings this
-  affects CRM #79, MSFT 2025 #80, NTRA 2025 #32, #45 and #46, and RDDT #47,
-  #48, #62, #63 and #64. None is a primary statement, and none can misplace a
-  number. The follow-up is a separate spec: keep the statement
+  `Year ending December 31:`) revert to today's header. In the 60 filings the
+  guard returns 82 tables besides the 21 D1 tables and TSM #105 to today's
+  output (1,592 fewer numeric cells than revision 5, 33 of them falling back
+  again); the audit README lists them. None is a primary statement, and none
+  can misplace a number. The follow-up is a separate spec: keep the statement
   on one sheet and give each block its own header row, so the 2025 block sits
   beneath the 2024 block under its own period.
 - **Table-wide percent captions.** `_numeric_role` reads plain amounts as
