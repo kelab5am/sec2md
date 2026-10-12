@@ -114,26 +114,37 @@ stays zero, blank stays blank, and a reported dash stays the exact text dash.
 
 A number becomes a fraction only on proof that it is a percent: its own `%`, an
 inline XBRL percent fact in the cell, a percent heading such as `% Change`, a
-percent row label, or a table-wide percent caption. A `%` in the next column
-counts as the number's own only when it sits directly beside it and its column
-holds nothing else; negative percents such as `(29) %` become `-0.29`. A percent
-word in an `except` caption, such as `(in millions, except percentages)`, proves
-nothing. Under an identifier-like heading, a cell converts only with its own
-`$`, `%` or inline XBRL fact. Cells without proof stay source text, the table
-becomes `needs_review`, and the export report gives the reason:
+percent row label, or a table-wide percent caption. A heading or caption over
+two values in one row proves neither of them. A `%` in the next column counts as
+the number's own only when it sits directly beside it and its column holds
+nothing else; negative percents such as `(29) %` become `-0.29`. A percent word
+in an `except` caption proves nothing, as in
+`(In millions, except per share and percentage data)`. Under an identifier-like
+heading, a cell converts only with its own `$`, `%` or inline XBRL fact. Numbers
+that need proof and lack it stay source text. When one of the cases below
+applies, the export report gives the reason and the table becomes
+`needs_review`; other text, such as a note reference under `Notes`, stays
+unflagged as before.
 
-- `Percent sign on other rows of this column; verify the scale.`: a plain number
-  in a column whose other rows carry `%` (zeros still convert), or a number
-  whose separate `%` could not be attached safely.
-- `Percentage points; verify the unit.`: a change such as `26.6 pts`.
-- `Identifier heading over quantities; verify the column.`: a plain number under
-  an identifier-like heading such as `Full Year 2024`, where other cells of the
-  column prove amounts.
-- `Identifier heading over amount-formatted values; verify the column.`: a
-  comma-grouped or parenthesised number under such a heading when no cell
-  proves an amount. Footnote marks such as `(1)` stay text without a reason.
-- `Conflicting explicit units; verify the row, column and displayed value
-  units.`: proofs disagree, such as a `$` amount under a percent heading.
+- `Percent sign on other rows of this column; verify the scale.`
+  A number without proof in a column where another row has its own `%`, a
+  percent fact or a percent row label. This includes amounts:
+  `Tier 1 capital 294,881` below `$ 275,513` is flagged although the number is
+  right. It also applies to a number under a percent heading or caption over two
+  values in one row, and to a number whose separate `%` could not be attached
+  safely. Zeros still convert.
+- `Percentage points; verify the unit.`
+  A change such as `26.6 pts`.
+- `Identifier heading over quantities; verify the column.`
+  A plain number under an identifier-like heading such as `Full Year 2024`,
+  where another cell of the column proves a quantity.
+- `Identifier heading over amount-formatted values; verify the column.`
+  A comma-grouped or parenthesised number under such a heading when no cell
+  proves a quantity. Footnote marks such as `(1)` are not amounts and stay
+  unflagged.
+- `Conflicting explicit units; verify the row, column and displayed value units.`
+  A `$` together with a percent proof, such as a `$` amount under a percent
+  heading or a `$` in the heading of a percent column (`% Change in NT$`).
 
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding
