@@ -5,11 +5,12 @@ This records the acceptance run for:
 - Task 6 of its plan ([`../../plans/2026-10-12-sec2md-xlsx-value-accuracy.md`](../../plans/2026-10-12-sec2md-xlsx-value-accuracy.md)).
 
 **Inputs:**
-- **Candidate:** branch `fix/xlsx-value-accuracy` at **`ecc5990`**, its final commit, in the worktree `.worktrees/xlsx-value-accuracy`.
-- **Runs:** this is the third acceptance run.
+- **Candidate:** branch `fix/xlsx-value-accuracy` at **`b7bd072`**, its final commit, in the worktree `.worktrees/xlsx-value-accuracy`.
+- **Runs:** this is the fourth acceptance run.
   - The first run, on `7484006`, was blocked (below).
   - The second run, on `732544d`, passed every gate, including fix round 1 of the review. The figures below hold for both the second and the third run unless a section marks a difference.
-  - The third run, on `ecc5990`, is the final rerun after Rulings 21–27. It differs from `732544d` in 13 text cells only ("Final rerun on `ecc5990`" below).
+  - The third run, on `ecc5990`, is the rerun after Rulings 21–27. It differs from `732544d` in 13 text cells only ("Final rerun on `ecc5990`" below).
+  - The fourth run, on `b7bd072`, is the final acceptance after Rulings 28–30. Its export is byte-identical to `ecc5990`'s ("Final acceptance on `b7bd072`" below).
 - **Baseline:** `outputs/xlsx-value-accuracy/base`. It is `main`'s `src` exported by Task 1; `src` on `main` is unchanged since `1c0ac51`.
 - **Manifest:** [`manifest.json`](manifest.json), with 4,048 entries built from that baseline by [`manifest.py`](manifest.py).
 - **Corpus:** the 60 filings of the header-detection audit (`../2026-10-11-xlsx-header-detection/filings.txt`).
@@ -35,7 +36,101 @@ The user decided the fix (user decision of 2026-10-13 and Rulings 13–18a in [`
   - its columns hold nothing else in any other body row, with `)` / `%)` fragments and unit-caption rows aside (Rulings 18, 18a).
 - **Safety net:** any value whose marker is refused becomes text with the P4 reason (Ruling 13), whatever its other proofs. A zero still converts, and a token the converter rejects keeps the converter's reason.
 
-The first run's export is kept as `outputs/xlsx-value-accuracy/new-7484006`, and the second run's as `new-732544d` (both git-ignored).
+The earlier exports are kept as `outputs/xlsx-value-accuracy/new-7484006`, `new-732544d` and `new-ecc5990` (all git-ignored).
+
+## Final acceptance on `b7bd072` (Rulings 28–30)
+
+Rulings 28–30 ([`rulings.md`](rulings.md); spec Revision 3) followed the `ecc5990` run:
+- **Ruling 28:** a sign disagreement between display and fact is not flagged (a known gap).
+- **Ruling 29:** under a table-wide declaration a currency label is a local non-percent unit, and a `pp` glued to a number is a points unit, while `PP&E` is not.
+- **Ruling 30:** under a table-wide declaration only a unit-position currency symbol keeps the displayed value; any other currency symbol in a label gives conflict text.
+
+**The export.** `b7bd072`'s `src` was exported into `outputs/xlsx-value-accuracy/new`, with 60 JSONs and 3,702 tables.
+- It ran from 12:07:59 to 12:19:44, 11m44s, at Idle priority with 3 workers, and exited 0. No other export was running, and none of its processes were left.
+- **It is byte-identical to the `ecc5990` export in all 60 files.** `rerun_diff.py new-ecc5990 new` reports 0 tables and 0 cells, and the reviewer's whole-file `deepdiff.py` reports 0 differences.
+- So no number, NVDA cell or statement-table cell changed, and there is no cell for a ruling to explain.
+
+**Gates.** Every gate passes on `base` against the new export.
+
+| Gate | Result |
+|---|---|
+| Dispositions | 0 invalid |
+| Split audit | 0 disagreements; Ruling 19: 144 / 144 / 144 |
+| Percent facts | 789 equal, 0 differ |
+| Primary statements | 126 vault statements with the same OK counts, identical to base |
+| Changed cells | 1,764, all as the spec gives; 948 numbers, 0 unproven |
+| Axes and removed columns | 0 axis changes; 54 of 54 tables explained |
+| Statement tables | 167, untouched |
+| `all_facts.py` | 0 new mismatches |
+| Stacked-block scans | 0 new hits |
+| All-cells sweep (new) | Pass, below |
+
+The `changes.py` log is identical to the `ecc5990` run's.
+
+**Checker changes in this run.** Each was made before the final gate run, and every affected cell is listed.
+
+1. **Rulings 29 and 30, encoded from the spec's text.**
+   - Under an in-table table-wide caption, a currency symbol (`$`, `US$`, `NT$`, `€`, `£`, `¥`) in a row or header label in unit position (`($)`, `(in $)`, `(US$ in millions)`, or a closing token such as `Price, US$`) is a non-percent unit.
+   - Any other currency symbol there is a conflict, and so is a local percent claim beside any currency label.
+   - The corpus has **0 tables with an in-table table-wide caption**, so these rules decide no cell. NVDA's context-line declarations are not in the export JSON; the sweep below holds NVDA's cells to the baseline.
+2. **Ruling 29's `pp`.** The checker's vocabulary now counts a bare `pp` only when no letter or `&` stands beside it. `Change 25pp` and `+25pp` count, while `PP&E` does not; `PP & E`, with spaces, still counts, as Ruling 24's known gap says. On all 18,638 distinct corpus labels the checker and the branch now agree on unit naming, percent-named headings and percent declarations: 0 disagreements.
+3. **Ruling 28 needs no encoding.** A sign-mismatched fact is no percent-fact proof in the checker either (spec P1.2), and it is not contrary evidence. The displayed token decides, as in the branch.
+4. **A precision fix found by the new all-cells sweep (3 cells).** The checker read a token such as `$(1,732)` or `$ (11.0)` held in one source cell as a complete number. The exporter converts `$ (x)` only when the `$` is a standalone fragment origin (the structural join). The checker now requires that. This affects 3 cells, all identical to base and all text with the converter's `Not a complete supported US numeric token`:
+   - JPM 10-K #162 [1, 4] `$(1,732)`, under `2023`, label `Foreign exchange derivatives`;
+   - JPM 10-K #162 [1, 5] `$(123)`, under `2022`;
+   - TSM 20-F #68 [9, 2] `$ (11.0)`, `Financial assets at FVTOCI`.
+
+   The same change makes a non-percent proof over a token the converter rejects expect the converter's own reason; the checker had expected nothing there. This affects 113 cells, all identical to base. The 3 cells above are among them.
+
+**The all-cells sweep (new gate, in `dispositions.py`).** Every digit copy cell of the export (column 0 aside, every table that is not source text), 65,441 cells, manifest entries or not, is held against the checker's expectation:
+- **55,711 match it.**
+- **9,235 are "today's behaviour".** The checker finds no proof and no percent column, so each must be identical to its baseline cell. Every one is: 5,408 text cells and 3,827 numbers. The checker does not model `main`'s role rules (`Numeric role unresolved`, footnote-marker reasons), so here `main`'s own output is the expectation, and a no-proof cell may not even equal its displayed number unless it is unchanged.
+- **495 are NVDA's percent-of-revenue values.** Their table-wide declaration sits in the context lines, which the export JSON does not hold. Each must be an NVDA number equal to the displayed number / 100, identical to base, in a table with no in-table caption, and the gate requires exactly 495, the spec's count.
+- **0 mismatches.**
+
+Two mutation tests check the sweep on scratch copies:
+- mutation 4 changes NVDA 10-K FY2024 #8 `Cost of revenue 27.3` from 0.273 to 27.3. The sweep reports 1 mismatch, the NVDA count drops to 494, and the gate fails;
+- the reviewer's mutation 1 (GOOGL `73,943` made a number) now also fails the sweep, besides `changes.py`.
+
+**The three unmodelled outcomes, measured.** [`unmodelled_scan.py`](unmodelled_scan.py) (adapted from the reviewer's `scan_unmodelled.py`) counts the corpus cells that the three outcomes of Rulings 21–23 the checker does not model could decide, and finds:
+- (i) other digit cells of a `$` or amount-fact column under a percent declaration or caption: 0;
+- (ii) digit cells under an amount heading with a table-wide caption: 0;
+- (iii) `%` / `)%` cells spanning two body rows: 0.
+
+**Vocabulary edges.** The unit vocabularies agree on every corpus label, and differ on 5 of the reviewer's 58 constructed probes:
+- **The checker names no unit where the branch does** in `Weighted average months to maturity` (the spec names only `years to maturity`), `Years 1, - 5` and `Months 1.-3` (the checker's bucket exemption reads digits with commas and dots).
+- **The checker names a unit where the branch does not** in `Change; years` (the checker also takes `;` as a closing separator) and `Rate (x.)`.
+
+On a cell with a percent claim, either kind of difference would make the checker and the branch disagree, so the gates would fail rather than pass. None occurs in the corpus.
+
+**The 24 KO #12 cells reattributed in the `ecc5990` run.** These were already P4 text in `732544d`, are unchanged since, and are now attributed to the percent-named heading (Ruling 21). Their headers all start `Percent Change 2024 versus 2023 —`.
+
+| Copy cell | Row | Header part | Text | Kind |
+|---|---|---|---|---|
+| [1, 1] | Europe, Middle East & Africa | Volume1 | `(1)` | changed cell |
+| [2, 1] | Latin America | Volume1 | `3` | changed cell |
+| [3, 1] | North America | Volume1 | `1` | changed cell |
+| [4, 1] | Asia Pacific | Volume1 | `2` | changed cell |
+| [5, 1] | Global Ventures | Volume1 | `4` | changed cell |
+| [6, 1] | Bottling Investments | Volume1 | `5` | changed cell |
+| [1, 2] | Europe, Middle East & Africa | Price, Product & Geographic Mix | `17` | changed cell |
+| [2, 2] | Latin America | Price, Product & Geographic Mix | `21` | changed cell |
+| [3, 2] | North America | Price, Product & Geographic Mix | `10` | changed cell |
+| [4, 2] | Asia Pacific | Price, Product & Geographic Mix | `2` | changed cell |
+| [5, 2] | Global Ventures | Price, Product & Geographic Mix | `(3)` | changed cell |
+| [6, 2] | Bottling Investments | Price, Product & Geographic Mix | `5` | changed cell |
+| [1, 3] | Europe, Middle East & Africa | Foreign Currency Exchange Rate Fluctuations | `(16)` | changed cell |
+| [2, 3] | Latin America | Foreign Currency Exchange Rate Fluctuations | `(14)` | changed cell |
+| [4, 3] | Asia Pacific | Foreign Currency Exchange Rate Fluctuations | `(3)` | changed cell |
+| [5, 3] | Global Ventures | Foreign Currency Exchange Rate Fluctuations | `2` | changed cell |
+| [6, 3] | Bottling Investments | Foreign Currency Exchange Rate Fluctuations | `(2)` | changed cell |
+| [6, 4] | Bottling Investments | Acquisitions & Divestitures2 | `(28)` | changed cell |
+| [1, 5] | Europe, Middle East & Africa | Total | `1` | manifest `percent_row_joined` |
+| [2, 5] | Latin America | Total | `11` | manifest `percent_row_joined` |
+| [3, 5] | North America | Total | `11` | manifest `percent_row_joined` |
+| [4, 5] | Asia Pacific | Total | `2` | manifest `percent_row_joined` |
+| [5, 5] | Global Ventures | Total | `2` | manifest `percent_row_joined` |
+| [6, 5] | Bottling Investments | Total | `(21)` | manifest `percent_row_joined` |
 
 ## Final rerun on `ecc5990` (Rulings 21–27)
 
@@ -85,11 +180,11 @@ Three outcomes of Rulings 21–23 are not modelled:
 - an amount heading under a table-wide declaration flagging its unproven cells (Ruling 8 as amended);
 - a `%` spanning two rows never joining a value.
 
-A cell any of them decides would fail the gates, because the checker still expects the earlier outcome, so none can pass unnoticed. The diff shows they changed no cell in this corpus. The three mutation tests of fix round 1 still fail on the `ecc5990` export (below).
+If the branch applied one of them to a cell, the gates would fail, because the checker still expects the earlier outcome. If the branch failed to apply one, the gates would not notice. `unmodelled_scan.py` finds 0 corpus cells of the shapes they decide ("Final acceptance on `b7bd072`" above), so neither case arises here. The three mutation tests of fix round 1 still fail on the `ecc5990` export (below).
 
 ## Result in one paragraph
 
-Every gate passes on `ecc5990` (and passed on `732544d`).
+Every gate passes on `b7bd072`, whose export equals `ecc5990`'s (and passed on `732544d`).
 - **Dispositions (Acceptance 3).** All 4,048 manifest entries have a valid disposition:
   - 338 proven percents, each with its proof named;
   - 47 proven quantities;
@@ -118,7 +213,7 @@ function low { cmd /c "start `"`" /low /b /wait $PY $args & call exit %^errorlev
 $H = 'docs/superpowers/audits/2026-10-11-xlsx-header-detection'
 $A = 'docs/superpowers/audits/2026-10-12-xlsx-value-accuracy'
 $O = 'outputs/xlsx-value-accuracy'
-$SRC = '.worktrees/xlsx-value-accuracy/src'     # the branch at ecc5990
+$SRC = '.worktrees/xlsx-value-accuracy/src'     # the branch at b7bd072
 $F = (Get-Content $H/filings.txt) -join ' '   # the 60 filings, one argument string
 low -I $H/export_tables.py --src $SRC --out $O/new --workers 3 $F
 low -I $A/dispositions.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/dispositions.json > $O/dispositions.log
@@ -127,13 +222,14 @@ low -I $H/primary_statements.py $O/new --report $O/statements-new.md --details $
 low -I $H/all_facts.py $O/base --report $O/all-facts-base.md --details $O/all-facts-base.json --workers 3
 low -I $H/all_facts.py $O/new --report $O/all-facts-new.md --details $O/all-facts-new.json --workers 3
 low -I $A/changes.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/changes.json --statements $O/statements-base.json $O/statements-new.json --all-facts $O/all-facts-base.json $O/all-facts-new.json --stacked-scan $A/stacked_scan.py > $O/changes.log
-low -I $A/rerun_diff.py $O/new-732544d $O/new --details $O/rerun-diff.json > $O/rerun-diff.log   # the final rerun's diff
+low -I $A/rerun_diff.py $O/new-ecc5990 $O/new --details $O/rerun-diff.json > $O/rerun-diff.log   # the previous run's export against this one
+low -I $A/unmodelled_scan.py $O/new --src $SRC > $O/unmodelled-scan.log
 ```
 
 | Step | Duration |
 |---|---|
-| Export, 60 filings | 11m44s on `ecc5990` (11:17:43–11:29:28); 11m12s on `732544d` |
-| `dispositions.py` | about 11 s |
+| Export, 60 filings | 11m44s on `b7bd072` (12:07:59–12:19:44); 11m44s on `ecc5990`; 11m12s on `732544d` |
+| `dispositions.py` (with the all-cells sweep) | about 18 s |
 | `primary_statements.py`, each side | 0.6 s |
 | `all_facts.py`, each side | 0.6 s |
 | `changes.py` | about 9 s |
@@ -195,8 +291,8 @@ Notes on the inputs:
 
 | Gate | Result | Evidence |
 |---|---|---|
-| 1. Export | **Pass** | `ecc5990`: 60 JSONs, 3,702 tables, exit 0. Run at Idle priority with 3 workers; no workers left over. |
-| 2. Dispositions (Acc. 3) | **Pass** | 0 of 4,048 entries without a valid disposition. `identifier_true`: 2,658 of 2,658 unchanged in value, type, format and reason. Split-`%` audit: 0 disagreements. |
+| 1. Export | **Pass** | `b7bd072`: 60 JSONs, 3,702 tables, exit 0, byte-identical to the `ecc5990` export. Run at Idle priority with 3 workers; no workers left over. |
+| 2. Dispositions (Acc. 3) | **Pass** | 0 of 4,048 entries without a valid disposition. All-cells sweep: 65,441 digit cells, 0 mismatches (55,711 as expected, 9,235 identical to base with no proof, 495 NVDA context-declared). `identifier_true`: 2,658 of 2,658 unchanged in value, type, format and reason. Split-`%` audit: 0 disagreements. |
 | 3. Primary statements (Acc. 4) | **Pass** | All 126 vault statements export (META 54, NVDA 42, RDDT 30). OK facts: META 3,322, NVDA 2,662, RDDT 2,056. Failures 0, arithmetic failures 0. `statements-new.json` is identical to `statements-base.json`. |
 | 4. Changed cells (Acc. 5) | **Pass** | 1,764 changed cells, all as the spec gives. 0 wrong numbers. 948 numbers in changed cells, 0 without a named proof and 0 outside their own heading. Axes: 0 cells whose header path or row label changed. 54 tables whose headers changed, all only by removed columns. Statement tables: 167 (126 vault), with 0 differing cells, 0 table changes and 0 axis changes. |
 | 5. Percent facts (Acc. 6) | **Pass** | 789 numbers equal the fact / 100 with its sign; 0 differ. |
@@ -289,7 +385,7 @@ There are 869 digit cells whose only fact is pure, at scale -2, in a plain forma
 
 ## Changed cells outside the manifest (Acceptance 5)
 
-There are 1,764 changed cells outside the manifest on `ecc5990`: 1,751 on `732544d` plus the 13 reason changes of the final rerun. Separately, 164 tables changed status or headers (see "Tables" below). Each class below has a stated rule, and `changes.py` checks every cell against the spec's expectation for it: value, format, reason and heading. All 1,751 hold.
+There are 1,764 changed cells outside the manifest on `ecc5990`: 1,751 on `732544d` plus the 13 reason changes of the final rerun. Separately, 164 tables changed status or headers (see "Tables" below). Each class below has a stated rule, and `changes.py` checks every cell against the spec's expectation for it: value, format, reason and heading. All 1,764 hold.
 
 | Class | Cells | Rule | Inspection |
 |---|---|---|---|
@@ -484,13 +580,14 @@ The review confirmed every count and found no wrong number and no change in any 
    - **Fix:** the commands now carry the wrapper, and the stacked-block scan is committed as a byte-identical copy.
    - **A side finding.** The wrapper used for the exports (Task 1's and this one) was `start /b /wait` without `call exit`, so their logged `exit: 0` carries no information. The evidence for both exports is 60 JSON files, 60 log lines and 3,702 tables on each side.
 
-**Mutation tests.** These ran on scratch copies of `outputs/xlsx-value-accuracy/new`, never on the real outputs, with the commands above. They ran first on the `732544d` export, then again on the `ecc5990` export after the final checker update, with the same results each time.
+**Mutation tests.** These ran on scratch copies of `outputs/xlsx-value-accuracy/new`, never on the real outputs, with the commands above. They ran on the `732544d` export, on the `ecc5990` export, and on the `b7bd072` export after the final checker update. The results were the same each time, except that on `b7bd072` the all-cells sweep fails mutation 1 too, and mutation 4 is new.
 
 | Test | Mutation | Result |
 |---|---|---|
 | Reviewer 1 | GOOGL 10-Q #56 EMEA `73,943` (text on both sides) becomes the number 73943 | `changes.py` exits 1: `UNPROVEN … '73,943' -> 73943 [no proof outside a percent column]`; gates `changes` and `unproven_numbers` FAIL. |
 | Reviewer 2 | AMZN 10-Q #8 (the balance sheet) column 1 relabelled `December 31, 2023` | `changes.py` exits 1. Axes: 25 cells moved. Removed columns: AMZN #8 not explained. Statements: 1 header change and 25 axis changes. `all_facts.py`: 26 new mismatches. Gates `axes`, `removed_columns`, `statements` and `all_facts` FAIL. |
 | Ruling 19 | META 10-K FY2025 #5 `52 %` loses its own `%` | `dispositions.py` exits 1: 1 marker "JOINED AGAINST THE RULES" (own % 143 of 144, valid 143 of 144). |
+| Sweep (mutation 4) | NVDA 10-K FY2024 #8 `Cost of revenue 27.3`, 0.273 on base, becomes the number 27.3 | `dispositions.py` exits 1: 1 sweep mismatch, NVDA context-declaration cells 494, not the spec's 495. |
 
 ## Concerns (none blocks the merge)
 

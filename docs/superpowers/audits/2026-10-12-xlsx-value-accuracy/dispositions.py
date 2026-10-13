@@ -87,22 +87,32 @@ source_text_only, whose percent-fact evidence holds is listed. A number must equ
 own displayed number / 100, negated when sign="-"; text is listed with its reason. Cells that
 would hold a percent fact but for a nested fact are listed as 'not proof: nested fact'.
 
+Rulings 29 and 30 (currency labels under a table-wide caption; a bare or glued 'pp' as points,
+'PP&E' excepted) are encoded as well, for the in-table captions this script can see. Ruling 28 (a
+sign disagreement between display and fact is not flagged) needs no encoding: a sign-mismatched
+fact is no percent-fact proof here either, and it is not contrary evidence.
 Rulings 21-27 (spec Revision 3) are encoded where they decide a corpus cell: contrary evidence
 (facts and unit-naming labels, read on the covering row label too) and percent-named headings.
 Three of their outcomes are not modelled: a copy column holding a '$' or amount fact withholding
 its percent heading and a table-wide declaration, an amount heading under a table-wide
-declaration flagging its unproven cells, and a '%' spanning two rows never joining a value. A cell
-those decide would show as a failure (the checker expects the earlier outcome), never pass
-unnoticed; the export of ecc5990 differs from that of 732544d in 13 cells, all decided by the
-two encoded outcomes (see the README).
+declaration flagging its unproven cells, and a '%' spanning two rows never joining a value. If the
+branch applied one of them to a cell, the gates would fail (the checker expects the earlier
+outcome); if the branch failed to apply one, they would not notice. unmodelled_scan.py counts the
+corpus cells of those shapes (0 in this corpus). The export of ecc5990 differs from that of
+732544d in 13 cells, all decided by the two encoded outcomes, and b7bd072's export equals
+ecc5990's (see the README).
 
 Split percent signs (user decision 2026-10-13, Rulings 13-18a): every '%' / ')%' marker the
 attachment pass reaches is judged by the rules (see audit_splits) and compared with NEW_DIR. A
 value whose marker was refused is P4 text by the safety net (Ruling 13): a zero converts, a token
 the converter rejects keeps its reason, and the conflict, points and identifier reasons come first.
 
-Exit status 1 when any entry has no valid disposition, any percent-fact number differs, or the
-branch and the split rules disagree on any marker or refused value.
+All-cells sweep: every digit copy cell of NEW_DIR, manifest entries or not, is held against the
+checker's expectation; see sweep_cells for the two stated exceptions, both identical to base.
+
+Exit status 1 when any entry has no valid disposition, any percent-fact number differs, the
+branch and the split rules disagree on any marker or refused value, or the sweep finds a
+mismatch (or other than 495 NVDA context-declaration cells).
 """
 
 import argparse
@@ -158,8 +168,8 @@ WORD_FORMS = re.compile(rf'(?:percent|percentage|percentages|percent change|perc
 # spelling and position, glued to a number too (Rulings 26, 27: no letter before it). Period
 # wording (today's _PERIOD_WORDS) is stripped first, and a leading bucket over a digit range on
 # the raw label ('Years 1-5', 'Days 31-60', Ruling 25) names no unit.
-POINTS_WORD = r'(?:bps|bp|basis[- ]points?|percentage[- ]points?|ppts?|pp|points|pts)'
-UNIT_WORD = rf'(?:years|yrs|months|mos|days|weeks|times|x|{POINTS_WORD})'
+POINTS_WORD = r'(?:bps|bp|basis[- ]points?|percentage[- ]points?|ppts?|points|pts)'
+UNIT_WORD = rf'(?:years|yrs|months|mos|days|weeks|times|x|pp|{POINTS_WORD})'
 UNIT_BUCKET = re.compile(r'^(?:years|months|days|weeks)\s*\d[\d,.]*\s*(?:[-–—]|to|through)\s*\d', re.I)
 OTHER_UNIT = re.compile(
     rf'\(\s*(?:in\s+)?{UNIT_WORD}\.?\s*\)'
@@ -167,7 +177,18 @@ OTHER_UNIT = re.compile(
     rf'|[,:;–—-]\s*{UNIT_WORD}\.?$'
     r'|^(?:number of\s+)?(?:days|months|years|weeks)\b|^times\b|\sx$'
     r'|\bduration\b|\byears to maturity\b'
-    rf'|(?<![a-z]){POINTS_WORD}\b', re.I)
+    rf'|(?<![a-z]){POINTS_WORD}\b'
+    # Ruling 29: a bare 'pp', glued to a number too ('Change 25pp'), but not 'PP&E'.
+    r'|(?<![a-z&])pp(?![a-z0-9_&])', re.I)
+# Rulings 29 and 30 (spec Revision 3): under a table-wide declaration a currency symbol ('$',
+# 'US$', 'NT$', '€', '£', '¥') in a row or header label keeps the displayed value only in unit
+# position, parenthesised ('($)', '(€)', '(US$)', '(in $)', '(US$ in millions)') or as the closing
+# token ('Price, US$', 'NT$'); any other currency symbol there (an amount, a description) is a
+# conflict, and so is a local percent proof beside any currency label.
+CURRENCY_MARK = re.compile(r'[$€£¥]')
+CURRENCY_TOKEN = r'(?:[a-z]{1,3})?[$€£¥]'
+CURRENCY_UNIT = re.compile(rf'\(\s*(?:in\s+)?{CURRENCY_TOKEN}(?:\s+in)?(?:\s+(?:thousands|millions|billions))?\s*\)'
+                           rf'|(?:^|[\s,:;–—-]){CURRENCY_TOKEN}\s*$', re.I)
 # Ruling 21: a header label naming a percent without declaring one ('% Change in NT$ from …',
 # 'Percent Change 2024 versus 2023'): a '%' or the word percent or percentage(s), outside a
 # number's own '%' and an except clause, in a label that is neither a percent declaration nor
@@ -467,6 +488,12 @@ def evidence(table, ri, ci):
     cell = table.cell(ri, ci)
     token = cell['original'].strip()
     d = displayed(token)
+    # A '$' before the parenthesis is the structural join of a standalone '$' fragment
+    # ('$ (120)'), which the exporter converts; '$(1,732)' or '$ (11.0)' in one source cell is no
+    # complete token, and the converter rejects it.
+    if d is not None and re.match(r'\$\s*\(', token) and not (
+            token.startswith('$ (') and any(table.text_at.get(s) == '$' for s in cell['sources'])):
+        d = None
     origins = table.digit_origins(ri, ci)
     facts = [f for o in origins for f in table.facts.get(o, [])]
     label = table.row_label(ri)
@@ -495,14 +522,24 @@ def evidence(table, ri, ci):
     shown_percent = bool(M._PERCENT.search(token)) or any(M._PERCENT_UNIT.fullmatch(p.strip()) for p in (*labels, label))
     percent = [name for name, on in (('own %', own_pct), ('percent fact', pct_fact), ('percent header', header_proof),
                                      ('percent row label', row_proof)) if on]
+    # Rulings 29, 30: currency labels under a table-wide caption (the in-table captions this script
+    # sees; context-line declarations are not in the export JSON).
+    table_wide_caption = table.table_wide()
+    currency_label = any(CURRENCY_MARK.search(part or '') for part in (label, *labels))
+    currency_unit = any(CURRENCY_UNIT.search(part or '') for part in (label, *labels))
+    currency_other = any(CURRENCY_MARK.search(CURRENCY_UNIT.sub(' ', part or '')) for part in (label, *labels))
     not_percent = [name for name, on in (('own $', own_dollar), ('amount fact', amount_fact),
-                                         ('non-percent unit', row_unit)) if on]
+                                         ('non-percent unit', row_unit),
+                                         ('currency unit under a table-wide caption',
+                                          table_wide_caption and currency_unit)) if on]
     claimed = bool(percent) or declared or shown_percent
     # Ruling 21: no percent claim, a table-wide declaration included, overrides contrary evidence:
     # a contrary fact, or a row or header label naming another unit (Rulings 24-27).
     contrary = contrary_fact or any(names_other_unit(part) for part in (label, *labels))
-    conflict = (((claimed or table.table_wide()) and contrary)
-                or (claimed and (amount_fact or row_unit or '$' in token or dollar_axis)))
+    conflict = (((claimed or table_wide_caption) and contrary)
+                or (table_wide_caption and currency_other)
+                or (claimed and (amount_fact or row_unit or '$' in token or dollar_axis
+                                 or (table_wide_caption and currency_label))))
     return dict(cell=cell, token=token, d=d, facts=facts, label=label, header=header, percent=percent,
                 not_percent=not_percent, conflict=conflict, withheld=withheld,
                 table_wide=table.table_wide() and not shared and not M._VALUE.search(header),
@@ -561,8 +598,10 @@ def rule_p(table, ci, e):
             return 'text: converter', dict(type='text', reasons={reason}), []
         return 'proven percent', dict(type='number', value=d / 100, format=expected_format(token, True)), proofs
     if e['not_percent']:
-        return ('proven not a percent', dict(type='number', value=d, format=expected_format(token, False))
-                if d is not None else None, e['not_percent'])
+        if d is None:
+            # Converted as today: a token the converter rejects keeps the converter's reason.
+            return 'proven not a percent', dict(type='text', reasons={converter_reason(token, 'number')}), e['not_percent']
+        return 'proven not a percent', dict(type='number', value=d, format=expected_format(token, False)), e['not_percent']
     if column_flags(table, ci)[0]:
         reason = converter_reason(token, 'number')
         if reason:
@@ -697,6 +736,48 @@ def check_entry(entry, base, new):
     return out
 
 
+def sweep_cells(name, base, new):
+    """The all-cells sweep: every digit copy cell of NEW_DIR (column 0 aside) against the checker's
+    expectation (expected_outcome). Two stated cases are judged against the baseline cell instead
+    (same value origin; type, value, original, format and reason must be identical):
+    - "today's behaviour": every cell where the checker finds no proof and no percent column must
+      be identical to base, whether or not it equals the displayed number (spec: plain numbers in
+      columns without evidence of another scale keep today's behaviour; the checker does not model
+      main's role rules, such as 'Numeric role unresolved', or a footnote-marker reason);
+    - "NVDA context declaration": an NVDA number equal to the displayed number / 100 in a table
+      with no in-table table-wide caption, whose declaration sits in the context lines before the
+      table, which the export JSON does not hold (spec: NVDA's 495 percent-of-revenue values stay
+      as they are). The gate requires exactly 495 such cells.
+    Any other cell is a mismatch and fails the gate."""
+    out = []
+    for ri, row in enumerate(new.t['rows']):
+        for ci in range(1, len(row)):
+            if not has_digit(row[ci][2]):
+                continue
+            disposition, expected, proofs = expected_outcome(new, ri, ci)
+            cell = new.cell(ri, ci)
+            origins = new.digit_origins(ri, ci)
+            b = base.where.get(origins[0]) if origins else None
+            unchanged = b is not None and same(base.cell(*b), cell)
+            if disposition == 'no proof outside a percent column':
+                # Today's behaviour is main's own output: such a cell must be identical to base,
+                # even where it would equal the checker's displayed-number approximation.
+                category = "today's behaviour (identical to base)" if unchanged else 'MISMATCH'
+            elif matches(cell, expected):
+                category = 'as the checker expects'
+            else:
+                d = displayed(cell['original'])
+                if (unchanged and group(name) == 'NVDA' and cell['type'] == 'number' and d is not None
+                      and Decimal(cell['value']) == d / 100 and not new.table_wide()):
+                    category = 'NVDA context declaration (identical to base)'
+                else:
+                    category = 'MISMATCH'
+            out.append(dict(filing=name, ordinal=new.ordinal, copy=[ri, ci], disposition=disposition,
+                            category=category, type=cell['type'], value=cell['value'], original=cell['original'],
+                            reason=cell['reason'], header=new.t['headers'][ci], label=new.row_label(ri)))
+    return out
+
+
 def percent_fact_cells(name, table):
     """Spec Acceptance 6: every digit cell whose percent-fact evidence holds."""
     out = []
@@ -750,7 +831,7 @@ def main():
     by_filing = collections.defaultdict(list)
     for entry in manifest:
         by_filing[entry['filing']].append(entry)
-    results, facts, splits = [], [], []
+    results, facts, splits, swept = [], [], [], []
     names = sorted(n[:-5] for n in os.listdir(args.new))
     assert names == sorted(n[:-5] for n in os.listdir(args.base)), 'the two exports hold different filings'
     nested_total = collections.Counter()
@@ -774,6 +855,7 @@ def main():
         for ordinal, t in new.items():
             if t.t['status'] != 'source_text_only':
                 facts.extend(percent_fact_cells(name, t))
+                swept.extend(sweep_cells(name, base[ordinal], t))
         for entry in by_filing.get(name, []):
             assert new[entry['ordinal']].t['status'] != 'source_text_only', (entry, 'table fell back to source text')
             results.append(check_entry(entry, base[entry['ordinal']], new[entry['ordinal']]))
@@ -841,12 +923,26 @@ def main():
     for x in disagree:
         print(f"  {x['filing']} #{x['ordinal']} value {x['value']} {x['value_text']!r} marker {x['marker']} "
               f"{x['marker_text']!r} {x['rules']} {x['outcome']} {x.get('disposition')} {x.get('new')}")
-    gate = not invalid and not different and not disagree
-    print(f'\nGATE (Acceptance 3 and 6): {"pass" if gate else "FAIL"}')
+    print(f'\nAll-cells sweep: {len(swept)} digit cells of NEW_DIR (column 0 aside), every table not source text')
+    for category, n in sorted(collections.Counter(x['category'] for x in swept).items()):
+        print(f'  {category}: {n}')
+    for k, n in sorted(collections.Counter((x['category'], x['disposition']) for x in swept).items()):
+        print(f'    {k[0]} / {k[1]}: {n}')
+    nvda = sum(x['category'] == 'NVDA context declaration (identical to base)' for x in swept)
+    mismatched = [x for x in swept if x['category'] == 'MISMATCH']
+    print(f'  NVDA context-declaration cells: {nvda} (the spec\'s 495: {"yes" if nvda == 495 else "NO"}); '
+          f'mismatches: {len(mismatched)}')
+    for x in mismatched:
+        print(f"  MISMATCH {x['filing']} #{x['ordinal']} {x['copy']} {x['original']!r} -> {x['type']} {x['value']!r} "
+              f"{x['reason']} [{x['disposition']}] header {x['header']!r} label {x['label']!r}")
+    sweep_ok = not mismatched and nvda == 495
+    gate = not invalid and not different and not disagree and sweep_ok
+    print(f'\nGATE (Acceptance 3 and 6, split audit, all-cells sweep): {"pass" if gate else "FAIL"}')
     if args.details:
         with open(args.details, 'w', encoding='utf-8', newline='\n') as handle:
-            json.dump(dict(entries=results, percent_facts=facts, splits=splits), handle, ensure_ascii=False, indent=1,
-                      default=str)
+            json.dump(dict(entries=results, percent_facts=facts, splits=splits,
+                           sweep=[x for x in swept if x['category'] != 'as the checker expects']),
+                      handle, ensure_ascii=False, indent=1, default=str)
     sys.exit(0 if gate else 1)
 
 
