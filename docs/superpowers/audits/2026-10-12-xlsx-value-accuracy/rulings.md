@@ -6,9 +6,12 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 31 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 32 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
+- Ruling 32 replaces the currency keep-value exception of Rulings 29–31. The Ruling 31 line
+  below names the scale words thousand(s), million(s), billion(s), bn, m and mm; the code it
+  produced (39a71d2) also accepted trillion(s) and k. That code was removed under Ruling 32.
 - Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
   records rather than the export.
 - "Spec" below means revision 2 of that spec; "T1"-"T7" and "Fix A" are tasks and
@@ -83,3 +86,5 @@ Ruling 29: a `$`/currency/dollars in a row or header label is a local non-percen
 Ruling 30 (amends 29, option a): only a unit-position currency symbol (`($)`, `(€)`, trailing `US$`) keeps the displayed value under a table-wide declaration (P3 precedent); any other currency symbol in a label (amount or descriptive) gives conflict text — the spec's local-unit precedence covers units, not amounts or descriptions — cost if wrong: coverage.
 
 Ruling 31 (amends 30): the trailing-token unit position does not apply when the token directly follows a digit or a scale word (thousand(s), million(s), billion(s), bn, m, mm) — that is an amount → conflict text; `Price, US$` and `Notes due 2030, $` keep their value — cost if wrong: coverage.
+
+Ruling 32 (replaces the currency keep-value exception of Rulings 29-31): under a table-wide percent declaration ANY currency symbol in a row or header label gives conflict text; word units (_ROW_UNIT) keep P3 behaviour; outside table-wide nothing changes — every unit-vs-amount refinement left a wrong-number shape; text is the no-guess outcome — cost if wrong: coverage (`Price ($) | 26` under a percent caption becomes conflict text; 0 such cells in corpus). Ruling 29/30/31 tests pinning a kept value change (authorized).
