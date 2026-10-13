@@ -1346,3 +1346,95 @@ def test_unit_positions_kept_after_narrowing(label):
     parentheses or after 'in'. Each conflicts with the row's own '%'."""
     table = prepared(heading('2025') + sec_row(label, '5.2 %'))
     assert cell_rows(table) == [[text_cell(label), text_cell('5.2 %', _CONFLICT)]]
+
+
+# --- Ruling 24: broad unit matching for contrary evidence -------------------------------
+
+_IN_PERCENTAGES = '<p>(in percentages)</p>'
+_NVDA_SENTENCE = ('<p>The following table sets forth, for the periods indicated, certain items in our '
+                  'Consolidated Statements of Income expressed as a percentage of revenue.</p>')
+_MARGIN_45 = [text_cell('Gross margin'), (Decimal('0.45'), '0%', '45', None)]
+
+
+@pytest.mark.parametrize('label', [
+    # Regressed by the R5 narrowing (e02bb44 gave conflict text).
+    'bps change', 'Margin change bps', 'Basis points change', 'Days in inventory', 'Days to maturity',
+    'Months to maturity', 'Years to maturity', 'Times covered', 'Days', 'Months', 'Years',
+    # Never recognised before Ruling 24.
+    'Basis point change', 'bp change', 'Change in margin (basis point)', 'Percentage point change',
+    'Change in percentage point', 'Change (pp)', 'pp change', 'Change in points', 'Points change',
+    'Leverage ratio x', 'Average years to maturity', 'Duration', 'Lead time (weeks)', 'Weeks',
+])
+def test_row_label_naming_another_unit_never_takes_a_table_wide_declaration(label):
+    """Ruling 24: under '(in percentages)' a row label naming another unit is a conflict,
+    never 120 → 1.20."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('header', ['bps', 'bps change', 'Change (bps)', 'Percentage point change', 'pp',
+                                    'Basis Point Change', 'Years', 'Duration'])
+def test_heading_naming_another_unit_never_takes_a_table_wide_declaration(header, before):
+    """Ruling 24: a column heading naming another unit conflicts with the table-wide
+    declaration on its cells; the other column keeps it."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=before)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('label', ['-25 bp', '+50 bps', '+1 percentage point', 'Shock -100 basis points'])
+def test_signed_scenario_names_no_unit(label):
+    """Ruling 24: bps, bp, basis point(s) and percentage point(s) directly after a signed
+    number name a rate scenario, not the unit of the row's values: its own '%' converts."""
+    table = prepared(heading('2025') + sec_row(label, '5.2 %'))
+    assert cell_rows(table) == [[text_cell(label), (Decimal('0.052'), '0.0%', '5.2 %', None)]]
+    assert table.status == 'exported'
+
+
+_MATURITY_BUCKETS = ['Less than 1 year', '1-3 years', '1 - 3 Years', '3–5 years', 'More than 5 years', 'Over 10 Years',
+                     'Due after ten years', '0-30 days', '30-59 Days', 'Past due - 90 days', 'After 5 Years']
+
+
+@pytest.mark.parametrize('bucket', _MATURITY_BUCKETS)
+def test_maturity_buckets_name_no_unit(bucket):
+    """Ruling 24 must-keep: a maturity or aging bucket heading names no unit of its values,
+    whether a value has its own '%' or a table-wide declaration proves it."""
+    table = prepared(heading(bucket) + sec_row('Weighted average yield', '3.25 %'))
+    assert cell_rows(table) == [[text_cell('Weighted average yield'), (Decimal('0.0325'), '0.00%', '3.25 %', None)]]
+    table = prepared(heading(bucket) + sec_row('Gross margin', '3.25'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [[text_cell('Gross margin'), (Decimal('0.0325'), '0.00%', '3.25', None)]]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('period', ['Year Ended December 31,', 'Three Months Ended September 30,', 'Nine Months Ended',
+                                    'Fiscal Years Ended', 'For the Years Ended December 31,', 'Weeks Ended',
+                                    '52 Weeks Ended', 'Fiscal Year 2025'])
+def test_period_headings_name_no_unit(period):
+    """Ruling 24 must-keep: period headings over the years name no unit; a statement's
+    '$' amounts and its own-'%' rate keep their values."""
+    table = prepared(f'<tr><th></th><th colspan="6">{period}</th></tr>' + heading('2025', '2024')
+                     + sec_row('Revenue', '$ 1,000', '$ 900') + sec_row('Effective tax rate', '21.0 %', '20.5 %'))
+    assert table.headers == ('Item', f'{period} — 2025', f'{period} — 2024')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1000'), '"$"#,##0', '$ 1,000', None), (Decimal('900'), '"$"#,##0', '$ 900', None)],
+        [text_cell('Effective tax rate'), (Decimal('0.210'), '0.0%', '21.0 %', None),
+         (Decimal('0.205'), '0.0%', '20.5 %', None)],
+    ]
+    assert table.status == 'exported'
+
+
+def test_nvda_sentence_under_year_ended_headings_keeps_its_percents():
+    """Ruling 24 must-keep: NVDA's table-wide sentence over 'Year Ended — Jan 26, 2025'."""
+    table = prepared('<tr><th></th><th colspan="6">Year Ended</th></tr>' + heading('Jan 26, 2025', 'Jan 28, 2024')
+                     + sec_row('Revenue', '100.0 %', '100.0 %') + sec_row('Cost of revenue', '24.4', '27.3')
+                     + sec_row('Gross profit', '75.6', '72.7'), before=_NVDA_SENTENCE)
+    assert table.headers == ('Item', 'Year Ended — Jan 26, 2025', 'Year Ended — Jan 28, 2024')
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1.000'), '0.0%', '100.0 %', None), (Decimal('1.000'), '0.0%', '100.0 %', None)],
+        [text_cell('Cost of revenue'), (Decimal('0.244'), '0.0%', '24.4', None), (Decimal('0.273'), '0.0%', '27.3', None)],
+        [text_cell('Gross profit'), (Decimal('0.756'), '0.0%', '75.6', None), (Decimal('0.727'), '0.0%', '72.7', None)],
+    ]
+    assert table.status == 'exported'

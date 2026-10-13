@@ -769,20 +769,28 @@ _PERCENT_WORDS = re.compile(
 _TABLE_PERCENT = re.compile(r'\((?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)', re.I)
 _PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'})
 _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
-# Ruling 21: a row or header label naming a unit other than a percent, in a unit position:
-# in parentheses ('Expected term (in years)', 'Interest coverage (times)', 'Net leverage
-# ratio (x)', 'Spread (bps)'), after 'in' ('Remaining life in years', 'Change in basis
-# points'), after a separator that ends the label ('Average life, years'), or as a named
-# measure ('Days sales outstanding', 'Number of days', 'Times interest earned'). Period
-# wording is stripped first ('Six months ended June 30', 'Years Ended December 31,'). A
-# word outside those positions names no unit: 'Changes in prior years' tax positions',
-# the scenario '+100 basis points', the bucket 'Years 1-5', the measure 'Months of supply'.
-_UNIT_WORD = r'(?:years|months|days|times|x|bps|basis points|percentage points|points|pts)'
+# Rulings 21 and 24: a row or header label naming a unit other than a percent: in
+# parentheses ('Expected term (in years)', 'Interest coverage (times)', 'Net leverage
+# ratio (x)', 'Lead time (weeks)'), after 'in' ('Remaining life in years'), after a
+# separator ending the label ('Average life, years', 'Leverage ratio x'), as its first
+# word ('Days in inventory', 'Years to maturity', 'Times covered', 'Number of days', a bare
+# 'Years' heading), as 'years to maturity' or 'duration', or a points unit anywhere
+# ('bps change', 'Basis point change', 'Change (pp)', 'Change in points'). Period wording
+# is stripped first ('Six months ended June 30', 'Years Ended December 31,'), so maturity
+# buckets ('1-3 years', 'Past due - 90 days') and period headings name no unit. Ruling 24
+# ignores only two shapes: a bps, bp, basis point(s) or percentage point(s) directly after
+# a signed number (the scenario '+100 basis points', stripped by _SIGNED_POINTS), and a
+# leading years, months or days word before a digit range or 'of' ('Years 1-5',
+# 'Months of supply').
+_UNIT_WORD = (r'(?:years|months|days|weeks|times|x|bps|bp|basis points?|percentage points?'
+              r'|pp|points|pts)')
+_SIGNED_POINTS = re.compile(r'[+\-−]\s*\d[\d,.]*\s*(?:bps|bp|basis points?|percentage points?)\b', re.I)
 _OTHER_UNIT = re.compile(
-    rf'\(\s*(?:in\s+)?{_UNIT_WORD}\s*\)|\bin (?:years|months|days|bps|basis points|percentage points)\b'
-    rf'|[,:–—-]\s*{_UNIT_WORD}$'
-    r'|^(?:number of (?:years|months|days)|days (?:sales|payables?|inventor(?:y|ies)|receivables?)'
-    r'|times interest earned)\b', re.I)
+    rf'\(\s*(?:in\s+)?{_UNIT_WORD}\s*\)|\bin (?:years|months|days|weeks|points)\b'
+    rf'|[,:–—-]\s*{_UNIT_WORD}$|\sx$'
+    r'|^(?:number of )?(?:years|months|days|weeks)\b(?!\s*(?:\d[\d,.]*\s*(?:[-–—]|to|through)\s*\d|of\b))'
+    r'|^times\b|\b(?:years|months|days|weeks) to maturity\b|\bduration\b'
+    r'|\b(?:bps|bp|basis points?|percentage points?|points|pts)\b|(?<![\w&])pp(?![\w&])', re.I)
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).
@@ -854,8 +862,8 @@ def _amount_fact(origins) -> bool:
 
 
 def _names_other_unit(text) -> bool:
-    """Ruling 21: a row or header label naming a unit other than a percent (_OTHER_UNIT)."""
-    return bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', text).strip()))
+    """Rulings 21 and 24: a row or header label naming a unit other than a percent (_OTHER_UNIT)."""
+    return bool(_OTHER_UNIT.search(_SIGNED_POINTS.sub(' ', _PERIOD_WORDS.sub(' ', text)).strip()))
 
 
 class _Proof(NamedTuple):
