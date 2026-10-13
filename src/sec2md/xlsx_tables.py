@@ -769,7 +769,7 @@ _PERCENT_WORDS = re.compile(
 _TABLE_PERCENT = re.compile(r'\((?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)', re.I)
 _PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'})
 _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
-# Rulings 21, 24 and 25: a row or header label naming a unit other than a percent: in
+# Rulings 21, 24, 25 and 26: a row or header label naming a unit other than a percent: in
 # parentheses ('Expected term (in years)', 'Interest coverage (times)', 'Net leverage
 # ratio (x)', 'Term (mos.)', 'Change (ppt)'), after 'in' ('Remaining life in years'), after
 # a separator ending the label ('Average life, years', 'Term, mos.', 'Leverage ratio x'),
@@ -780,14 +780,12 @@ _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
 # unit without naming it in one of these forms ('DSO', 'Weighted-average life') is none.
 # Period wording is stripped ('Six months ended June 30', 'Years Ended December 31,'), so
 # maturity buckets ('1-3 years', 'Past due - 90 days') and period headings name no unit.
-# Two shapes are exempt, both read on the raw label: a points unit directly after a
-# signed number, the scenario '+100 basis points' (_SIGNED_POINTS; not the year range in
-# 'Change 2024-25, bps'), and a label that starts with a years, months, days or weeks
-# bucket over a digit range, 'Years 1-5' or 'Days 31-60' (_UNIT_BUCKET; never
-# 'Number of …').
+# One shape is exempt, read on the raw label: a label that starts with a years, months,
+# days or weeks bucket over a digit range, 'Years 1-5' or 'Days 31-60' (_UNIT_BUCKET;
+# never 'Number of …'). A points unit is contrary evidence in every position, a rate
+# scenario such as '+100 basis points' included (Ruling 26).
 _POINTS_WORD = r'(?:bps|bp|basis[- ]points?|percentage[- ]points?)'
 _UNIT_WORD = (rf'(?:years|yrs\.?|months|mos\.?|days|weeks|times|x|{_POINTS_WORD}|ppts?|pp|points|pts)')
-_SIGNED_POINTS = re.compile(rf'(?<![\w.])[+\-−]\s*\d(?:[\d,.]*\d)?\s*{_POINTS_WORD}\b', re.I)
 _UNIT_BUCKET = re.compile(r'^(?:years|months|days|weeks)\s*\d(?:[\d,.]*\d)?\s*(?:[-–—]|to|through)\s*\d', re.I)
 _OTHER_UNIT = re.compile(
     rf'\(\s*(?:in\s+)?{_UNIT_WORD}\s*\)|\bin (?:years|yrs|months|mos|days|weeks|points|ppts?)\b'
@@ -866,10 +864,10 @@ def _amount_fact(origins) -> bool:
 
 
 def _names_other_unit(text) -> bool:
-    """Rulings 21, 24 and 25: a row or header label naming a unit other than a percent
-    (_OTHER_UNIT). The two exempt shapes are removed from the raw label first, then period
-    wording."""
-    text = _UNIT_BUCKET.sub(' ', _SIGNED_POINTS.sub(' ', text.strip()))
+    """Rulings 21, 24, 25 and 26: a row or header label naming a unit other than a percent
+    (_OTHER_UNIT). The exempt bucket shape is removed from the raw label first, then
+    period wording."""
+    text = _UNIT_BUCKET.sub(' ', text.strip())
     return bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', text).strip()))
 
 

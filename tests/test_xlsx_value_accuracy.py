@@ -1320,22 +1320,25 @@ def test_identifier_heading_naming_a_percent_flags_plain_values():
     assert table.status == 'needs_review'
 
 
-@pytest.mark.parametrize('label', ['+100 basis points', 'Interest rate shock +200 basis points', 'Years 1-5'])
+@pytest.mark.parametrize('label', ['Years 1-5'])
 def test_unit_words_outside_a_unit_position_name_no_unit(label):
-    """R5: a rate-shock scenario and a maturity bucket hold unit words, but name no unit of
-    the row's values: their own '%' converts. ('Months of supply' names one: Ruling 25.)"""
+    """R5: a maturity bucket holds a unit word, but names no unit of the row's values: its
+    own '%' converts. ('Months of supply' names one: Ruling 25; a rate-shock scenario's
+    points unit is contrary evidence: Ruling 26.)"""
     table = prepared(heading('2025') + sec_row(label, '5.2 %'))
     assert cell_rows(table) == [[text_cell(label), (Decimal('0.052'), '0.0%', '5.2 %', None)]]
     assert table.status == 'exported'
 
 
-def test_scenario_headings_name_no_unit():
-    """R5 with R2a: '+100 basis points' and '-100 basis points' head scenario columns of
-    percents, not a unit: the values convert."""
+def test_scenario_headings_are_contrary_evidence():
+    """Ruling 26: '+100 basis points' and '-100 basis points' scenario headings hold a
+    points unit, which is contrary evidence in any position: the percents beside them are
+    conflict text (a coverage cost, never a wrong number)."""
     table = prepared(heading('+100 basis points', '-100 basis points') + sec_row('Net interest income', '5.2 %', '(4.8) %'))
-    assert cell_rows(table) == [[text_cell('Net interest income'), (Decimal('0.052'), '0.0%', '5.2 %', None),
-                                 (Decimal('-0.048'), '0.0%;(0.0%)', '(4.8) %', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [[text_cell('Net interest income'), text_cell('5.2 %', _CONFLICT),
+                                 text_cell('(4.8) %', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 1: {_CONFLICT}', f'Source row 1, column 4: {_CONFLICT}')
+    assert table.status == 'needs_review'
 
 
 @pytest.mark.parametrize('label', ['Days payable outstanding', 'Days inventory outstanding', 'Number of days',
@@ -1384,13 +1387,15 @@ def test_heading_naming_another_unit_never_takes_a_table_wide_declaration(header
     assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
 
 
-@pytest.mark.parametrize('label', ['-25 bp', '+50 bps', '+1 percentage point', 'Shock -100 basis points'])
-def test_signed_scenario_names_no_unit(label):
-    """Ruling 24: bps, bp, basis point(s) and percentage point(s) directly after a signed
-    number name a rate scenario, not the unit of the row's values: its own '%' converts."""
+@pytest.mark.parametrize('label', ['-25 bp', '+50 bps', '+1 percentage point', 'Shock -100 basis points',
+                                   '+100 basis points', 'Interest rate shock +200 basis points', '-100 bps',
+                                   'Change -25 bp'])
+def test_signed_scenarios_are_contrary_evidence(label):
+    """Ruling 26 (replacing Ruling 24's exemption): a points unit after a signed number is
+    contrary evidence too, so a rate-shock row's own '%' is conflict text."""
     table = prepared(heading('2025') + sec_row(label, '5.2 %'))
-    assert cell_rows(table) == [[text_cell(label), (Decimal('0.052'), '0.0%', '5.2 %', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [[text_cell(label), text_cell('5.2 %', _CONFLICT)]]
+    assert table.status == 'needs_review'
 
 
 _MATURITY_BUCKETS = ['Less than 1 year', '1-3 years', '1 - 3 Years', '3–5 years', 'More than 5 years', 'Over 10 Years',
@@ -1490,3 +1495,35 @@ def test_leading_digit_range_buckets_name_no_unit(label):
     table = prepared(heading('2025') + sec_row(label, '3.25'), before=_IN_PERCENTAGES)
     assert cell_rows(table) == [[text_cell(label), (Decimal('0.0325'), '0.00%', '3.25', None)]]
     assert table.status == 'exported'
+
+
+# --- Ruling 26: every points unit is contrary evidence ---------------------------------
+
+_RULING_26_LABELS = ['Change 2024 - 2025 bps', 'Change 2024 - 25 bps', 'Change 2024 -25 bps',
+                     'Change in margin 2024 - 2025 basis points', 'Margin change 2023 − 2024 bps']
+
+
+@pytest.mark.parametrize('label', _RULING_26_LABELS)
+def test_ruling_26_row_labels_never_take_a_table_wide_declaration(label):
+    """Ruling 26: a year range before bps is no scenario; the label names a points unit, so
+    under '(in percentages)' its value is conflict text, never 120 → 1.20."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('header', _RULING_26_LABELS + ['2025 - 2024 bps change'])
+def test_ruling_26_headings_never_take_nvdas_sentence(header):
+    """Ruling 26: as column headings under NVDA's sentence, the same labels conflict."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+def test_ruling_26_own_percent_beside_a_points_label_conflicts():
+    """Ruling 26: a row's own '120 %' beside 'Change 2024 - 2025 bps' is conflict text,
+    never 1.20."""
+    table = prepared(heading('2025') + sec_row('Change 2024 - 2025 bps', '120 %'))
+    assert cell_rows(table) == [[text_cell('Change 2024 - 2025 bps'), text_cell('120 %', _CONFLICT)]]
+    assert table.status == 'needs_review'
