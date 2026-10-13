@@ -38,7 +38,8 @@ The evidence for a digit copy cell, read from the export JSON (spec Definitions,
   declaration, unless the column shares its leaf header with another copy column holding a
   value in the same row (Ruling 7); the withheld declaration still feeds the conflict test
   and makes the column a percent column (Rulings 10, 11).
-- percent row label: the source row's column-0 text is a percent declaration.
+- percent row label: the text of the source cell covering column 0 of the source row is a
+  percent declaration (Ruling 21, completed: a label spanning two rows labels both).
 - table-wide declaration: a spanning in-table caption before the first body row matching the
   spec's table-wide forms. The context lines before a table are not in the export JSON, so a
   number scaled by a context declaration has no proof this script can see: it would be reported
@@ -46,16 +47,18 @@ The evidence for a digit copy cell, read from the export JSON (spec Definitions,
   gives) and must then be checked by hand (see the README).
 - non-percent unit: today's _ROW_UNIT in the header or the row label.
 
-Expected outcome of a digit cell under Rule P (P3, P4, rulings 4, 8-12):
+Expected outcome of a digit cell under Rule P (P3, P4, rulings 4, 8-12, 21, 24-27):
 1. conflict (a percent proof, a withheld declaration or today's shown percent, beside own $, an
-   amount fact, _ROW_UNIT or a '$' in the header or row label; or own % with a pure fact at
-   another scale) -> text, 'Conflicting explicit units; ...' or the converter's
-   'Currency and percent conflict; ...';
+   amount fact, _ROW_UNIT or a '$' in the header or row label; or, Ruling 21, any percent claim
+   or a table-wide caption beside contrary evidence: a fact neither pure at scale -2 nor an
+   amount fact, or a row or header label naming another unit, OTHER_UNIT) -> text,
+   'Conflicting explicit units; ...' or the converter's 'Currency and percent conflict; ...';
 2. a points value -> text, 'Percentage points; verify the unit.';
 3. a percent proof -> a number equal to D / 100, its format derived from the token's decimals,
    or the converter's own reason when it rejects the token;
 4. a non-percent proof -> a number equal to D;
-   (before 3: a value whose split '%' was refused is P4 text, see Split percent signs below)
+   (before 3: a value whose split '%' was refused is P4 text, see Split percent signs below;
+   so is a cell without a proof of its own under a heading naming a percent, Ruling 21)
 5. no proof, in a percent column (some digit cell of the copy column has own %, a percent fact
    or a percent row label, or the column holds a withheld declaration) -> text with
    'Percent sign on other rows of this column; verify the scale.', except a token the converter
@@ -83,6 +86,15 @@ Percent facts (spec Acceptance 6): every digit copy cell of NEW_DIR, in every ta
 source_text_only, whose percent-fact evidence holds is listed. A number must equal the fact's
 own displayed number / 100, negated when sign="-"; text is listed with its reason. Cells that
 would hold a percent fact but for a nested fact are listed as 'not proof: nested fact'.
+
+Rulings 21-27 (spec Revision 3) are encoded where they decide a corpus cell: contrary evidence
+(facts and unit-naming labels, read on the covering row label too) and percent-named headings.
+Three of their outcomes are not modelled: a copy column holding a '$' or amount fact withholding
+its percent heading and a table-wide declaration, an amount heading under a table-wide
+declaration flagging its unproven cells, and a '%' spanning two rows never joining a value. A cell
+those decide would show as a failure (the checker expects the earlier outcome), never pass
+unnoticed; the export of ecc5990 differs from that of 732544d in 13 cells, all decided by the
+two encoded outcomes (see the README).
 
 Split percent signs (user decision 2026-10-13, Rulings 13-18a): every '%' / ')%' marker the
 attachment pass reaches is judged by the rules (see audit_splits) and compared with NEW_DIR. A
@@ -138,6 +150,30 @@ WORD_FORMS = re.compile(rf'(?:percent|percentage|percentages|percent change|perc
                         rf'|percent of {BASE}|percentage of {BASE}|as a percent(?:age)? of {BASE}'
                         rf'|percent of retained loans to total retained loans)(?:\s*(?:\([a-z\d]{{1,2}}\)|\*+))?', re.I)
 # Spec Definitions, table-wide percent declaration (spanning in-table captions only, see above).
+# Rulings 21 and 24-27 (spec Revision 3): a row or header label naming a unit other than a
+# percent. Written from the rulings' text: a unit word in parentheses ('(in years)', '(times)',
+# '(x)', '(mos.)', '(ppt)'), after 'in' ('in years'), after a separator closing the label
+# (', years'), as the first word ('Days …', 'Months of supply', 'Years …', 'Weeks …', 'Times …',
+# 'Number of days'), a trailing ' x', 'duration', 'years to maturity', or a points unit in any
+# spelling and position, glued to a number too (Rulings 26, 27: no letter before it). Period
+# wording (today's _PERIOD_WORDS) is stripped first, and a leading bucket over a digit range on
+# the raw label ('Years 1-5', 'Days 31-60', Ruling 25) names no unit.
+POINTS_WORD = r'(?:bps|bp|basis[- ]points?|percentage[- ]points?|ppts?|pp|points|pts)'
+UNIT_WORD = rf'(?:years|yrs|months|mos|days|weeks|times|x|{POINTS_WORD})'
+UNIT_BUCKET = re.compile(r'^(?:years|months|days|weeks)\s*\d[\d,.]*\s*(?:[-–—]|to|through)\s*\d', re.I)
+OTHER_UNIT = re.compile(
+    rf'\(\s*(?:in\s+)?{UNIT_WORD}\.?\s*\)'
+    rf'|\bin\s+(?:years|yrs|months|mos|days|weeks|{POINTS_WORD})\b'
+    rf'|[,:;–—-]\s*{UNIT_WORD}\.?$'
+    r'|^(?:number of\s+)?(?:days|months|years|weeks)\b|^times\b|\sx$'
+    r'|\bduration\b|\byears to maturity\b'
+    rf'|(?<![a-z]){POINTS_WORD}\b', re.I)
+# Ruling 21: a header label naming a percent without declaring one ('% Change in NT$ from …',
+# 'Percent Change 2024 versus 2023'): a '%' or the word percent or percentage(s), outside a
+# number's own '%' and an except clause, in a label that is neither a percent declaration nor
+# a table-wide declaration and names no points or percentage-of-completion (spec Testing 7).
+PERCENT_NAME = re.compile(r'%|\bpercent(?:ages?)?\b', re.I)
+NOT_PERCENT_NAME = re.compile(r'\bpoints?\b|\bpts\b|\bpercentage[- ]of[- ]completion\b', re.I)
 TABLE_WIDE = re.compile(r'\(?(?:(?:(?:items |amounts )?expressed as a )?percentage of revenue'
                         r'|the following table [^.!?\d]*expressed as a percentage of revenue'
                         r'|in percent(?:ages)?|as a percentage of (?:total )?revenue)\)?\.?', re.I)
@@ -209,6 +245,20 @@ def nested_facts(path):
     return nested
 
 
+def names_other_unit(label):
+    """Rulings 21, 24-27: the label names a unit other than a percent (see OTHER_UNIT)."""
+    text = UNIT_BUCKET.sub(' ', (label or '').strip())
+    return bool(OTHER_UNIT.search(M._PERIOD_WORDS.sub(' ', text).strip()))
+
+
+def percent_heading(label):
+    """Ruling 21: a header label that names a percent without declaring one."""
+    text = re.sub(r'\s+', ' ', label or '').strip()
+    named = NUMBER_PERCENT.sub(' ', re.sub(r'\bexcept\b[^)]*', ' ', text, flags=re.I))
+    return (bool(PERCENT_NAME.search(named)) and not NOT_PERCENT_NAME.search(text)
+            and not percent_declaration(text) and not TABLE_WIDE.fullmatch(text))
+
+
 def percent_declaration(label):
     """Spec Definitions: a header or row label declaring its values percents."""
     label = re.sub(r'\s+', ' ', label or '').strip()
@@ -260,9 +310,11 @@ class Table:
         return [tuple(s) for s in self.t['cell_sources'][ri][ci] if has_digit(self.text_at.get(tuple(s)))]
 
     def row_label(self, ri):
+        """The source cell covering column 0 of the copy row's source row, so a label spanning
+        two rows labels both (Ruling 21, completed)."""
         r = self.header_count + ri
         c = self.grid[r][0] if self.width else None
-        return c[4] if c is not None and (c[0], c[1]) == (r, 0) else ''
+        return c[4] if c is not None else ''
 
     def header_labels(self, ci):
         header = self.t['headers'][ci]
@@ -428,7 +480,11 @@ def evidence(table, ri, ci):
               and digits_of(facts[0]['displayed']) == digits_of(token) and (facts[0]['sign'] == '-') == (d < 0 or d.is_signed()))
     pct_fact = single and not facts[0]['nested']
     amount_fact = any(m.lower().startswith('iso4217:') or m.lower() == 'xbrli:shares' for f in facts for m in f['unit'])
-    other_scale = '%' in token and any(f['unit'] == ['xbrli:pure'] and f['scale'] != '-2' for f in facts)
+    # Ruling 21: a fact neither pure at scale -2 nor measured in a currency or shares is contrary
+    # evidence (a pure fact at another scale, a fact in years, a unit the filing leaves undefined).
+    contrary_fact = any(not (f['unit'] == ['xbrli:pure'] and f['scale'] == '-2')
+                        and not any(m.lower().startswith('iso4217:') or m.lower() == 'xbrli:shares' for m in f['unit'])
+                        for f in facts)
     declared = any(percent_declaration(part) for part in labels)
     shared = ci in table.shared()
     withheld = (declared or table.table_wide()) and shared
@@ -441,13 +497,21 @@ def evidence(table, ri, ci):
                                      ('percent row label', row_proof)) if on]
     not_percent = [name for name, on in (('own $', own_dollar), ('amount fact', amount_fact),
                                          ('non-percent unit', row_unit)) if on]
-    conflict = other_scale or ((bool(percent) or declared or shown_percent)
-                               and (amount_fact or row_unit or '$' in token or dollar_axis))
+    claimed = bool(percent) or declared or shown_percent
+    # Ruling 21: no percent claim, a table-wide declaration included, overrides contrary evidence:
+    # a contrary fact, or a row or header label naming another unit (Rulings 24-27).
+    contrary = contrary_fact or any(names_other_unit(part) for part in (label, *labels))
+    conflict = (((claimed or table.table_wide()) and contrary)
+                or (claimed and (amount_fact or row_unit or '$' in token or dollar_axis)))
     return dict(cell=cell, token=token, d=d, facts=facts, label=label, header=header, percent=percent,
                 not_percent=not_percent, conflict=conflict, withheld=withheld,
                 table_wide=table.table_wide() and not shared and not M._VALUE.search(header),
                 nested_fact=single and not pct_fact,
                 refused=any(s in table.refused for s in cell['sources']),
+                # Ruling 21: under a heading naming a percent, a cell without a proof of its own
+                # (own '%' or '$', a percent fact or an amount fact) is P4 text.
+                percent_named=(any(percent_heading(part) for part in labels)
+                               and not (own_pct or '$' in token or pct_fact or amount_fact)),
                 points=bool(POINTS.fullmatch(token)), quantity=bool(facts) or own_pct or own_dollar,
                 marks_column=(own_pct or pct_fact or row_proof) and not POINTS.fullmatch(token))
 
@@ -478,15 +542,18 @@ def rule_p(table, ci, e):
         return 'text: conflict', dict(type='text', reasons={CONFLICT, CURRENCY_PERCENT}), []
     if e['points']:
         return 'text: points', dict(type='text', reasons={POINTS_REASON}), []
-    if e['refused']:
+    if e['refused'] or e['percent_named']:
         # User decision (2026-10-13), Ruling 13: a value whose split '%' was refused is P4 text,
-        # whatever its proofs; a zero converts and a token the converter rejects keeps its reason.
+        # whatever its proofs; Ruling 21: so is a cell without a proof of its own under a heading
+        # naming a percent. A zero converts and a token the converter rejects keeps its reason.
         reason = converter_reason(token, 'number')
         if reason:
             return 'text: converter', dict(type='text', reasons={reason}), []
         if d is not None and d.is_zero():
             return 'zero', dict(type='number', value=Decimal(0), format=expected_format(token, False)), []
-        return 'text: refused split % (P4)', dict(type='text', reasons={UNPROVEN}), []
+        if e['refused']:
+            return 'text: refused split % (P4)', dict(type='text', reasons={UNPROVEN}), []
+        return 'text: percent-named heading (P4)', dict(type='text', reasons={UNPROVEN}), []
     proofs = e['percent'] or (['table-wide caption'] if e['table_wide'] and not e['not_percent'] else [])
     if proofs:
         reason = converter_reason(token, 'percent')
@@ -506,6 +573,21 @@ def rule_p(table, ci, e):
     return 'no proof outside a percent column', None, []
 
 
+def identifier_named_reason(e):
+    """Ruling 21, completed: under an identifier heading that names a percent, a cell without a
+    proof of its own stays text with the P4 reason (or the converter's own reason), ranking below
+    the conflict and points reasons and above the I2 reasons; a zero the converter accepts takes
+    no P4 reason and falls through to I2. None when the rule does not apply."""
+    if not e['percent_named']:
+        return None
+    reason = converter_reason(e['token'], 'number')
+    if reason:
+        return 'text: converter', dict(type='text', reasons={reason}), []
+    if e['d'] is not None and e['d'].is_zero():
+        return None
+    return 'text: percent-named heading (P4)', dict(type='text', reasons={UNPROVEN}), []
+
+
 def expected_outcome(table, ri, ci):
     """(disposition, expected, proofs) the spec's rules give any digit cell of NEW_DIR: Rule I under
     an identifier heading, else Rule P; a cell without proof outside a percent column keeps today's
@@ -516,6 +598,9 @@ def expected_outcome(table, ri, ci):
             return 'text: conflict', dict(type='text', reasons={CONFLICT}), []
         if e['points']:
             return 'text: points', dict(type='text', reasons={POINTS_REASON}), []
+        named = identifier_named_reason(e)
+        if named:
+            return named
         if column_flags(table, ci)[1]:
             return 'text: identifier over quantities', dict(type='text', reasons={QUANTITIES}), []
         if AMOUNT_FORMAT.fullmatch(e['token']) and not M._FOOTNOTE_MARK.fullmatch(e['token']):
@@ -592,6 +677,9 @@ def check_entry(entry, base, new):
             disposition, reasons = 'text: conflict', {CONFLICT}
         elif e['points']:
             disposition, reasons = 'text: points', {POINTS_REASON}
+        elif identifier_named_reason(e):
+            disposition, expected, _ = identifier_named_reason(e)
+            reasons = expected['reasons']
         elif column_flags(new, ci)[1]:
             disposition, reasons = 'text: identifier over quantities', {QUANTITIES}
         elif AMOUNT_FORMAT.fullmatch(e['token']) and not M._FOOTNOTE_MARK.fullmatch(e['token']):
