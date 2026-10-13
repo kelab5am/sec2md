@@ -6,7 +6,7 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 32 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 33 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Ruling 32 replaces the currency keep-value exception of Rulings 29–31. The Ruling 31 line
@@ -88,3 +88,5 @@ Ruling 30 (amends 29, option a): only a unit-position currency symbol (`($)`, `(
 Ruling 31 (amends 30): the trailing-token unit position does not apply when the token directly follows a digit or a scale word (thousand(s), million(s), billion(s), bn, m, mm) — that is an amount → conflict text; `Price, US$` and `Notes due 2030, $` keep their value — cost if wrong: coverage.
 
 Ruling 32 (replaces the currency keep-value exception of Rulings 29-31): under a table-wide percent declaration ANY currency symbol in a row or header label gives conflict text; word units (_ROW_UNIT) keep P3 behaviour; outside table-wide nothing changes — every unit-vs-amount refinement left a wrong-number shape; text is the no-guess outcome — cost if wrong: coverage (`Price ($) | 26` under a percent caption becomes conflict text; 0 such cells in corpus). Ruling 29/30/31 tests pinning a kept value change (authorized).
+
+Ruling 33 (completes 32's "any currency"): ISO 4217 currency codes as whole upper-case words (USD, EUR, GBP, JPY, CNY, RMB, TWD, NTD, HKD, CHF, CAD, AUD, INR, KRW, SGD, BRL, MXN, SEK, NOK, DKK, ZAR, plus a generic `\b[A-Z]{3}\b` is NOT used) in a row or header label under a table-wide declaration give conflict text, like symbols — same class as Ruling 32; coverage only — cost if wrong: coverage.
