@@ -137,10 +137,12 @@ unflagged as before.
   proves nothing in its column (over two values in one row, or withheld by
   contrary evidence), to a number without its own `%`, `$` or fact under a
   heading that names a percent without declaring one (`Percent Change 2024
-  versus 2023`, identifier-like headings included), and to a number whose separate `%` could not be attached
-  safely. That `%` can still reach the number as before, through column grouping
-  under one heading over both or the merge of a column of `%` signs; the number
-  then converts with it. Zeros still convert.
+  versus 2023`, identifier-like headings included), and to a number whose
+  separate `%` could not be attached safely. That `%` can still reach the number
+  as before, through column grouping under one heading over both or the merge of
+  a column of `%` signs; the number then converts with it. A `%` spanning several
+  rows never reaches any number: each number beside it is flagged. Zeros still
+  convert.
 - `Percentage points; verify the unit.`
   A change such as `26.6 pts`.
 - `Identifier heading over quantities; verify the column.`
@@ -156,8 +158,11 @@ unflagged as before.
   a pure inline XBRL fact whose scale is not -2 under any percent proof, a
   table-wide caption included; a fact in another unit, such as years, under any
   percent proof; and a percent proof on a row or column whose label names
-  another unit (`Expected term (in years)`, `Days sales outstanding`, `(x)`,
-  `(bps)`, `(percentage points)`). A row label spanning two rows counts for both.
+  another unit (`Expected term (in years)`, `Days in inventory`, `(x)`,
+  `bps change`, `Change (pp)`, `Duration`, a bare `Years` heading). A row label
+  spanning two rows counts for both. Period headings, maturity buckets such as
+  `1-3 years`, signed scenarios such as `+100 basis points` and labels such as
+  `Years 1-5` name no unit.
 
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding

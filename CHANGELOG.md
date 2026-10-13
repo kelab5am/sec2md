@@ -38,11 +38,13 @@
     scale, and so does a value whose pure fact has a scale other than -2 under
     any percent proof, a table-wide caption included, and so does a value whose
     fact is in another unit, such as years, or in a unit the filing does not
-    define. A row or column label that names another unit in a unit position,
-    such as `Expected term (in years)`, `Days sales outstanding`, `(times)`,
-    `(x)`, `(bps)` or `(percentage points)`, conflicts with every percent proof on
-    its cells in the same way; a row label spanning two rows counts for both,
-    and scenario labels such as `+100 basis points` name no unit.
+    define. A row or column label that names another unit, such as
+    `Expected term (in years)`, `Days in inventory`, `Times covered`, `(x)`,
+    `bps change`, `Change (pp)`, `Duration` or a bare `Years` heading, conflicts
+    with every percent proof on its cells in the same way; a row label spanning
+    two rows counts for both. Period headings (`Years Ended December 31,`),
+    maturity buckets (`1-3 years`, `Past due - 90 days`), signed scenarios
+    (`+100 basis points`) and `Years 1-5` / `Months of supply` name no unit.
   - A `%` printed in its own column joins the value directly to its left when the
     `%` spans one row, has no heading or sits under the value's heading or one
     spanning the value's column, and its column holds nothing else in any other
@@ -50,7 +52,9 @@
     is refused becomes text with the reason above, whatever its other proof,
     unless the `%` still reaches the value as it did before this change: through
     column grouping under one heading over both, or through the merge of a column
-    of `%` signs. The value then converts with that `%`. Negative
+    of `%` signs. The value then converts with that `%`. A `%` spanning several
+    rows never joins any value: each value beside it becomes text with the
+    reason above. Negative
     percents convert: `(34) %` gives -0.34, and `(40.4` with `)%` in the next
     column gives -0.404. In 54 tables, 71 `%` and `pts` columns whose signs now
     sit with their values drop out of the copy grid; a `%` column emptied this way
