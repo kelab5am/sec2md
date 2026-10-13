@@ -5,14 +5,15 @@ This records the acceptance run for:
 - Task 6 of its plan ([`../../plans/2026-10-12-sec2md-xlsx-value-accuracy.md`](../../plans/2026-10-12-sec2md-xlsx-value-accuracy.md)).
 
 **Inputs:**
-- **Candidate:** branch `fix/xlsx-value-accuracy` at **`be2afea`**, its final commit, in the worktree `.worktrees/xlsx-value-accuracy`.
-- **Runs:** this is the sixth acceptance run.
+- **Candidate:** branch `fix/xlsx-value-accuracy` at **`3e744db`**, its final commit, in the worktree `.worktrees/xlsx-value-accuracy`.
+- **Runs:** this is the seventh acceptance run.
   - The first run, on `7484006`, was blocked (below).
   - The second run, on `732544d`, passed every gate, including fix round 1 of the review. The figures below hold for both the second and the third run unless a section marks a difference.
   - The third run, on `ecc5990`, is the rerun after Rulings 21–27. It differs from `732544d` in 13 text cells only ("Final rerun on `ecc5990`" below).
   - The fourth run, on `b7bd072`, came after Rulings 28–30. Its export is byte-identical to `ecc5990`'s ("Final acceptance on `b7bd072`" below).
   - The fifth run, on `39a71d2`, came after Ruling 31. Its export is byte-identical to `b7bd072`'s ("Acceptance on `39a71d2`" below).
-  - The sixth run, on `be2afea`, is the acceptance after Rulings 32 and 33. Its export is byte-identical to `39a71d2`'s ("Acceptance on `be2afea`" below).
+  - The sixth run, on `be2afea`, came after Rulings 32 and 33. Its export is byte-identical to `39a71d2`'s ("Acceptance on `be2afea`" below).
+  - The seventh run, on `3e744db`, is the acceptance after Rulings 34 and 35. Its export is byte-identical to `be2afea`'s ("Acceptance on `3e744db`" below).
 - **Baseline:** `outputs/xlsx-value-accuracy/base`. It is `main`'s `src` exported by Task 1; `src` on `main` is unchanged since `1c0ac51`.
 - **Manifest:** [`manifest.json`](manifest.json), with 4,048 entries built from that baseline by [`manifest.py`](manifest.py).
 - **Corpus:** the 60 filings of the header-detection audit (`../2026-10-11-xlsx-header-detection/filings.txt`).
@@ -38,7 +39,40 @@ The user decided the fix (user decision of 2026-10-13 and Rulings 13–18a in [`
   - its columns hold nothing else in any other body row, with `)` / `%)` fragments and unit-caption rows aside (Rulings 18, 18a).
 - **Safety net:** any value whose marker is refused becomes text with the P4 reason (Ruling 13), whatever its other proofs. A zero still converts, and a token the converter rejects keeps the converter's reason.
 
-The earlier exports are kept as `outputs/xlsx-value-accuracy/new-7484006`, `new-732544d`, `new-ecc5990`, `new-b7bd072` and `new-39a71d2` (all git-ignored).
+The earlier exports are kept as `outputs/xlsx-value-accuracy/new-7484006`, `new-732544d`, `new-ecc5990`, `new-b7bd072`, `new-39a71d2` and `new-be2afea` (all git-ignored).
+
+## Acceptance on `3e744db` (Rulings 34 and 35)
+
+**The rulings.**
+- **Ruling 34 (user decision).** A table-wide percent declaration proves nothing in a table that holds any unit or currency evidence anywhere. Evidence is any of these:
+  - a currency symbol or listed ISO code (also `₹ ₩ ₽ ₺ ₪`, `Fr.` and codes glued to an amount);
+  - a `$` cell or marker;
+  - an amount fact;
+  - a word or scale unit (`_ROW_UNIT`);
+  - another unit in a label.
+
+  In such a table the values only the declaration proved become P4 text.
+- **Ruling 35.** Caption-shaped context lines naming a currency, scale or other unit count as evidence; prose context lines never do.
+
+**The export.** `3e744db`'s `src` was exported into `outputs/xlsx-value-accuracy/new`, with 60 JSONs and 3,702 tables.
+- It ran from 13:49:55 to 14:01:06, 11m11s, at Idle priority with 3 workers, and exited 0. No other export was running, and none of its processes were left.
+- **It is byte-identical to the `be2afea` export in all 60 files.** `rerun_diff.py new-be2afea new` finds 0 tables and 0 cells that differ.
+
+**Gates.** Every gate was rerun and passes, the all-cells sweep included.
+- The `dispositions.py` and `changes.py` logs are identical to the `be2afea` run's.
+- The primary-statement details are identical to base.
+- `unmodelled_scan.py` finds 0 / 0 / 0.
+- The four mutation tests fail as before.
+
+**NVDA's 495 values are unchanged.** The sweep finds exactly 495 NVDA cells whose table-wide declaration sits in the context lines. Each is identical to base and equal to the displayed number / 100, and they are in 14 tables, NVDA's `Results of Operations` table in each of the 14 NVDA filings. The export is byte-identical to `be2afea`'s, so every NVDA cell is unchanged.
+
+**Rulings 34 and 35 in the checker.** Ruling 34 is encoded from the spec's text, for the table's own cells.
+- **Evidence.** Any source cell (header, caption or body) holding currency evidence (`[$€£¥₹₩₽₺₪]`, `Fr.`, or a listed ISO code not touching another capital letter), a `_ROW_UNIT` word, or an amount fact counts. So does any label (a header cell, a column-0 cell or a cell without digits) naming another unit.
+- **Effect.** In a table with evidence, an in-table caption proves nothing, and every column becomes a percent column, so values nothing else proves are P4 text. The per-cell conflicts keep reading the caption itself.
+- **What the checker cannot see.** The table's context unit lines and Ruling 35's caption-shaped context lines are not in the export JSON, so the checker cannot encode them. Where a context declaration and context evidence decide a table, the sweep holds that table's cells to the baseline: they must be identical to base, and NVDA's must be exactly 495.
+- **A further precision change.** The four parenthesised table-wide forms now need their parentheses, as the final review fix in Revision 3 requires.
+- **Affected cells: none.** The corpus has no in-table table-wide caption.
+- **Cross-check.** On all 2,966 exported tables, the checker's cell evidence equals the branch's `_unit_evidence` (cells part): 2,451 tables with evidence, 515 without, 0 disagreements. The 14 NVDA tables hold none.
 
 ## Acceptance on `be2afea` (Rulings 32 and 33)
 
@@ -229,7 +263,7 @@ If the branch applied one of them to a cell, the gates would fail, because the c
 
 ## Result in one paragraph
 
-Every gate passes on `be2afea`, whose export equals the exports of `39a71d2`, `b7bd072` and `ecc5990` (and passed on `732544d`).
+Every gate passes on `3e744db`, whose export equals the exports of `be2afea`, `39a71d2`, `b7bd072` and `ecc5990` (and passed on `732544d`).
 - **Dispositions (Acceptance 3).** All 4,048 manifest entries have a valid disposition:
   - 338 proven percents, each with its proof named;
   - 47 proven quantities;
@@ -258,7 +292,7 @@ function low { cmd /c "start `"`" /low /b /wait $PY $args & call exit %^errorlev
 $H = 'docs/superpowers/audits/2026-10-11-xlsx-header-detection'
 $A = 'docs/superpowers/audits/2026-10-12-xlsx-value-accuracy'
 $O = 'outputs/xlsx-value-accuracy'
-$SRC = '.worktrees/xlsx-value-accuracy/src'     # the branch at be2afea
+$SRC = '.worktrees/xlsx-value-accuracy/src'     # the branch at 3e744db
 $F = (Get-Content $H/filings.txt) -join ' '   # the 60 filings, one argument string
 low -I $H/export_tables.py --src $SRC --out $O/new --workers 3 $F
 low -I $A/dispositions.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/dispositions.json > $O/dispositions.log
@@ -267,13 +301,13 @@ low -I $H/primary_statements.py $O/new --report $O/statements-new.md --details $
 low -I $H/all_facts.py $O/base --report $O/all-facts-base.md --details $O/all-facts-base.json --workers 3
 low -I $H/all_facts.py $O/new --report $O/all-facts-new.md --details $O/all-facts-new.json --workers 3
 low -I $A/changes.py $O/base $O/new --manifest $A/manifest.json --src $SRC --details $O/changes.json --statements $O/statements-base.json $O/statements-new.json --all-facts $O/all-facts-base.json $O/all-facts-new.json --stacked-scan $A/stacked_scan.py > $O/changes.log
-low -I $A/rerun_diff.py $O/new-39a71d2 $O/new --details $O/rerun-diff.json > $O/rerun-diff.log   # the previous run's export against this one
+low -I $A/rerun_diff.py $O/new-be2afea $O/new --details $O/rerun-diff.json > $O/rerun-diff.log   # the previous run's export against this one
 low -I $A/unmodelled_scan.py $O/new --src $SRC > $O/unmodelled-scan.log
 ```
 
 | Step | Duration |
 |---|---|
-| Export, 60 filings | 11m23s on `be2afea` (13:12:53–13:24:17); 11m22s on `39a71d2`; 11m44s on `b7bd072` and on `ecc5990`; 11m12s on `732544d` |
+| Export, 60 filings | 11m11s on `3e744db` (13:49:55–14:01:06); 11m23s on `be2afea`; 11m22s on `39a71d2`; 11m44s on `b7bd072` and on `ecc5990`; 11m12s on `732544d` |
 | `dispositions.py` (with the all-cells sweep) | about 18 s |
 | `primary_statements.py`, each side | 0.6 s |
 | `all_facts.py`, each side | 0.6 s |
@@ -336,7 +370,7 @@ Notes on the inputs:
 
 | Gate | Result | Evidence |
 |---|---|---|
-| 1. Export | **Pass** | `be2afea`: 60 JSONs, 3,702 tables, exit 0, byte-identical to the `39a71d2`, `b7bd072` and `ecc5990` exports. Run at Idle priority with 3 workers; no workers left over. |
+| 1. Export | **Pass** | `3e744db`: 60 JSONs, 3,702 tables, exit 0, byte-identical to the `be2afea`, `39a71d2`, `b7bd072` and `ecc5990` exports. Run at Idle priority with 3 workers; no workers left over. |
 | 2. Dispositions (Acc. 3) | **Pass** | 0 of 4,048 entries without a valid disposition. All-cells sweep: 65,441 digit cells, 0 mismatches (55,711 as expected, 9,235 identical to base with no proof, 495 NVDA context-declared). `identifier_true`: 2,658 of 2,658 unchanged in value, type, format and reason. Split-`%` audit: 0 disagreements. |
 | 3. Primary statements (Acc. 4) | **Pass** | All 126 vault statements export (META 54, NVDA 42, RDDT 30). OK facts: META 3,322, NVDA 2,662, RDDT 2,056. Failures 0, arithmetic failures 0. `statements-new.json` is identical to `statements-base.json`. |
 | 4. Changed cells (Acc. 5) | **Pass** | 1,764 changed cells, all as the spec gives. 0 wrong numbers. 948 numbers in changed cells, 0 without a named proof and 0 outside their own heading. Axes: 0 cells whose header path or row label changed. 54 tables whose headers changed, all only by removed columns. Statement tables: 167 (126 vault), with 0 differing cells, 0 table changes and 0 axis changes. |

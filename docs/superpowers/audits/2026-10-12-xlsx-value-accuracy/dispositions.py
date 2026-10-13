@@ -87,8 +87,11 @@ source_text_only, whose percent-fact evidence holds is listed. A number must equ
 own displayed number / 100, negated when sign="-"; text is listed with its reason. Cells that
 would hold a percent fact but for a nested fact are listed as 'not proof: nested fact'.
 
-Rulings 32 and 33 (any currency symbol or listed ISO code in a label under a table-wide caption
-is a conflict; they replace the currency keep-value exception of Rulings 29-31) and Ruling 29's
+Ruling 34 (a caption proves nothing in a table with unit or currency evidence in its cells, and
+every column there becomes a percent column) is encoded for the table's own cells; Ruling 35's
+caption-shaped context lines are not in the export JSON. The table-wide forms now require the
+parentheses of the final review fix. Rulings 32 and 33 (any currency symbol or listed ISO code in
+a label under a table-wide caption is a conflict; they replace the currency keep-value exception of Rulings 29-31) and Ruling 29's
 points part (a bare or glued 'pp' as points, 'PP&E' excepted) are encoded as well, for the in-table captions this script can see. Ruling 28 (a
 sign disagreement between display and fact is not flagged) needs no encoding: a sign-mismatched
 fact is no percent-fact proof here either, and it is not contrary evidence.
@@ -196,9 +199,16 @@ CURRENCY_MARK = re.compile(r'[$€£¥]|\b(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD
 # a table-wide declaration and names no points or percentage-of-completion (spec Testing 7).
 PERCENT_NAME = re.compile(r'%|\bpercent(?:ages?)?\b', re.I)
 NOT_PERCENT_NAME = re.compile(r'\bpoints?\b|\bpts\b|\bpercentage[- ]of[- ]completion\b', re.I)
+# Spec Definitions with the final review fix (Revision 3): _UNIT_DECLARATION's alternatives 2
+# and 3, or one of the four parenthesised forms, parentheses required.
 TABLE_WIDE = re.compile(r'\(?(?:(?:(?:items |amounts )?expressed as a )?percentage of revenue'
-                        r'|the following table [^.!?\d]*expressed as a percentage of revenue'
-                        r'|in percent(?:ages)?|as a percentage of (?:total )?revenue)\)?\.?', re.I)
+                        r'|the following table [^.!?\d]*expressed as a percentage of revenue)\)?\.?'
+                        r'|\((?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)', re.I)
+# Ruling 34 (user decision 2026-10-13): unit or currency evidence anywhere in a table withholds a
+# table-wide declaration. Currency evidence is wider than CURRENCY_MARK: also '₹ ₩ ₽ ₺ ₪', 'Fr.',
+# and a listed ISO code glued to an amount ('USD500m', '500mUSD').
+ISO_CODES = r'(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD|CHF|CAD|AUD|INR|KRW|SGD|BRL|MXN|SEK|NOK|DKK|ZAR)'
+CURRENCY_EVIDENCE = re.compile(rf'[$€£¥₹₩₽₺₪]|\bFr\.|(?<![A-Z]){ISO_CODES}(?![A-Z])')
 
 
 def group(name):
@@ -321,6 +331,7 @@ class Table:
         self.refused = set()  # value origins whose split '%' was refused (set by audit_splits)
         self._shared = None
         self._table_wide = None
+        self._unit_evidence = None
         self.columns = {}
 
     def cell(self, ri, ci):
@@ -368,6 +379,27 @@ class Table:
                     if len(columns) > 1:
                         self._shared |= columns
         return self._shared
+
+    def unit_evidence(self):
+        """Ruling 34: unit or currency evidence anywhere in the table's own cells. In any source
+        cell, header, caption or body: currency evidence (CURRENCY_EVIDENCE, '$' cells and markers
+        included), a word or scale unit (today's _ROW_UNIT), or an amount fact; in a label (a
+        header cell, a column-0 cell or a cell without digits): another unit (names_other_unit).
+        The table's context unit lines and caption-shaped context lines (Ruling 35) are not in
+        the export JSON, so this reads the cells only."""
+        if self._unit_evidence is None:
+            amount = {o for o, facts in self.facts.items()
+                      if any(m.lower().startswith('iso4217:') or m.lower() == 'xbrli:shares'
+                             for f in facts for m in f['unit'])}
+            self._unit_evidence = False
+            for c in self.t['source_cells']:
+                text = c[4] or ''
+                label = c[0] < self.header_count or c[1] == 0 or not has_digit(text)
+                if (CURRENCY_EVIDENCE.search(text) or M._ROW_UNIT.search(text) or (c[0], c[1]) in amount
+                        or (label and names_other_unit(text))):
+                    self._unit_evidence = True
+                    break
+        return self._unit_evidence
 
     def table_wide(self):
         """A spanning in-table caption before the first body row matching a table-wide declaration."""
@@ -515,7 +547,9 @@ def evidence(table, ri, ci):
                         for f in facts)
     declared = any(percent_declaration(part) for part in labels)
     shared = ci in table.shared()
-    withheld = (declared or table.table_wide()) and shared
+    # Rulings 10, 11; Ruling 34: a caption in a table with unit evidence proves nothing, and every
+    # column of such a table is a percent column, so values nothing else proves are P4 text.
+    withheld = ((declared or table.table_wide()) and shared) or (table.table_wide() and table.unit_evidence())
     header_proof = declared and not shared
     row_proof = percent_declaration(label)
     row_unit = bool(M._ROW_UNIT.search(header) or M._ROW_UNIT.search(label))
@@ -538,7 +572,8 @@ def evidence(table, ri, ci):
                 or (claimed and (amount_fact or row_unit or '$' in token or dollar_axis)))
     return dict(cell=cell, token=token, d=d, facts=facts, label=label, header=header, percent=percent,
                 not_percent=not_percent, conflict=conflict, withheld=withheld,
-                table_wide=table.table_wide() and not shared and not M._VALUE.search(header),
+                table_wide=(table.table_wide() and not table.unit_evidence() and not shared
+                            and not M._VALUE.search(header)),
                 nested_fact=single and not pct_fact,
                 refused=any(s in table.refused for s in cell['sources']),
                 # Ruling 21: under a heading naming a percent, a cell without a proof of its own
