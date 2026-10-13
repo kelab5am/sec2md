@@ -1658,3 +1658,35 @@ def test_currency_in_unit_position_keeps_its_value_under_a_table_wide_declaratio
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
     assert cell_rows(table) == [_MARGIN_45 + [(Decimal('26'), '#,##0', '26', None)]]
     assert table.status == 'exported'
+
+
+# --- Ruling 31: a currency symbol after an amount is not a unit --------------------------
+
+_AMOUNT_CURRENCY = ['Senior notes, 4.1 billion €', 'Issuance of 3.8 billion US$', 'Bonds of 500 million €',
+                    '3.8 billion $']
+
+
+@pytest.mark.parametrize('label', _AMOUNT_CURRENCY)
+def test_currency_after_an_amount_conflicts_with_a_table_wide_declaration(label):
+    """Ruling 31: a closing currency token right after a digit or a scale word is an
+    amount, not a unit: under '(in percentages)' the value is conflict text, never 2.63."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('header', _AMOUNT_CURRENCY)
+def test_currency_after_an_amount_heading_conflicts_with_nvdas_sentence(header):
+    """Ruling 31: as a heading under NVDA's sentence, the same labels conflict."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '2.63'), before=_NVDA_SENTENCE)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('label', ['Price, US$', 'Notes due 2030, $'])
+def test_closing_currency_token_after_a_comma_keeps_its_value(label):
+    """Ruling 31 keeps the closing-token unit after a comma, a year included."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('26'), '#,##0', '26', None)]]
+    assert table.status == 'exported'

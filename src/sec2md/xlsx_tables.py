@@ -794,15 +794,29 @@ _OTHER_UNIT = re.compile(
     r'|^(?:number of )?(?:years|months|days|weeks)\b'
     r'|^times\b|\b(?:years|months|days|weeks) to maturity\b|\bduration\b'
     rf'|(?<![^\W\d_])(?:{_POINTS_WORD}|ppts?|points|pts)\b|(?<!&)(?<![^\W\d_])pp(?![\w&])', re.I)
-# Rulings 29 and 30: a currency symbol in a row or header label names a non-percent unit
+# Rulings 29 to 31: a currency symbol in a row or header label names a non-percent unit
 # only in unit position: parenthesised ('Price ($)', 'Amount (€)', 'Price (in $)',
-# 'Revenue (US$ in millions)') or a closing token ('Price, US$'). Elsewhere it is an amount
-# or a description ('issuance of $3.8 billion', 'US$ contracts', '€ markets').
+# 'Revenue (US$ in millions)') or a closing token ('Price, US$', 'Notes due 2030, $'),
+# but not one that follows a digit or a scale word ('3.8 billion $', 'Bonds of 500
+# million €'). Elsewhere it is an amount or a description ('issuance of $3.8 billion',
+# 'US$ contracts', '€ markets').
 _CURRENCY_MARK = re.compile(r'[$€£¥]')
 _CURRENCY_TOKEN = r'(?:[A-Z]{1,3})?[$€£¥]'
-_CURRENCY_UNIT = re.compile(
-    rf'\(\s*(?:in\s+)?{_CURRENCY_TOKEN}(?:\s+in)?(?:\s+(?:thousands|millions|billions))?\s*\)'
-    rf'|(?:^|[\s,:–—-]){_CURRENCY_TOKEN}\s*$', re.I)
+_CURRENCY_PAREN = re.compile(
+    rf'\(\s*(?:in\s+)?{_CURRENCY_TOKEN}(?:\s+in)?(?:\s+(?:thousands|millions|billions))?\s*\)', re.I)
+_CURRENCY_CLOSING = re.compile(rf'(?:^|[\s,:–—-]){_CURRENCY_TOKEN}\s*$', re.I)
+_CURRENCY_AFTER_AMOUNT = re.compile(
+    rf'(?:\d|\b(?:thousands?|millions?|billions?|trillions?|bn|mm|m|k))\s*{_CURRENCY_TOKEN}\s*$', re.I)
+
+
+def _currency_label(text) -> tuple[bool, bool]:
+    """Rulings 29 to 31: (a currency symbol in unit position, a currency symbol elsewhere)
+    in a row or header label."""
+    rest = _CURRENCY_PAREN.sub(' ', text)
+    unit = rest != text
+    if _CURRENCY_CLOSING.search(rest) and not _CURRENCY_AFTER_AMOUNT.search(rest):
+        unit, rest = True, _CURRENCY_CLOSING.sub(' ', rest)
+    return unit, bool(_CURRENCY_MARK.search(rest))
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).
@@ -924,8 +938,9 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True, table_
     # there (spec P3), and a local percent proof beside it conflicts. Any other currency
     # symbol there (an amount, a description) is a conflict.
     currency_label = any(_CURRENCY_MARK.search(part) for part in (label, *labels))
-    currency_unit = any(_CURRENCY_UNIT.search(part) for part in (label, *labels))
-    currency_other = any(_CURRENCY_MARK.search(_CURRENCY_UNIT.sub(' ', part)) for part in (label, *labels))
+    currencies = [_currency_label(part) for part in (label, *labels)]
+    currency_unit = any(unit for unit, _ in currencies)
+    currency_other = any(other for _, other in currencies)
     not_percent = ('$' in text or amount or bool(_ROW_UNIT.search(header) or _ROW_UNIT.search(label))
                    or (table_percent and currency_unit))
     # Today's explicit-unit conflicts stay conflicts: a percent heading, label or sign
