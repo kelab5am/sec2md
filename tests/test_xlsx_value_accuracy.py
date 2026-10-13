@@ -1877,3 +1877,116 @@ def test_prose_context_with_a_dollar_keeps_the_table_wide_declaration(declaratio
     assert cell_rows(table) == [[text_cell('Average price'), (Decimal('0.26'), '0%', '26', None)],
                                 [text_cell('Gross margin'), (Decimal('0.45'), '0%', '45', None)]]
     assert table.status == 'exported'
+
+
+# --- Ruling 36: unit evidence anywhere in a table blocks a table-wide caption ------------
+
+_MARGIN_TWO_YEARS = [text_cell('Gross margin'), text_cell('45', _UNPROVEN), text_cell('44', _UNPROVEN)]
+
+
+def _stacked(sub_label, label, values, tag='td'):
+    """'2025 | 2024' over a margin row, then a stacked sub-header row and a value row."""
+    subs = ''.join(f'<{tag} colspan="3">{sub_label.format(year)}</{tag}>' for year in (2025, 2024))
+    return (heading('2025', '2024') + sec_row('Gross margin', '45', '44')
+            + f'<tr><{tag}></{tag}>{subs}</tr>' + sec_row(label, *values))
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('sub_label, label, values, tag', [
+    ('{} (bps)', 'Spread', ('120', '110'), 'td'),
+    ('{} (in years)', 'Expected term', ('5.5', '6.0'), 'td'),
+    ('{} (in years)', 'Expected term', ('5.5', '6.0'), 'th'),
+    ('Years {}', 'Expected term', ('5.5', '6.0'), 'td'),
+    ('{} (x)', 'Coverage', ('5.5', '6.0'), 'td'),
+    ('{} Days', 'DSO', ('45', '50'), 'td'),
+], ids=['bps', 'in-years', 'in-years-th', 'years-year', 'x', 'days'])
+def test_unit_in_a_stacked_sub_header_withholds_a_table_wide_declaration(sub_label, label, values, tag, before):
+    """Ruling 36: a unit in a digit-bearing stacked sub-header ('2025 (bps)', 'Years 2025') is
+    unit evidence too, so no value in the table takes the table-wide declaration: P4 text,
+    never 1.20 or 0.055."""
+    table = prepared(_stacked(sub_label, label, values, tag), before=before)
+    subs = [sub_label.format(year) for year in (2025, 2024)]
+    assert cell_rows(table) == [_MARGIN_TWO_YEARS, [_EMPTY] + [text_cell(sub, _INCOMPLETE) for sub in subs],
+                                [text_cell(label)] + [text_cell(value, _UNPROVEN) for value in values]]
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('label, values', [
+    ('Expected term', ('5.5 years', '6.0 years')), ('Coverage', ('5.5x', '6.0x')),
+    ('Spread', ('+100bps', '+50bps')), ('DSO', ('45 days', '50 days')),
+], ids=['years', 'x', 'bps', 'days'])
+def test_unit_inside_a_value_cell_withholds_a_table_wide_declaration(label, values, before):
+    """Ruling 36: a unit inside a value cell ('5.5 years', '5.5x') is unit evidence: the
+    margin row is P4 text, never 0.45."""
+    table = prepared(heading('2025', '2024') + sec_row('Gross margin', '45', '44') + sec_row(label, *values),
+                     before=before)
+    assert cell_rows(table) == [_MARGIN_TWO_YEARS, [text_cell(label)] + [text_cell(v, _INCOMPLETE) for v in values]]
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+def test_fact_in_another_unit_withholds_a_table_wide_declaration(before):
+    """Ruling 36: a fact that is no pure scale -2 percent fact (here years, utr:Y) is unit
+    evidence: its own cell conflicts (Ruling 21) and the untagged 6.0 beside it is P4 text,
+    never 0.060."""
+    table = prepared(heading('2025', '2024') + sec_row('Gross margin', '45', '44')
+                     + sec_row('Expected term', fact('5.5', unit='U_years', scale='0'), '6.0'), before=before)
+    assert cell_rows(table) == [_MARGIN_TWO_YEARS, [text_cell('Expected term'), text_cell('5.5', _CONFLICT),
+                                                    text_cell('6.0', _UNPROVEN)]]
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('word', ['euros', 'yen'])
+def test_currency_word_unit_row_withholds_a_table_wide_declaration(word, before):
+    """Ruling 36: a currency word in a unit row ('(in euros)', '(in yen)') is currency
+    evidence: 26 is P4 text, never 0.26."""
+    table = prepared('<tr><th>Item</th><th colspan="3">2025</th></tr>'
+                     f'<tr><th></th><th colspan="3">(in {word})</th></tr>' + sec_row('Average price', '26'), before=before)
+    assert cell_rows(table) == [[text_cell('Average price'), text_cell('26', _UNPROVEN)]]
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+def test_currency_word_row_label_withholds_a_table_wide_declaration(before):
+    """Ruling 36: 'Price (euros)' is currency evidence: both rows are P4 text."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row('Price (euros)', '26'), before=before)
+    assert cell_rows(table) == [[text_cell('Gross margin'), text_cell('45', _UNPROVEN)],
+                                [text_cell('Price (euros)'), text_cell('26', _UNPROVEN)]]
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('line', ['(in euros)', '(Euros)', '(in yen)'])
+def test_currency_word_caption_line_withholds_a_table_wide_declaration(line, before):
+    """Ruling 36 with Ruling 35: a caption line naming a currency word is evidence."""
+    table = prepared(heading('2025') + sec_row('Average price', '26'), before=f'{before}<p>{line}</p>')
+    assert cell_rows(table) == [[text_cell('Average price'), text_cell('26', _UNPROVEN)]]
+    assert table.status == 'needs_review'
+
+
+_NVDA_ROWS = (sec_row('Revenue', '100.0 %', '100.0 %') + sec_row('Cost of revenue', '24.4', '27.3')
+              + sec_row('Interest expense', '(0.2)', '(0.4)') + sec_row('Net income', '55.8 %', '48.8 %'))
+_NVDA_PERCENTS = [
+    [text_cell('Revenue'), (Decimal('1.000'), '0.0%', '100.0 %', None), (Decimal('1.000'), '0.0%', '100.0 %', None)],
+    [text_cell('Cost of revenue'), (Decimal('0.244'), '0.0%', '24.4', None), (Decimal('0.273'), '0.0%', '27.3', None)],
+    [text_cell('Interest expense'), (Decimal('-0.002'), '0.0%;(0.0%)', '(0.2)', None),
+     (Decimal('-0.004'), '0.0%;(0.0%)', '(0.4)', None)],
+    [text_cell('Net income'), (Decimal('0.558'), '0.0%', '55.8 %', None), (Decimal('0.488'), '0.0%', '48.8 %', None)],
+]
+
+
+@pytest.mark.parametrize('context', [
+    '<p>(Unaudited)</p>', '<h3>Results of Operations</h3>',
+    '<p>Revenue for fiscal year 2025 was $130.5 billion, up 114% from a year ago.</p>',
+    '<p>Fiscal Year 2025 Summary</p>',
+], ids=['unaudited', 'heading', 'prose-dollar', 'summary'])
+@pytest.mark.parametrize('headings', [
+    '<tr><th></th><th colspan="6">Year Ended</th></tr>' + heading('Jan 26, 2025', 'Jan 28, 2024'),
+    '<tr><th></th><th colspan="6">Six Months Ended</th></tr>' + heading('Jul 28, 2024', 'Jul 30, 2023'),
+    heading('Fiscal 2025', 'Fiscal 2024'),
+], ids=['year-ended', 'six-months', 'fiscal'])
+def test_nvda_shaped_tables_keep_the_table_wide_declaration(headings, context):
+    """Ruling 36 control: NVDA's percent-of-revenue shapes, with their real context lines and
+    period headings, hold no unit evidence and keep every percent."""
+    table = prepared(headings + _NVDA_ROWS, before=context + _NVDA_SENTENCE)
+    assert cell_rows(table) == _NVDA_PERCENTS
+    assert table.status == 'exported'

@@ -18,9 +18,11 @@
     nor a table-wide caption proves a column that holds a `$` amount or an amount
     fact, and a table-wide caption proves nothing under an amount heading such as
     `Total`. A table-wide caption proves nothing at all in a table that holds
-    any unit or currency evidence: a currency symbol or ISO code, a `$` cell, an
-    amount fact, a scale or word unit such as `(in millions)` or `per share`, or
-    another unit such as `(in years)`, also in a caption line just above the
+    any unit or currency evidence anywhere in it (header, sub-header, row label
+    or value cell): a currency symbol, ISO code or word such as `euros`, a `$`
+    cell, any fact that is not a percent fact, a scale or word unit such as
+    `(in millions)` or `per share`, or another unit such as `(in years)`,
+    `5.5 years` or `2.0x`, also in a caption line just above the
     table such as `(in millions of $)` (not in prose). There, every value only the caption proved
     stays text with the reason above. Under a table-wide caption a currency label
     such as `Price ($)` or `Price (USD)` is conflict text, while a word unit such

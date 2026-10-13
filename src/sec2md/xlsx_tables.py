@@ -887,27 +887,41 @@ _CAPTION_SHAPED = re.compile(r'\([^()]*\)\.?')
 _CAPTION_LENGTH = 120
 
 
+# Ruling 36: a currency word ('(in euros)', 'Price (euros)', '(in yen)'). 'won', 'real(s)'
+# and 'pound(s)' count only in a unit position, so 'Real estate' is none.
+_CURRENCY_WORD = re.compile(
+    r'\b(?:dollars?|euros?|yen|yuan|renminbi|rupees?|francs?|pounds? sterling|sterling)\b'
+    r'|\(\s*(?:in\s+)?(?:won|reals?|pounds?)\s*\)|\bin (?:won|reals?|pounds?)\b', re.I)
+# Ruling 36: a unit after the number in a value cell ('5.5 years', '45 days', '5.5x', '+100bps').
+_VALUE_UNIT = re.compile(r'\d\s*(?:years?|yrs?\.?|months?|mos\.?|days?|weeks?|x|times|bps|bp|basis[- ]points?'
+                         r'|percentage[- ]points?|pp|ppts?|points?|pts?)(?![A-Za-z])', re.I)
+
+
 def _unit_evidence(cells, unit_lines, context, header_count) -> bool:
-    """Rulings 34 (user decision 2026-10-13) and 35: whether a table holds any unit or
-    currency evidence, in which case a table-wide percent declaration proves nothing in it.
-    Evidence is, in any source cell (header, caption or body), unit line of the table or
-    caption-shaped context line (_CAPTION_SHAPED, or _UNIT_LINE's shape when short): a
-    currency symbol or ISO code (_CURRENCY_EVIDENCE, '$' cells and markers included), an
-    amount fact, a word or scale unit (_ROW_UNIT: per share, dollars, shares, in millions
-    …), or, in a label (a header cell, a row label, a cell without digits or such a line),
-    another unit (_names_other_unit: years, days, bps, x …)."""
+    """Rulings 34 (user decision 2026-10-13), 35 and 36: whether a table holds any unit or
+    currency evidence anywhere, in which case a table-wide percent declaration proves
+    nothing in it. Every source cell (header, caption or body, with digits or without), unit
+    line of the table and caption-shaped context line (_CAPTION_SHAPED, or _UNIT_LINE's
+    shape when short) is checked for: a currency symbol, ISO code or word
+    (_CURRENCY_EVIDENCE, _CURRENCY_WORD, '$' cells and markers included); a word or scale
+    unit (_ROW_UNIT: per share, dollars, shares, in millions …); another unit
+    (_names_other_unit, period words stripped: '2025 (in years)', 'Years 2025', '(x)');
+    and, in a body value cell, a unit after the number (_VALUE_UNIT: '5.5 years'). Every
+    fact that is no pure scale -2 percent fact (an amount fact, a fact in years) is
+    evidence too."""
+    def names_a_unit(text):
+        return bool(_CURRENCY_EVIDENCE.search(text) or _CURRENCY_WORD.search(text) or _ROW_UNIT.search(text)
+                    or _names_other_unit(text))
+
     for cell in cells:
-        text = cell.text
-        if (_CURRENCY_EVIDENCE.search(text) or _ROW_UNIT.search(text)
-                or any(_measured_amount(fact) for fact in cell.facts)):
+        if names_a_unit(cell.text) or any(not (fact.unit_measures == ('xbrli:pure',) and fact.scale == -2)
+                                          for fact in cell.facts):
             return True
-        label = cell.row < header_count or cell.column == 0 or not re.search(r'\d', text)
-        if label and _names_other_unit(text):
+        if cell.row >= header_count and cell.column > 0 and _VALUE_UNIT.search(cell.text):
             return True
     captions = [line for line in (line.strip() for line in context)
                 if len(line) <= _CAPTION_LENGTH and (_CAPTION_SHAPED.fullmatch(line) or _UNIT_LINE.match(line))]
-    return any(_CURRENCY_EVIDENCE.search(line) or _ROW_UNIT.search(line) or _names_other_unit(line)
-               for line in (*unit_lines, *captions))
+    return any(map(names_a_unit, (*unit_lines, *captions)))
 
 
 class _Proof(NamedTuple):
