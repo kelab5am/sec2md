@@ -1038,8 +1038,7 @@ def _attached_percent_signs(grid, header_count):
     marker. Neither does period text or any origin of a period row (heading rows
     left in the body: '| | 2025 | 2024 | $ | % |').
 
-    The marker attaches only when it spans one row (a '%' spanning two rows
-    names no one row's value), sits directly beside that value, with no
+    The marker attaches only when it spans one row, sits directly beside that value, with no
     origin between them (Ruling 16), and its leaf heading is the value's or
     spans the value's column (user decision 2026-10-13, amending Ruling 5):
     TSM's '%' under 'For the year ended December 31,' joins the value under its
@@ -1053,15 +1052,18 @@ def _attached_percent_signs(grid, header_count):
     caption row (see _unit_caption_row) are not values of the marker column.
     A value the search reached but that fails any of these rules is returned as refused
     and becomes P4 text, so it is never left a plain number; a zero still
-    converts, under spec P4's zero exception.
+    converts, under spec P4's zero exception. A '%' spanning two or more rows
+    names no one row's value: it is refused for the value beside it in every row
+    it spans, and _spanning_marker keeps grouping and the marker-column merge from
+    joining it too (Ruling 23).
     """
     attached, refused = {}, {}
     value_rows = [r for r in range(header_count, len(grid)) if not _period_row(grid[r])]
     for r in value_rows:
         row = grid[r]
         for col, marker in enumerate(row):
-            if marker is None or (marker.row, marker.column) != (r, col) or marker.text not in _SPLIT_PERCENT:
-                continue
+            if marker is None or marker.column != col or marker.text not in _SPLIT_PERCENT:
+                continue  # each row a spanning marker covers is searched, not only its first
             value = next((c for c in reversed(row[:col]) if c is not None and c.text not in {'', '$', '('}), None)
             if (value is None or value.row != r or value.column == 0 or not re.search(r'\d', value.text)
                     or '%' in value.text or _period_text(value.text)):
@@ -1074,6 +1076,11 @@ def _attached_percent_signs(grid, header_count):
             else:
                 refused[value] = marker
     return attached, refused
+
+
+def _spanning_marker(cell) -> bool:
+    """A '%' or ')%' marker spanning two or more rows (Ruling 23)."""
+    return cell is not None and cell.text in _SPLIT_PERCENT and cell.rowspan > 1
 
 
 def _with_attached(origins, attached):
@@ -1125,7 +1132,8 @@ def _column_groups(grid, original, header_count, attached):
                                      attached)
             # A points unit beside its value is not a second value (spec P4).
             nonmarkers = [c for c in origins if c.text not in _FRAGMENTS and not _POINTS_UNIT.fullmatch(c.text)]
-            if len(nonmarkers) > 1:
+            # A '%' spanning two rows joins no value (Ruling 23).
+            if len(nonmarkers) > 1 or any(map(_spanning_marker, origins)):
                 safe = False
             text = _joined(origins)
             if (any(c.text in _FRAGMENTS for c in origins) and not _POINTS.fullmatch(text)
@@ -1206,11 +1214,13 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     structural_grid = [[GridCell(Cell('')) for _ in groups], *raw[header_count:]]
     parser = object.__new__(TableParser)
     actions = parser._safe_structural_actions(structural_grid)
-    # A marker column carrying independent header text must remain visible.
+    # A marker column carrying independent header text must remain visible, and a column
+    # holding a '%' that spans two rows never merges into its values (Ruling 23).
     actions = {col: moves for col, moves in actions.items()
                if all(not grid[r][groups[col][0]] or not grid[r][groups[col][0]].text or
                       any(grid[r][groups[target][0]] is grid[r][groups[col][0]] for target in moves.values())
-                      for r in range(header_count))}
+                      for r in range(header_count))
+               and not any(map(_spanning_marker, (o for r in range(header_count, height) for o in group_origins[r][col])))}
     # Revalidate after the header veto: removing one part must not leave an
     # accounting fragment whose original successful validation used that part.
     actions = parser._validated_structural_actions(structural_grid, actions)

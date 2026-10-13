@@ -1170,14 +1170,14 @@ def test_number_percent_and_except_clause_in_a_heading_name_no_percent(header):
 
 
 def test_percent_sign_spanning_two_rows_never_attaches():
-    """A6: a '%' spanning two rows names no one row's value. It is refused, so '4' is P4
-    text, never 0.04."""
+    """A6: a '%' spanning two rows names no one row's value. It is refused for both rows it
+    spans (Ruling 23), so '4' and '5' are P4 text, never 0.04."""
     table = prepared('<tr><th>Item</th><th>2025</th><th></th></tr>'
                      '<tr><td>Gross margin</td><td>4</td><td rowspan="2">%</td></tr>'
                      '<tr><td>Operating margin</td><td>5</td></tr>')
     assert cell_rows(table) == [
         [text_cell('Gross margin'), text_cell('4', _UNPROVEN), _STRAY],
-        [text_cell('Operating margin'), text_cell('5', _UNRESOLVED), _EMPTY],
+        [text_cell('Operating margin'), text_cell('5', _UNPROVEN), _EMPTY],
     ]
     assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),)), (((2, 0),), ((2, 1),), ()))
 
@@ -1204,6 +1204,36 @@ def test_refused_split_percent_flags_a_value_with_its_own_dollar():
 # --- Ruling 21, completed (final fix round 2) ------------------------------------------
 
 _YEARS_FACT = fact('5.5', unit='U_years', scale='-1', name='us-gaap:ExpectedTerm')
+
+
+def test_spanning_percent_sign_never_joins_through_column_grouping():
+    """R1 (Ruling 23): '2025' heads the value and the '%' spanning two rows. Column grouping must not
+    join that '%' to '4' either: both values beside it are P4 text, never 0.04."""
+    table = prepared('<tr><th>Item</th><th colspan="2">2025</th></tr>'
+                     '<tr><td>Revenue</td><td>4</td><td rowspan="2">%</td></tr>'
+                     '<tr><td>Cost</td><td>6</td></tr>')
+    assert table.headers == ('Item', '2025', '2025')
+    assert cell_rows(table) == [[text_cell('Revenue'), text_cell('4', _UNPROVEN), _STRAY],
+                                [text_cell('Cost'), text_cell('6', _UNPROVEN), _EMPTY]]
+    assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),)), (((2, 0),), ((2, 1),), ()))
+    assert table.issues == tuple(f'Source row {r}, column 1: {_UNPROVEN}' for r in (1, 2))
+    assert table.status == 'needs_review'
+
+
+def test_spanning_percent_sign_never_joins_through_the_marker_column_merge():
+    """R1 (Ruling 23): a column of '%' signs merges into its values, but not the '%' spanning two rows:
+    '4' and '5' beside it are P4 text, while C's own '%' still attaches."""
+    table = prepared('<tr><th>Item</th><th>2025</th><th></th></tr>'
+                     '<tr><td>A</td><td>4</td><td rowspan="2">%</td></tr><tr><td>B</td><td>5</td></tr>'
+                     '<tr><td>C</td><td>6</td><td>%</td></tr>')
+    assert table.headers == ('Item', '2025', 'Column 3')
+    assert cell_rows(table) == [[text_cell('A'), text_cell('4', _UNPROVEN), _STRAY],
+                                [text_cell('B'), text_cell('5', _UNPROVEN), _EMPTY],
+                                [text_cell('C'), (Decimal('0.06'), '0%', '6 %', None), _EMPTY]]
+    assert table.cell_sources == ((((1, 0),), ((1, 1),), ((1, 2),)), (((2, 0),), ((2, 1),), ()),
+                                  (((3, 0),), ((3, 1), (3, 2)), ()))
+    assert table.issues == ('Missing source header for Column 3; verify its meaning.',
+                            f'Source row 1, column 1: {_UNPROVEN}', f'Source row 2, column 1: {_UNPROVEN}')
 
 
 @pytest.mark.parametrize('before, value, shown', [
