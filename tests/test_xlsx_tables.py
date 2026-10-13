@@ -286,7 +286,10 @@ def test_body_percentage_label_does_not_supply_global_units():
     table = prepared('''<table><tr><th>Item</th><th>2026</th></tr>
     <tr><td>Revenue</td><td>120</td></tr><tr><td>Percentage of revenue</td><td>15</td></tr></table>''')
     assert table.units == ''
-    assert [row[1].value for row in table.rows] == [Decimal('120'), Decimal('.15')]
+    # Spec P4 (value accuracy): the row label proves 15 a percent, so 120, with no
+    # proof of either kind, stays source text in this percent column.
+    assert [row[1].value for row in table.rows] == ['120', Decimal('.15')]
+    assert table.rows[0][1].review_reason == 'Percent sign on other rows of this column; verify the scale.'
     assert table.rows[1][0].value == 'Percentage of revenue'
 
 
@@ -352,9 +355,13 @@ def test_preparation_mixed_units_groups_and_numeric_facts_keep_display():
     <tr><td>Tax rate (%)</td><td>15</td><td>—</td></tr></table>''')
     assert table.title == 'Results'
     assert table.units == 'In millions, except per share data'
+    # Spec P4 (value accuracy): 'Tax rate (%)' makes 2026 a percent column. The
+    # unitless fact is not an amount fact, so 1,200 stays source text; 'Per share'
+    # proves 2.50 not a percent.
     assert [[c.value for c in r] for r in table.rows] == [
-        ['Revenue', Decimal('1200'), Decimal('.25')], ['Per share', Decimal('2.50'), None],
+        ['Revenue', '1,200', Decimal('.25')], ['Per share', Decimal('2.50'), None],
         ['Group', None, None], ['Tax rate (%)', Decimal('.15'), '—']]
+    assert table.rows[0][1].review_reason == 'Percent sign on other rows of this column; verify the scale.'
     assert table.original_rows[1][1] == '1,200'
 
 
@@ -430,7 +437,10 @@ def test_wrapped_table_percent_context_and_local_unit_exception():
     table = prepared('''<h2>Margins</h2><p>Expressed as a percentage of revenue</p><div><table>
     <tr><th>Item</th><th>2026</th></tr><tr><td>Gross margin</td><td>25</td></tr>
     <tr><td>Income per share</td><td>2.50</td></tr></table></div><h2>Next</h2><p>Unrelated</p>''')
-    assert table.rows[0][1].value == Decimal('.25')
+    # Ruling 34 (user decision 2026-10-13): 'per share' is unit evidence, so the table-wide
+    # declaration proves nothing in this table; 25 stays source text for review.
+    assert (table.rows[0][1].value, table.rows[0][1].review_reason) == (
+        '25', 'Percent sign on other rows of this column; verify the scale.')
     assert table.rows[1][1].value == Decimal('2.50')
     assert table.title == 'Margins'
     assert not any('Unrelated' in note for note in table.notes)
@@ -672,11 +682,12 @@ XLSX_POLICY_CONTROLS = {
         '<tr><td>Margin</td><td>(3.2</td><td>)%</td></tr>'
         '<tr><td>Growth</td><td>(1.5</td><td>)%</td></tr></table>',
         ('Item', '2025', 'Column 3'),
-        [[('Margin', '@', 'Margin', None), ('(3.2', '@', '(3.2', _UNRESOLVED), (')%', '@', ')%', None)],
-         [('Growth', '@', 'Growth', None), ('(1.5', '@', '(1.5', _UNRESOLVED), (')%', '@', ')%', None)]],
-        _own_sources((1, 2), 3),
-        ('Missing source header for Column 3; verify its meaning.',
-         f'Source row 1, column 1: {_UNRESOLVED}', f'Source row 2, column 1: {_UNRESOLVED}'),
+        # Spec P4 (value accuracy): the ')%' attaches to the value on its left, which
+        # converts as a negative percent; the marker's own copy position is empty.
+        [[('Margin', '@', 'Margin', None), ('-0.032', '0.0%;(0.0%)', '(3.2)%', None), (None, '@', '', None)],
+         [('Growth', '@', 'Growth', None), ('-0.015', '0.0%;(0.0%)', '(1.5)%', None), (None, '@', '', None)]],
+        tuple((((row, 0),), ((row, 1), (row, 2)), ()) for row in (1, 2)),
+        ('Missing source header for Column 3; verify its meaning.',),
     ),
     'zero_width_marker_slot': (
         f'<table>{_ITEM_HEADER}<tr><td>Revenue</td><td>$</td><td>100</td></tr>'

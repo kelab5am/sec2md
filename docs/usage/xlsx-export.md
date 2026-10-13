@@ -112,6 +112,68 @@ scale. Percentages become fractions with percentage formatting (`12.3%` becomes
 `0.123`). Dates, identifiers and numeric-looking labels stay text. Explicit zero
 stays zero, blank stays blank, and a reported dash stays the exact text dash.
 
+A number becomes a fraction only on proof that it is a percent: its own `%`, an
+inline XBRL percent fact in the cell, a percent heading such as `% Change`, a
+percent row label, or a table-wide percent caption. A heading or caption over
+two values in one row proves neither of them. A percent proof never overrides
+contrary evidence: a heading or caption proves nothing in a column that holds a
+`$` amount or an amount fact, and a caption proves nothing under an amount
+heading such as `Total`. A table-wide caption proves nothing in a table with any
+unit or currency evidence anywhere in it, header, sub-header, row label or value
+cell (a currency symbol, code or word such as `euros`, a `$` cell, any fact that
+is not a percent fact, `(in millions)`, `per share`, `(in years)`, `5.5 years`,
+`2.0x` …, also in a caption line such as
+`(in millions of $)` just above the table, not in prose): values only the caption proved are
+flagged there. A currency label under a caption (`Price ($)`, `Price (USD)`) is
+conflict text, while a word unit such as `Income per share` keeps the displayed
+number. A `%` in
+the next column counts as the number's own
+only when it spans one row, sits directly beside the number and its column holds
+nothing else; negative percents such as `(29) %` become `-0.29`. A percent word
+in an `except` caption proves nothing, as in
+`(In millions, except per share and percentage data)`. Under an identifier-like
+heading, a cell converts only with its own `$`, `%` or inline XBRL fact. Numbers
+that need proof and lack it stay source text. When one of the cases below
+applies, the export report gives the reason and the table becomes
+`needs_review`; other text, such as a note reference under `Notes`, stays
+unflagged as before.
+
+- `Percent sign on other rows of this column; verify the scale.`
+  A number without proof in a column where another row has its own `%`, a
+  percent fact or a percent row label. This includes amounts:
+  `Tier 1 capital 294,881` below `$ 275,513` is flagged although the number is
+  right. It also applies to a number under a percent heading or caption that
+  proves nothing in its column (over two values in one row, or withheld by
+  contrary evidence), to a number without its own `%`, `$` or fact under a
+  heading that names a percent without declaring one (`Percent Change 2024
+  versus 2023`, identifier-like headings included), and to a number whose
+  separate `%` could not be attached safely. That `%` can still reach the number
+  as before, through column grouping under one heading over both or the merge of
+  a column of `%` signs; the number then converts with it. A `%` spanning several
+  rows never reaches any number: each number beside it is flagged. Zeros still
+  convert.
+- `Percentage points; verify the unit.`
+  A change such as `26.6 pts`.
+- `Identifier heading over quantities; verify the column.`
+  A plain number under an identifier-like heading such as `Full Year 2024`,
+  where another cell of the column proves a quantity.
+- `Identifier heading over amount-formatted values; verify the column.`
+  A comma-grouped or parenthesised number under such a heading when no cell
+  proves a quantity. Footnote marks such as `(1)` are not amounts and stay
+  unflagged.
+- `Conflicting explicit units; verify the row, column and displayed value units.`
+  A `$` together with a percent proof, such as a `$` amount under a percent
+  heading or a `$` in the heading of a percent column (`% Change in NT$`). Also
+  a pure inline XBRL fact whose scale is not -2 under any percent proof, a
+  table-wide caption included; a fact in another unit, such as years, under any
+  percent proof; and a percent proof on a row or column whose label names
+  another unit (`Expected term (in years)`, `Days in inventory`, `(x)`,
+  `bps change`, `Change (pp)`, `Duration`, a bare `Years` heading). A row label
+  spanning two rows counts for both. Period headings, maturity buckets such as
+  `1-3 years` and digit-range buckets such as `Years 1-5` name no unit;
+  `Months of supply` does, and so does any points unit, a rate-shock scenario
+  such as `+100 basis points` included.
+
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding
 Excel's reliable precision stay text with issues in the export report. Source strings beginning

@@ -2,6 +2,108 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- XLSX export changes a displayed number, such as dividing a percent by 100, only
+  on proof: the cell's own `%` or `$`, an explicit header or row label, or the
+  inline XBRL fact in the cell. A value without proof stays source text with a
+  review reason, and its table becomes `needs_review`. Plain numbers with no `%`
+  beside them export as before in columns with no percent or identifier heading,
+  no table-wide percent caption, and no row that has its own `%`, a percent fact
+  or a percent row label.
+  - A percent converts to a fraction when the cell has its own `%`, holds a single
+    pure inline XBRL fact at scale -2 whose digits and sign match the cell, sits
+    under a percent heading such as `% Change` or beside a percent row label, or
+    is under a table-wide percent caption. A percent heading over two values in
+    one row proves neither of them, and neither does a table-wide caption there.
+    A percent proof never overrides contrary evidence: neither a percent heading
+    nor a table-wide caption proves a column that holds a `$` amount or an amount
+    fact, and a table-wide caption proves nothing under an amount heading such as
+    `Total`. A table-wide caption proves nothing at all in a table that holds
+    any unit or currency evidence anywhere in it (header, sub-header, row label
+    or value cell): a currency symbol, ISO code or word such as `euros`, a `$`
+    cell, any fact that is not a percent fact, a scale or word unit such as
+    `(in millions)` or `per share`, or another unit such as `(in years)`,
+    `5.5 years` or `2.0x`, also in a caption line just above the
+    table such as `(in millions of $)` (not in prose). There, every value only the caption proved
+    stays text with the reason above. Under a table-wide caption a currency label
+    such as `Price ($)` or `Price (USD)` is conflict text, while a word unit such
+    as `Income per share` keeps its displayed number. NVDA's percent-of-revenue
+    tables hold no such evidence and keep all their values.
+  - In a column where some row has its own `%`, a percent fact or a percent row
+    label, every other number without proof stays text with
+    `Percent sign on other rows of this column; verify the scale.`
+    This covers amounts as well as percents: META's `Cost of revenue 18` below
+    `Revenue 100 %` no longer exports in percentage points, and amounts that
+    exported correctly, such as JPM's `Tier 1 capital 294,881` below
+    `$ 275,513` and TSM's `Net revenue 2,263,891`, are now flagged too. The same
+    holds for unproven numbers under a percent heading or table-wide caption
+    that proves nothing in their column: one over two values in one row, or one
+    withheld by contrary evidence as above. It also holds for a number without its
+    own `%`, `$` or fact under a heading that names a percent without declaring
+    one, such as KO's `Percent Change 2024 versus 2023`, even when that heading is
+    also an identifier heading (the cell then stays text with this reason rather
+    than an identifier reason). A zero still converts.
+  - A `$` together with a percent proof stays text as a conflict, whether the `$`
+    is in the heading or row label (TSM's `% Change in NT$ …`) or in the value
+    under a percent heading. So does a `%` whose fact is an amount or has another
+    scale, and so does a value whose pure fact has a scale other than -2 under
+    any percent proof, a table-wide caption included, and so does a value whose
+    fact is in another unit, such as years, or in a unit the filing does not
+    define. A row or column label that names another unit, such as
+    `Expected term (in years)`, `Days in inventory`, `Times covered`, `(x)`,
+    `bps change`, `Change (pp)`, `Duration` or a bare `Years` heading, conflicts
+    with every percent proof on its cells in the same way; a row label spanning
+    two rows counts for both. Period headings (`Years Ended December 31,`),
+    maturity buckets (`1-3 years`, `Past due - 90 days`) and digit-range buckets
+    (`Years 1-5`, `Days 31-60`) name no unit, while `Months of supply` and
+    `Number of days of supply` do. A points unit always counts, so the percents
+    of a rate-shock scenario such as `+100 basis points` are conflict text.
+  - A `%` printed in its own column joins the value directly to its left when the
+    `%` spans one row, has no heading or sits under the value's heading or one
+    spanning the value's column, and its column holds nothing else in any other
+    body row (`)` and `%)` fragments and unit captions aside). A value whose `%`
+    is refused becomes text with the reason above, whatever its other proof,
+    unless the `%` still reaches the value as it did before this change: through
+    column grouping under one heading over both, or through the merge of a column
+    of `%` signs. The value then converts with that `%`. A `%` spanning several
+    rows never joins any value: each value beside it becomes text with the
+    reason above. Negative
+    percents convert: `(34) %` gives -0.34, and `(40.4` with `)%` in the next
+    column gives -0.404. In 54 tables, 71 `%` and `pts` columns whose signs now
+    sit with their values drop out of the copy grid; a `%` column emptied this way
+    can also keep its header with no text, as in TSM 20-F #8.
+  - A caption such as `(In millions, except per share and percentage data)` no
+    longer makes plain amounts percents. This bug divided them by 100 (`161,690`
+    became `1616.90`) but was latent: no such caption occurs in the 60 filings
+    below (`fact-pack.md` in the audit directory; covered by unit tests).
+  - Changes in percentage points, such as NVDA's `Gross margin` changes in `pts`,
+    stay text with `Percentage points; verify the unit.`
+  - Identifier columns are judged per cell. Under a heading such as CAT's
+    `Full Year 2024` or TSM's `Other Changes (Note)`, a cell converts only with
+    its own `$` or `%` or its own inline XBRL fact. Other digit cells stay text.
+    When another cell of the column proves a quantity, they carry
+    `Identifier heading over quantities; verify the column.`
+    When none does, comma-grouped or parenthesised amounts carry
+    `Identifier heading over amount-formatted values; verify the column.`
+    and footnote marks such as `(1)` stay without a reason. A points or conflict
+    reason takes precedence over these two.
+
+  On the 60 filings of the header-detection audit, all 4,048 cells of the
+  manifest built from `main`'s export (percent rows and identifier columns) have
+  a valid outcome: 338 proven percents, 47 proven quantities, 988 flagged text
+  cells, and 2,658 true identifier cells and 17 cells without digits unchanged.
+  None is an unflagged number at the wrong scale. Of the 1,751 other changed
+  cells, 0 numbers are wrong; 12 rates such as BAC's `Floating 5.65` take the
+  scale their own percent fact proves. Every one of the 789 cells proven by a
+  percent fact equals the fact / 100 with its sign. The 126 vault primary
+  statements export as before (META 3,322, NVDA 2,662 and RDDT 2,056 verified
+  facts, 0 failures). The cost is 1,127 numbers that became flagged text, in 74
+  tables and no primary statement: 820 META and RDDT percent-of-revenue cells,
+  82 joined percent cells in other filings, 20 split-`%` cells (17 TSM conflicts
+  and 3 refused `%`), and 205 numbers outside the manifest (200 unproven numbers
+  in `%` columns, among them amounts in JPM, AMZN, GOOGL, NFLX and TSM tables,
+  NVDA's SG&A amounts and MU's lease terms; 4 NVDA `pts` changes; 1 conflict).
+  In return 370 text cells became proven numbers and 20 META tables that were
+  source text now export (`docs/superpowers/audits/2026-10-12-xlsx-value-accuracy/`).
 - XLSX export reads more header rows, so statement and note tables export as
   numbers under period headers instead of as source text. A header now extends
   through rows such as a bare `December 31,` over the years, `% change` columns,

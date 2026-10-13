@@ -20,6 +20,7 @@ _TOKEN = re.compile(
     r"(?P<number>(?:0|[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)"
     r"(?:\.[0-9]+)?)\s*(?P<percent>%?)"
 )
+_PERCENT_OUTSIDE = re.compile(r"\((?P<inner>[^()]*)\)\s*%")
 _EXCEL_MAX = Decimal("9.99999999999999E+307")
 _EXCEL_MIN = Decimal("2.2250738585072014E-308")
 
@@ -37,6 +38,9 @@ def convert_cell(text: str, *, role: Literal["text", "number", "percent"]) -> Ce
     accounting = token.startswith("(") and token.endswith(")")
     if accounting:
         token = token[1:-1].strip()
+    elif split := _PERCENT_OUTSIDE.fullmatch(token):
+        # A negative percent whose sign follows the parentheses: '(29) %', '(4.5)%'.
+        accounting, token = True, split.group("inner").strip() + "%"
     match = _TOKEN.fullmatch(token)
     if match is None:
         return CellValue(
