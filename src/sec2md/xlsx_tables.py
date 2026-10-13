@@ -769,16 +769,20 @@ _PERCENT_WORDS = re.compile(
 _TABLE_PERCENT = re.compile(r'\((?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)', re.I)
 _PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'})
 _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
-# Ruling 21: a row label naming a unit other than a percent: in parentheses ('Expected
-# term (in years)', 'Interest coverage (times)', 'Net leverage ratio (x)'), after 'in'
-# ('Remaining life in years'), after a closing separator ('Average life, years'), as the
-# label's measure ('Days sales outstanding'), or bps, basis points and percentage points
-# anywhere. Period wording is stripped first ('Six months ended June 30'); a word that
-# names no unit ('Changes in prior years' tax positions') is none.
+# Ruling 21: a row or header label naming a unit other than a percent, in a unit position:
+# in parentheses ('Expected term (in years)', 'Interest coverage (times)', 'Net leverage
+# ratio (x)', 'Spread (bps)'), after 'in' ('Remaining life in years', 'Change in basis
+# points'), after a separator that ends the label ('Average life, years'), or as a named
+# measure ('Days sales outstanding', 'Number of days', 'Times interest earned'). Period
+# wording is stripped first ('Six months ended June 30', 'Years Ended December 31,'). A
+# word outside those positions names no unit: 'Changes in prior years' tax positions',
+# the scenario '+100 basis points', the bucket 'Years 1-5', the measure 'Months of supply'.
+_UNIT_WORD = r'(?:years|months|days|times|x|bps|basis points|percentage points|points|pts)'
 _OTHER_UNIT = re.compile(
-    r'\(\s*(?:in\s+)?(?:years|months|days|times|x|bps|basis points|percentage points|points|pts)\s*\)'
-    r'|\bin (?:years|months|days)\b|[,:–—-]\s*(?:years|months|days|times|x)$'
-    r'|^(?:number of )?(?:years|months|days)\b|^times\b|\b(?:bps|basis points|percentage points)\b', re.I)
+    rf'\(\s*(?:in\s+)?{_UNIT_WORD}\s*\)|\bin (?:years|months|days|bps|basis points|percentage points)\b'
+    rf'|[,:–—-]\s*{_UNIT_WORD}$'
+    r'|^(?:number of (?:years|months|days)|days (?:sales|payables?|inventor(?:y|ies)|receivables?)'
+    r'|times interest earned)\b', re.I)
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).
@@ -838,10 +842,20 @@ def _percent_fact(origins) -> bool:
             and (fact.sign == '-') == shown.is_signed())
 
 
+def _measured_amount(fact) -> bool:
+    """A fact measured in a currency or in shares."""
+    return any(measure.lower().startswith('iso4217:') or measure.lower() == 'xbrli:shares'
+               for measure in fact.unit_measures)
+
+
 def _amount_fact(origins) -> bool:
     """A fact on the value origin measured in a currency or in shares (spec Definitions)."""
-    return any(measure.lower().startswith('iso4217:') or measure.lower() == 'xbrli:shares'
-               for fact in _value_facts(origins) for measure in fact.unit_measures)
+    return any(_measured_amount(fact) for fact in _value_facts(origins))
+
+
+def _names_other_unit(text) -> bool:
+    """Ruling 21: a row or header label naming a unit other than a percent (_OTHER_UNIT)."""
+    return bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', text).strip()))
 
 
 class _Proof(NamedTuple):
@@ -890,10 +904,13 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True, table_
     claimed = percent or declared or shown_percent
     local = f'{header} {label} {text}'
     # Ruling 21: no percent claim, a table-wide declaration included, overrides contrary
-    # evidence on the cell or its row: a pure fact whose scale is not -2, or a row label
-    # naming another unit ('Expected term (in years)').
-    contrary = (any(item.unit_measures == ('xbrli:pure',) and item.scale != -2 for item in _value_facts(origins))
-                or bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', label).strip())))
+    # evidence on the cell, its row or its column: a fact that is neither a pure fact at
+    # scale -2 nor an amount fact (which conflicts below), such as a pure fact at scale 0, a
+    # fact in years (utr:Y) or one whose unit the filing does not define; or a row or header
+    # label naming another unit ('Expected term (in years)').
+    contrary = (any(not (item.unit_measures == ('xbrli:pure',) and item.scale == -2) and not _measured_amount(item)
+                    for item in _value_facts(origins))
+                or any(_names_other_unit(part) for part in (label, *labels)))
     conflict = (((claimed or table_percent) and contrary)
                 or (claimed and (amount or bool(_ROW_UNIT.search(local)) or '$' in local)))
     return _Proof('percent' if percent else 'number' if not_percent else None, conflict,
@@ -914,7 +931,8 @@ class _BodyCell(NamedTuple):
     identifier_text: bool  # a digit cell its identifier heading keeps as text (spec I1)
     identifier_quantity: bool  # a digit cell that proves a quantity under one (spec I1)
     refused_percent: bool  # user decision (2026-10-13): the attachment pass refused its value's split '%'
-    percent_named: bool  # Ruling 21: under a heading naming a percent, without a proof of its own
+    percent_named: bool  # Ruling 21: under a heading naming a percent, without a proof of its own,
+    # identifier headings included (conflict and points reasons first, then P4, then I2)
 
 
 def _unproven_value(text, origins):
@@ -1240,12 +1258,15 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     body = []
     for r, copy_row in enumerate(copies, start=header_count):
         decided = []
+        # Ruling 21, completed: the row label that proves or contradicts is the source cell
+        # covering column 0, so a label spanning two rows covers both (spec P1.4, P2.3).
+        row_label = grid[r][0].text if grid[r][0] is not None else ''
         for index, (origins, text) in enumerate(copy_row):
             digits = bool(re.search(r'\d', text))
             # Labels are never promoted merely because they look numeric.
             label_column = index == 0 and not (_VALUE.search(headers[index]) or _PERCENT.search(headers[index]))
             points = not label_column and bool(_POINTS.fullmatch(text))
-            proof = (_cell_proof(text, headers[index], header_labels[index], original[r][0], origins,
+            proof = (_cell_proof(text, headers[index], header_labels[index], row_label, origins,
                                  header_proves=index not in withheld, table_percent=table_percent)
                      if digits and not label_column else _NO_PROOF)
             # Spec I1: under an identifier heading a digit cell takes the role path only
@@ -1274,7 +1295,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             refused_percent = flaggable and any(o in refused and refused[o] not in origins for o in origins)
             decided.append(_BodyCell(text, origins, role, value, proof.marks_column and not points,
                                      unproven, proof.by_fact, identifier and not quantity, quantity, refused_percent,
-                                     flaggable and not proof.own and index in percent_named))
+                                     digits and not label_column and not points and not proof.conflict
+                                     and not proof.own and index in percent_named))
         body.append(decided)
     # Spec P4: a cell's own '%', its percent fact or its row label makes its copy
     # column a percent column, as does a withheld declaration (Rulings 10, 11 and 21).
@@ -1287,10 +1309,13 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     for r, decided in enumerate(body, start=header_count):
         row_values = []
         for index, cell in enumerate(decided):
-            value = (_unproven_value(cell.text, cell.origins)
-                     if (cell.unproven and index in percent_columns) or cell.refused_percent or cell.percent_named
-                     else cell.value)
-            # Spec I2. A cell's own reason (points, conflicting units) stays (Ruling 4).
+            value = cell.value
+            if (cell.unproven and index in percent_columns) or cell.refused_percent or cell.percent_named:
+                flagged = _unproven_value(cell.text, cell.origins)
+                # Ruling 21, completed: under an identifier heading that names a percent the
+                # cell stays text (spec I1), but takes the P4 reason before any I2 reason.
+                value = replace(value, review_reason=flagged.review_reason) if cell.identifier_text else flagged
+            # Spec I2. A cell's own reason (points, conflicting units, P4) stays (Rulings 4, 12, 21).
             if cell.identifier_text and not value.review_reason:
                 value = replace(value, review_reason=_identifier_reason(cell.text, index in quantity_columns))
             column = groups[kept[index]][0]

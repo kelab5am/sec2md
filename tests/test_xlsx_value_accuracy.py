@@ -1199,3 +1199,120 @@ def test_refused_split_percent_flags_a_value_with_its_own_dollar():
     assert cell_rows(table) == [[text_cell('Revenue'), text_cell('$ 1,000', _UNPROVEN), _EMPTY, _STRAY]]
     assert table.cell_sources == ((((1, 0),), ((1, 1), (1, 2)), ((1, 3),), ((1, 4),)),)
     assert table.issues == (f'Source row 1, column 1: {_UNPROVEN}',)
+
+
+# --- Ruling 21, completed (final fix round 2) ------------------------------------------
+
+_YEARS_FACT = fact('5.5', unit='U_years', scale='-1', name='us-gaap:ExpectedTerm')
+
+
+@pytest.mark.parametrize('before, value, shown', [
+    ('<p>(in percentages)</p>', '5.5', '5.5'),
+    ('', '5.5 %', '5.5 %'),
+    ('', fact('5.5'), '5.5'),
+], ids=['table-wide', 'own-percent', 'percent-fact'])
+def test_heading_naming_another_unit_conflicts_with_every_percent_proof(before, value, shown):
+    """R2a: a column heading naming another unit contradicts every percent claim on its
+    cells, as a row label does: conflict text, never 0.055."""
+    table = prepared(heading('Expected term (in years)') + sec_row('Options', value), before=before)
+    assert cell_rows(table) == [[text_cell('Options'), text_cell(shown, _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+def test_period_heading_names_no_unit():
+    """'Years Ended December 31,' is period wording, not a unit: the table-wide declaration
+    proves the values below it."""
+    table = prepared('<tr><th></th><th colspan="6">Years Ended December 31,</th></tr>' + heading('2025', '2024')
+                     + sec_row('Gross margin', '45.2', '43.1'), before='<p>(in percentages)</p>')
+    assert table.headers == ('Item', 'Years Ended December 31, — 2025', 'Years Ended December 31, — 2024')
+    assert cell_rows(table) == [[text_cell('Gross margin'), (Decimal('0.452'), '0.0%', '45.2', None),
+                                 (Decimal('0.431'), '0.0%', '43.1', None)]]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('header, label, before, value, shown', [
+    ('% Change', 'Term', '', _YEARS_FACT, '5.5'),
+    ('2025', '% of net revenue', '', _YEARS_FACT, '5.5'),
+    ('2025', 'Term', '<p>(in percentages)</p>', _YEARS_FACT, '5.5'),
+    ('2025', 'Term', '', _YEARS_FACT + ' %', '5.5 %'),
+    ('% Change', 'Term', '', fact('5.5', unit='U_missing'), '5.5'),
+], ids=['percent-header', 'percent-row-label', 'table-wide', 'own-percent', 'unresolved-unit'])
+def test_fact_in_another_unit_conflicts_with_every_percent_proof(header, label, before, value, shown):
+    """R2b: a fact that is no pure fact at scale -2 says the value is no percent; a fact in
+    years (utr:Y) or in a unit the filing does not define conflicts with every percent
+    claim, never 0.055."""
+    table = prepared(heading(header) + sec_row(label, value), before=before)
+    assert cell_rows(table) == [[text_cell(label), text_cell(shown, _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 1: {_CONFLICT}',)
+
+
+def test_spanning_row_label_contradicts_every_row_it_covers():
+    """R3: 'Expected term (in years)' spans two rows; its unit contradicts the table-wide
+    declaration on both, so 6.0 is conflict text too, never 0.060."""
+    table = prepared('<tr><th>Item</th><th>2025</th></tr>'
+                     '<tr><td rowspan="2">Expected term (in years)</td><td>5.5</td></tr><tr><td>6.0</td></tr>',
+                     before='<p>(in percentages)</p>')
+    assert cell_rows(table) == [[text_cell('Expected term (in years)'), text_cell('5.5', _CONFLICT)],
+                                [_EMPTY, text_cell('6.0', _CONFLICT)]]
+    assert table.issues == tuple(f'Source row {r}, column 1: {_CONFLICT}' for r in (1, 2))
+
+
+def test_spanning_row_label_proves_every_row_it_covers():
+    """R3: a spanning percent row label proves both rows (spec P1.4), and a spanning
+    'Income per share' keeps both rows out of the table-wide declaration (P2.3)."""
+    table = prepared('<tr><th>Item</th><th>2025</th></tr>'
+                     '<tr><td>Net revenue</td><td>$ 1,000</td></tr>'
+                     '<tr><td rowspan="2">% of net revenue</td><td>26</td></tr><tr><td>27</td></tr>')
+    assert cell_rows(table) == [[text_cell('Net revenue'), (Decimal('1000'), '"$"#,##0', '$ 1,000', None)],
+                                [text_cell('% of net revenue'), (Decimal('0.26'), '0%', '26', None)],
+                                [_EMPTY, (Decimal('0.27'), '0%', '27', None)]]
+    assert table.status == 'exported'
+    table = prepared('<tr><th>Item</th><th>2025</th></tr><tr><td>Gross margin</td><td>25</td></tr>'
+                     '<tr><td rowspan="2">Income per share</td><td>2.50</td></tr><tr><td>2.40</td></tr>',
+                     before='<p>(in percentages)</p>')
+    assert cell_rows(table) == [[text_cell('Gross margin'), (Decimal('0.25'), '0%', '25', None)],
+                                [text_cell('Income per share'), (Decimal('2.50'), '#,##0.00', '2.50', None)],
+                                [_EMPTY, (Decimal('2.40'), '#,##0.00', '2.40', None)]]
+    assert table.status == 'exported'
+
+
+def test_identifier_heading_naming_a_percent_flags_plain_values():
+    """R4: 'Percent Change Year-over-Year' is an identifier heading that names a percent.
+    The identifier rule keeps '33.9' text, and the P4 reason flags it before any I2 reason;
+    the cell's own '%' converts, and a zero keeps the I2 reason only."""
+    table = prepared(heading('Percent Change Year-over-Year') + sec_row('Gross margin', '33.9')
+                     + sec_row('Revenue', '12 %') + sec_row('Other', '0'))
+    assert cell_rows(table) == [[text_cell('Gross margin'), text_cell('33.9', _UNPROVEN)],
+                                [text_cell('Revenue'), (Decimal('0.12'), '0%', '12 %', None)],
+                                [text_cell('Other'), text_cell('0', _QUANTITIES)]]
+    assert table.issues == (f'Source row 1, column 1: {_UNPROVEN}', f'Source row 3, column 1: {_QUANTITIES}')
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('label', ['+100 basis points', 'Interest rate shock +200 basis points', 'Years 1-5',
+                                   'Months of supply'])
+def test_unit_words_outside_a_unit_position_name_no_unit(label):
+    """R5: a rate-shock scenario, a maturity bucket and a measure name hold unit words, but
+    name no unit of the row's values: their own '%' converts."""
+    table = prepared(heading('2025') + sec_row(label, '5.2 %'))
+    assert cell_rows(table) == [[text_cell(label), (Decimal('0.052'), '0.0%', '5.2 %', None)]]
+    assert table.status == 'exported'
+
+
+def test_scenario_headings_name_no_unit():
+    """R5 with R2a: '+100 basis points' and '-100 basis points' head scenario columns of
+    percents, not a unit: the values convert."""
+    table = prepared(heading('+100 basis points', '-100 basis points') + sec_row('Net interest income', '5.2 %', '(4.8) %'))
+    assert cell_rows(table) == [[text_cell('Net interest income'), (Decimal('0.052'), '0.0%', '5.2 %', None),
+                                 (Decimal('-0.048'), '0.0%;(0.0%)', '(4.8) %', None)]]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('label', ['Days payable outstanding', 'Days inventory outstanding', 'Number of days',
+                                   'Rate change (in basis points)', 'Rate change in basis points'])
+def test_unit_positions_kept_after_narrowing(label):
+    """R5 keeps the unit positions: a 'days … outstanding' measure, 'Number of', a unit in
+    parentheses or after 'in'. Each conflicts with the row's own '%'."""
+    table = prepared(heading('2025') + sec_row(label, '5.2 %'))
+    assert cell_rows(table) == [[text_cell(label), text_cell('5.2 %', _CONFLICT)]]
