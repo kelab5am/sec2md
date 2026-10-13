@@ -881,14 +881,21 @@ def _names_other_unit(text) -> bool:
     return bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', text).strip()))
 
 
-def _unit_evidence(cells, unit_lines, header_count) -> bool:
-    """Ruling 34 (user decision 2026-10-13): whether a table holds any unit or currency
-    evidence, in which case a table-wide percent declaration proves nothing in it. Evidence
-    is, in any source cell (header, caption or body) or unit line of the table: a currency
-    symbol or ISO code (_CURRENCY_EVIDENCE, '$' cells and markers included), an amount
-    fact, a word or scale unit (_ROW_UNIT: per share, dollars, shares, in millions …), or,
-    in a label (a header cell, a row label or a cell without digits), another unit
-    (_names_other_unit: years, days, bps, x …)."""
+# Ruling 35: a caption-shaped context line, wholly parenthesised ('(in millions of $)',
+# '(in years)') or a short unit line ('In thousands of US$'). A prose sentence is none.
+_CAPTION_SHAPED = re.compile(r'\([^()]*\)\.?')
+_CAPTION_LENGTH = 120
+
+
+def _unit_evidence(cells, unit_lines, context, header_count) -> bool:
+    """Rulings 34 (user decision 2026-10-13) and 35: whether a table holds any unit or
+    currency evidence, in which case a table-wide percent declaration proves nothing in it.
+    Evidence is, in any source cell (header, caption or body), unit line of the table or
+    caption-shaped context line (_CAPTION_SHAPED, or _UNIT_LINE's shape when short): a
+    currency symbol or ISO code (_CURRENCY_EVIDENCE, '$' cells and markers included), an
+    amount fact, a word or scale unit (_ROW_UNIT: per share, dollars, shares, in millions
+    …), or, in a label (a header cell, a row label, a cell without digits or such a line),
+    another unit (_names_other_unit: years, days, bps, x …)."""
     for cell in cells:
         text = cell.text
         if (_CURRENCY_EVIDENCE.search(text) or _ROW_UNIT.search(text)
@@ -897,8 +904,10 @@ def _unit_evidence(cells, unit_lines, header_count) -> bool:
         label = cell.row < header_count or cell.column == 0 or not re.search(r'\d', text)
         if label and _names_other_unit(text):
             return True
+    captions = [line for line in (line.strip() for line in context)
+                if len(line) <= _CAPTION_LENGTH and (_CAPTION_SHAPED.fullmatch(line) or _UNIT_LINE.match(line))]
     return any(_CURRENCY_EVIDENCE.search(line) or _ROW_UNIT.search(line) or _names_other_unit(line)
-               for line in unit_lines)
+               for line in (*unit_lines, *captions))
 
 
 class _Proof(NamedTuple):
@@ -1244,7 +1253,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     # Ruling 34: the declaration proves values only in a table without unit or currency
     # evidence. In any other table it still covers every column, whose values nothing else
     # proves are P4 text. Per-cell conflicts keep reading table_percent itself.
-    table_wide = table_percent and not _unit_evidence(cells, unit_texts, header_count)
+    table_wide = table_percent and not _unit_evidence(cells, unit_texts, snapshot.context_before, header_count)
     attached, refused = _attached_percent_signs(grid, header_count)
     groups = _column_groups(grid, original, header_count, attached)
     group_origins = [[list(dict.fromkeys(grid[r][col] for col in group

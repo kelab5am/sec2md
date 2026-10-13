@@ -20,7 +20,8 @@
     `Total`. A table-wide caption proves nothing at all in a table that holds
     any unit or currency evidence: a currency symbol or ISO code, a `$` cell, an
     amount fact, a scale or word unit such as `(in millions)` or `per share`, or
-    another unit such as `(in years)`. There, every value only the caption proved
+    another unit such as `(in years)`, also in a caption line just above the
+    table such as `(in millions of $)` (not in prose). There, every value only the caption proved
     stays text with the reason above. Under a table-wide caption a currency label
     such as `Price ($)` or `Price (USD)` is conflict text, while a word unit such
     as `Income per share` keeps its displayed number. NVDA's percent-of-revenue

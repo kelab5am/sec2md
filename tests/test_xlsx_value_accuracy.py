@@ -1848,3 +1848,32 @@ def test_table_without_unit_evidence_keeps_the_table_wide_declaration():
         [text_cell('Net income'), (Decimal('0.558'), '0.0%', '55.8', None), (Decimal('0.488'), '0.0%', '48.8', None)],
     ]
     assert table.status == 'exported'
+
+
+# --- Ruling 35: caption-shaped context unit lines count as unit evidence ----------------
+
+_PRICE_MARGIN_ONE_YEAR = heading('2025') + sec_row('Average price', '26') + sec_row('Gross margin', '45')
+
+
+@pytest.mark.parametrize('declaration', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('line', ['(in millions of $)', '(In thousands of US$)', '(in years)',
+                                  'In thousands of US$', '(in millions, except per share data)'])
+def test_caption_shaped_context_unit_line_withholds_a_table_wide_declaration(line, declaration):
+    """Ruling 35: a caption-shaped context line (wholly parenthesised, or a short unit line)
+    naming a currency, a scale or another unit is unit evidence, so the table-wide
+    declaration proves nothing: 26 and 45 are P4 text, never 0.26."""
+    table = prepared(_PRICE_MARGIN_ONE_YEAR, before=f'{declaration}<p>{line}</p>')
+    assert cell_rows(table) == [[text_cell('Average price'), text_cell('26', _UNPROVEN)],
+                                [text_cell('Gross margin'), text_cell('45', _UNPROVEN)]]
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('declaration', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+def test_prose_context_with_a_dollar_keeps_the_table_wide_declaration(declaration):
+    """Ruling 35 control: a prose context sentence is no caption, even with '$' and a scale
+    word: the table-wide declaration still proves the values."""
+    prose = '<p>Revenue for fiscal year 2025 was $130.5 billion, up 114% from a year ago, in millions of units.</p>'
+    table = prepared(_PRICE_MARGIN_ONE_YEAR, before=prose + declaration)
+    assert cell_rows(table) == [[text_cell('Average price'), (Decimal('0.26'), '0%', '26', None)],
+                                [text_cell('Gross margin'), (Decimal('0.45'), '0%', '45', None)]]
+    assert table.status == 'exported'

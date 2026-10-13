@@ -120,7 +120,8 @@ contrary evidence: a heading or caption proves nothing in a column that holds a
 `$` amount or an amount fact, and a caption proves nothing under an amount
 heading such as `Total`. A table-wide caption proves nothing in a table with any
 unit or currency evidence (a currency symbol or code, a `$` cell, an amount fact,
-`(in millions)`, `per share`, `(in years)` …): values only the caption proved are
+`(in millions)`, `per share`, `(in years)` …, also in a caption line such as
+`(in millions of $)` just above the table, not in prose): values only the caption proved are
 flagged there. A currency label under a caption (`Price ($)`, `Price (USD)`) is
 conflict text, while a word unit such as `Income per share` keeps the displayed
 number. A `%` in
