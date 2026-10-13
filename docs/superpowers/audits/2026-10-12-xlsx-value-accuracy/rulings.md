@@ -6,7 +6,7 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 33 and the Ruling 34 user decision included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 33, the Ruling 34 user decision and Ruling 35 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Ruling 32 replaces the currency keep-value exception of Rulings 29–31. The Ruling 31 line
@@ -92,3 +92,5 @@ Ruling 32 (replaces the currency keep-value exception of Rulings 29-31): under a
 Ruling 33 (completes 32's "any currency"): ISO 4217 currency codes as whole upper-case words (USD, EUR, GBP, JPY, CNY, RMB, TWD, NTD, HKD, CHF, CAD, AUD, INR, KRW, SGD, BRL, MXN, SEK, NOK, DKK, ZAR, plus a generic `\b[A-Z]{3}\b` is NOT used) in a row or header label under a table-wide declaration give conflict text, like symbols — same class as Ruling 32; coverage only — cost if wrong: coverage.
 
 User decision (2026-10-13): table-level rule (Ruling 34) — a table-wide percent declaration proves nothing in a table with any unit or currency evidence anywhere; such cells become P4 text; tables without evidence (NVDA) unchanged.
+
+Ruling 35 (completes 34): a caption-shaped context line (the positions `units` are collected from, wholly parenthesised or a short unit line) naming a currency, scale or other unit counts as unit evidence; prose context lines do not — STOP if any NVDA cell would change — closes the reported shape without letting prose sentences flip NVDA — cost if wrong: coverage.
