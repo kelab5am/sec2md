@@ -118,8 +118,9 @@ percent row label, or a table-wide percent caption. A heading or caption over
 two values in one row proves neither of them. A percent proof never overrides
 contrary evidence: a heading or caption proves nothing in a column that holds a
 `$` amount or an amount fact, and a caption proves nothing under an amount
-heading such as `Total`. Under a caption any currency symbol in a row label or
-heading (`Price ($)`, `issuance of $3.8 billion`) makes the value conflict text,
+heading such as `Total`. Under a caption any currency symbol or ISO currency code
+in a row label or heading (`Price ($)`, `Price (USD)`, `issuance of $3.8 billion`)
+makes the value conflict text,
 while a word unit such as `Income per share` keeps the displayed number. A `%` in
 the next column counts as the number's own
 only when it spans one row, sits directly beside the number and its column holds

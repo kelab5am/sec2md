@@ -17,8 +17,9 @@
     A percent proof never overrides contrary evidence: neither a percent heading
     nor a table-wide caption proves a column that holds a `$` amount or an amount
     fact, and a table-wide caption proves nothing under an amount heading such as
-    `Total`. Under a table-wide caption any currency symbol in a row label or
-    heading, such as `Price ($)` or `issuance of $3.8 billion`, makes the value
+    `Total`. Under a table-wide caption any currency symbol or ISO currency code
+    in a row label or heading, such as `Price ($)`, `Price (USD)` or `issuance of
+    $3.8 billion`, makes the value
     conflict text, while a word unit such as `Income per share` keeps the
     displayed number.
   - In a column where some row has its own `%`, a percent fact or a percent row

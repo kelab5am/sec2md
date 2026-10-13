@@ -796,7 +796,10 @@ _OTHER_UNIT = re.compile(
     rf'|(?<![^\W\d_])(?:{_POINTS_WORD}|ppts?|points|pts)\b|(?<!&)(?<![^\W\d_])pp(?![\w&])', re.I)
 # Ruling 32: a currency symbol anywhere in a row or header label ('Price ($)', 'Price, US$',
 # 'issuance of $3.8 billion', '4.1bn €'); no attempt is made to tell a unit from an amount.
-_CURRENCY_MARK = re.compile(r'[$€£¥]')
+# Ruling 33: an ISO 4217 code from a closed list, as a whole upper-case word ('Price (USD)',
+# 'Amount, TWD'), is a currency too; 'CEO', 'EPS' and 'USDA' are not.
+_CURRENCY_MARK = re.compile(r'[$€£¥]|\b(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD|CHF|CAD|AUD|INR|KRW|SGD|BRL'
+                            r'|MXN|SEK|NOK|DKK|ZAR)\b')
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).
@@ -928,9 +931,9 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True, table_
     contrary = (any(not (item.unit_measures == ('xbrli:pure',) and item.scale == -2) and not _measured_amount(item)
                     for item in _value_facts(origins))
                 or any(_names_other_unit(part) for part in (label, *labels)))
-    # Ruling 32: under a table-wide declaration any currency symbol in the row or a header
-    # label is a conflict; no currency label keeps a displayed value there. Word units
-    # ('Income per share', 'dollars') keep spec P3 through _ROW_UNIT above.
+    # Rulings 32 and 33: under a table-wide declaration any currency symbol or ISO code in the
+    # row or a header label is a conflict; no currency label keeps a displayed value there.
+    # Word units ('Income per share', 'dollars') keep spec P3 through _ROW_UNIT above.
     currency_label = any(_CURRENCY_MARK.search(part) for part in (label, *labels))
     conflict = (((claimed or table_percent) and contrary)
                 or (table_percent and currency_label)

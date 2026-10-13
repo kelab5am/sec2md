@@ -1728,3 +1728,37 @@ def test_any_currency_label_conflicts_with_a_table_wide_declaration(label, befor
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.63'), before=before)
     assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
     assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+# --- Ruling 33: ISO currency codes conflict with a table-wide percent caption -----------
+
+_ISO_CURRENCY = ['Price (USD)', 'Revenue (EUR)', 'Amount, TWD']
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('label', _ISO_CURRENCY)
+def test_iso_currency_code_conflicts_with_a_table_wide_declaration(label, before):
+    """Ruling 33: an ISO 4217 code as a whole upper-case word is a currency like a symbol, so
+    under a table-wide declaration the value is conflict text, never 0.0263, as a row
+    label and as a heading."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=before)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.63'), before=before)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('label', ['CEO compensation ratio', 'EPS growth', 'USDA grants', 'Revenue (usd)'])
+def test_words_that_are_no_iso_currency_code_keep_the_table_wide_declaration(label):
+    """Ruling 33 uses a closed, case-sensitive list of whole words: 'CEO', 'EPS', 'USDA' and a
+    lower-case 'usd' are no codes, so the table-wide declaration still proves 2.63."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('0.0263'), '0.00%', '2.63', None)]]
+    assert table.status == 'exported'
+
+
+def test_iso_currency_code_without_a_table_wide_declaration_is_unchanged():
+    """Ruling 33 changes nothing outside a table-wide declaration: the row's own rate converts."""
+    table = prepared(heading('Stated Interest Rate') + sec_row('Notes (USD)', '2.63 %'))
+    assert cell_rows(table) == [[text_cell('Notes (USD)'), (Decimal('0.0263'), '0.00%', '2.63 %', None)]]
