@@ -137,7 +137,7 @@ unflagged as before.
   proves nothing in its column (over two values in one row, or withheld by
   contrary evidence), to a number without its own `%`, `$` or fact under a
   heading that names a percent without declaring one (`Percent Change 2024
-  versus 2023`), and to a number whose separate `%` could not be attached
+  versus 2023`, identifier-like headings included), and to a number whose separate `%` could not be attached
   safely. That `%` can still reach the number as before, through column grouping
   under one heading over both or the merge of a column of `%` signs; the number
   then converts with it. Zeros still convert.
@@ -154,9 +154,10 @@ unflagged as before.
   A `$` together with a percent proof, such as a `$` amount under a percent
   heading or a `$` in the heading of a percent column (`% Change in NT$`). Also
   a pure inline XBRL fact whose scale is not -2 under any percent proof, a
-  table-wide caption included, and a percent proof on a row whose label names
+  table-wide caption included; a fact in another unit, such as years, under any
+  percent proof; and a percent proof on a row or column whose label names
   another unit (`Expected term (in years)`, `Days sales outstanding`, `(x)`,
-  `bps`, `percentage points`).
+  `(bps)`, `(percentage points)`). A row label spanning two rows counts for both.
 
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding

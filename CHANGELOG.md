@@ -29,15 +29,20 @@
     that proves nothing in their column: one over two values in one row, or one
     withheld by contrary evidence as above. It also holds for a number without its
     own `%`, `$` or fact under a heading that names a percent without declaring
-    one, such as KO's `Percent Change 2024 versus 2023`. A zero still converts.
+    one, such as KO's `Percent Change 2024 versus 2023`, even when that heading is
+    also an identifier heading (the cell then stays text with this reason rather
+    than an identifier reason). A zero still converts.
   - A `$` together with a percent proof stays text as a conflict, whether the `$`
     is in the heading or row label (TSM's `% Change in NT$ …`) or in the value
     under a percent heading. So does a `%` whose fact is an amount or has another
     scale, and so does a value whose pure fact has a scale other than -2 under
-    any percent proof, a table-wide caption included. A row label that names
-    another unit, such as `Expected term (in years)`, `Days sales outstanding`,
-    `(times)`, `(x)`, `bps` or `percentage points`, conflicts with every percent
-    proof on its row in the same way.
+    any percent proof, a table-wide caption included, and so does a value whose
+    fact is in another unit, such as years, or in a unit the filing does not
+    define. A row or column label that names another unit in a unit position,
+    such as `Expected term (in years)`, `Days sales outstanding`, `(times)`,
+    `(x)`, `(bps)` or `(percentage points)`, conflicts with every percent proof on
+    its cells in the same way; a row label spanning two rows counts for both,
+    and scenario labels such as `+100 basis points` name no unit.
   - A `%` printed in its own column joins the value directly to its left when the
     `%` spans one row, has no heading or sits under the value's heading or one
     spanning the value's column, and its column holds nothing else in any other
