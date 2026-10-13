@@ -6,8 +6,8 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence and marks Rulings 5, 14
-  and 17 as superseded.
+  restates each ruling that shapes the export in one sentence, Ruling 22 included, and
+  marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
   records rather than the export.
@@ -61,3 +61,7 @@ Ruling 19: the column-grouping category stands (pre-existing `_column_groups` sa
 Ruling 20: the `except` claim stays in the CHANGELOG (the plan's Step 1 requires it), supported by the fact pack in the same audit directory, code and tests, and reworded to the latent singular `except … percentage data` case — the README covers the corpus, where the case does not occur — cost if wrong: a CHANGELOG claim backed by tests rather than the corpus record.
 
 Ruling 21: a percent proof never overrides contrary evidence in the same column, row or cell (other-unit row label, `$`/amount fact in the column, pure fact scale≠-2) — those cells become flagged text; also amends Ruling 8 (under a table-wide declaration a _VALUE-headed column's unproven cells become P4 text) and flags digit cells under non-declaration % headings — the user's principle is no unflagged scale change on contested evidence; constructed paths only — cost if wrong: coverage, verified by an acceptance rerun (NVDA unchanged is a stop gate).
+
+Ruling 22: A2 stays per copy column (a `$` cell withholds table-wide proof only for its own column), so `(in percentages)` with `Revenue | $ 1,000 | 100` in distinct leaves still gives 100 → 1.00 — spec P1.5 makes the declaration proof where no local proof exists, and a `$` is local to its column; recorded as a known gap — cost if wrong: one constructed shape (0 in corpus) converts on the table's own declaration.
+
+User decision (2026-10-13): do one more fix round for the residuals (Codex C1-C4 confirmed, _OTHER_UNIT misfires, Ruling 22 in record, B1 nits), then acceptance rerun on the final commit.
