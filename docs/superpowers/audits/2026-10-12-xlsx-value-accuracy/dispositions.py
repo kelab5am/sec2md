@@ -87,8 +87,9 @@ source_text_only, whose percent-fact evidence holds is listed. A number must equ
 own displayed number / 100, negated when sign="-"; text is listed with its reason. Cells that
 would hold a percent fact but for a nested fact are listed as 'not proof: nested fact'.
 
-Rulings 29 and 30 (currency labels under a table-wide caption; a bare or glued 'pp' as points,
-'PP&E' excepted) are encoded as well, for the in-table captions this script can see. Ruling 28 (a
+Rulings 29 to 31 (currency labels under a table-wide caption, a closing currency token after a
+digit or a scale word being an amount; a bare or glued 'pp' as points, 'PP&E' excepted) are
+encoded as well, for the in-table captions this script can see. Ruling 28 (a
 sign disagreement between display and fact is not flagged) needs no encoding: a sign-mismatched
 fact is no percent-fact proof here either, and it is not contrary evidence.
 Rulings 21-27 (spec Revision 3) are encoded where they decide a corpus cell: contrary evidence
@@ -187,8 +188,24 @@ OTHER_UNIT = re.compile(
 # conflict, and so is a local percent proof beside any currency label.
 CURRENCY_MARK = re.compile(r'[$€£¥]')
 CURRENCY_TOKEN = r'(?:[a-z]{1,3})?[$€£¥]'
-CURRENCY_UNIT = re.compile(rf'\(\s*(?:in\s+)?{CURRENCY_TOKEN}(?:\s+in)?(?:\s+(?:thousands|millions|billions))?\s*\)'
-                           rf'|(?:^|[\s,:;–—-]){CURRENCY_TOKEN}\s*$', re.I)
+CURRENCY_PAREN = re.compile(rf'\(\s*(?:in\s+)?{CURRENCY_TOKEN}(?:\s+in)?(?:\s+(?:thousands|millions|billions))?\s*\)', re.I)
+CURRENCY_CLOSING = re.compile(rf'(?:^|[\s,:;–—-]){CURRENCY_TOKEN}\s*$', re.I)
+# Ruling 31 (amends 30): a closing currency token directly after a digit or a scale word,
+# whitespace allowed between, is an amount ('3.8 billion $', 'Bonds of 500 million €'), not a
+# unit position; 'Price, US$' and 'Notes due 2030, $' keep their unit position. A scale word
+# glued to its number counts as well ('5m $', '500mm US$'): no letter may precede it.
+CURRENCY_AFTER_AMOUNT = re.compile(
+    rf'(?:\d|(?<![a-z])(?:thousands?|millions?|billions?|trillions?|bn|mm|m|k))\s*{CURRENCY_TOKEN}\s*$', re.I)
+
+
+def currency_parts(label):
+    """Rulings 29-31: (a currency symbol in unit position, a currency symbol elsewhere) in a label."""
+    text = label or ''
+    rest = CURRENCY_PAREN.sub(' ', text)
+    unit = rest != text
+    if CURRENCY_CLOSING.search(rest) and not CURRENCY_AFTER_AMOUNT.search(rest):
+        unit, rest = True, CURRENCY_CLOSING.sub(' ', rest)
+    return unit, bool(CURRENCY_MARK.search(rest))
 # Ruling 21: a header label naming a percent without declaring one ('% Change in NT$ from …',
 # 'Percent Change 2024 versus 2023'): a '%' or the word percent or percentage(s), outside a
 # number's own '%' and an except clause, in a label that is neither a percent declaration nor
@@ -526,8 +543,9 @@ def evidence(table, ri, ci):
     # sees; context-line declarations are not in the export JSON).
     table_wide_caption = table.table_wide()
     currency_label = any(CURRENCY_MARK.search(part or '') for part in (label, *labels))
-    currency_unit = any(CURRENCY_UNIT.search(part or '') for part in (label, *labels))
-    currency_other = any(CURRENCY_MARK.search(CURRENCY_UNIT.sub(' ', part or '')) for part in (label, *labels))
+    currencies = [currency_parts(part) for part in (label, *labels)]
+    currency_unit = any(unit for unit, _ in currencies)
+    currency_other = any(other for _, other in currencies)
     not_percent = [name for name, on in (('own $', own_dollar), ('amount fact', amount_fact),
                                          ('non-percent unit', row_unit),
                                          ('currency unit under a table-wide caption',
