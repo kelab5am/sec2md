@@ -6,9 +6,12 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 33, the Ruling 34 user decision and Ruling 35 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 33, the Ruling 34 user decision and Rulings 35 and 36 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
+- Below are 40 ledger lines, one paragraph each: 36 `Ruling` lines (Rulings 1 to 36 and 18a,
+  except 34) and four `User decision` lines, the fourth of which is Ruling 34. The file itself has
+  more lines, counting this header and the blank lines between paragraphs.
 - Ruling 32 replaces the currency keep-value exception of Rulings 29–31. The Ruling 31 line
   below names the scale words thousand(s), million(s), billion(s), bn, m and mm; the code it
   produced (39a71d2) also accepted trillion(s) and k. That code was removed under Ruling 32.
@@ -94,3 +97,5 @@ Ruling 33 (completes 32's "any currency"): ISO 4217 currency codes as whole uppe
 User decision (2026-10-13): table-level rule (Ruling 34) — a table-wide percent declaration proves nothing in a table with any unit or currency evidence anywhere; such cells become P4 text; tables without evidence (NVDA) unchanged.
 
 Ruling 35 (completes 34): a caption-shaped context line (the positions `units` are collected from, wholly parenthesised or a short unit line) naming a currency, scale or other unit counts as unit evidence; prose context lines do not — STOP if any NVDA cell would change — closes the reported shape without letting prose sentences flip NVDA — cost if wrong: coverage.
+
+Ruling 36 (completes 34's "anywhere"): scan every cell, every non-percent fact, and currency words; NVDA must stay unchanged (stop gate).
