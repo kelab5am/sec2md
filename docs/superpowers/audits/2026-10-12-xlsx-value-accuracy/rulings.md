@@ -6,7 +6,7 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 26 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 27 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
@@ -73,3 +73,5 @@ Ruling 24 (amends R5): restore e02bb44's broad unit matching, ignoring only bps 
 Ruling 25 (amends 24): drop the `of` exemption entirely (Days/Months/Years of … name a measure; e02bb44 was right); keep only a leading digit-range exemption; fix _SIGNED_POINTS boundary/order; add hyphenated and ppt/yrs/mos spellings; record the closed-vocabulary limit as a known gap — accuracy over coverage — cost if wrong: conflict text on `Months of supply`-style labels beside percent claims.
 
 Ruling 26 (amends 24/25): remove the signed-points exemption entirely — any bps/basis/percentage point(s) in a label is contrary evidence; each refinement reopened a wrong number; rate-shock scenario labels lose coverage (conflict text), recorded as a known gap — cost if wrong: coverage on rate-sensitivity tables.
+
+Ruling 27 (completes 26's "any spelling"): a points word glued to a digit counts (`_OTHER_UNIT` leading boundary becomes a no-letter lookbehind), with tests for `+50bps Years`, `+100bps`, `Change 25bp`, `Change 2024-25bps` → conflict text — one-line, closes the regression and the glued-spelling gap — cost if wrong: coverage only.
