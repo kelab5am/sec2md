@@ -44,7 +44,8 @@
     with every percent proof on its cells in the same way; a row label spanning
     two rows counts for both. Period headings (`Years Ended December 31,`),
     maturity buckets (`1-3 years`, `Past due - 90 days`), signed scenarios
-    (`+100 basis points`) and `Years 1-5` / `Months of supply` name no unit.
+    (`+100 basis points`) and digit-range buckets (`Years 1-5`, `Days 31-60`)
+    name no unit, while `Months of supply` and `Number of days of supply` do.
   - A `%` printed in its own column joins the value directly to its left when the
     `%` spans one row, has no heading or sits under the value's heading or one
     spanning the value's column, and its column holds nothing else in any other

@@ -161,8 +161,8 @@ unflagged as before.
   another unit (`Expected term (in years)`, `Days in inventory`, `(x)`,
   `bps change`, `Change (pp)`, `Duration`, a bare `Years` heading). A row label
   spanning two rows counts for both. Period headings, maturity buckets such as
-  `1-3 years`, signed scenarios such as `+100 basis points` and labels such as
-  `Years 1-5` name no unit.
+  `1-3 years`, signed scenarios such as `+100 basis points` and digit-range
+  buckets such as `Years 1-5` name no unit; `Months of supply` does.
 
 Conversion requires a complete supported numeric token and source-supported role.
 Ambiguous mixed text, conflicting units, unsupported formats or numbers exceeding

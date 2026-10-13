@@ -1320,11 +1320,10 @@ def test_identifier_heading_naming_a_percent_flags_plain_values():
     assert table.status == 'needs_review'
 
 
-@pytest.mark.parametrize('label', ['+100 basis points', 'Interest rate shock +200 basis points', 'Years 1-5',
-                                   'Months of supply'])
+@pytest.mark.parametrize('label', ['+100 basis points', 'Interest rate shock +200 basis points', 'Years 1-5'])
 def test_unit_words_outside_a_unit_position_name_no_unit(label):
-    """R5: a rate-shock scenario, a maturity bucket and a measure name hold unit words, but
-    name no unit of the row's values: their own '%' converts."""
+    """R5: a rate-shock scenario and a maturity bucket hold unit words, but name no unit of
+    the row's values: their own '%' converts. ('Months of supply' names one: Ruling 25.)"""
     table = prepared(heading('2025') + sec_row(label, '5.2 %'))
     assert cell_rows(table) == [[text_cell(label), (Decimal('0.052'), '0.0%', '5.2 %', None)]]
     assert table.status == 'exported'
@@ -1437,4 +1436,57 @@ def test_nvda_sentence_under_year_ended_headings_keeps_its_percents():
         [text_cell('Cost of revenue'), (Decimal('0.244'), '0.0%', '24.4', None), (Decimal('0.273'), '0.0%', '27.3', None)],
         [text_cell('Gross profit'), (Decimal('0.756'), '0.0%', '75.6', None), (Decimal('0.727'), '0.0%', '72.7', None)],
     ]
+    assert table.status == 'exported'
+
+
+# --- Ruling 25: no 'of' exemption, anchored signed points, more spellings ----------------
+
+_RULING_25_LABELS = [
+    # The 'of' exemption is gone: 'Days/Months/Years of …' and 'Number of … of …' name a measure.
+    'Number of days of supply', 'Number of days of sales outstanding', 'Number of years of service',
+    'Number of months of supply', 'Days of sales outstanding', 'Days of inventory on hand', 'Years of service',
+    'Months of supply',
+    # A year range or a digit range before bps is no signed scenario.
+    'Change 2024-25, bps', 'Change in margin 2024-25 bps', 'Margin change FY24-25 bps', 'Spread 1-10 bps',
+    # Hyphenated and abbreviated spellings.
+    'Percentage-point change', 'Basis-point change', 'Change (ppt)', 'Change (ppts)', 'Change in ppts',
+    'Weighted average life (yrs)', 'Remaining term (yrs.)', 'Term (mos.)', 'Remaining life (in yrs)', 'Term, mos.',
+]
+
+
+@pytest.mark.parametrize('label', _RULING_25_LABELS)
+def test_ruling_25_row_labels_never_take_a_table_wide_declaration(label):
+    """Ruling 25: each label names another unit, so under '(in percentages)' its value is
+    conflict text, never 120 → 1.20."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('header', ['Change 2024-25, bps', 'Number of days of supply', 'Percentage-point change',
+                                    'Basis-point change', 'Change (ppt)'])
+def test_ruling_25_headings_never_take_nvdas_sentence(header):
+    """Ruling 25: as column headings under NVDA's sentence, the same labels conflict."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+def test_measure_row_under_a_percent_heading_conflicts():
+    """Ruling 25: 'Number of days of supply' under '% of total' conflicts, never 0.45."""
+    table = prepared(heading('% of total') + sec_row('Number of days of supply', '45'))
+    assert cell_rows(table) == [[text_cell('Number of days of supply'), text_cell('45', _CONFLICT)]]
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('label', ['Years 1-5', 'Days 31-60', 'Years 2027-2030', 'Months 1 to 12'])
+def test_leading_digit_range_buckets_name_no_unit(label):
+    """Ruling 25 keeps one exemption: a bucket that starts with years, months or days and a
+    digit range names no unit of its values, whether they have their own '%' or a
+    table-wide declaration proves them."""
+    table = prepared(heading('2025') + sec_row(label, '5.2 %'))
+    assert cell_rows(table) == [[text_cell(label), (Decimal('0.052'), '0.0%', '5.2 %', None)]]
+    table = prepared(heading('2025') + sec_row(label, '3.25'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [[text_cell(label), (Decimal('0.0325'), '0.00%', '3.25', None)]]
     assert table.status == 'exported'
