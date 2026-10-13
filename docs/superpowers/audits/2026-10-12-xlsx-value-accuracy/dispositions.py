@@ -87,9 +87,9 @@ source_text_only, whose percent-fact evidence holds is listed. A number must equ
 own displayed number / 100, negated when sign="-"; text is listed with its reason. Cells that
 would hold a percent fact but for a nested fact are listed as 'not proof: nested fact'.
 
-Rulings 29 to 31 (currency labels under a table-wide caption, a closing currency token after a
-digit or a scale word being an amount; a bare or glued 'pp' as points, 'PP&E' excepted) are
-encoded as well, for the in-table captions this script can see. Ruling 28 (a
+Rulings 32 and 33 (any currency symbol or listed ISO code in a label under a table-wide caption
+is a conflict; they replace the currency keep-value exception of Rulings 29-31) and Ruling 29's
+points part (a bare or glued 'pp' as points, 'PP&E' excepted) are encoded as well, for the in-table captions this script can see. Ruling 28 (a
 sign disagreement between display and fact is not flagged) needs no encoding: a sign-mismatched
 fact is no percent-fact proof here either, and it is not contrary evidence.
 Rulings 21-27 (spec Revision 3) are encoded where they decide a corpus cell: contrary evidence
@@ -181,31 +181,15 @@ OTHER_UNIT = re.compile(
     rf'|(?<![a-z]){POINTS_WORD}\b'
     # Ruling 29: a bare 'pp', glued to a number too ('Change 25pp'), but not 'PP&E'.
     r'|(?<![a-z&])pp(?![a-z0-9_&])', re.I)
-# Rulings 29 and 30 (spec Revision 3): under a table-wide declaration a currency symbol ('$',
-# 'US$', 'NT$', '€', '£', '¥') in a row or header label keeps the displayed value only in unit
-# position, parenthesised ('($)', '(€)', '(US$)', '(in $)', '(US$ in millions)') or as the closing
-# token ('Price, US$', 'NT$'); any other currency symbol there (an amount, a description) is a
-# conflict, and so is a local percent proof beside any currency label.
-CURRENCY_MARK = re.compile(r'[$€£¥]')
-CURRENCY_TOKEN = r'(?:[a-z]{1,3})?[$€£¥]'
-CURRENCY_PAREN = re.compile(rf'\(\s*(?:in\s+)?{CURRENCY_TOKEN}(?:\s+in)?(?:\s+(?:thousands|millions|billions))?\s*\)', re.I)
-CURRENCY_CLOSING = re.compile(rf'(?:^|[\s,:;–—-]){CURRENCY_TOKEN}\s*$', re.I)
-# Ruling 31 (amends 30): a closing currency token directly after a digit or a scale word,
-# whitespace allowed between, is an amount ('3.8 billion $', 'Bonds of 500 million €'), not a
-# unit position; 'Price, US$' and 'Notes due 2030, $' keep their unit position. A scale word
-# glued to its number counts as well ('5m $', '500mm US$'): no letter may precede it.
-CURRENCY_AFTER_AMOUNT = re.compile(
-    rf'(?:\d|(?<![a-z])(?:thousands?|millions?|billions?|trillions?|bn|mm|m|k))\s*{CURRENCY_TOKEN}\s*$', re.I)
-
-
-def currency_parts(label):
-    """Rulings 29-31: (a currency symbol in unit position, a currency symbol elsewhere) in a label."""
-    text = label or ''
-    rest = CURRENCY_PAREN.sub(' ', text)
-    unit = rest != text
-    if CURRENCY_CLOSING.search(rest) and not CURRENCY_AFTER_AMOUNT.search(rest):
-        unit, rest = True, CURRENCY_CLOSING.sub(' ', rest)
-    return unit, bool(CURRENCY_MARK.search(rest))
+# Rulings 32 and 33 (spec Revision 3; they replace the currency keep-value exception of Rulings
+# 29-31): under a table-wide declaration any currency in a row or header label makes the cell
+# conflict text, and no currency label keeps a displayed value there; word units (today's
+# _ROW_UNIT: 'per share', 'dollars' …) keep spec P3. A currency is a symbol ('$', '€', '£', '¥',
+# so 'US$', 'NT$', 'HK$' too) anywhere in the label, or an ISO 4217 code from Ruling 33's closed
+# list as a whole, case-sensitive, upper-case word ('Price (USD)', 'Amount, TWD'; not 'CEO',
+# 'EPS' or 'USDA').
+CURRENCY_MARK = re.compile(r'[$€£¥]|\b(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD|CHF|CAD|AUD|INR|KRW|SGD|BRL'
+                           r'|MXN|SEK|NOK|DKK|ZAR)\b')
 # Ruling 21: a header label naming a percent without declaring one ('% Change in NT$ from …',
 # 'Percent Change 2024 versus 2023'): a '%' or the word percent or percentage(s), outside a
 # number's own '%' and an except clause, in a label that is neither a percent declaration nor
@@ -539,25 +523,19 @@ def evidence(table, ri, ci):
     shown_percent = bool(M._PERCENT.search(token)) or any(M._PERCENT_UNIT.fullmatch(p.strip()) for p in (*labels, label))
     percent = [name for name, on in (('own %', own_pct), ('percent fact', pct_fact), ('percent header', header_proof),
                                      ('percent row label', row_proof)) if on]
-    # Rulings 29, 30: currency labels under a table-wide caption (the in-table captions this script
-    # sees; context-line declarations are not in the export JSON).
+    # Rulings 32, 33: a currency label under a table-wide caption (the in-table captions this
+    # script sees; context-line declarations are not in the export JSON) is a conflict.
     table_wide_caption = table.table_wide()
     currency_label = any(CURRENCY_MARK.search(part or '') for part in (label, *labels))
-    currencies = [currency_parts(part) for part in (label, *labels)]
-    currency_unit = any(unit for unit, _ in currencies)
-    currency_other = any(other for _, other in currencies)
     not_percent = [name for name, on in (('own $', own_dollar), ('amount fact', amount_fact),
-                                         ('non-percent unit', row_unit),
-                                         ('currency unit under a table-wide caption',
-                                          table_wide_caption and currency_unit)) if on]
+                                         ('non-percent unit', row_unit)) if on]
     claimed = bool(percent) or declared or shown_percent
     # Ruling 21: no percent claim, a table-wide declaration included, overrides contrary evidence:
     # a contrary fact, or a row or header label naming another unit (Rulings 24-27).
     contrary = contrary_fact or any(names_other_unit(part) for part in (label, *labels))
     conflict = (((claimed or table_wide_caption) and contrary)
-                or (table_wide_caption and currency_other)
-                or (claimed and (amount_fact or row_unit or '$' in token or dollar_axis
-                                 or (table_wide_caption and currency_label))))
+                or (table_wide_caption and currency_label)
+                or (claimed and (amount_fact or row_unit or '$' in token or dollar_axis)))
     return dict(cell=cell, token=token, d=d, facts=facts, label=label, header=header, percent=percent,
                 not_percent=not_percent, conflict=conflict, withheld=withheld,
                 table_wide=table.table_wide() and not shared and not M._VALUE.search(header),
