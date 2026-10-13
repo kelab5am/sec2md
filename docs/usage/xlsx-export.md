@@ -118,7 +118,8 @@ percent row label, or a table-wide percent caption. A heading or caption over
 two values in one row proves neither of them. A percent proof never overrides
 contrary evidence: a heading or caption proves nothing in a column that holds a
 `$` amount or an amount fact, and a caption proves nothing under an amount
-heading such as `Total`. A `%` in the next column counts as the number's own
+heading such as `Total` or beside a currency label such as `Price ($)`, whose
+value keeps its displayed number. A `%` in the next column counts as the number's own
 only when it spans one row, sits directly beside the number and its column holds
 nothing else; negative percents such as `(29) %` become `-0.29`. A percent word
 in an `except` caption proves nothing, as in

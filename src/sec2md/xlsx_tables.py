@@ -793,7 +793,10 @@ _OTHER_UNIT = re.compile(
     rf'|[,:–—-]\s*{_UNIT_WORD}$|\sx$'
     r'|^(?:number of )?(?:years|months|days|weeks)\b'
     r'|^times\b|\b(?:years|months|days|weeks) to maturity\b|\bduration\b'
-    rf'|(?<![^\W\d_])(?:{_POINTS_WORD}|ppts?|points|pts)\b|(?<![\w&])pp(?![\w&])', re.I)
+    rf'|(?<![^\W\d_])(?:{_POINTS_WORD}|ppts?|points|pts)\b|(?<!&)(?<![^\W\d_])pp(?![\w&])', re.I)
+# Ruling 29: a currency symbol in a row or header label ('Price ($)', 'Price (US$)', 'Price
+# (€)') names a non-percent unit, as 'dollars' does through _ROW_UNIT.
+_CURRENCY_MARK = re.compile(r'[$€£¥]')
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).
@@ -910,7 +913,12 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True, table_
     row = _percent_declaration(label)
     amount = _amount_fact(origins)
     percent = own_percent or fact or heading or row
-    not_percent = '$' in text or amount or bool(_ROW_UNIT.search(header) or _ROW_UNIT.search(label))
+    # Ruling 29: under a table-wide declaration a currency symbol in the row or a header
+    # label is a local non-percent unit: the declaration proves nothing there (spec P3),
+    # and a local percent proof beside it conflicts.
+    currency_label = any(_CURRENCY_MARK.search(part) for part in (label, *labels))
+    not_percent = ('$' in text or amount or bool(_ROW_UNIT.search(header) or _ROW_UNIT.search(label))
+                   or (table_percent and currency_label))
     # Today's explicit-unit conflicts stay conflicts: a percent heading, label or sign
     # beside a '$' or a unit word anywhere on the cell's axes.
     shown_percent = bool(_PERCENT.search(text)) or any(_PERCENT_UNIT.fullmatch(part.strip())
@@ -926,7 +934,8 @@ def _cell_proof(text, header, labels, label, origins, header_proves=True, table_
                     for item in _value_facts(origins))
                 or any(_names_other_unit(part) for part in (label, *labels)))
     conflict = (((claimed or table_percent) and contrary)
-                or (claimed and (amount or bool(_ROW_UNIT.search(local)) or '$' in local)))
+                or (claimed and (amount or bool(_ROW_UNIT.search(local)) or '$' in local
+                                 or (table_percent and currency_label))))
     return _Proof('percent' if percent else 'number' if not_percent else None, conflict,
                   own_percent or fact or row, fact and not (heading or row),
                   own_percent or fact or '$' in text or amount)

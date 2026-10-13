@@ -1550,3 +1550,72 @@ def test_glued_points_headings_never_take_nvdas_sentence(header):
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
     assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
     assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+# --- Ruling 29: currency labels against a table-wide declaration, glued 'pp' -------------
+
+_CURRENCY_LABELS = ['Price ($)', 'Price (US$)', 'Price (€)', 'Price (£)', 'Amount in dollars']
+
+
+@pytest.mark.parametrize('label', _CURRENCY_LABELS)
+def test_currency_row_label_keeps_its_value_under_a_table_wide_declaration(label):
+    """Ruling 29 (D4): a currency symbol or 'dollars' in the row label is a local
+    non-percent unit, which overrides '(in percentages)' as 'Income per share' does: 26
+    keeps its displayed value, never 0.26."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('26'), '#,##0', '26', None)]]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('header', _CURRENCY_LABELS)
+def test_currency_heading_keeps_its_values_under_a_table_wide_declaration(header):
+    """Ruling 29 (D4): the same holds for a column heading with a currency label."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45 + [(Decimal('26'), '#,##0', '26', None)]]
+    assert table.status == 'exported'
+
+
+@pytest.mark.parametrize('label', _CURRENCY_LABELS)
+def test_currency_row_label_conflicts_with_a_local_percent_proof(label):
+    """Ruling 29 (D4): with the row's own '%' as well, the currency label is a conflict,
+    never 0.26."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26 %'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26 %', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('label', ['Change 25pp', '+25pp', 'Margin change 1.5pp'])
+def test_glued_pp_row_label_never_takes_a_table_wide_declaration(label):
+    """Ruling 29 (P1): 'pp' glued to a number is a points unit, so the value is conflict
+    text, never 120 → 1.20."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('header', ['Change, 25pp', 'Change 25pp', '+25pp'])
+def test_glued_pp_heading_conflicts_with_every_percent_proof(header):
+    """Ruling 29 (P2): as a heading, glued 'pp' conflicts with an own '120 %' and with
+    NVDA's sentence alike, never 1.20."""
+    table = prepared(heading(header) + sec_row('Margin', '120 %'))
+    assert cell_rows(table) == [[text_cell('Margin'), text_cell('120 %', _CONFLICT)]]
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
+
+
+@pytest.mark.parametrize('label', ['PP&E', 'Net PP&E'])
+def test_pp_and_e_names_no_unit(label):
+    """Ruling 29 keeps today's PP&E handling: 'PP&E' is property, plant and equipment."""
+    table = prepared(heading('2025') + sec_row(label, '12.5'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [[text_cell(label), (Decimal('0.125'), '0.0%', '12.5', None)]]
+
+
+def test_euro_label_without_a_table_wide_declaration_keeps_its_percent():
+    """Ruling 29 is scoped to table-wide declarations: MSFT's '2013 issuance of €4.1 billion'
+    keeps its own-'%' rate, and the '$' row keeps today's conflict (Ruling 9)."""
+    table = prepared(heading('Stated Interest Rate') + sec_row('2013 issuance of €4.1 billion', '2.63 %')
+                     + sec_row('2009 issuance of $3.8 billion', '4.20 %'))
+    assert cell_rows(table) == [
+        [text_cell('2013 issuance of €4.1 billion'), (Decimal('0.0263'), '0.00%', '2.63 %', None)],
+        [text_cell('2009 issuance of $3.8 billion'), text_cell('4.20 %', _CONFLICT)],
+    ]
