@@ -1619,3 +1619,42 @@ def test_euro_label_without_a_table_wide_declaration_keeps_its_percent():
         [text_cell('2013 issuance of €4.1 billion'), (Decimal('0.0263'), '0.00%', '2.63 %', None)],
         [text_cell('2009 issuance of $3.8 billion'), text_cell('4.20 %', _CONFLICT)],
     ]
+
+
+# --- Ruling 30: a currency label proves a unit only in unit position ---------------------
+
+_DESCRIPTIVE_CURRENCY = ['2009 issuance of $3.8 billion', '2013 issuance of €4.1 billion',
+                         'Revenue from US$ contracts', 'Sales in € markets']
+_CURRENCY_UNITS = ['Price ($)', 'Price (US$)', 'Amount (€)', 'Price, US$', 'Price (in $)', 'Revenue (US$ in millions)']
+
+
+@pytest.mark.parametrize('label', _DESCRIPTIVE_CURRENCY)
+def test_descriptive_currency_label_conflicts_with_a_table_wide_declaration(label):
+    """Ruling 30: under '(in percentages)' a currency symbol that is an amount or part of a
+    description names no unit of the value, so the cell is conflict text, never 2.63 or
+    0.0263."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('header', _DESCRIPTIVE_CURRENCY)
+def test_descriptive_currency_heading_conflicts_with_a_table_wide_declaration(header):
+    """Ruling 30: the same holds for a column heading."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '2.63'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('label', _CURRENCY_UNITS)
+def test_currency_in_unit_position_keeps_its_value_under_a_table_wide_declaration(label):
+    """Ruling 30: a currency symbol in unit position, '($)', '(US$)', '(in $)', a parenthesised
+    scale caption or a closing 'US$', is a local unit: 26 keeps its displayed value, as
+    a row label and as a heading."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('26'), '#,##0', '26', None)]]
+    assert table.status == 'exported'
+    table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45 + [(Decimal('26'), '#,##0', '26', None)]]
+    assert table.status == 'exported'
