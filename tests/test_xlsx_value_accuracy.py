@@ -1554,28 +1554,43 @@ def test_glued_points_headings_never_take_nvdas_sentence(header):
 
 # --- Ruling 29: currency labels against a table-wide declaration, glued 'pp' -------------
 
-_CURRENCY_LABELS = ['Price ($)', 'Price (US$)', 'Price (€)', 'Price (£)', 'Amount in dollars']
+_CURRENCY_LABELS = ['Price ($)', 'Price (US$)', 'Price (€)', 'Price (£)']
+_WORD_UNIT_LABELS = ['Amount in dollars', 'Income per share']
 
 
 @pytest.mark.parametrize('label', _CURRENCY_LABELS)
-def test_currency_row_label_keeps_its_value_under_a_table_wide_declaration(label):
-    """Ruling 29 (D4): a currency symbol or 'dollars' in the row label is a local
-    non-percent unit, which overrides '(in percentages)' as 'Income per share' does: 26
-    keeps its displayed value, never 0.26."""
+def test_currency_row_label_conflicts_with_a_table_wide_declaration(label):
+    """Ruling 32 (replacing Ruling 29's kept value): under '(in percentages)' any currency
+    symbol in the row label is a conflict, never 0.26 and never a kept 26."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('26'), '#,##0', '26', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
 
 
 @pytest.mark.parametrize('header', _CURRENCY_LABELS)
-def test_currency_heading_keeps_its_values_under_a_table_wide_declaration(header):
-    """Ruling 29 (D4): the same holds for a column heading with a currency label."""
+def test_currency_heading_conflicts_with_a_table_wide_declaration(header):
+    """Ruling 32: the same holds for a column heading with a currency symbol."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45 + [(Decimal('26'), '#,##0', '26', None)]]
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('26', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('label', _WORD_UNIT_LABELS)
+def test_word_unit_label_keeps_its_value_under_a_table_wide_declaration(label, before):
+    """Ruling 32 keeps spec P3 for word units: 'Amount in dollars' and 'Income per share'
+    are local non-percent units, so 2.50 keeps its displayed value as a row label and as
+    a heading."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.50'), before=before)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('2.50'), '#,##0.00', '2.50', None)]]
+    assert table.status == 'exported'
+    table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.50'), before=before)
+    assert cell_rows(table) == [_MARGIN_45 + [(Decimal('2.50'), '#,##0.00', '2.50', None)]]
     assert table.status == 'exported'
 
 
-@pytest.mark.parametrize('label', _CURRENCY_LABELS)
+@pytest.mark.parametrize('label', _CURRENCY_LABELS + ['Amount in dollars'])
 def test_currency_row_label_conflicts_with_a_local_percent_proof(label):
     """Ruling 29 (D4): with the row's own '%' as well, the currency label is a conflict,
     never 0.26."""
@@ -1648,16 +1663,16 @@ def test_descriptive_currency_heading_conflicts_with_a_table_wide_declaration(he
 
 
 @pytest.mark.parametrize('label', _CURRENCY_UNITS)
-def test_currency_in_unit_position_keeps_its_value_under_a_table_wide_declaration(label):
-    """Ruling 30: a currency symbol in unit position, '($)', '(US$)', '(in $)', a parenthesised
-    scale caption or a closing 'US$', is a local unit: 26 keeps its displayed value, as
-    a row label and as a heading."""
+def test_currency_in_unit_position_conflicts_with_a_table_wide_declaration(label):
+    """Ruling 32 (replacing Ruling 30's unit position): '($)', '(US$)', '(in $)', a
+    parenthesised scale caption or a closing 'US$' is a conflict under '(in percentages)'
+    too, as a row label and as a heading; no currency label keeps a value there."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('26'), '#,##0', '26', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26', _CONFLICT)]]
+    assert table.status == 'needs_review'
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45 + [(Decimal('26'), '#,##0', '26', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('26', _CONFLICT)]]
+    assert table.status == 'needs_review'
 
 
 # --- Ruling 31: a currency symbol after an amount is not a unit --------------------------
@@ -1685,8 +1700,31 @@ def test_currency_after_an_amount_heading_conflicts_with_nvdas_sentence(header):
 
 
 @pytest.mark.parametrize('label', ['Price, US$', 'Notes due 2030, $'])
-def test_closing_currency_token_after_a_comma_keeps_its_value(label):
-    """Ruling 31 keeps the closing-token unit after a comma, a year included."""
+def test_closing_currency_token_conflicts_with_a_table_wide_declaration(label):
+    """Ruling 32 (replacing Ruling 31's closing-token unit): a currency token after a comma
+    is a conflict under '(in percentages)' too."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('26'), '#,##0', '26', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26', _CONFLICT)]]
+    assert table.status == 'needs_review'
+
+
+# --- Ruling 32: any currency label conflicts with a table-wide percent caption -----------
+
+_RULING_32_CURRENCY = ['Senior notes, 4.1bn €', 'Bonds of 500m €', 'Notes 3.8mm $', 'Notes 250k $',
+                       'Notes 4.1BN €', 'Bonds 500M €', 'Notes 4.1 billion, €', 'Bonds 4.1 bn. €',
+                       'Notes 2.5tn ¥', 'Notes 3.8B $', 'Notes 500 Mio. €', 'Notes 3.8 bln $',
+                       'Notes 500 million of €', 'Price ($)$']
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('label', _RULING_32_CURRENCY)
+def test_any_currency_label_conflicts_with_a_table_wide_declaration(label, before):
+    """Ruling 32: under a table-wide declaration any currency symbol in a row label or a
+    heading, glued scales and every other amount or unit spelling included, is conflict
+    text, never 2.63."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=before)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.63'), before=before)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
