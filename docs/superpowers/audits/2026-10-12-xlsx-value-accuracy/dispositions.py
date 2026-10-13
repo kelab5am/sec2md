@@ -88,7 +88,8 @@ own displayed number / 100, negated when sign="-"; text is listed with its reaso
 would hold a percent fact but for a nested fact are listed as 'not proof: nested fact'.
 
 Ruling 34 (a caption proves nothing in a table with unit or currency evidence in its cells, and
-every column there becomes a percent column) is encoded for the table's own cells; Ruling 35's
+every column there becomes a percent column), with Ruling 36's search of every cell and every
+non-percent fact, is encoded for the table's own cells; Ruling 35's
 caption-shaped context lines are not in the export JSON. The table-wide forms now require the
 parentheses of the final review fix. Rulings 32 and 33 (any currency symbol or listed ISO code in
 a label under a table-wide caption is a conflict; they replace the currency keep-value exception of Rulings 29-31) and Ruling 29's
@@ -209,6 +210,14 @@ TABLE_WIDE = re.compile(r'\(?(?:(?:(?:items |amounts )?expressed as a )?percenta
 # and a listed ISO code glued to an amount ('USD500m', '500mUSD').
 ISO_CODES = r'(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD|CHF|CAD|AUD|INR|KRW|SGD|BRL|MXN|SEK|NOK|DKK|ZAR)'
 CURRENCY_EVIDENCE = re.compile(rf'[$€£¥₹₩₽₺₪]|\bFr\.|(?<![A-Z]){ISO_CODES}(?![A-Z])')
+# Ruling 36 (completes Ruling 34's "anywhere"): a currency word, dollar(s), euro(s), yen, yuan,
+# renminbi, rupee(s), franc(s) or pound(s) sterling anywhere, and won, real(s) or pound(s) only as
+# a unit ('(in won)', '(reals)', 'in pounds'), so 'Real estate' is none.
+CURRENCY_WORD = re.compile(r'\b(?:dollars?|euros?|yen|yuan|renminbi|rupees?|francs?|pounds? sterling)\b'
+                           r'|\(\s*(?:in\s+)?(?:won|reals?|pounds?)\s*\)|\bin (?:won|reals?|pounds?)\b', re.I)
+# Ruling 36: a unit after the number in a value cell ('5.5 years', '45 days', '5.5x', '+100bps').
+VALUE_UNIT = re.compile(r'\d\s*(?:years?|yrs?|months?|mos|days?|weeks?|times|x|bps|bp|basis[- ]points?'
+                        r'|percentage[- ]points?|ppts?|pp|points?|pts?)\.?(?![a-z])', re.I)
 
 
 def group(name):
@@ -381,22 +390,24 @@ class Table:
         return self._shared
 
     def unit_evidence(self):
-        """Ruling 34: unit or currency evidence anywhere in the table's own cells. In any source
-        cell, header, caption or body: currency evidence (CURRENCY_EVIDENCE, '$' cells and markers
-        included), a word or scale unit (today's _ROW_UNIT), or an amount fact; in a label (a
-        header cell, a column-0 cell or a cell without digits): another unit (names_other_unit).
-        The table's context unit lines and caption-shaped context lines (Ruling 35) are not in
-        the export JSON, so this reads the cells only."""
+        """Rulings 34 and 36: unit or currency evidence anywhere in the table's own cells. Every
+        source cell, header rows, sub-headers, row labels and value cells, with digits or without,
+        is read for: a currency symbol or code (CURRENCY_EVIDENCE, '$' cells and markers included)
+        or word (CURRENCY_WORD); a word or scale unit (today's _ROW_UNIT); another unit
+        (names_other_unit, period words stripped: '2025 (in years)', 'Years 2025', '2025 (x)');
+        and, in a body value cell (column > 0), a unit after the number (VALUE_UNIT: '5.5
+        years'). Every fact that is not a pure scale -2 percent fact (an amount fact, a fact in
+        years) is evidence too. The table's context unit lines and caption-shaped context lines
+        (Ruling 35) are not in the export JSON, so this reads the cells only."""
         if self._unit_evidence is None:
-            amount = {o for o, facts in self.facts.items()
-                      if any(m.lower().startswith('iso4217:') or m.lower() == 'xbrli:shares'
-                             for f in facts for m in f['unit'])}
+            facts = {o for o, items in self.facts.items()
+                     if any(not (f['unit'] == ['xbrli:pure'] and f['scale'] == '-2') for f in items)}
             self._unit_evidence = False
             for c in self.t['source_cells']:
                 text = c[4] or ''
-                label = c[0] < self.header_count or c[1] == 0 or not has_digit(text)
-                if (CURRENCY_EVIDENCE.search(text) or M._ROW_UNIT.search(text) or (c[0], c[1]) in amount
-                        or (label and names_other_unit(text))):
+                if (CURRENCY_EVIDENCE.search(text) or CURRENCY_WORD.search(text) or M._ROW_UNIT.search(text)
+                        or names_other_unit(text) or (c[0], c[1]) in facts
+                        or (c[0] >= self.header_count and c[1] > 0 and VALUE_UNIT.search(text))):
                     self._unit_evidence = True
                     break
         return self._unit_evidence
