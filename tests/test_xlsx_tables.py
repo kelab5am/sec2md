@@ -437,7 +437,10 @@ def test_wrapped_table_percent_context_and_local_unit_exception():
     table = prepared('''<h2>Margins</h2><p>Expressed as a percentage of revenue</p><div><table>
     <tr><th>Item</th><th>2026</th></tr><tr><td>Gross margin</td><td>25</td></tr>
     <tr><td>Income per share</td><td>2.50</td></tr></table></div><h2>Next</h2><p>Unrelated</p>''')
-    assert table.rows[0][1].value == Decimal('.25')
+    # Ruling 34 (user decision 2026-10-13): 'per share' is unit evidence, so the table-wide
+    # declaration proves nothing in this table; 25 stays source text for review.
+    assert (table.rows[0][1].value, table.rows[0][1].review_reason) == (
+        '25', 'Percent sign on other rows of this column; verify the scale.')
     assert table.rows[1][1].value == Decimal('2.50')
     assert table.title == 'Margins'
     assert not any('Unrelated' in note for note in table.notes)

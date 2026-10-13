@@ -798,8 +798,11 @@ _OTHER_UNIT = re.compile(
 # 'issuance of $3.8 billion', '4.1bn €'); no attempt is made to tell a unit from an amount.
 # Ruling 33: an ISO 4217 code from a closed list, as a whole upper-case word ('Price (USD)',
 # 'Amount, TWD'), is a currency too; 'CEO', 'EPS' and 'USDA' are not.
-_CURRENCY_MARK = re.compile(r'[$€£¥]|\b(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD|CHF|CAD|AUD|INR|KRW|SGD|BRL'
-                            r'|MXN|SEK|NOK|DKK|ZAR)\b')
+_ISO_CODES = r'(?:USD|EUR|GBP|JPY|CNY|RMB|TWD|NTD|HKD|CHF|CAD|AUD|INR|KRW|SGD|BRL|MXN|SEK|NOK|DKK|ZAR)'
+_CURRENCY_MARK = re.compile(rf'[$€£¥]|\b{_ISO_CODES}\b')
+# Ruling 34: currency evidence anywhere in a table, a wider set than _CURRENCY_MARK: also
+# ₹ ₩ ₽ ₺ ₪ and 'Fr.', and an ISO code glued to an amount ('USD500m', '500mUSD').
+_CURRENCY_EVIDENCE = re.compile(rf'[$€£¥₹₩₽₺₪]|\bFr\.|(?<![A-Z]){_ISO_CODES}(?![A-Z])')
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).
@@ -876,6 +879,26 @@ def _names_other_unit(text) -> bool:
     period wording."""
     text = _UNIT_BUCKET.sub(' ', text.strip())
     return bool(_OTHER_UNIT.search(_PERIOD_WORDS.sub(' ', text).strip()))
+
+
+def _unit_evidence(cells, unit_lines, header_count) -> bool:
+    """Ruling 34 (user decision 2026-10-13): whether a table holds any unit or currency
+    evidence, in which case a table-wide percent declaration proves nothing in it. Evidence
+    is, in any source cell (header, caption or body) or unit line of the table: a currency
+    symbol or ISO code (_CURRENCY_EVIDENCE, '$' cells and markers included), an amount
+    fact, a word or scale unit (_ROW_UNIT: per share, dollars, shares, in millions …), or,
+    in a label (a header cell, a row label or a cell without digits), another unit
+    (_names_other_unit: years, days, bps, x …)."""
+    for cell in cells:
+        text = cell.text
+        if (_CURRENCY_EVIDENCE.search(text) or _ROW_UNIT.search(text)
+                or any(_measured_amount(fact) for fact in cell.facts)):
+            return True
+        label = cell.row < header_count or cell.column == 0 or not re.search(r'\d', text)
+        if label and _names_other_unit(text):
+            return True
+    return any(_CURRENCY_EVIDENCE.search(line) or _ROW_UNIT.search(line) or _names_other_unit(line)
+               for line in unit_lines)
 
 
 class _Proof(NamedTuple):
@@ -1218,6 +1241,10 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
     # Spec P1.5: a table-wide percent declaration comes from the positions units do.
     table_percent = any(_table_percent_declaration(text)
                         for text in (*snapshot.context_before, *(c.text for c in captions)))
+    # Ruling 34: the declaration proves values only in a table without unit or currency
+    # evidence. In any other table it still covers every column, whose values nothing else
+    # proves are P4 text. Per-cell conflicts keep reading table_percent itself.
+    table_wide = table_percent and not _unit_evidence(cells, unit_texts, header_count)
     attached, refused = _attached_percent_signs(grid, header_count)
     groups = _column_groups(grid, original, header_count, attached)
     group_origins = [[list(dict.fromkeys(grid[r][col] for col in group
@@ -1288,6 +1315,8 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
                         if table_percent or any(_percent_declaration(part) for part in header_labels[index])}
     if table_percent:
         withheld_percent |= {index for index, header in enumerate(headers) if _VALUE.search(header)}
+        if not table_wide:  # Ruling 34 (Ruling 8 and the A2 column rule are then subsumed)
+            withheld_percent |= set(range(len(kept)))
     # Ruling 21: a heading naming a percent without declaring one proves nothing either way.
     percent_named = {index for index, labels in enumerate(header_labels) if any(map(_percent_heading, labels))}
     body = []
@@ -1310,7 +1339,7 @@ def prepare_table(snapshot: TableSnapshot) -> PreparedTable:
             quantity = identifier and _proves_quantity(text, origins)
             role = 'text' if label_column else _numeric_role(
                 text, headers[index], original[r][0], origins, units, financial,
-                table_percent and index not in withheld, proof.role, quantity)
+                table_wide and index not in withheld, proof.role, quantity)
             value = _convert_prepared(text, role, origins)
             # Explicit units on either axis (or on the value itself) must agree.
             # Broader table units can still have specific row/column exceptions.

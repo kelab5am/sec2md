@@ -17,11 +17,14 @@
     A percent proof never overrides contrary evidence: neither a percent heading
     nor a table-wide caption proves a column that holds a `$` amount or an amount
     fact, and a table-wide caption proves nothing under an amount heading such as
-    `Total`. Under a table-wide caption any currency symbol or ISO currency code
-    in a row label or heading, such as `Price ($)`, `Price (USD)` or `issuance of
-    $3.8 billion`, makes the value
-    conflict text, while a word unit such as `Income per share` keeps the
-    displayed number.
+    `Total`. A table-wide caption proves nothing at all in a table that holds
+    any unit or currency evidence: a currency symbol or ISO code, a `$` cell, an
+    amount fact, a scale or word unit such as `(in millions)` or `per share`, or
+    another unit such as `(in years)`. There, every value only the caption proved
+    stays text with the reason above. Under a table-wide caption a currency label
+    such as `Price ($)` or `Price (USD)` is conflict text, while a word unit such
+    as `Income per share` keeps its displayed number. NVDA's percent-of-revenue
+    tables hold no such evidence and keep all their values.
   - In a column where some row has its own `%`, a percent fact or a percent row
     label, every other number without proof stays text with
     `Percent sign on other rows of this column; verify the scale.`

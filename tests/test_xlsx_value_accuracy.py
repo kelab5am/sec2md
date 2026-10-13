@@ -1008,13 +1008,17 @@ _RATES = ([text_cell('Risk-free interest rate'), (Decimal('0.042'), '0.0%', '4.2
 ])
 def test_row_label_naming_another_unit_conflicts_with_a_table_wide_declaration(label):
     """Ruling 21 (A1): '(in percent)' declares the table percents, but a row label naming
-    another unit contradicts it on that row. Its values are conflict text, never 0.055;
-    the other rows keep the declaration."""
+    another unit contradicts it on that row. Its values are conflict text, never 0.055.
+    Ruling 34: that label is unit evidence, so the declaration proves nothing in the table
+    and the other rows are P4 text."""
     table = prepared(heading('2025', '2024') + _RATE_ROWS[0] + sec_row(label, '5.5', '6.0') + _RATE_ROWS[1],
                      before='<p>(in percent)</p>')
     assert cell_rows(table) == [
-        _RATES[0], [text_cell(label), text_cell('5.5', _CONFLICT), text_cell('6.0', _CONFLICT)], _RATES[1]]
-    assert table.issues == tuple(f'Source row 2, column {c}: {_CONFLICT}' for c in (1, 4))
+        [text_cell('Risk-free interest rate'), text_cell('4.2', _UNPROVEN), text_cell('3.9', _UNPROVEN)],
+        [text_cell(label), text_cell('5.5', _CONFLICT), text_cell('6.0', _CONFLICT)],
+        [text_cell('Expected volatility'), text_cell('45', _UNPROVEN), text_cell('50', _UNPROVEN)]]
+    assert table.issues == tuple(f'Source row {r}, column {c}: {_CONFLICT if r == 2 else _UNPROVEN}'
+                                 for r in (1, 2, 3) for c in (1, 4))
     assert table.status == 'needs_review'
 
 
@@ -1051,19 +1055,20 @@ def test_row_labels_that_name_no_unit_keep_the_table_wide_declaration():
 def test_cell_level_amount_withholds_a_table_wide_declaration_from_its_column(first):
     """Ruling 21 (A2): under '(in percentages)' a column holding a cell's own '$' or amount
     fact takes no table-wide proof, so its plain values are P4 text, never 5.00. Its own
-    '%' still proves a percent, and a column without such a cell keeps the declaration."""
+    '%' still proves a percent. Ruling 34: the '$' or amount fact is unit evidence, so the
+    declaration proves nothing in the other column either."""
     table = prepared(heading('2025', 'Change') + sec_row('Revenue', first, '11.1')
                      + sec_row('Cost of revenue', '500', '25.0') + sec_row('Gross margin', '50 %', '(2.0)'),
                      before='<p>(in percentages)</p>')
     revenue = ((Decimal('1000'), '"$"#,##0', '$ 1,000', None) if first.startswith('$')
                else (Decimal('1000'), '#,##0', '1,000', None))
     assert cell_rows(table) == [
-        [text_cell('Revenue'), revenue, (Decimal('0.111'), '0.0%', '11.1', None)],
-        [text_cell('Cost of revenue'), text_cell('500', _UNPROVEN), (Decimal('0.250'), '0.0%', '25.0', None)],
-        [text_cell('Gross margin'), (Decimal('0.50'), '0%', '50 %', None),
-         (Decimal('-0.020'), '0.0%;(0.0%)', '(2.0)', None)],
+        [text_cell('Revenue'), revenue, text_cell('11.1', _UNPROVEN)],
+        [text_cell('Cost of revenue'), text_cell('500', _UNPROVEN), text_cell('25.0', _UNPROVEN)],
+        [text_cell('Gross margin'), (Decimal('0.50'), '0%', '50 %', None), text_cell('(2.0)', _UNPROVEN)],
     ]
-    assert table.issues == (f'Source row 2, column 1: {_UNPROVEN}',)
+    assert table.issues == (f'Source row 1, column 4: {_UNPROVEN}', f'Source row 2, column 1: {_UNPROVEN}',
+                            f'Source row 2, column 4: {_UNPROVEN}', f'Source row 3, column 4: {_UNPROVEN}')
     assert table.status == 'needs_review'
 
 
@@ -1290,7 +1295,9 @@ def test_spanning_row_label_contradicts_every_row_it_covers():
 
 def test_spanning_row_label_proves_every_row_it_covers():
     """R3: a spanning percent row label proves both rows (spec P1.4), and a spanning
-    'Income per share' keeps both rows out of the table-wide declaration (P2.3)."""
+    'Income per share' keeps both rows out of the table-wide declaration (P2.3). Ruling 34:
+    'per share' is unit evidence, so the declaration proves nothing in that table and
+    'Gross margin 25' is P4 text."""
     table = prepared('<tr><th>Item</th><th>2025</th></tr>'
                      '<tr><td>Net revenue</td><td>$ 1,000</td></tr>'
                      '<tr><td rowspan="2">% of net revenue</td><td>26</td></tr><tr><td>27</td></tr>')
@@ -1301,10 +1308,10 @@ def test_spanning_row_label_proves_every_row_it_covers():
     table = prepared('<tr><th>Item</th><th>2025</th></tr><tr><td>Gross margin</td><td>25</td></tr>'
                      '<tr><td rowspan="2">Income per share</td><td>2.50</td></tr><tr><td>2.40</td></tr>',
                      before='<p>(in percentages)</p>')
-    assert cell_rows(table) == [[text_cell('Gross margin'), (Decimal('0.25'), '0%', '25', None)],
+    assert cell_rows(table) == [[text_cell('Gross margin'), text_cell('25', _UNPROVEN)],
                                 [text_cell('Income per share'), (Decimal('2.50'), '#,##0.00', '2.50', None)],
                                 [_EMPTY, (Decimal('2.40'), '#,##0.00', '2.40', None)]]
-    assert table.status == 'exported'
+    assert table.status == 'needs_review'
 
 
 def test_identifier_heading_naming_a_percent_flags_plain_values():
@@ -1356,6 +1363,10 @@ _IN_PERCENTAGES = '<p>(in percentages)</p>'
 _NVDA_SENTENCE = ('<p>The following table sets forth, for the periods indicated, certain items in our '
                   'Consolidated Statements of Income expressed as a percentage of revenue.</p>')
 _MARGIN_45 = [text_cell('Gross margin'), (Decimal('0.45'), '0%', '45', None)]
+# Ruling 34: in a table with unit or currency evidence the table-wide declaration proves
+# nothing, so the margin row it alone proved is P4 text.
+_MARGIN_45_P4 = [text_cell('Gross margin'), text_cell('45', _UNPROVEN)]
+_MARGIN_P4_ISSUE = f'Source row 1, column 1: {_UNPROVEN}'
 
 
 @pytest.mark.parametrize('label', [
@@ -1371,8 +1382,8 @@ def test_row_label_naming_another_unit_never_takes_a_table_wide_declaration(labe
     """Ruling 24: under '(in percentages)' a row label naming another unit is a conflict,
     never 120 → 1.20."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1383,8 +1394,8 @@ def test_heading_naming_another_unit_never_takes_a_table_wide_declaration(header
     """Ruling 24: a column heading naming another unit conflicts with the table-wide
     declaration on its cells; the other column keeps it."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=before)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('label', ['-25 bp', '+50 bps', '+1 percentage point', 'Shock -100 basis points',
@@ -1464,8 +1475,8 @@ def test_ruling_25_row_labels_never_take_a_table_wide_declaration(label):
     """Ruling 25: each label names another unit, so under '(in percentages)' its value is
     conflict text, never 120 → 1.20."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1474,8 +1485,8 @@ def test_ruling_25_row_labels_never_take_a_table_wide_declaration(label):
 def test_ruling_25_headings_never_take_nvdas_sentence(header):
     """Ruling 25: as column headings under NVDA's sentence, the same labels conflict."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 def test_measure_row_under_a_percent_heading_conflicts():
@@ -1508,8 +1519,8 @@ def test_ruling_26_row_labels_never_take_a_table_wide_declaration(label):
     """Ruling 26: a year range before bps is no scenario; the label names a points unit, so
     under '(in percentages)' its value is conflict text, never 120 → 1.20."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1517,8 +1528,8 @@ def test_ruling_26_row_labels_never_take_a_table_wide_declaration(label):
 def test_ruling_26_headings_never_take_nvdas_sentence(header):
     """Ruling 26: as column headings under NVDA's sentence, the same labels conflict."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 def test_ruling_26_own_percent_beside_a_points_label_conflicts():
@@ -1539,8 +1550,8 @@ def test_glued_points_row_labels_never_take_a_table_wide_declaration(label):
     """Ruling 27: 'bps' or 'bp' glued to a digit is a points unit too, so under
     '(in percentages)' the value is conflict text, never 120 → 1.20."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1548,8 +1559,8 @@ def test_glued_points_row_labels_never_take_a_table_wide_declaration(label):
 def test_glued_points_headings_never_take_nvdas_sentence(header):
     """Ruling 27: as column headings under NVDA's sentence, the glued labels conflict."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 # --- Ruling 29: currency labels against a table-wide declaration, glued 'pp' -------------
@@ -1563,8 +1574,8 @@ def test_currency_row_label_conflicts_with_a_table_wide_declaration(label):
     """Ruling 32 (replacing Ruling 29's kept value): under '(in percentages)' any currency
     symbol in the row label is a conflict, never 0.26 and never a kept 26."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('26', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1572,8 +1583,8 @@ def test_currency_row_label_conflicts_with_a_table_wide_declaration(label):
 def test_currency_heading_conflicts_with_a_table_wide_declaration(header):
     """Ruling 32: the same holds for a column heading with a currency symbol."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('26', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('26', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
@@ -1583,11 +1594,11 @@ def test_word_unit_label_keeps_its_value_under_a_table_wide_declaration(label, b
     are local non-percent units, so 2.50 keeps its displayed value as a row label and as
     a heading."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.50'), before=before)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), (Decimal('2.50'), '#,##0.00', '2.50', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), (Decimal('2.50'), '#,##0.00', '2.50', None)]]
+    assert table.status == 'needs_review'
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.50'), before=before)
-    assert cell_rows(table) == [_MARGIN_45 + [(Decimal('2.50'), '#,##0.00', '2.50', None)]]
-    assert table.status == 'exported'
+    assert cell_rows(table) == [_MARGIN_45_P4 + [(Decimal('2.50'), '#,##0.00', '2.50', None)]]
+    assert table.status == 'needs_review'
 
 
 @pytest.mark.parametrize('label', _CURRENCY_LABELS + ['Amount in dollars'])
@@ -1595,8 +1606,8 @@ def test_currency_row_label_conflicts_with_a_local_percent_proof(label):
     """Ruling 29 (D4): with the row's own '%' as well, the currency label is a conflict,
     never 0.26."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26 %'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26 %', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('26 %', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('label', ['Change 25pp', '+25pp', 'Margin change 1.5pp'])
@@ -1604,8 +1615,8 @@ def test_glued_pp_row_label_never_takes_a_table_wide_declaration(label):
     """Ruling 29 (P1): 'pp' glued to a number is a points unit, so the value is conflict
     text, never 120 → 1.20."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('header', ['Change, 25pp', 'Change 25pp', '+25pp'])
@@ -1615,7 +1626,7 @@ def test_glued_pp_heading_conflicts_with_every_percent_proof(header):
     table = prepared(heading(header) + sec_row('Margin', '120 %'))
     assert cell_rows(table) == [[text_cell('Margin'), text_cell('120 %', _CONFLICT)]]
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('120', _CONFLICT)]]
 
 
 @pytest.mark.parametrize('label', ['PP&E', 'Net PP&E'])
@@ -1649,8 +1660,8 @@ def test_descriptive_currency_label_conflicts_with_a_table_wide_declaration(labe
     description names no unit of the value, so the cell is conflict text, never 2.63 or
     0.0263."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1658,8 +1669,8 @@ def test_descriptive_currency_label_conflicts_with_a_table_wide_declaration(labe
 def test_descriptive_currency_heading_conflicts_with_a_table_wide_declaration(header):
     """Ruling 30: the same holds for a column heading."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '2.63'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('label', _CURRENCY_UNITS)
@@ -1668,10 +1679,10 @@ def test_currency_in_unit_position_conflicts_with_a_table_wide_declaration(label
     parenthesised scale caption or a closing 'US$' is a conflict under '(in percentages)'
     too, as a row label and as a heading; no currency label keeps a value there."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26', _CONFLICT)]]
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('26', _CONFLICT)]]
     assert table.status == 'needs_review'
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('26', _CONFLICT)]]
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('26', _CONFLICT)]]
     assert table.status == 'needs_review'
 
 
@@ -1686,8 +1697,8 @@ def test_currency_after_an_amount_conflicts_with_a_table_wide_declaration(label)
     """Ruling 31: a closing currency token right after a digit or a scale word is an
     amount, not a unit: under '(in percentages)' the value is conflict text, never 2.63."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     assert table.status == 'needs_review'
 
 
@@ -1695,8 +1706,8 @@ def test_currency_after_an_amount_conflicts_with_a_table_wide_declaration(label)
 def test_currency_after_an_amount_heading_conflicts_with_nvdas_sentence(header):
     """Ruling 31: as a heading under NVDA's sentence, the same labels conflict."""
     table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '2.63'), before=_NVDA_SENTENCE)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('label', ['Price, US$', 'Notes due 2030, $'])
@@ -1704,7 +1715,7 @@ def test_closing_currency_token_conflicts_with_a_table_wide_declaration(label):
     """Ruling 32 (replacing Ruling 31's closing-token unit): a currency token after a comma
     is a conflict under '(in percentages)' too."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('26', _CONFLICT)]]
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('26', _CONFLICT)]]
     assert table.status == 'needs_review'
 
 
@@ -1723,11 +1734,11 @@ def test_any_currency_label_conflicts_with_a_table_wide_declaration(label, befor
     heading, glued scales and every other amount or unit spelling included, is conflict
     text, never 2.63."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=before)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.63'), before=before)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 # --- Ruling 33: ISO currency codes conflict with a table-wide percent caption -----------
@@ -1742,11 +1753,11 @@ def test_iso_currency_code_conflicts_with_a_table_wide_declaration(label, before
     under a table-wide declaration the value is conflict text, never 0.0263, as a row
     label and as a heading."""
     table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '2.63'), before=before)
-    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4, [text_cell(label), text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 2, column 1: {_CONFLICT}')
     table = prepared(heading('2025', label) + sec_row('Gross margin', '45', '2.63'), before=before)
-    assert cell_rows(table) == [_MARGIN_45 + [text_cell('2.63', _CONFLICT)]]
-    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
+    assert cell_rows(table) == [_MARGIN_45_P4 + [text_cell('2.63', _CONFLICT)]]
+    assert table.issues == (_MARGIN_P4_ISSUE, f'Source row 1, column 4: {_CONFLICT}')
 
 
 @pytest.mark.parametrize('label', ['CEO compensation ratio', 'EPS growth', 'USDA grants', 'Revenue (usd)'])
@@ -1762,3 +1773,78 @@ def test_iso_currency_code_without_a_table_wide_declaration_is_unchanged():
     """Ruling 33 changes nothing outside a table-wide declaration: the row's own rate converts."""
     table = prepared(heading('Stated Interest Rate') + sec_row('Notes (USD)', '2.63 %'))
     assert cell_rows(table) == [[text_cell('Notes (USD)'), (Decimal('0.0263'), '0.00%', '2.63 %', None)]]
+
+
+# --- Ruling 34: a table-wide caption proves nothing in a table with unit evidence -------
+
+def _two_year_table(unit_row):
+    """'2025' and '2024' over a second header or body row, then a price and a margin row."""
+    return ('<tr><th>Item</th><th colspan="3">2025</th><th colspan="3">2024</th></tr>'
+            f'<tr><th></th><th colspan="3">{unit_row}</th><th colspan="3">{unit_row}</th></tr>'
+            + sec_row('Average price', '26', '24') + sec_row('Gross margin', '45', '44'))
+
+
+_P4_PRICE_MARGIN = [[text_cell('Average price'), text_cell('26', _UNPROVEN), text_cell('24', _UNPROVEN)],
+                    [text_cell('Gross margin'), text_cell('45', _UNPROVEN), text_cell('44', _UNPROVEN)]]
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('unit_line', ['(in millions of $)', 'In thousands of US$', '(in millions, US$)',
+                                       'in millions of €', '(In millions of USD)', '(in millions)'])
+def test_unit_line_header_row_withholds_a_table_wide_declaration(unit_line, before):
+    """Ruling 34 (shape 1): a unit line as a second header row is unit evidence, so the
+    table-wide declaration proves nothing in the table: every value it alone proved is P4
+    text, never 0.26."""
+    table = prepared(_two_year_table(unit_line), before=before)
+    assert table.headers == ('Item', '2025', '2024')
+    assert cell_rows(table) == _P4_PRICE_MARGIN
+    assert table.issues == tuple(f'Source row {r}, column {c}: {_UNPROVEN}' for r in (2, 3) for c in (1, 4))
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('before', [_IN_PERCENTAGES, _NVDA_SENTENCE], ids=['in-percentages', 'nvda-sentence'])
+@pytest.mark.parametrize('marker', ['$', '($)'])
+def test_currency_unit_row_withholds_a_table_wide_declaration(marker, before):
+    """Ruling 34 (shape 2): a lone '$' unit row under the years stays in the body as marker
+    text; it is unit evidence, so the values below are P4 text, never 0.26."""
+    table = prepared(_two_year_table(marker), before=before)
+    assert cell_rows(table) == [[_EMPTY, text_cell(marker), text_cell(marker)]] + _P4_PRICE_MARGIN
+    assert table.status == 'needs_review'
+
+
+def test_currency_and_percent_unit_row_withholds_a_table_wide_declaration():
+    """Ruling 34 (shape 2): 'Price | Margin' over '$ | %' as body marker text: the '$' is unit
+    evidence, so neither value takes the table-wide declaration."""
+    table = prepared('<tr><th></th><th colspan="3">Price</th><th colspan="3">Margin</th></tr>'
+                     '<tr><th></th><th colspan="3">$</th><th colspan="3">%</th></tr>' + sec_row('2025', '26', '45'),
+                     before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [[_EMPTY, text_cell('$'), text_cell('%')],
+                                [text_cell('2025'), text_cell('26', _UNPROVEN), text_cell('45', _UNPROVEN)]]
+
+
+@pytest.mark.parametrize('label', ['Notes USD500m', 'Notes 500mUSD', 'Price (₹)', 'Price (₩)', 'Price (₽)',
+                                   'Price (₺)', 'Price (₪)', 'Price (Fr.)'])
+def test_glued_codes_and_other_currency_symbols_withhold_a_table_wide_declaration(label):
+    """Ruling 34: an ISO code glued to an amount and the symbols ₹ ₩ ₽ ₺ ₪ and 'Fr.' are unit
+    evidence too: no value in the table takes the table-wide declaration."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '26'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [[text_cell('Gross margin'), text_cell('45', _UNPROVEN)],
+                                [text_cell(label), text_cell('26', _UNPROVEN)]]
+    assert table.status == 'needs_review'
+
+
+def test_table_without_unit_evidence_keeps_the_table_wide_declaration():
+    """Ruling 34 control: an NVDA-shaped percent-of-revenue table with no unit or currency
+    evidence anywhere keeps every percent."""
+    table = prepared('<tr><th></th><th colspan="6">Year Ended</th></tr>' + heading('Jan 26, 2025', 'Jan 28, 2024')
+                     + sec_row('Revenue', '100.0', '100.0') + sec_row('Cost of revenue', '24.4', '27.3')
+                     + sec_row('Research and development', '9.9', '14.2') + sec_row('Net income', '55.8', '48.8'),
+                     before=_NVDA_SENTENCE)
+    assert cell_rows(table) == [
+        [text_cell('Revenue'), (Decimal('1.000'), '0.0%', '100.0', None), (Decimal('1.000'), '0.0%', '100.0', None)],
+        [text_cell('Cost of revenue'), (Decimal('0.244'), '0.0%', '24.4', None), (Decimal('0.273'), '0.0%', '27.3', None)],
+        [text_cell('Research and development'), (Decimal('0.099'), '0.0%', '9.9', None),
+         (Decimal('0.142'), '0.0%', '14.2', None)],
+        [text_cell('Net income'), (Decimal('0.558'), '0.0%', '55.8', None), (Decimal('0.488'), '0.0%', '48.8', None)],
+    ]
+    assert table.status == 'exported'
