@@ -6,7 +6,7 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 24 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 25 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
@@ -69,3 +69,5 @@ User decision (2026-10-13): do one more fix round for the residuals (Codex C1-C4
 Ruling 23: apply R1 (the A6 test is this wave's own; the cell stays text, reason becomes the more accurate P4) — closes an unflagged 0.04; REJECT the `(x)` part of R5: `(x)` stays a unit (times) — dropping it would let `Net leverage ratio (x) | 2.4` under a percent claim become 0.024; a footnote `(x)` beside a `%` only loses coverage (conflict text) — accuracy over coverage — cost if wrong: `Net interest margin (x)`-style footnotes give conflict text.
 
 Ruling 24 (amends R5): restore e02bb44's broad unit matching, ignoring only bps after a signed number and a leading years/months/days before a digit range or `of`; extend the vocabulary to the never-recognised unit labels in row labels and headings; must-keep list for maturity buckets/period headings/NVDA verified by tests — accuracy over coverage (as Ruling 23) — cost if wrong: more conflict text on unit-ish labels.
+
+Ruling 25 (amends 24): drop the `of` exemption entirely (Days/Months/Years of … name a measure; e02bb44 was right); keep only a leading digit-range exemption; fix _SIGNED_POINTS boundary/order; add hyphenated and ppt/yrs/mos spellings; record the closed-vocabulary limit as a known gap — accuracy over coverage — cost if wrong: conflict text on `Months of supply`-style labels beside percent claims.
