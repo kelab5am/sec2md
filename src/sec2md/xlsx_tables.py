@@ -769,15 +769,16 @@ _PERCENT_WORDS = re.compile(
 _TABLE_PERCENT = re.compile(r'\((?:in percent(?:ages)?|as a percentage of (?:total )?revenue)\)', re.I)
 _PERCENT_FACT_FORMATS = frozenset({None, 'ixt:num-dot-decimal', 'ixt:numdotdecimal'})
 _UNPROVEN = 'Percent sign on other rows of this column; verify the scale.'
-# Rulings 21, 24, 25 and 26: a row or header label naming a unit other than a percent: in
+# Rulings 21 and 24 to 27: a row or header label naming a unit other than a percent: in
 # parentheses ('Expected term (in years)', 'Interest coverage (times)', 'Net leverage
 # ratio (x)', 'Term (mos.)', 'Change (ppt)'), after 'in' ('Remaining life in years'), after
 # a separator ending the label ('Average life, years', 'Term, mos.', 'Leverage ratio x'),
 # as its first word ('Days in inventory', 'Months of supply', 'Years of service', 'Times
 # covered', a bare 'Years' heading, 'Number of days of supply'), as 'years to maturity'
-# or 'duration', or a points unit anywhere ('bps change', 'Basis-point change',
-# 'Change (pp)', 'Change in points'). This is a closed vocabulary: a label that implies a
-# unit without naming it in one of these forms ('DSO', 'Weighted-average life') is none.
+# or 'duration', or a points unit anywhere, glued to a number too ('bps change',
+# 'Basis-point change', 'Change (pp)', 'Change in points', '+100bps'; Ruling 27). This is
+# a closed vocabulary: a label that implies a unit without naming it in one of these forms
+# ('DSO', 'Weighted-average life') is none.
 # Period wording is stripped ('Six months ended June 30', 'Years Ended December 31,'), so
 # maturity buckets ('1-3 years', 'Past due - 90 days') and period headings name no unit.
 # One shape is exempt, read on the raw label: a label that starts with a years, months,
@@ -792,7 +793,7 @@ _OTHER_UNIT = re.compile(
     rf'|[,:–—-]\s*{_UNIT_WORD}$|\sx$'
     r'|^(?:number of )?(?:years|months|days|weeks)\b'
     r'|^times\b|\b(?:years|months|days|weeks) to maturity\b|\bduration\b'
-    rf'|\b(?:{_POINTS_WORD}|ppts?|points|pts)\b|(?<![\w&])pp(?![\w&])', re.I)
+    rf'|(?<![^\W\d_])(?:{_POINTS_WORD}|ppts?|points|pts)\b|(?<![\w&])pp(?![\w&])', re.I)
 # Ruling 21: a header label naming a percent ('% Change in NT$ from 2023 to 2024',
 # 'Percent Change 2024 versus 2023'). Percentage points and the percentage-of-completion
 # method name no percent (spec Testing 7).

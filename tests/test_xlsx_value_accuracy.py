@@ -1527,3 +1527,26 @@ def test_ruling_26_own_percent_beside_a_points_label_conflicts():
     table = prepared(heading('2025') + sec_row('Change 2024 - 2025 bps', '120 %'))
     assert cell_rows(table) == [[text_cell('Change 2024 - 2025 bps'), text_cell('120 %', _CONFLICT)]]
     assert table.status == 'needs_review'
+
+
+# --- Ruling 27: a points unit glued to a number counts ---------------------------------
+
+_GLUED_POINTS = ['+50bps Years', '-25bp Days in inventory', '+100bps', 'Change 25bp', 'Change 2024-25bps']
+
+
+@pytest.mark.parametrize('label', _GLUED_POINTS)
+def test_glued_points_row_labels_never_take_a_table_wide_declaration(label):
+    """Ruling 27: 'bps' or 'bp' glued to a digit is a points unit too, so under
+    '(in percentages)' the value is conflict text, never 120 → 1.20."""
+    table = prepared(heading('2025') + sec_row('Gross margin', '45') + sec_row(label, '120'), before=_IN_PERCENTAGES)
+    assert cell_rows(table) == [_MARGIN_45, [text_cell(label), text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 2, column 1: {_CONFLICT}',)
+    assert table.status == 'needs_review'
+
+
+@pytest.mark.parametrize('header', _GLUED_POINTS)
+def test_glued_points_headings_never_take_nvdas_sentence(header):
+    """Ruling 27: as column headings under NVDA's sentence, the glued labels conflict."""
+    table = prepared(heading('2025', header) + sec_row('Gross margin', '45', '120'), before=_NVDA_SENTENCE)
+    assert cell_rows(table) == [_MARGIN_45 + [text_cell('120', _CONFLICT)]]
+    assert table.issues == (f'Source row 1, column 4: {_CONFLICT}',)
