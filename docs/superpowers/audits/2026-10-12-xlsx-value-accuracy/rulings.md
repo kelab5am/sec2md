@@ -6,7 +6,7 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Rulings 22 to 30 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 to 31 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
@@ -81,3 +81,5 @@ Ruling 28: display/fact sign disagreement is not flagged — the value comes fro
 Ruling 29: a `$`/currency/dollars in a row or header label is a local non-percent unit against a table-wide declaration (keeps the displayed value; conflict if a local percent proof also applies); `pp` glued to a digit counts — both close confirmed unflagged scale changes — cost if wrong: coverage only.
 
 Ruling 30 (amends 29, option a): only a unit-position currency symbol (`($)`, `(€)`, trailing `US$`) keeps the displayed value under a table-wide declaration (P3 precedent); any other currency symbol in a label (amount or descriptive) gives conflict text — the spec's local-unit precedence covers units, not amounts or descriptions — cost if wrong: coverage.
+
+Ruling 31 (amends 30): the trailing-token unit position does not apply when the token directly follows a digit or a scale word (thousand(s), million(s), billion(s), bn, m, mm) — that is an amount → conflict text; `Price, US$` and `Notes due 2030, $` keep their value — cost if wrong: coverage.
