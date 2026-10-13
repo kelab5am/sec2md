@@ -6,7 +6,7 @@ XLSX value accuracy work, copied verbatim and in ledger order. The ledger itself
 
 - The spec's "Revision 3: amendments during implementation"
   ([`../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md`](../../specs/2026-10-12-sec2md-xlsx-value-accuracy-design.md))
-  restates each ruling that shapes the export in one sentence, Ruling 22 included, and
+  restates each ruling that shapes the export in one sentence, Rulings 22 and 23 included, and
   marks Rulings 5, 14 and 17 as superseded.
 - Code comments and tests cite these rulings by number.
 - Rulings 1, 2, 6, 19 and 20 govern the audit harness, commits, test counts and
@@ -65,3 +65,5 @@ Ruling 21: a percent proof never overrides contrary evidence in the same column,
 Ruling 22: A2 stays per copy column (a `$` cell withholds table-wide proof only for its own column), so `(in percentages)` with `Revenue | $ 1,000 | 100` in distinct leaves still gives 100 → 1.00 — spec P1.5 makes the declaration proof where no local proof exists, and a `$` is local to its column; recorded as a known gap — cost if wrong: one constructed shape (0 in corpus) converts on the table's own declaration.
 
 User decision (2026-10-13): do one more fix round for the residuals (Codex C1-C4 confirmed, _OTHER_UNIT misfires, Ruling 22 in record, B1 nits), then acceptance rerun on the final commit.
+
+Ruling 23: apply R1 (the A6 test is this wave's own; the cell stays text, reason becomes the more accurate P4) — closes an unflagged 0.04; REJECT the `(x)` part of R5: `(x)` stays a unit (times) — dropping it would let `Net leverage ratio (x) | 2.4` under a percent claim become 0.024; a footnote `(x)` beside a `%` only loses coverage (conflict text) — accuracy over coverage — cost if wrong: `Net interest margin (x)`-style footnotes give conflict text.
