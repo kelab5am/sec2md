@@ -1074,7 +1074,6 @@ def test_visible_text_joins_a_number_split_across_consecutive_links_to_one_targe
 
 
 @pytest.mark.parametrize("html, numbers", [
-    pytest.param('<p><a href="#a">2</a><a href="#b">5</a></p>', ["2", "5"], id="different-targets"),
     pytest.param('<p><a href="#a">2</a> <a href="#a">5</a></p>', ["2", "5"], id="space-between"),
     pytest.param('<p><a href="#a">2 </a><a href="#a">5</a></p>', ["2", "5"], id="space-inside"),
     pytest.param('<p><a href="#a">2</a><br/><a href="#a">5</a></p>', ["2", "5"], id="line-break"),
@@ -1082,14 +1081,36 @@ def test_visible_text_joins_a_number_split_across_consecutive_links_to_one_targe
                  id="block-boundary"),
     pytest.param('<table><tr><td><a href="#a">2</a></td><td><a href="#a">5</a></td></tr></table>',
                  ["2", "5"], id="table-cells"),
-    pytest.param("<p><a>2</a><a>5</a></p>", ["2", "5"], id="no-target"),
-    # Not every untagged boundary: a range dash must not turn 4.3 into a negative number.
-    pytest.param("<p><span>3.5%-</span><span>4.3%</span></p>", ["3.5", "4.3"], id="untagged-range"),
-    pytest.param('<p><a href="#a">3.5%-</a><a href="#a">4.3%</a></p>', ["3.5", "4.3"],
+    pytest.param("<p>2<sup>5</sup></p>", ["2", "5"], id="superscript"),
+    pytest.param('<p>2<span style="position:relative;top:-3.5pt">5</span></p>', ["2", "5"],
+                 id="raised-by-style"),
+    pytest.param('<p>2<span style="padding-left:9pt">5</span></p>', ["2", "5"], id="padding-gap"),
+    pytest.param("<p>2<!-- x -->5</p>", ["2", "5"], id="comment-between"),
+])
+def test_visible_text_keeps_a_space_where_a_reader_sees_one(html, numbers):
+    assert normalize_numbers(_visible(html)) == numbers
+
+
+@pytest.mark.parametrize("html, numbers", [
+    pytest.param('<p><a href="#a">2</a><a href="#b">5</a></p>', ["25"], id="different-targets"),
+    pytest.param("<p><a>2</a><a>5</a></p>", ["25"], id="no-target"),
+    pytest.param("<p>or 2<span>0</span>%</p>", ["20"], id="donnelley-spans"),
+    pytest.param("<p><span>$</span><span>68</span><span>.7 billion</span></p>", ["68.7"],
+                 id="donnelley-decimal"),
+    pytest.param('<p>2<span style="position:relative;left:0.5pt">5</span></p>', ["25"],
+                 id="kerned-not-raised"),
+    # Touching range strings read as the same text in one node reads ("3.5%-4.3%"): this
+    # normalizer reads its dash as a sign there too.
+    pytest.param("<p><span>3.5%-</span><span>4.3%</span></p>", ["3.5", "-4.3"], id="untagged-range"),
+    pytest.param('<p><a href="#a">3.5%-</a><a href="#a">4.3%</a></p>', ["3.5", "-4.3"],
                  id="linked-range"),
 ])
-def test_visible_text_joins_only_number_fragments_of_touching_same_target_links(html, numbers):
+def test_visible_text_joins_strings_that_touch(html, numbers):
+    # Since inline spacing (2026-10-23) any strings that touch inside inline elements read
+    # as one run, as the renderer writes them; until then only same-target links did.
     assert normalize_numbers(_visible(html)) == numbers
+    unsplit = BeautifulSoup(html, "lxml").get_text()
+    assert normalize_numbers(_visible(f"<p>{unsplit}</p>")) == numbers
 
 
 def _audit_with_markdown(monkeypatch, source: bytes, markdown: str):

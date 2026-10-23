@@ -12,7 +12,13 @@ from bs4.element import NavigableString, Tag
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
-from sec2md.table_parser import TableHeaderRecord, TableParser, render_cell_content
+from sec2md.table_parser import (
+    TableHeaderRecord,
+    TableParser,
+    inline_text,
+    render_cell_content,
+    separates_inline,
+)
 from sec2md.models import Page, Element
 from sec2md.xlsx_tables import (
     TableSnapshot, native_metadata, snapshot_html_table, snapshot_positioned_table,
@@ -44,6 +50,37 @@ MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
 _MARKDOWN_TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
 
 logger = logging.getLogger(__name__)
+
+
+def _edge_whitespace(raw: str) -> tuple[bool, bool]:
+    """Whether a source string starts and ends with whitespace (no-break space included).
+
+    Zero-width characters are not whitespace and are dropped first, as clean_text drops them.
+    A whitespace-only string has whitespace at both ends.
+    """
+
+    text = raw.replace("\u200b", "").replace("\ufeff", "")
+    return text[:1].isspace(), text[-1:].isspace()
+
+
+def _meeting_emphasis_runs(left: str, right: str) -> tuple[int, int]:
+    """Marker lengths of two emphasis runs that meet with no whitespace, else (0, 0).
+
+    left must end and right must start with a whole run such as "**Total**" or "*:*".
+    Runs with the same marker merge into one ("**in**" + "**creased**" is "**increased**");
+    runs with different markers keep one space between them, since Markdown emphasis
+    delimiters cannot abut ("***Wafer Fabrication*** *:*").
+    """
+
+    left_run = len(left) - len(left.rstrip("*"))
+    right_run = len(right) - len(right.lstrip("*"))
+    if (
+        0 < left_run <= 3 and 0 < right_run <= 3
+        and len(left) > 2 * left_run and left.startswith("*" * left_run)
+        and len(right) > 2 * right_run and right.endswith("*" * right_run)
+    ):
+        return left_run, right_run
+    return 0, 0
 
 
 def _wrapped_copy_survives(
@@ -369,7 +406,15 @@ class Parser:
                 else ((source_node,) if source_node else ())
             )
 
-            merged = self._try_merge_inline_spans(last_text, s, last_source, source_node)
+            merged = None
+            if not last_text[-1:].isspace() and not s[:1].isspace():
+                left_run, right_run = _meeting_emphasis_runs(last_text, s)
+                if left_run and left_run == right_run:
+                    merged = last_text[:-left_run] + s[right_run:]
+                elif left_run:
+                    self._separate(page_num)
+                    last_text = buf[-1]
+            merged = merged or self._try_merge_inline_spans(last_text, s, last_source, source_node)
             if merged:
                 buf[-1] = merged
                 seg_buf[-1] = (
@@ -404,6 +449,22 @@ class Parser:
 
     def _blankline_after(self, page_num: int) -> None:
         self._blankline_before(page_num)
+
+    def _separate(self, page_num: int) -> None:
+        """End the page's last piece with one space, where the source separates inline text.
+
+        Text from adjacent inline nodes joins as the source writes it: a space is written only
+        for source whitespace or a separating tag, never at every text-node boundary. The space
+        goes on the last piece and its segment, so bold and italic runs still merge.
+        """
+
+        buf = self.pages.get(page_num)
+        if not buf or buf[-1][-1:].isspace():
+            return
+        buf[-1] += " "
+        seg_buf = self.page_segments[page_num]
+        content, source_ref, text_block = seg_buf[-1]
+        seg_buf[-1] = (content + " ", source_ref, text_block)
 
     def _process_text_node(self, node: NavigableString) -> str:
         text = clean_text(str(node))
@@ -469,12 +530,13 @@ class Parser:
         """Render a list or an inline wrapper, with the tables rendered inside it.
 
         Each table that left a pending header record comes with its normal render, which the
-        wrapper's text holds verbatim (revision 18).
+        wrapper's text holds verbatim (revision 18). The text keeps one leading or trailing
+        space where the source separates the wrapper from its neighbours (_render_inline).
         """
 
         previous, self._table_collector = self._table_collector, []
         try:
-            return self._process_element(wrapper), self._table_collector
+            return self._render_inline(wrapper), self._table_collector
         finally:
             self._table_collector = previous
 
@@ -574,19 +636,37 @@ class Parser:
         return rendered
 
     def _process_element(self, element: Union[Tag, NavigableString]) -> str:
-        if isinstance(element, NavigableString):
-            return self._process_text_node(element)
-
-        if element.name == "img":
-            if self.include_images:
-                return self._img_to_markdown(element)
-            return ""
-
-        if element.name == "table":
+        if isinstance(element, Tag) and element.name == "table":
             rendered = self._render_table(element)
             if self.table_checks and element.find_parent("table") is None:
                 self.table_outputs[id(element)] = rendered
             return rendered
+        return self._render_inline(element).strip()
+
+    def _render_inline(self, element: Union[Tag, NavigableString]) -> str:
+        """An element's text, with one leading or trailing space where the source separates it.
+
+        Adjacent strings join as the source writes them: "2</span><span>0</span>%" is "20%".
+        A space comes only from source whitespace, or from a separating tag (block, line
+        break, table cell, footnote marker; separates_inline) on both sides of its text.
+        """
+
+        if isinstance(element, NavigableString):
+            text = self._process_text_node(element)
+            lead, trail = _edge_whitespace(str(element))
+            if not text:
+                return " " if lead else ""
+            return f"{' ' if lead else ''}{text}{' ' if trail else ''}"
+
+        if element.name == "img":
+            if self.include_images:
+                md = self._img_to_markdown(element)
+                return f" {md} " if md else ""
+            return ""
+
+        if element.name == "table":
+            rendered = self._process_element(element)
+            return f" {rendered} " if rendered else ""
 
         if element.name in {"ul", "ol"}:
             items = []
@@ -598,30 +678,42 @@ class Parser:
             if not items:
                 return ""
             if element.name == "ol":
-                return "\n".join(f"{i + 1}. {t}" for i, t in enumerate(items))
-            return "\n".join(f"- {t}" for t in items)
+                listed = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(items))
+            else:
+                listed = "\n".join(f"- {t}" for t in items)
+            return f" {listed} "
 
-        if element.name == "li":
-            parts = [self._process_element(c) for c in element.children]
-            return " ".join(p for p in parts if p).strip()
+        inner = self._join_inline(element.children)
+        text = inner.strip()
+        if not text:
+            return " " if inner else ""
+
+        if element.name != "li":
+            wrap = self._wrap_markdown(element)
+            if wrap:
+                text = f"{wrap}{text}{wrap}"
+        if separates_inline(element):
+            return f" {text} "
+        return f"{' ' if inner[0].isspace() else ''}{text}{' ' if inner[-1].isspace() else ''}"
+
+    def _join_inline(self, children) -> str:
+        """Concatenate children's _render_inline texts, keeping one space where two meet."""
 
         parts: List[str] = []
-        for child in element.children:
-            if isinstance(child, NavigableString):
-                t = self._process_text_node(child)
-                if t:
-                    parts.append(t)
-            else:
-                t = self._process_element(child)
-                if t:
-                    parts.append(t)
-
-        text = " ".join(p for p in parts if p).strip()
-        if not text:
-            return ""
-
-        wrap = self._wrap_markdown(element)
-        return f"{wrap}{text}{wrap}" if wrap else text
+        for child in children:
+            part = self._render_inline(child)
+            if part[:1] == " " and parts and parts[-1][-1:].isspace():
+                part = part[1:]
+            if part and parts and not parts[-1][-1:].isspace() and not part[:1].isspace():
+                left_run, right_run = _meeting_emphasis_runs(parts[-1], part)
+                if left_run and left_run == right_run:
+                    parts[-1] = parts[-1][:-left_run] + part[right_run:]
+                    continue
+                if left_run:
+                    part = f" {part}"
+            if part:
+                parts.append(part)
+        return "".join(parts)
 
     def _extract_page_number_from_footer(self, footer_el: Tag) -> Optional[int]:
         text = footer_el.get_text(" ", strip=True)
@@ -875,10 +967,16 @@ class Parser:
             page_num += 1
 
         if isinstance(root, NavigableString):
+            # A space only where the source has whitespace: adjacent spans "2" + "0" are "20".
             t = self._process_text_node(root)
+            lead, trail = _edge_whitespace(str(root))
+            if lead:
+                self._separate(page_num)
             if t:
                 parent = root.parent if isinstance(root.parent, Tag) else None
-                self._append(page_num, t + " ", source_node=parent)
+                self._append(page_num, t, source_node=parent)
+                if trail:
+                    self._separate(page_num)
             return page_num
 
         if not isinstance(root, Tag):
@@ -978,6 +1076,7 @@ class Parser:
                 t, tables = self._process_element(root), []
             else:
                 t, tables = self._process_wrapper(root)
+                t = t.strip()
             if t:
                 self._append(page_num, t, source_node=root)
                 self._note_wrapped_tables(page_num, root, tables)
@@ -990,20 +1089,32 @@ class Parser:
 
         wrap = self._wrap_markdown(root)
         if wrap and not is_block:
-            t, tables = self._process_wrapper(root)
+            rendered, tables = self._process_wrapper(root)
+            t = rendered.strip()
+            if rendered[:1].isspace():
+                self._separate(page_num)
             if t:
-                self._append(page_num, t + " ", source_node=root)
+                self._append(page_num, t, source_node=root)
                 self._note_wrapped_tables(page_num, root, tables)
+                if rendered[-1:].isspace():
+                    self._separate(page_num)
             if self._has_break_after(root):
                 page_num += 1
             self._restore_text_block(text_block_started, text_block_has_continuation,
                                      continuation_ends_text_block, previous_text_block)
             return page_num
 
+        # A line break, footnote marker or box of its own keeps a space on each side of its text.
+        separates = not is_block and separates_inline(root)
+        if separates:
+            self._separate(page_num)
+
         current = page_num
         for child in root.children:
             current = self._stream_pages(child, current)
 
+        if separates:
+            self._separate(current)
         if is_block:
             self._blankline_after(current)
 
@@ -1303,7 +1414,7 @@ class Parser:
         rows = []
         for tr in table.find_all('tr', recursive=True):
             cells = tr.find_all(['td', 'th'], recursive=False) or tr.find_all(['td', 'th'], recursive=True)
-            texts = [clean_text(c.get_text(" ", strip=True)) for c in cells]
+            texts = [inline_text(c) for c in cells]
             if any(texts):
                 rows.append(cells)
         return rows
@@ -1318,7 +1429,7 @@ class Parser:
         texts = [
             render_cell_content(c, base_url=self.source_url)
             if c.find("a")
-            else clean_text(c.get_text(" ", strip=True))
+            else inline_text(c)
             for c in cells
         ]
         if not texts:

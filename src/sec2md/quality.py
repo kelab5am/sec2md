@@ -246,11 +246,16 @@ def trace_numeric_failures(
     # Output side only: the source pool below reads the mapped nodes' text unchanged.
     content = _SPLIT_PAREN_NUMBER_RE.sub(_close_up_split_paren_number, content)
     expected = Counter(_normalized_numbers(content))
+    # The source pool holds each number as the strings split it ("2 0" from
+    # "2</span><span>0</span>") and as the output joins them ("20", inline_source_text), the
+    # larger count of each token: a number traces when either reading shows it. Imported
+    # here: table_parser imports this module.
+    from sec2md.table_parser import inline_source_text
+
+    tags = [node for node in nodes if isinstance(node, Tag)]
     available = Counter(
-        _normalized_numbers(
-            " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
-        )
-    )
+        _normalized_numbers(" ".join(node.get_text(" ", strip=True) for node in tags))
+    ) | Counter(_normalized_numbers(inline_source_text(tags)))
     if header_source:
         available -= header_source
     failures: list[str] = []

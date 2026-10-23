@@ -1,0 +1,1118 @@
+{
+ "corpus": {
+  "files": 45,
+  "removed_spaces": 16536,
+  "added_spaces": 0,
+  "non_space_changes": 28,
+  "per_file": {
+   "AAPL__10-Q__2026-Q1.md": {
+    "removed_spaces": 286,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "AAPL__10-Q__2026-Q2.md": {
+    "removed_spaces": 415,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "AAPL__10-Q__2026-Q3.md": {
+    "removed_spaces": 408,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "CRDO__10-K__2026-FY.md": {
+    "removed_spaces": 400,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "CRDO__10-Q__2026-Q3.md": {
+    "removed_spaces": 180,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "CRDO__10-Q__2027-Q1.md": {
+    "removed_spaces": 179,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "CRM__10-K__2025-FY.md": {
+    "removed_spaces": 613,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "CRM__10-Q__2027-Q1.md": {
+    "removed_spaces": 270,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "CRM__10-Q__2027-Q2.md": {
+    "removed_spaces": 419,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "META__10-K__2025-FY.md": {
+    "removed_spaces": 630,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "META__10-Q__2026-Q1.md": {
+    "removed_spaces": 400,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "META__10-Q__2026-Q2.md": {
+    "removed_spaces": 522,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__10-K__2023-FY.md": {
+    "removed_spaces": 659,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-K__2025-FY.md": {
+    "removed_spaces": 647,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-K__2026-FY.md": {
+    "removed_spaces": 661,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2020-Q3.md": {
+    "removed_spaces": 475,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__10-Q__2021-Q1.md": {
+    "removed_spaces": 358,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__10-Q__2021-Q3.md": {
+    "removed_spaces": 501,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2022-Q1.md": {
+    "removed_spaces": 366,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__10-Q__2023-Q2.md": {
+    "removed_spaces": 534,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__10-Q__2023-Q3.md": {
+    "removed_spaces": 508,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2024-Q1.md": {
+    "removed_spaces": 372,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2024-Q2.md": {
+    "removed_spaces": 519,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2024-Q3.md": {
+    "removed_spaces": 516,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2025-Q1.md": {
+    "removed_spaces": 380,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2025-Q2.md": {
+    "removed_spaces": 521,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2025-Q3.md": {
+    "removed_spaces": 502,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2026-Q1.md": {
+    "removed_spaces": 384,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2026-Q2.md": {
+    "removed_spaces": 528,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__10-Q__2026-Q3.md": {
+    "removed_spaces": 515,
+    "added_spaces": 0,
+    "other_changes": 2,
+    "identical": false
+   },
+   "MSFT__8-K__2024-01-17__2024-01-19.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2024-12-10__2024-12-11.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2025-01-22__2025-01-22.md": {
+    "removed_spaces": 8,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2025-07-01__2025-07-01.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2025-09-24__2025-09-30.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2025-12-05__2025-12-08.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2026-05-13__2026-05-14.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "MSFT__8-K__2026-06-02__2026-06-05.md": {
+    "removed_spaces": 4,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "NVDA__10-K__2026-FY.md": {
+    "removed_spaces": 595,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "NVDA__10-Q__2027-Q1.md": {
+    "removed_spaces": 306,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "NVDA__10-Q__2027-Q2.md": {
+    "removed_spaces": 429,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "RDDT__10-K__2025-FY.md": {
+    "removed_spaces": 441,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "RDDT__10-Q__2026-Q1.md": {
+    "removed_spaces": 171,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "RDDT__10-Q__2026-Q2.md": {
+    "removed_spaces": 263,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   },
+   "SPCX__10-Q__2026-Q2.md": {
+    "removed_spaces": 627,
+    "added_spaces": 0,
+    "other_changes": 0,
+    "identical": false
+   }
+  },
+  "categories": [
+   [
+    "(|9",
+    7617
+   ],
+   [
+    "9|)",
+    2819
+   ],
+   [
+    "$|9",
+    2545
+   ],
+   [
+    "9|%",
+    1323
+   ],
+   [
+    "a|a",
+    475
+   ],
+   [
+    "a|,",
+    320
+   ],
+   [
+    "9|,",
+    283
+   ],
+   [
+    " | ",
+    240
+   ],
+   [
+    "a|.",
+    163
+   ],
+   [
+    "(|*",
+    128
+   ],
+   [
+    "*|)",
+    112
+   ],
+   [
+    "*|.",
+    88
+   ],
+   [
+    "*|,",
+    49
+   ],
+   [
+    "9|.",
+    41
+   ],
+   [
+    ")|,",
+    39
+   ],
+   [
+    "€|9",
+    32
+   ],
+   [
+    "“|a",
+    26
+   ],
+   [
+    "9|;",
+    23
+   ],
+   [
+    " |a",
+    21
+   ],
+   [
+    "/|a",
+    20
+   ],
+   [
+    "a|/",
+    19
+   ],
+   [
+    "-|9",
+    14
+   ],
+   [
+    "a|;",
+    12
+   ],
+   [
+    "a|-",
+    11
+   ],
+   [
+    "a|”",
+    11
+   ],
+   [
+    "a|)",
+    9
+   ],
+   [
+    "a|:",
+    9
+   ],
+   [
+    "*|—",
+    8
+   ],
+   [
+    "9|-",
+    6
+   ],
+   [
+    "(|a",
+    6
+   ],
+   [
+    "*|:",
+    5
+   ],
+   [
+    "9|*",
+    5
+   ],
+   [
+    "9|9",
+    5
+   ],
+   [
+    "-|a",
+    5
+   ],
+   [
+    "a|*",
+    4
+   ],
+   [
+    "%|,",
+    4
+   ],
+   [
+    "a|–",
+    4
+   ],
+   [
+    "–|a",
+    4
+   ],
+   [
+    "—|%",
+    3
+   ],
+   [
+    "—|*",
+    3
+   ],
+   [
+    "*|-",
+    3
+   ],
+   [
+    ",|”",
+    3
+   ],
+   [
+    "*|’",
+    3
+   ],
+   [
+    "9|:",
+    2
+   ],
+   [
+    "£|9",
+    2
+   ],
+   [
+    "a|’",
+    2
+   ],
+   [
+    "$|—",
+    2
+   ],
+   [
+    ")|.",
+    1
+   ],
+   [
+    "*|/",
+    1
+   ],
+   [
+    "a|—",
+    1
+   ],
+   [
+    "(|“",
+    1
+   ],
+   [
+    "”|)",
+    1
+   ],
+   [
+    "*|*",
+    1
+   ],
+   [
+    "*|a",
+    1
+   ],
+   [
+    "(|—",
+    1
+   ]
+  ],
+  "examples": {
+   "a|,": [
+    "AAPL__10-Q__2026-Q1.md: ...| Cupertino , California | 95014 |...",
+    "AAPL__10-Q__2026-Q1.md: ...vember 21, 2025 , Kevan Parekh , the Company’s Senior Vice P...",
+    "AAPL__10-Q__2026-Q1.md: ...nt and Chief Financial Officer , entered into a trading plan...",
+    "AAPL__10-Q__2026-Q1.md: ...ber 24, 2025 , Deirdre O’Brien , the Company’s Senior Vice P...",
+    "AAPL__10-Q__2026-Q1.md: ...ice President, Retail + People , terminated a trading plan i..."
+   ],
+   "(|9": [
+    "AAPL__10-Q__2026-Q1.md: ...**( 408 ) 996-1010**...",
+    "AAPL__10-Q__2026-Q1.md: ...ncome/(expense), net | 150 | ( 248 ) |...",
+    "AAPL__10-Q__2026-Q1.md: ...cy translation, net of tax | ( 159 ) | ( 625 ) |...",
+    "AAPL__10-Q__2026-Q1.md: ...tion, net of tax | ( 159 ) | ( 625 ) |...",
+    "AAPL__10-Q__2026-Q1.md: ...able debt securities | 424 | ( 1,647 ) |..."
+   ],
+   "9|)": [
+    "AAPL__10-Q__2026-Q1.md: ...**( 408 ) 996-1010**...",
+    "AAPL__10-Q__2026-Q1.md: ...e/(expense), net | 150 | ( 248 ) |...",
+    "AAPL__10-Q__2026-Q1.md: ...ranslation, net of tax | ( 159 ) | ( 625 ) |...",
+    "AAPL__10-Q__2026-Q1.md: ..., net of tax | ( 159 ) | ( 625 ) |...",
+    "AAPL__10-Q__2026-Q1.md: ...ebt securities | 424 | ( 1,647 ) |..."
+   ],
+   "9|.": [
+    "AAPL__10-Q__2026-Q1.md: ...tanding as of January 16, 2026 ....",
+    "AAPL__10-Q__2026-Q2.md: ...tstanding as of April 17, 2026 ....",
+    "AAPL__10-Q__2026-Q3.md: ...utstanding as of July 17, 2026 ....",
+    "CRDO__10-Q__2027-Q1.md: ... exercised in fiscal year 2026 ....",
+    "CRM__10-Q__2027-Q1.md: ...ge price per share of $ 198.34 . The initial share delivery ..."
+   ],
+   "$|9": [
+    "AAPL__10-Q__2026-Q1.md: ... additional paid-in capital, $ 0.00001 par value: 50,400,000...",
+    "AAPL__10-Q__2026-Q1.md: ...ad total deferred revenue of $ 14.3 billion and $ 13.7 billi...",
+    "AAPL__10-Q__2026-Q1.md: ...evenue of $ 14.3 billion and $ 13.7 billion, respectively. A...",
+    "AAPL__10-Q__2026-Q1.md: ...ect to fair value hedges was $ 12.6 billion....",
+    "AAPL__10-Q__2026-Q1.md: ...er 27, 2025, the Company had $ 2.0 billion and $ 8.0 billion..."
+   ],
+   "9|%": [
+    "AAPL__10-Q__2026-Q1.md: ..., 2025, the Company expects 66 % of total deferred revenue t...",
+    "AAPL__10-Q__2026-Q1.md: ...alized in less than a year, 23 % within one-to-two years, 9 ...",
+    "AAPL__10-Q__2026-Q1.md: ...3 % within one-to-two years, 9 % within two-to-three years a...",
+    "AAPL__10-Q__2026-Q1.md: ...ithin two-to-three years and 2 % in greater than three years...",
+    "AAPL__10-Q__2026-Q1.md: ...As of December 27, 2025, 78 % of the Company’s non-curren..."
+   ],
+   "a|a": [
+    "AAPL__10-Q__2026-Q1.md: ...receivables, which accounted f or 47 % and 26 %. A s of Sept...",
+    "AAPL__10-Q__2026-Q1.md: ...ccounted f or 47 % and 26 %. A s of September 27, 2025, the ...",
+    "AAPL__10-Q__2026-Q2.md: ...receivables, which accounted f or 51 % and 18 %. A s of Sept...",
+    "AAPL__10-Q__2026-Q2.md: ...ccounted f or 51 % and 18 %. A s of September 27, 2025, the ...",
+    "AAPL__10-Q__2026-Q3.md: ...receivables, which accounted f or 47 % and 22 %. A s of Sept..."
+   ],
+   "a|.": [
+    "AAPL__10-Q__2026-Q1.md: ...are forward-looking statements . Forward-looking statements ...",
+    "AAPL__10-Q__2026-Q2.md: ...are forward-looking statements . Forward-looking statements ...",
+    "AAPL__10-Q__2026-Q3.md: ...are forward-looking statements . Forward-looking statements ...",
+    "CRDO__10-K__2026-FY.md: ...h range from two to five years . In addition, the Company co...",
+    "CRDO__10-Q__2026-Q3.md: ...approximates two to five years . In addition, the Company co..."
+   ],
+   "*|,": [
+    "AAPL__10-Q__2026-Q1.md: ...Clarifying the Effective Date* , which clarified the effecti...",
+    "AAPL__10-Q__2026-Q2.md: ...Clarifying the Effective Date* , which clarified the effecti...",
+    "AAPL__10-Q__2026-Q3.md: ...Clarifying the Effective Date* , which clarified the effecti...",
+    "CRDO__10-K__2026-FY.md: ...nts to Income Tax Disclosures* , which requires disclosure o...",
+    "CRDO__10-K__2026-FY.md: ...se Disaggregation Disclosures* , which requires disclosure o..."
+   ],
+   "9|,": [
+    "AAPL__10-Q__2026-Q1.md: ...On November 21, 2025 , Kevan Parekh , the Company’...",
+    "AAPL__10-Q__2026-Q1.md: ...ll expire on December 31, 2026 , subject to early terminatio...",
+    "AAPL__10-Q__2026-Q1.md: ...On November 24, 2025 , Deirdre O’Brien , the Compa...",
+    "AAPL__10-Q__2026-Q1.md: ...ior Plan, on November 24, 2025 , Ms. O’Brien entered into a ...",
+    "AAPL__10-Q__2026-Q1.md: ...ll expire on December 31, 2026 , subject to early terminatio..."
+   ],
+   " | ": [
+    "CRDO__10-K__2026-FY.md: ...or the transition period from                               ...",
+    "CRDO__10-K__2026-FY.md: ...r the transition period from                                ...",
+    "CRDO__10-K__2026-FY.md: ... the transition period from                                 ...",
+    "CRDO__10-K__2026-FY.md: ...the transition period from                                  ...",
+    "CRDO__10-K__2026-FY.md: ...he transition period from                                  t..."
+   ],
+   " |a": [
+    "CRDO__10-K__2026-FY.md: ...                               to |...",
+    "CRDO__10-K__2026-FY.md: ...Balances and expected to vest  as of May 2, 2026 | 1.5 | $ 8...",
+    "CRM__10-K__2025-FY.md: ...r those products or services.  The Company enters into contr...",
+    "CRM__10-K__2025-FY.md: ...rt and professional services.  Significant judgment may be r...",
+    "CRM__10-K__2025-FY.md: ...egarding which were distinct.  We read a sample of executed ..."
+   ],
+   "*|:": [
+    "CRDO__10-K__2026-FY.md: ...roFlap Optical Transceivers*** : Credo’s ZeroFlap optical tr...",
+    "CRDO__10-K__2026-FY.md: ...***OmniConnect*** : Credo’s OmniConnect is a ne...",
+    "CRDO__10-K__2026-FY.md: ...***microLED Solutions*** : Credo is expanding its conn...",
+    "CRM__10-K__2025-FY.md: ...1. *Financial Statements* : The information concerning ...",
+    "CRM__10-K__2025-FY.md: ...Financial Statement Schedules* : The Financial Statement Sch..."
+   ],
+   "9|*": [
+    "CRDO__10-K__2026-FY.md: ...fiscal year ended* May 3, 2025 *, filed with the SEC on July...",
+    "NVDA__10-K__2026-FY.md: ... Adoption | 12/10/2025 | 3,984 * | 12/7/2026 |...",
+    "NVDA__10-Q__2027-Q1.md: ...option | 3/19/2026 | 8,000,000 * | 10/30/2027 |...",
+    "NVDA__10-Q__2027-Q1.md: ...mination | 4/10/2026 | 500,000 ** | N/A |...",
+    "NVDA__10-Q__2027-Q2.md: ...Adoption | 6/16/2026 | 375,439 ** | 12/14/2027 |..."
+   ],
+   "*|.": [
+    "CRDO__10-K__2026-FY.md: ...r Uncertainty in Income Taxes* . We recognize the tax effect...",
+    "CRDO__10-K__2026-FY.md: ...r Uncertainty in Income Taxes* . The Company recognizes the ...",
+    "CRM__10-K__2025-FY.md: ...*Data 360* . Data 360 is Salesforce’s hy...",
+    "CRM__10-K__2025-FY.md: ...*Informatica* . The acquisition of Informat...",
+    "CRM__10-K__2025-FY.md: ...*Agentforce* . Agentforce enables customer..."
+   ],
+   "a|-": [
+    "CRDO__10-K__2026-FY.md: ... institutions, and other third -party sources used to determ...",
+    "CRDO__10-Q__2026-Q3.md: ...l institutions and other third -party sources used to determ...",
+    "CRDO__10-Q__2027-Q1.md: ...l institutions and other third -party sources used to determ...",
+    "CRM__10-K__2025-FY.md: ...h range from approximately one -year to four -years, these p...",
+    "CRM__10-K__2025-FY.md: ...pproximately one -year to four -years, these performance-bas..."
+   ],
+   "—|%": [
+    "CRDO__10-K__2026-FY.md: ...| Expected dividend yield | — % | — % | — % |...",
+    "CRDO__10-K__2026-FY.md: ...ected dividend yield | — % | — % | — % |...",
+    "CRDO__10-K__2026-FY.md: ...dividend yield | — % | — % | — % |..."
+   ],
+   "9|:": [
+    "CRDO__10-K__2026-FY.md: ...May 3, 2025 and April 27, 2024 :...",
+    "MSFT__10-Q__2023-Q2.md: ...enue as of December 31 , 202 2 :..."
+   ],
+   "a|*": [
+    "CRDO__10-K__2026-FY.md: ...ithin Credo have been detected ***.***...",
+    "MSFT__10-Q__2025-Q1.md: ... investments, including OpenAI *.*...",
+    "MSFT__10-Q__2026-Q1.md: ...stment reflected in other, net *.*...",
+    "RDDT__10-K__2025-FY.md: ... set forth in Internal Control *—* Integrated Framework issu..."
+   ],
+   ")|.": [
+    "CRDO__10-K__2026-FY.md: ...lation S-K Item 601(b)(10)(iv) ...."
+   ],
+   "9|-": [
+    "CRM__10-K__2025-FY.md: ...the Company entered into a 364 -day Credit Agreement that pr...",
+    "NVDA__10-K__2026-FY.md: ...expected life (in years) | 0.1 - 2.0 | 0.1 - 2.0 | 0.1 - 2.0...",
+    "NVDA__10-K__2026-FY.md: ...e (in years) | 0.1 - 2.0 | 0.1 - 2.0 | 0.1 - 2.0 |...",
+    "NVDA__10-K__2026-FY.md: ... | 0.1 - 2.0 | 0.1 - 2.0 | 0.1 - 2.0 |...",
+    "NVDA__10-K__2026-FY.md: ... software | 12,619 | 7,568 | 2 - 7 |..."
+   ],
+   "*|/": [
+    "CRM__10-K__2025-FY.md: ...investor/corporate-governance* /. A copy may also be obtaine..."
+   ],
+   "(|*": [
+    "META__10-K__2025-FY.md: ...thern District of California ( *In re Facebook, Inc., Consum...",
+    "META__10-K__2025-FY.md: ...ic administrative proceeding ( *In the Matter of Facebook, I...",
+    "META__10-K__2025-FY.md: ...District of Columbia Circuit ( *U.S. v. Facebook, Inc.* ) an...",
+    "META__10-K__2025-FY.md: ...for the District of Columbia ( *Meta Platforms, Inc. v. FTC*...",
+    "META__10-K__2025-FY.md: ...decision in *SEC v. Jarkesy* ( *Jarkesy* ). Our motion for a..."
+   ],
+   "*|)": [
+    "META__10-K__2025-FY.md: ...ivacy User Profile Litigation* ). On December 22, 2022, the ...",
+    "META__10-K__2025-FY.md: ... the Matter of Facebook, Inc.* ) seeking substantial changes...",
+    "META__10-K__2025-FY.md: ...uit ( *U.S. v. Facebook, Inc.* ) and sought to stay the FTC ...",
+    "META__10-K__2025-FY.md: ... *Meta Platforms, Inc. v. FTC* ), asserting constitutional c...",
+    "META__10-K__2025-FY.md: ...n *SEC v. Jarkesy* ( *Jarkesy* ). Our motion for a stay of t..."
+   ],
+   "*|—": [
+    "META__10-K__2025-FY.md: ...ted in the section entitled \"* — *Revenue* — *Foreign Exchan...",
+    "META__10-K__2025-FY.md: ...ection entitled \"* — *Revenue* — *Foreign Exchange Impact on...",
+    "META__10-K__2025-FY.md: ...e, see the section entitled \"* — *Liquidity and Capital Reso...",
+    "RDDT__10-K__2025-FY.md: ...*Fair Value of Common Stock* —Prior to the completion of a...",
+    "RDDT__10-K__2025-FY.md: ...*Expected Term* —The expected term of options..."
+   ],
+   "—|*": [
+    "META__10-K__2025-FY.md: ...d in the section entitled \"* — *Revenue* — *Foreign Exchange...",
+    "META__10-K__2025-FY.md: ...tion entitled \"* — *Revenue* — *Foreign Exchange Impact on R...",
+    "META__10-K__2025-FY.md: ... see the section entitled \"* — *Liquidity and Capital Resour..."
+   ],
+   "*|-": [
+    "META__10-K__2025-FY.md: ...*Level 1* - Quoted prices in active mar...",
+    "META__10-K__2025-FY.md: ...*Level 2* - Observable inputs other tha...",
+    "META__10-K__2025-FY.md: ...*Level 3* - Inputs that are generally u..."
+   ],
+   "€|9": [
+    "META__10-K__2025-FY.md: ...n administrative fine of EUR € 1.2 billion as well as correc...",
+    "META__10-K__2025-FY.md: ...damages of approximately EUR € 542 million. We have appealed...",
+    "META__10-K__2025-FY.md: ... a fine of approximately EUR € 798 million. We appealed the ...",
+    "META__10-K__2025-FY.md: ...ts and imposed a fine of EUR € 200 million. Based on feedbac...",
+    "META__10-Q__2026-Q1.md: ...n administrative fine of EUR € 1.2 billion as well as correc..."
+   ],
+   "/|a": [
+    "META__10-K__2025-FY.md: ...| / S / Aaron Anderson | Chief Ac...",
+    "MSFT__10-Q__2020-Q3.md: .../ S / D ELOITTE & T OUCHE LLP...",
+    "MSFT__10-Q__2020-Q3.md: ...| / S / F RANK H. B ROD |...",
+    "MSFT__10-Q__2021-Q1.md: .../ S / D ELOITTE & T OUCHE LLP...",
+    "MSFT__10-Q__2021-Q1.md: ...| / S / Alice L. Jolla |..."
+   ],
+   "a|/": [
+    "META__10-K__2025-FY.md: ...| / S / Aaron Anderson | Chief Acco...",
+    "MSFT__10-Q__2020-Q3.md: .../ S / D ELOITTE & T OUCHE LLP...",
+    "MSFT__10-Q__2020-Q3.md: ...| / S / F RANK H. B ROD |...",
+    "MSFT__10-Q__2021-Q1.md: .../ S / D ELOITTE & T OUCHE LLP...",
+    "MSFT__10-Q__2021-Q1.md: ...| / S / Alice L. Jolla |..."
+   ],
+   "“|a": [
+    "MSFT__10-K__2023-FY.md: ... by artificial intelligence (“ AI ”), that deliver better, f...",
+    "MSFT__10-K__2023-FY.md: ...adoption or termination of a “ Rule 10b5-1 trading arrangeme...",
+    "MSFT__10-K__2023-FY.md: ...5-1 trading arrangement ” or “ non-Rule 10b5-1 trading arran...",
+    "MSFT__10-K__2025-FY.md: ..., modified , or terminated a “ Rule 10b5-1 trading arrangeme...",
+    "MSFT__10-K__2025-FY.md: ...1 trading arrangement ” or a “ non-Rule 10b5-1 trading arran..."
+   ],
+   "a|”": [
+    "MSFT__10-K__2023-FY.md: ... artificial intelligence (“ AI ”), that deliver better, fast...",
+    "MSFT__10-K__2023-FY.md: ...ule 10b5-1 trading arrangement ” or “ non-Rule 10b5-1 tradin...",
+    "MSFT__10-K__2025-FY.md: ...ule 10b5-1 trading arrangement ” or a “ non-Rule 10b5-1 trad...",
+    "MSFT__10-K__2026-FY.md: ...ule 10b5-1 trading arrangement ” or a “ non-Rule 10b5-1 trad...",
+    "MSFT__10-Q__2020-Q3.md: ... included in “O ther contracts ” in the tables below...."
+   ],
+   "a|)": [
+    "MSFT__10-K__2023-FY.md: ... Microsoft Consulting Services ), and Nuance professional se...",
+    "MSFT__10-Q__2020-Q3.md: ...| ( State of incorporation ) | (I.R.S. ID) |...",
+    "MSFT__10-Q__2020-Q3.md: ...( a ) Refer to Note 5 – Derivativ...",
+    "MSFT__10-Q__2021-Q1.md: ...( a ) Refer to Note 5 – Derivativ...",
+    "MSFT__10-Q__2021-Q1.md: ...(b ) Refer to Note 5 – Derivativ..."
+   ],
+   "9|;": [
+    "MSFT__10-K__2023-FY.md: ...tal – shares authorized 24,000 ; outstanding 7,432 and 7,464...",
+    "MSFT__10-K__2025-FY.md: ...tal – shares authorized 24,000 ; outstanding 7,434 and 7,434...",
+    "MSFT__10-K__2026-FY.md: ...tal – shares authorized 24,000 ; outstanding 7,427 and 7,434...",
+    "MSFT__10-Q__2020-Q3.md: ...tal – shares authorized 24,000 ; outstanding 7,590 and 7,643...",
+    "MSFT__10-Q__2021-Q1.md: ...tal – shares authorized 24,000 ; outstanding 7,564 and 7,571..."
+   ],
+   "a|;": [
+    "MSFT__10-K__2023-FY.md: ... for internal use, three years ; computer equipment, two to ...",
+    "MSFT__10-K__2023-FY.md: ...er equipment, two to six years ; buildings and improvements,...",
+    "MSFT__10-K__2023-FY.md: ...improvements, five to 15 years ; leasehold improvements, thr...",
+    "MSFT__10-K__2023-FY.md: ...mprovements, three to 20 years ; and furniture and equipment...",
+    "MSFT__10-K__2025-FY.md: ... for internal use, three years ; computer equipment, two to ..."
+   ],
+   "a|:": [
+    "MSFT__10-K__2023-FY.md: ...ive income (loss) by component :...",
+    "MSFT__10-K__2025-FY.md: ...ive income (loss) by component :...",
+    "MSFT__10-Q__2026-Q2.md: ...ased on the following segments : Productivity and Business P...",
+    "MSFT__10-Q__2026-Q3.md: ...ased on the following segments : Productivity and Business P...",
+    "SPCX__10-Q__2026-Q2.md: ...Mass to Orbit : Mass to orbit is the total ..."
+   ],
+   ")|,": [
+    "MSFT__10-K__2023-FY.md: ...ivatives, net of tax of $( 4 ) , $ 1 , and $ 7 | ( 14) | 6 |...",
+    "MSFT__10-K__2023-FY.md: ...losses, net of tax of $( 393 ) , $( 1,440 ), and $( 589 ) | ...",
+    "MSFT__10-K__2023-FY.md: ...tments, net of tax of $( 373 ) , $( 1,428 ), and $( 602 ) | ...",
+    "MSFT__10-K__2025-FY.md: ...ivatives, net of tax of $( 1 ) , $ 6 , and $( 4 ) | ( 5) | 2...",
+    "MSFT__10-K__2026-FY.md: ...losses), net of tax of $( 11 ) , $ 20 , and $( 4 ) | ( 42) |..."
+   ],
+   ",|”": [
+    "MSFT__10-K__2023-FY.md: ...le 10b5-1 trading arrangement, ” as defined in Item 408 of R...",
+    "MSFT__10-K__2025-FY.md: ...le 10b5-1 trading arrangement, ” as defined in Item 408 of R...",
+    "MSFT__10-K__2026-FY.md: ...le 10b5-1 trading arrangement, ” as defined in Item 408 of R..."
+   ],
+   "a|—": [
+    "MSFT__10-K__2023-FY.md: ... Inline XBRL Instance Document —the instance document does n..."
+   ],
+   "(|a": [
+    "MSFT__10-Q__2020-Q3.md: ...| ( State of incorporation ) | (I...",
+    "MSFT__10-Q__2020-Q3.md: ...( a ) Refer to Note 5 – Derivat...",
+    "MSFT__10-Q__2021-Q1.md: ...( a ) Refer to Note 5 – Derivat...",
+    "MSFT__10-Q__2021-Q3.md: ...( a ) Refer to Note 5 – Derivat...",
+    "MSFT__10-Q__2023-Q2.md: ...( a ) Refer to Note 5 – Derivat..."
+   ],
+   "9|9": [
+    "MSFT__10-Q__2020-Q3.md: ...ne months ended March 31 , 201 9 , respectively . These amou...",
+    "MSFT__10-Q__2021-Q1.md: ...illion as of September 30 , 20 20 , of which $ 107 billion i...",
+    "MSFT__10-Q__2022-Q1.md: ...ation for tax years 1996 to 20 2 1 , some of which are curre...",
+    "MSFT__10-Q__2022-Q1.md: ...ion for tax years 1996 to 20 2 1 , some of which are current...",
+    "MSFT__10-Q__2023-Q2.md: ...evenue as of December 31 , 202 2 :..."
+   ],
+   "(|“": [
+    "MSFT__10-Q__2020-Q3.md: ...to the Tax Cuts and Jobs Act ( “TCJA” ) of $157 million . Re..."
+   ],
+   "”|)": [
+    "MSFT__10-Q__2020-Q3.md: ...Tax Cuts and Jobs Act ( “TCJA” ) of $157 million . Refer to ..."
+   ],
+   "%|,": [
+    "MSFT__10-Q__2020-Q3.md: ...products revenue increased 11% , due to hybrid and premium s...",
+    "MSFT__10-Q__2020-Q3.md: ...e increased $277 million or 6% , driven by growth in Premier...",
+    "MSFT__10-Q__2021-Q3.md: ... increased $170 million or 10% , driven by growth in Premier...",
+    "MSFT__10-Q__2023-Q2.md: ... foreign currency impact of 6% , 7%, and 8%, respectively. O..."
+   ],
+   "a|–": [
+    "MSFT__10-Q__2020-Q3.md: ...| Foreign currency – Revenue | 10% decrease in f...",
+    "MSFT__10-Q__2020-Q3.md: ...| Foreign currency – Investments | 10% decrease ...",
+    "MSFT__10-Q__2021-Q3.md: ...| Foreign currency – Revenue | 10% decrease in f...",
+    "MSFT__10-Q__2021-Q3.md: ...| Foreign currency – Investments | 10% decrease ..."
+   ],
+   "–|a": [
+    "MSFT__10-Q__2020-Q3.md: ...| Foreign currency – Revenue | 10% decrease in for...",
+    "MSFT__10-Q__2020-Q3.md: ...| Foreign currency – Investments | 10% decrease in...",
+    "MSFT__10-Q__2021-Q3.md: ...| Foreign currency – Revenue | 10% decrease in for...",
+    "MSFT__10-Q__2021-Q3.md: ...| Foreign currency – Investments | 10% decrease in..."
+   ],
+   "-|a": [
+    "MSFT__10-Q__2021-Q3.md: ...otect product s and customer - facing services could reduce ...",
+    "MSFT__10-Q__2022-Q1.md: ...otect product s and customer - facing services could reduce ...",
+    "MSFT__10-Q__2023-Q2.md: ...otect product s and customer - facing services could reduce ...",
+    "MSFT__10-Q__2026-Q2.md: ...**FORM** **10- Q**...",
+    "MSFT__10-Q__2026-Q3.md: ...**FORM** **10- Q**..."
+   ],
+   "*|*": [
+    "MSFT__10-Q__2022-Q1.md: ...* * Furnished, not filed...."
+   ],
+   "-|9": [
+    "NVDA__10-K__2026-FY.md: ...pected life (in years) | 0.1 - 2.0 | 0.1 - 2.0 | 0.1 - 2.0 |...",
+    "NVDA__10-K__2026-FY.md: ...(in years) | 0.1 - 2.0 | 0.1 - 2.0 | 0.1 - 2.0 |...",
+    "NVDA__10-K__2026-FY.md: ... 0.1 - 2.0 | 0.1 - 2.0 | 0.1 - 2.0 |...",
+    "NVDA__10-K__2026-FY.md: ...sk-free interest rate | 3.5 %- 4.3 % | 3.6 %- 5.4 % | 3.9 %-...",
+    "NVDA__10-K__2026-FY.md: ...t rate | 3.5 %- 4.3 % | 3.6 %- 5.4 % | 3.9 %- 5.5 % |..."
+   ],
+   "*|’": [
+    "NVDA__10-Q__2027-Q1.md: ...d Statements of Shareholders** ’ **Equity**...",
+    "NVDA__10-Q__2027-Q2.md: ...d Statements of Shareholders** ’ **Equity**...",
+    "NVDA__10-Q__2027-Q2.md: ...d Statements of Shareholders** ’ **Equity**..."
+   ],
+   "*|a": [
+    "RDDT__10-K__2025-FY.md: ... forth in Internal Control *—* Integrated Framework issued b..."
+   ],
+   "£|9": [
+    "RDDT__10-Q__2026-Q1.md: ...which includes a fine of GBP £ 14.5 million. We are challeng...",
+    "RDDT__10-Q__2026-Q2.md: ...which includes a fine of GBP £ 14.5 million. We are challeng..."
+   ],
+   "a|’": [
+    "SPCX__10-Q__2026-Q2.md: ...| Total shareholders ’ equity | 127,224 | 2,573 |...",
+    "SPCX__10-Q__2026-Q2.md: ...ferred stock, and shareholders ’ equity | $ 192,770 | $ 92,0..."
+   ],
+   "$|—": [
+    "SPCX__10-Q__2026-Q2.md: ... (related party of $ 327 and $ — for the three months ended ...",
+    "SPCX__10-Q__2026-Q2.md: ... respectively, and $ 513 and $ — for the six months ended Ju..."
+   ],
+   "(|—": [
+    "SPCX__10-Q__2026-Q2.md: ... Convertible Preferred Stock ( — and 2.1 million shares, res..."
+   ]
+  },
+  "non_space_change_examples": [
+   {
+    "file": "MSFT__10-K__2023-FY.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-K__2023-FY.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-K__2025-FY.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-K__2025-FY.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-K__2026-FY.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-K__2026-FY.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2021-Q3.md",
+    "old": "***Nine* *Months Ended* *March 3* *1, 202* *1* *Compared with* *Nine* *Months Ended* *March* *31, 20* *20***",
+    "new": "***Nine* *Months Ended* *March 31, 2021* *Compared with* *Nine* *Months Ended* *March* *31, 2020***"
+   },
+   {
+    "file": "MSFT__10-Q__2021-Q3.md",
+    "old": "***Three Months Ended* *March* *3* *1* *, 202* *1* *Compared with Three Months Ended* *March* *3* *1* *, 20* *20***",
+    "new": "***Three Months Ended* *March* *31, 2021* *Compared with Three Months Ended* *March* *31, 2020***"
+   },
+   {
+    "file": "MSFT__10-Q__2023-Q3.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2023-Q3.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2024-Q1.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2024-Q1.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2024-Q2.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2024-Q2.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2024-Q3.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2024-Q3.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2025-Q1.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2025-Q1.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2025-Q2.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2025-Q2.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2025-Q3.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2025-Q3.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2026-Q1.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2026-Q1.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2026-Q2.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2026-Q2.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   },
+   {
+    "file": "MSFT__10-Q__2026-Q3.md",
+    "old": "**ONE MICROSOFT WAY** **,** **REDMOND** **,** **Washington** **98052-6399**",
+    "new": "**ONE MICROSOFT WAY,** **REDMOND,** **Washington** **98052-6399**"
+   },
+   {
+    "file": "MSFT__10-Q__2026-Q3.md",
+    "old": "**(** **425** **)** **882-8080**",
+    "new": "**(425)** **882-8080**"
+   }
+  ]
+ },
+ "aapl_golden_fixture": {
+  "removed_spaces": 475,
+  "non_space_changes": 0,
+  "categories": [
+   [
+    "(|9",
+    171
+   ],
+   [
+    "9|)",
+    170
+   ],
+   [
+    "$|9",
+    53
+   ],
+   [
+    "9|%",
+    27
+   ],
+   [
+    " | ",
+    20
+   ],
+   [
+    " |a",
+    10
+   ],
+   [
+    "a|,",
+    6
+   ],
+   [
+    "9|,",
+    5
+   ],
+   [
+    "€|9",
+    5
+   ],
+   [
+    "a|a",
+    3
+   ],
+   [
+    "9|.",
+    2
+   ],
+   [
+    "a|.",
+    1
+   ],
+   [
+    "a|-",
+    1
+   ],
+   [
+    "9|9",
+    1
+   ]
+  ],
+  "examples": {
+   "9|,": [
+    "AAPL_golden.md: ...fiscal year ended September 28 , 2024...",
+    "AAPL_golden.md: ...On August 27, 2024 , Deirdre O’Brien , the Compa...",
+    "AAPL_golden.md: ...ll expire on December 31, 2026 , subject to early terminatio...",
+    "AAPL_golden.md: ...On August 29, 2024 , Jeff Williams , the Company...",
+    "AAPL_golden.md: ...ll expire on December 15, 2025 , subject to early terminatio..."
+   ],
+   "a|,": [
+    "AAPL_golden.md: ...| Cupertino , California | 95014 |...",
+    "AAPL_golden.md: ...generally vest over four years , based on continued employme...",
+    "AAPL_golden.md: ...ust 27, 2024 , Deirdre O’Brien , the Company’s Senior Vice P...",
+    "AAPL_golden.md: ... Senior Vice President, Retail , entered into a trading plan...",
+    "AAPL_golden.md: ...ugust 29, 2024 , Jeff Williams , the Company’s Chief Operati..."
+   ],
+   "(|9": [
+    "AAPL_golden.md: ...**( 408 ) 996-1010**...",
+    "AAPL_golden.md: ...ncome/(expense), net | 269 | ( 565 ) | ( 334 ) |...",
+    "AAPL_golden.md: ...ense), net | 269 | ( 565 ) | ( 334 ) |...",
+    "AAPL_golden.md: ...nslation, net of tax | 395 | ( 765 ) | ( 1,511 ) |...",
+    "AAPL_golden.md: ...net of tax | 395 | ( 765 ) | ( 1,511 ) |..."
+   ],
+   "9|)": [
+    "AAPL_golden.md: ...**( 408 ) 996-1010**...",
+    "AAPL_golden.md: ...e/(expense), net | 269 | ( 565 ) | ( 334 ) |...",
+    "AAPL_golden.md: ...), net | 269 | ( 565 ) | ( 334 ) |...",
+    "AAPL_golden.md: ...tion, net of tax | 395 | ( 765 ) | ( 1,511 ) |...",
+    "AAPL_golden.md: ... tax | 395 | ( 765 ) | ( 1,511 ) |..."
+   ],
+   "$|9": [
+    "AAPL_golden.md: ...l quarter, was approximately $ 2,628,553,000,000 . Solely fo...",
+    "AAPL_golden.md: ... additional paid-in capital, $ 0.00001 par value: 50,400,000...",
+    "AAPL_golden.md: ...Total net sales include $ 7.7 billion of revenue recogn...",
+    "AAPL_golden.md: ...ue as of September 30, 2023, $ 8.2 billion of revenue recogn...",
+    "AAPL_golden.md: ...s of September 24, 2022, and $ 7.5 billion of revenue recogn..."
+   ],
+   "9|.": [
+    "AAPL_golden.md: ...roximately $ 2,628,553,000,000 . Solely for purposes of this...",
+    "AAPL_golden.md: ... LLP, PCAOB Firm ID No. 000 42 ...."
+   ],
+   "a|a": [
+    "AAPL_golden.md: ... is designed to identify, asse ss, and monitor the Company’s...",
+    "AAPL_golden.md: ... many state and foreign jurisd ictions. Tax years after 2017...",
+    "AAPL_golden.md: ... subject to examination. Altho ugh the timing of resolution ..."
+   ],
+   "9|%": [
+    "AAPL_golden.md: ..., 2024, the Company expects 64 % of total deferred revenue t...",
+    "AAPL_golden.md: ...alized in less than a year, 25 % within one-to-two years, 9 ...",
+    "AAPL_golden.md: ...5 % within one-to-two years, 9 % within two-to-three years a...",
+    "AAPL_golden.md: ...ithin two-to-three years and 2 % in greater than three years...",
+    "AAPL_golden.md: ...As of September 28, 2024, 86 % of the Company’s non-curren..."
+   ],
+   "€|9": [
+    "AAPL_golden.md: ... amount was calculated to be € 13.1 billion, plus interest o...",
+    "AAPL_golden.md: ....1 billion, plus interest of € 1.2 billion....",
+    "AAPL_golden.md: ... adjusted recovery amount of € 12.7 billion plus interest of...",
+    "AAPL_golden.md: ...2.7 billion plus interest of € 1.2 billion was held in escro...",
+    "AAPL_golden.md: ...alized investment gains, was € 14.2 billion or $ 15.8 billio..."
+   ],
+   "a|.": [
+    "AAPL_golden.md: ...enerally less than nine months . The weighted-average intere..."
+   ],
+   "a|-": [
+    "AAPL_golden.md: ...ompany’s common stock on a one -for-one basis. All RSUs gran..."
+   ],
+   "9|9": [
+    "AAPL_golden.md: ...ung LLP, PCAOB Firm ID No. 000 42 ...."
+   ],
+   " | ": [
+    "AAPL_golden.md: ...| /s/    Timothy D. Cook | Chief Exe...",
+    "AAPL_golden.md: ...| /s/    Timothy D. Cook | Chief Exec...",
+    "AAPL_golden.md: ...| /s/    Luca Maestri | Senior Vice ...",
+    "AAPL_golden.md: ...| /s/    Luca Maestri | Senior Vice P...",
+    "AAPL_golden.md: ...| /s/    Chris Kondo | Senior Direct..."
+   ],
+   " |a": [
+    "AAPL_golden.md: ...| /s/    Timothy D. Cook | Chief Execu...",
+    "AAPL_golden.md: ...| /s/    Luca Maestri | Senior Vice Pr...",
+    "AAPL_golden.md: ...| /s/    Chris Kondo | Senior Director...",
+    "AAPL_golden.md: ...| /s/    Wanda Austin | Director | Nov...",
+    "AAPL_golden.md: ...| /s/    Alex Gorsky | Director | Nove..."
+   ]
+  }
+ }
+}

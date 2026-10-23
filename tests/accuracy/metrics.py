@@ -311,10 +311,19 @@ def _oracle_trace_numeric_failures(
         content = content[:start] + content[end:]
 
     expected = Counter(normalize_numbers(re.sub(r"!\[[^\]]*\]\([^)]*\)", "", content)))
-    available = Counter(
-        normalize_numbers(
-            " ".join(node.get_text(" ", strip=True) for node in nodes if isinstance(node, Tag))
-        )
+    # The pool reads the mapped nodes both ways, each token as often as the larger reading
+    # has it: strings joined with single spaces, and strings joined as a reader sees them.
+    tags = [node for node in nodes if isinstance(node, Tag)]
+    seen: set[int] = set()
+    strings: list[NavigableString] = []
+    for node in tags:
+        for string in node.strings:
+            if id(string) not in seen:
+                seen.add(id(string))
+                strings.append(string)
+    available = (
+        Counter(normalize_numbers(" ".join(node.get_text(" ", strip=True) for node in tags)))
+        | Counter(normalize_numbers(_oracle_reader_text(strings)))
     ) - header_source
     failures: list[str] = []
     for token, count in sorted(expected.items()):
@@ -452,33 +461,39 @@ def _oracle_page_footers(soup: BeautifulSoup) -> list[Tag]:
     return footers
 
 
-def _oracle_splits_a_number(left: str, right: str) -> bool:
-    """Whether two touching strings are fragments of one number: digits meet digits, or a
-    decimal or thousands separator between digits."""
+# Inline text a reader still sees set apart: superscripts by style (Workiva raises footnote
+# markers with "position:relative;top:-3.5pt"), inline-block and block boxes, positioned text,
+# and a gap made with horizontal padding or margin ("Item 1.<span style='padding-left:..'>").
+_ORACLE_SET_APART_STYLE_RE = re.compile(
+    r"display\s*:\s*(?:block|inline-block|flex|grid|table|list-item)"
+    r"|position\s*:\s*absolute|vertical-align\s*:\s*(?:super|sub)"
+    r"|(?<![\w-])top\s*:\s*-\s*\d*\.?\d*[1-9]"
+    r"|(?:padding|margin)-(?:left|right)\s*:\s*\d*\.?\d*[1-9]",
+    re.IGNORECASE,
+)
 
-    return bool(
-        (re.search(r"\d\Z", left) and re.match(r"[.,]?\d", right))
-        or (re.search(r"\d[.,]\Z", left) and re.match(r"\d", right))
-    )
+
+def _oracle_edge_joins(tag: Tag) -> bool:
+    """Whether a reader sees text on the two sides of this element's edge as touching: an
+    inline or inline XBRL element, not a sup/sub footnote marker, with no style that sets
+    its text apart."""
+
+    if tag.name in {"sup", "sub"} or not (tag.name in _ORACLE_INLINE_TAGS or _oracle_is_xbrl(tag)):
+        return False
+    return not _ORACLE_SET_APART_STYLE_RE.search(str(tag.get("style") or ""))
 
 
-def _oracle_same_target_split(left: NavigableString, right: NavigableString) -> bool:
-    """Whether a number is split across consecutive links to one target (nvda-2026-10k's
-    ``<a href="#x">January 2</a><a href="#x">5</a>``), which a reader sees as one number.
+def _oracle_reads_joined(left: NavigableString, right: NavigableString) -> bool:
+    """Whether a reader sees two strings as one run of text, with no space between them.
 
-    The raw strings must be number fragments that touch: nothing lies between them but the
-    opening tags of the right string's own ancestors (no whitespace, comment or other element),
-    every element they close or open on the way is inline, and their nearest ``a`` ancestors
-    are two elements with one non-empty href. Any other boundary keeps its space: an untagged
-    ``3.5%-``/``4.3%`` junction never reads as -4.3.
+    Donnelley splits words and numbers across touching spans (``or 2</span><span>0</span>%``);
+    nvda-2026-10k splits dates across links to one target (``January 2</a><a ...>5``). The raw
+    strings must touch: no whitespace at the junction, nothing between them but the opening
+    tags of the right string's own ancestors (no string, comment or other element), and every
+    element closed or opened on the way joins at its edge (``_oracle_edge_joins``).
     """
 
-    if not _oracle_splits_a_number(left, right):
-        return False
-    first, second = left.find_parent("a"), right.find_parent("a")
-    if first is None or second is None or first is second:
-        return False
-    if not first.get("href") or first.get("href") != second.get("href"):
+    if str(left)[-1:].isspace() or str(right)[:1].isspace():
         return False
     left_ancestors = {id(tag) for tag in left.parents}
     right_ancestors = {id(tag) for tag in right.parents}
@@ -491,9 +506,26 @@ def _oracle_same_target_split(left: NavigableString, right: NavigableString) -> 
         for tag in start.parents:
             if id(tag) in other:
                 break
-            if tag.name not in _ORACLE_INLINE_TAGS:
+            if not _oracle_edge_joins(tag):
                 return False
     return True
+
+
+def _oracle_reader_text(strings: Sequence[NavigableString]) -> str:
+    """Strings in document order joined as a reader sees them (``_oracle_reads_joined``), with
+    one space at every other junction."""
+
+    parts: list[str] = []
+    previous: NavigableString | None = None
+    for node in strings:
+        text = node.strip()
+        if not text:
+            continue
+        if previous is not None:
+            parts.append("" if _oracle_reads_joined(previous, node) else " ")
+        parts.append(text)
+        previous = node
+    return _SPACE_RE.sub(" ", "".join(parts))
 
 
 def _visible_text(soup: BeautifulSoup) -> str:
@@ -508,9 +540,9 @@ def _source_visible(soup: BeautifulSoup) -> tuple[str, Counter]:
 
     Left out: style/script/template, hidden subtrees, the ``<head>`` (its ``<title>`` is the
     file name, which no browser draws on the page) and page footers by the harness's own rule
-    (``_oracle_page_footers``). Strings are joined with one space, as ``get_text(" ",
-    strip=True)`` joins them, except a number split across consecutive links to one target,
-    joined as it reads (``_oracle_same_target_split``).
+    (``_oracle_page_footers``). Strings are joined as a reader sees them
+    (``_oracle_reader_text``): strings that touch read as one run, any other junction as one
+    space.
     """
 
     with warnings.catch_warnings():
@@ -527,21 +559,16 @@ def _source_visible(soup: BeautifulSoup) -> tuple[str, Counter]:
     footer_lines = Counter(_SPACE_RE.sub(" ", block.get_text(" ", strip=True)) for block in footers)
     for block in footers:
         block.decompose()
-    parts: list[str] = []
-    previous: NavigableString | None = None
-    for node in clone.strings:
-        text = node.strip()
-        if not text:
-            continue
-        if previous is not None:
-            parts.append("" if _oracle_same_target_split(previous, node) else " ")
-        parts.append(text)
-        previous = node
-    return "".join(parts), footer_lines
+    return _oracle_reader_text(list(clone.strings)), footer_lines
 
 
 def _cell_text(cell) -> str:
-    return re.sub(r"\s+", " ", cell.get_text(" ", strip=True)).strip()
+    """A source cell's visible text as a reader sees it (``_oracle_reader_text``)."""
+
+    return _oracle_reader_text([
+        string for string in cell.strings
+        if not (isinstance(string.parent, Tag) and _oracle_is_hidden_or_under_hidden(string.parent))
+    ]).strip()
 
 
 def _has_label_text(text: str) -> bool:
@@ -788,7 +815,7 @@ def _link_aware_source_row_positions(
                 if table_has_split_link and cell.find("a"):
                     value = render_cell_content(cell)
                 else:
-                    value = re.sub(r"\s+", " ", cell.get_text(" ", strip=True)).strip()
+                    value = _cell_text(cell)
                 values.append(_strip_markdown_link_destinations(value))
 
             numbers = tuple(normalize_numbers(" | ".join(values)))
