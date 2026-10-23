@@ -2,6 +2,21 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- Text split across adjacent inline nodes is joined as the source writes it. A space
+  is written only where the source has whitespace, or at a block, line break, table
+  cell, footnote marker (`sup`, `sub`, raised by style), inline-block box or padding gap.
+  Donnelley's `or 2</span><span>0</span>%` now reads `or 20%` (was `2 0 %`), and
+  `$</span><span>68</span><span>.7` reads `$68.7` (was `$ 68 .7`). Split words such as
+  `in creased` now read `increased`, and `( 248 )` reads `(248)`.
+  - This applies to prose, bold and italic runs, lists, table cells and positioned text.
+  - Bold or italic runs that touch merge into one run (`**(650)**`). Runs with different
+    markers keep one space.
+  - Hidden text in a table cell is skipped, as in prose.
+  - Strict's source pool reads each number both split and joined, so earlier traces
+    keep their results.
+  - Numbers glued to a parenthesis or word in touching runs (`$(650)M`) are now outside
+    strict's trace, as the same text in one node is.
+  - Acceptance record: `docs/superpowers/audits/2026-10-23-inline-spacing/`.
 - XLSX export changes a displayed number, such as dividing a percent by 100, only
   on proof: the cell's own `%` or `$`, an explicit header or row label, or the
   inline XBRL fact in the cell. A value without proof stays source text with a
