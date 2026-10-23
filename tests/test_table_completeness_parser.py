@@ -115,9 +115,14 @@ CASES = [
     ("prose repeats the lost value", "<p>Commitments include $9,943 million due in 2024.</p>" + MERGE_LOSS,
      lambda s: s.replace("| $ 9,943 |", "| $ |"), {1: (lost("9943"), (), ())}),
     ("first-row amount kept beside its $", MERGE_LOSS, None, {}),
+    # The render reads "1,2<span>34</span>" as the source does since inline spacing
+    # (2026-10-23); it wrote "1,2 34" before, which this check reported as lost 1234.
     ("inline-split number",
      "<table><tr><td>Item</td><td>2026</td></tr><tr><td>Revenue</td><td>1,2<span>34</span></td></tr></table>", None,
-     {1: (lost("1234"), (), ())}),
+     {}),
+    ("inline-split number written apart",
+     "<table><tr><td>Item</td><td>2026</td></tr><tr><td>Revenue</td><td>1,2<span>34</span></td></tr></table>",
+     lambda s: s.replace("| 1,234 |", "| 1,2 34 |"), {1: (lost("1234"), (), ())}),
     ("hidden descendant is not source", HIDDEN, None, {}),
     ("hidden value leaked into the output keeps the visible value", HIDDEN, lambda s: s.replace("100", "100 999"), {}),
     ("euro and pound values", CURRENCIES, None, {}),

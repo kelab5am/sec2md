@@ -4,7 +4,14 @@ import re
 import logging
 from collections import Counter
 from bs4 import Tag
-from bs4.element import NavigableString
+from bs4.element import (
+    Comment,
+    Declaration,
+    Doctype,
+    NavigableString,
+    PageElement,
+    ProcessingInstruction,
+)
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
@@ -61,9 +68,43 @@ EXTENDED = StructuralPolicy.EXTENDED
 _ZERO_WIDTH = str.maketrans(dict.fromkeys(ZERO_WIDTH_CHARACTERS))
 
 _BLOCK_DESCENDANT_TAGS = {
-    "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "p"
+    "address", "article", "blockquote", "br", "caption", "center", "dd", "div", "dl", "dt",
+    "footer", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "ol", "p", "pre",
+    "section", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
 }
+# Footnote markers stay apart from the text they follow: "$5.2<sup>1</sup>" is not "$5.21".
+_MARKER_TAGS = {"sup", "sub"}
+# Text set apart by its style: blocks and inline-block boxes, absolutely positioned text,
+# superscripts (vertical-align, or Workiva's raised "position:relative;top:-3.5pt"; a
+# relative offset that does not raise the text only kerns it), and a gap made with
+# horizontal padding or margin (Workiva's "Item 1.<span style="padding-left:22.5pt">").
+_SEPARATE_STYLE = re.compile(
+    r"display\s*:\s*(?:block|inline-block|flex|grid|table|list-item)"
+    r"|position\s*:\s*absolute|vertical-align\s*:\s*(?:super|sub)"
+    r"|(?<![\w-])top\s*:\s*-\s*\d*\.?\d*[1-9]"
+    r"|(?:padding|margin)-(?:left|right)\s*:\s*\d*\.?\d*[1-9]",
+    re.I,
+)
+_NON_TEXT_STRINGS = (Comment, Declaration, Doctype, ProcessingInstruction)
+_HIDDEN_STYLE = re.compile(r"display\s*:\s*none", re.I)
 _STRUCTURAL_BOUNDARY = "\x00"
+
+
+def separates_inline(tag: Tag) -> bool:
+    """Whether a tag's content is set apart from the text around it by a space.
+
+    Text in adjacent inline nodes joins as the source writes it, with a space only where
+    the source has whitespace. A block, line break or table cell, a footnote marker (sup,
+    sub, or raised by its style), a box laid out on its own (display block or inline-block,
+    absolute position) and text after or before a padding or margin gap still separate
+    their text from their neighbours'.
+    """
+
+    name = (tag.name or "").lower()
+    if name in _BLOCK_DESCENDANT_TAGS or name in _MARKER_TAGS:
+        return True
+    style = tag.get("style")
+    return bool(style) and bool(_SEPARATE_STYLE.search(str(style)))
 
 
 @dataclass(frozen=True)
@@ -85,6 +126,8 @@ def _inline_fragments(
 
     fragments: list[InlineFragment] = []
     for child in node.children:
+        if isinstance(child, _NON_TEXT_STRINGS):
+            continue
         if isinstance(child, NavigableString):
             text = str(child).replace("\xa0", " ").translate(_ZERO_WIDTH)
             if text:
@@ -94,7 +137,9 @@ def _inline_fragments(
             continue
 
         tag_name = child.name.lower()
-        if tag_name in _BLOCK_DESCENDANT_TAGS:
+        if _HIDDEN_STYLE.search(str(child.get("style") or "")):
+            continue  # not drawn, as the stream skips it: "100<span hidden>999</span>" is "100"
+        if separates_inline(child):
             fragments.append(InlineFragment(text=" ", boundary=True))
             if tag_name != "br":
                 fragments.extend(
@@ -167,6 +212,76 @@ def render_cell_content(cell: Tag, *, base_url: str | None = None) -> str:
     return _collapse_structural_whitespace(joined).strip()
 
 
+def inline_text(node: Tag) -> str:
+    """A node's text with its strings joined as the source writes them.
+
+    Whitespace runs collapse to one space, and only source whitespace or a separating tag
+    (separates_inline) puts a space between two strings: "2</span><span>0</span>%" reads
+    "20%", where ``get_text(" ")`` reads "2 0 %". Zero-width characters are removed.
+    """
+
+    return " ".join(_raw_inline_text(node).split())
+
+
+def _raw_inline_text(node: Tag) -> str:
+    return "".join(fragment.text for fragment in _inline_fragments(node))
+
+
+def _separating_ancestor(node: Tag, other: Tag) -> bool:
+    """Whether a separating tag encloses node but not other."""
+
+    other_ancestors = {id(ancestor) for ancestor in other.parents}
+    for ancestor in node.parents:
+        if id(ancestor) in other_ancestors:
+            return False
+        if separates_inline(ancestor):
+            return True
+    return False
+
+
+def _joins_inline(first: Tag, second: Tag) -> bool:
+    """Whether second's text follows first's in the source with nothing between them.
+
+    Nothing means no string (whitespace included) and no separating tag opened or closed
+    between the end of first and the start of second.
+    """
+
+    if separates_inline(first) or separates_inline(second):
+        return False
+    if _separating_ancestor(first, second) or _separating_ancestor(second, first):
+        return False
+    last: PageElement = first
+    while isinstance(last, Tag) and last.contents:
+        last = last.contents[-1]
+    cursor = last.next_element
+    while cursor is not None and cursor is not second:
+        if isinstance(cursor, NavigableString):
+            if not isinstance(cursor, _NON_TEXT_STRINGS) and str(cursor):
+                return False
+        elif isinstance(cursor, Tag) and separates_inline(cursor):
+            return False
+        cursor = cursor.next_element
+    return cursor is second
+
+
+def inline_source_text(nodes: Sequence[Tag]) -> str:
+    """Several source nodes' text, in their order, joined as the source joins them.
+
+    Nodes that follow each other directly in the source join without a space, so the spans
+    "2" and "0" of "or 2</span><span>0</span>%" read "20" here as in the output. Any other
+    two nodes are separated by one space. Whitespace runs collapse to one space.
+    """
+
+    parts: list[str] = []
+    previous: Tag | None = None
+    for node in nodes:
+        if previous is not None and not _joins_inline(previous, node):
+            parts.append(" ")
+        parts.append(_raw_inline_text(node))
+        previous = node
+    return " ".join("".join(parts).split())
+
+
 def has_descendant(node: Tag, name: str) -> bool:
     """Whether a tag has a descendant tag with this name: ``node.find(name)`` without the
     cost of bs4's filter machinery, which dominates on tables with many cells. Strings
@@ -178,8 +293,8 @@ def has_descendant(node: Tag, name: str) -> bool:
 def extract_cell_text(td: Tag, *, base_url: str | None = None) -> str:
     """A td or th cell's text as the Markdown render reads it (the spec's extracted text).
 
-    A cell with a link keeps it as Markdown (render_cell_content); any other cell joins its
-    strings with single spaces. Zero-width characters are removed, and a cell holding only
+    A cell with a link keeps it as Markdown (render_cell_content); any other cell reads as
+    inline_text, its strings joined as the source writes them. A cell holding only
     an image reads as a bullet. The header-alignment check reads source cells through this
     same function, so its labels match the header line text R6 writes.
     """
@@ -187,15 +302,7 @@ def extract_cell_text(td: Tag, *, base_url: str | None = None) -> str:
     if has_descendant(td, "a"):
         text = render_cell_content(td, base_url=base_url)
     else:
-        text = (
-            td.get_text(separator=" ", strip=True)
-            .replace('\xa0', ' ')
-            .replace('\r\n', ' ')
-            .replace('\r', ' ')
-            .replace('\n', ' ')
-            .translate(_ZERO_WIDTH)
-            .strip()
-        )
+        text = inline_text(td)
     if not text and has_descendant(td, 'img'):
         text = '●'  # or '•' depending on your BULLETS set
     return text
@@ -443,8 +550,9 @@ class TableHeaderRecord:
 
     header_line is the exact Markdown header line written, or None when it holds no text.
     header_source counts the numeric tokens of the header-zone source cells, each cell
-    once: their nodes' ``get_text(" ", strip=True)`` joined in document order with single
-    spaces, as strict's source pool is built, then tokenized once with strict's tokenizer.
+    once, joined in document order with single spaces and tokenized once with strict's
+    tokenizer in both of strict's source-pool readings, ``get_text(" ", strip=True)`` and
+    ``inline_text``; each token counts as often as the larger reading has it.
     header_capacity multiplies each cell's own tokens by the number of output columns
     whose header that cell covers. Counts are sorted (token, count) pairs.
     header_cells lists the same header-zone cells that have text, in document order, as
@@ -1310,10 +1418,17 @@ class TableParser:
             first_reads.setdefault(id(cell.node) if cell.node is not None else id(cell), cell)
         zone_cells = list(first_reads.values())
         texts = [
+            inline_text(cell.node) if cell.node is not None else cell.text
+            for cell in zone_cells
+        ]
+        split_texts = [
             cell.node.get_text(" ", strip=True) if cell.node is not None else cell.text
             for cell in zone_cells
         ]
-        source = Counter(_normalized_numbers(" ".join(text for text in texts if text)))
+        # Both readings, as strict's source pool holds them (quality.trace_numeric_failures).
+        source = Counter(_normalized_numbers(" ".join(text for text in split_texts if text))) | Counter(
+            _normalized_numbers(" ".join(text for text in texts if text))
+        )
         covering = [
             [cell for cells in self.column_header_cells(index) for cell in cells] for index in kept
         ]

@@ -182,23 +182,22 @@ def test_zero_width_only_row_is_not_a_header_line():
 
 
 @pytest.mark.parametrize(
-    ("amount", "rendered", "token"),
+    ("amount", "rendered"),
     [
-        ("1,2\u200b34", "1,234", "1234"),
-        ("12\u200c345", "12345", "12345"),
-        ("(1,234\u200b)", "(1,234)", "-1234"),
+        ("1,2\u200b34", "1,234"),
+        ("12\u200c345", "12345"),
+        ("(1,234\u200b)", "(1,234)"),
     ],
     ids=["u200b_in_thousands", "u200c_in_digits", "u200b_before_close_paren"],
 )
-def test_zero_width_inside_a_number_is_a_known_strict_limitation(amount, rendered, token):
-    """Known limitation (accepted 2026-10-06), pinned as today's behaviour.
+def test_zero_width_inside_a_number_traces_in_strict(amount, rendered):
+    """The render removes a zero-width character inside a table number, and strict's source
+    pool reads the number joined as well (inline spacing, 2026-10-23), so strict passes.
 
-    The render removes a zero-width character inside a table number, but strict's source
-    pool still splits the source number at it, so strict reports the joined number as
-    untraceable. A separate strict fix will change this test.
+    Until then this was a known limitation (accepted 2026-10-06): the pool split the source
+    number at the character and strict reported the joined number as untraceable.
     """
     from sec2md.core import convert_to_markdown
-    from sec2md.quality import ParseQualityError
 
     html = (
         "<html><body><p>Operating results for the year.</p><table>"
@@ -206,11 +205,8 @@ def test_zero_width_inside_a_number_is_a_known_strict_limitation(amount, rendere
         f"<tr><td>Revenue</td><td>{amount}</td></tr>"
         "<tr><td>Costs</td><td>567</td></tr></table></body></html>"
     )
-    with pytest.raises(ParseQualityError,
-                       match=rf"^untraceable normalized number: [^\s,:]+:{token}$"):
-        convert_to_markdown(html, quality_policy="strict")
     assert f"| Revenue | {rendered} |" in convert_to_markdown(
-        html, quality_policy="off").splitlines()
+        html, quality_policy="strict").splitlines()
 
 
 def test_cells_keep_their_td_or_th_markup():

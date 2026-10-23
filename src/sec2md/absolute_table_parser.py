@@ -5,7 +5,8 @@ from bs4 import Tag
 from collections import defaultdict
 from typing import List, Optional, Tuple, Dict
 
-from sec2md.utils import NUMERIC_RE, median, clean_text
+from sec2md.table_parser import inline_text
+from sec2md.utils import NUMERIC_RE, median
 
 
 class AbsolutelyPositionedTableParser:
@@ -27,7 +28,7 @@ class AbsolutelyPositionedTableParser:
         return None
 
     def _clean_text(self, element: Tag) -> str:
-        return clean_text(element.get_text(separator=" ", strip=True))
+        return inline_text(element)
 
     def _is_bold(self, el: Tag) -> bool:
         style = (el.get("style") or "").lower()

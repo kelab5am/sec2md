@@ -966,22 +966,24 @@ SPLIT_NET_LOSS = ('<p>Net loss was <b>(</b><ix:nonFraction name="us-gaap:NetInco
                   '</ix:nonFraction><b>)</b> for the year.</p>')
 
 
+# Since inline spacing (2026-10-23) bold runs with no whitespace between them render as one
+# run, as the source shows them: "**(650)**", no longer "**(** **650** **)**".
 @pytest.mark.parametrize(("html", "rendered"), [
-    (NTRA_PHONE, "**(** **650** **)** **249-9090**"),
-    (SPAN_PHONE, "**(** **425** **)** **882-8080**"),
+    (NTRA_PHONE, "**(650)** **249-9090**"),
+    (SPAN_PHONE, "**(425)** **882-8080**"),
 ], ids=["bold-tags", "bold-spans"])
 def test_strict_traces_phone_number_whose_parentheses_are_separate_bold_runs(html, rendered):
-    # The fix is on the trace's output side only: the rendered Markdown keeps its emphasis.
     assert convert_to_markdown(html, quality_policy="strict") == rendered
 
 
 @pytest.mark.parametrize(("html", "rendered"), [
     ("<p>Net loss was <b>(1,234)</b> for the year.</p>", "**(1,234)**"),
-    ("<p>Net loss was <b>(</b><b>1,234</b><b>)</b> for the year.</p>", "**( 1,234 )**"),
-    (SPLIT_NET_LOSS, "**(** **1,234** **)**"),
+    ("<p>Net loss was <b>(</b><b>1,234</b><b>)</b> for the year.</p>", "**(1,234)**"),
+    (SPLIT_NET_LOSS, "**(1,234)**"),
     ('<p>Net loss was <b>$(</b><ix:nonFraction name="us-gaap:NetIncomeLoss"><b>1,234</b></ix:nonFraction>'
-     "<b>)</b> million.</p>", "**$(** **1,234** **)**"),
-], ids=["one-run", "merged-runs", "separate-runs", "separate-runs-dollar"])
+     "<b>)</b> million.</p>", "**$(1,234)**"),
+    ("<p>Net loss was <b>(</b> <b>1,234</b> <b>)</b> for the year.</p>", "**( 1,234 )**"),
+], ids=["one-run", "merged-runs", "separate-runs", "separate-runs-dollar", "runs-with-spaces"])
 def test_strict_traces_bold_accounting_negative(html, rendered):
     assert rendered in convert_to_markdown(html, quality_policy="strict")
 
@@ -1042,32 +1044,41 @@ def test_strict_rejects_a_number_altered_inside_emphasis(monkeypatch, html, old,
     assert _strict_trace_tokens(html) == [token]
 
 
-@pytest.mark.parametrize(("html", "token"), [(NTRA_PHONE, "650"), (SPLIT_NET_LOSS, "1234")],
+@pytest.mark.parametrize(("html", "rendered"), [(NTRA_PHONE, "**650)**"), (SPLIT_NET_LOSS, "**1,234)**")],
                          ids=["phone", "net-loss"])
-def test_strict_rejects_a_dropped_bold_opening_parenthesis(monkeypatch, html, token):
+def test_dropped_bold_opening_parenthesis_reads_as_unsplit_text(monkeypatch, html, rendered):
+    # Known limitation (inline spacing, 2026-10-23). With no whitespace between the runs the
+    # output closes up as the source does, and strict's tokenizer reads no number glued to a
+    # parenthesis ("650)"), so a dropped "(" goes unreported, as it does on main when the
+    # source holds "(650)" in one text node. Before, the runs rendered "**650** **)**" and the
+    # trace caught the lost sign.
     original = Parser._process_text_node
     monkeypatch.setattr(Parser, "_process_text_node",
                         lambda self, node: "" if str(node).strip() == "(" else original(self, node))
-    assert _strict_trace_tokens(html) == [token]
+    assert rendered in convert_to_markdown(html, quality_policy="off")
+    assert _strict_trace_tokens(html) == []
 
 
 _SPLIT_650 = '<ix:nonFraction name="us-gaap:NetIncomeLoss"><b>650</b></ix:nonFraction>'
 
 
 @pytest.mark.parametrize(("html", "rendered"), [
-    (f"<p>Loss <b>$(</b>{_SPLIT_650}<b>)M</b> total</p>", "**$(** **650** **)M**"),
-    (f"<p>Loss <b>USD(</b>{_SPLIT_650}<b>)</b> total</p>", "**USD(** **650** **)**"),
-    (f"<p>Loss <b>(</b>{_SPLIT_650}<b>)thousand</b> total</p>", "**(** **650** **)thousand**"),
+    (f"<p>Loss <b>$(</b>{_SPLIT_650}<b>)M</b> total</p>", "**$(650)M**"),
+    (f"<p>Loss <b>USD(</b>{_SPLIT_650}<b>)</b> total</p>", "**USD(650)**"),
+    (f"<p>Loss <b>(</b>{_SPLIT_650}<b>)thousand</b> total</p>", "**(650)thousand**"),
 ], ids=["paren-glued-to-M", "USD-glued-to-paren", "paren-glued-to-thousand"])
-def test_split_parentheses_glued_to_a_word_read_as_before(monkeypatch, html, rendered):
-    # Closed up, "(650)M" or "USD(650)" is no token the tokenizer reads, so the number would drop
-    # out of the trace. Parentheses glued to a word or digit stay as they are: the number reads
-    # 650 as on main (the source, "USD( 650 )", reads none), and an altered one still fails.
+def test_split_parentheses_glued_to_a_word_read_as_unsplit_text(monkeypatch, html, rendered):
+    # Known limitation (inline spacing, 2026-10-23). The runs touch in the source, so the
+    # output closes them up as the source reads: "$(650)M". Strict's tokenizer reads no token
+    # there, in the output or the source, so the number is out of the trace, as on main when
+    # the source holds "$(650)M" in one text node; an altered number is not reported either.
+    # Before, the runs rendered "**$(** **650** **)M**": the trace read 650, which the source
+    # ("$( 650 )M") did not, so strict failed on the unaltered filing.
     assert rendered in convert_to_markdown(html, quality_policy="off")
-    assert _strict_trace_tokens(html) == ["650"]
+    assert _strict_trace_tokens(html) == []
     original = Parser._process_text_node
     monkeypatch.setattr(Parser, "_process_text_node", lambda self, node: original(self, node).replace("650", "651"))
-    assert _strict_trace_tokens(html) == ["651"]
+    assert _strict_trace_tokens(html) == []
 
 
 @pytest.mark.parametrize("html", [

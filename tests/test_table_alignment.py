@@ -101,7 +101,7 @@ def test_unreliable_placement_is_none(html):
 def test_source_cell_text_reads_visible_label_text():
     table, *_ = unit(
         "<table><tr><td><a href='#n1'>Net | income</a></td><td>Total\xa0revenue\u200b</td>"
-        "<td><span>Year</span><span>Ended</span></td><td>2025<sup>(a)</sup></td></tr></table>"
+        "<td><span>Year</span> <span>Ended</span></td><td>2025<sup>(a)</sup></td></tr></table>"
     )
     cells = table.find_all("td")
     assert [source_cell_text(td) for td in cells] == ["Net | income", "Total revenue", "Year Ended", "2025 (a)"]
@@ -110,8 +110,9 @@ def test_source_cell_text_reads_visible_label_text():
 @pytest.mark.parametrize("cell, expected", [
     ("<td><img src='x.png'></td>", "●"),
     ("<td><span><a href='#n'>Note</a> 3</span></td>", "[Note](#n) 3"),
-    ("<td><span>Year</span><span>Ended</span></td>", "Year Ended"),
-], ids=["image-only", "nested-link", "plain"])
+    ("<td><span>Year</span> <span>Ended</span></td>", "Year Ended"),
+    ("<td><span>Fis</span><span>cal 202</span><span>5</span></td>", "Fiscal 2025"),
+], ids=["image-only", "nested-link", "plain", "adjacent-spans"])
 def test_extract_cell_text_reads_cells_as_the_renderer_does(cell, expected):
     td = BeautifulSoup(f"<table><tr>{cell}</tr></table>", "lxml").find("td")
     assert extract_cell_text(td) == expected
