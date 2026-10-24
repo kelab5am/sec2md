@@ -18,6 +18,7 @@ from bs4 import NavigableString, Tag
 from bs4.element import Comment, Declaration, Doctype, ProcessingInstruction
 
 from sec2md.chunker.blocks import is_separator_row
+from sec2md.positioned_layout import is_absolute, is_line_fragment, space_between
 from sec2md.quality import _MARKDOWN_LINK_RE, _is_hidden_tag, _normalized_numbers
 from sec2md.table_parser import has_descendant
 from sec2md.xlsx_tables import _header_count, _hidden as _grid_hidden, _visible_text
@@ -60,11 +61,14 @@ _DIGIT = re.compile(r"\d")
 _COMPATIBLE = {
     "reference": ("reference", "text_cell", "text_rendering", "header_line"),
     "marker": ("text_cell", "text_rendering", "header_line"),
+    # A footnote in a cell holding only a close marker or "%" (")%<sup>(3)</sup>") renders
+    # after the merged number ("(14)% (3)") or, unmerged, on its own (spec 2026-10-24 D7.4).
+    "close_marker": ("text_cell", "numeric_cell", "header_line", "text_rendering"),
     "standalone_marker": ("numeric_cell", "header_line", "text_rendering"),
     "value_numeric": ("numeric_cell", "header_line", "text_rendering"),
     "value_text": ("text_cell", "numeric_cell", "header_line", "text_rendering"),
 }
-_CLAIM_ORDER = ("reference", "marker", "standalone_marker", "value_numeric", "value_text")
+_CLAIM_ORDER = ("reference", "marker", "close_marker", "standalone_marker", "value_numeric", "value_text")
 
 
 # --- text and tokens ---------------------------------------------------------------
@@ -166,16 +170,23 @@ def _is_marker(tag: Tag) -> bool:
 
 
 def _walk(node: Tag, hidden: set[int], out: list, marker: bool) -> None:
+    previous = None
     for child in node.children:
         if isinstance(child, _SKIP_STRINGS):
             continue
+        # Positioned boxes are drawn apart unless their geometry proves they touch
+        # (spec 2026-10-24 D7.1): "JPY" and "6,095,977" 60pt apart are two tokens.
+        if space_between(previous, child):
+            out.append((" ", marker))
+        previous = child
         if isinstance(child, NavigableString):
             out.append((str(child), marker))
             continue
         if id(child) in hidden or child.name == "table":
             continue  # nested tables are counted through their own rows
         child_marker = marker or _is_marker(child)
-        separate = child.name in _BLOCK or child_marker != marker
+        separate = (child.name in _BLOCK or child_marker != marker
+                    or (is_absolute(child) and not is_line_fragment(child)))
         if separate:
             out.append((" ", marker))
         _walk(child, hidden, out, child_marker)
@@ -277,7 +288,12 @@ def output_positions(segment: str, exhibit_index: bool) -> tuple[list[tuple[str,
             continue
         cells = merge_split_negatives(line.split("|"))
         if i < separator:
-            other.update((t, "header_line") for cell in cells for t in numbers(cell))
+            for cell in cells:
+                tokens = Counter(numbers(cell))
+                # An identifier's number counts as in body lines, though numbers() drops a
+                # parenthesized "(Note 1)" (spec 2026-10-24 D7.2).
+                identifiers = Counter(t for m in _IDENTIFIER.finditer(cell) for t in numbers(m.group(0)))
+                other.update({(t, "header_line"): n for t, n in (tokens | identifiers).items()})
             continue
         signature_row = any(_SIGNATURE_ROW_MARK.search(c) for c in cells)
         found: Counter = Counter()
@@ -469,13 +485,24 @@ def match_occurrences(rows: list[tuple[str, Counter]], body: list[tuple[str, Cou
     return missing_values, missing_reported
 
 
+def _line_tokens(line: str) -> list[str]:
+    """Check 2's tokens of one output line, read as source rows are (spec 2026-10-24 D7.3).
+
+    classify_cell takes an identifier's number even where numbers() drops it, as in a
+    parenthesized "(Note 6)", so source and output rows carry the same tokens.
+    """
+    cells = merge_split_negatives(line.split("|"))
+    signature_row = any(_SIGNATURE_ROW_MARK.search(cell) for cell in cells)
+    return [token for cell in cells for token, _ in classify_cell(cell, signature_row)]
+
+
 def row_structure(source_rows: list[tuple[str, ...]], segment: str) -> list[str]:
     """Check 2 over body lines: within-row order, rows out of order, values split across rows."""
     lines = segment.split("\n")
     separator = next((i for i, line in enumerate(lines) if is_separator_row(line)), None)
     if separator is None:
         return []
-    body = [output_line_numbers(line) for line in lines[separator + 1:]]
+    body = [_line_tokens(line) for line in lines[separator + 1:]]
     body_all = Counter(t for line in body for t in line)
     findings, pointer = [], 0
     for number, row in enumerate(source_rows, 1):
@@ -640,7 +667,12 @@ def check_tables(soup, table_outputs: Mapping[int, str], table_pages: Mapping[in
                     occurrences[(token, "reference" if exhibit_index else kind, role)] += 1
                     row_tokens.append(token)
             for value, marks in texts:
-                marker_kind = "marker" if _ALPHANUMERIC.search(value) else "standalone_marker"
+                if _ALPHANUMERIC.search(value):
+                    marker_kind = "marker"
+                elif _CLOSE.match(value.strip()) or value.strip() == "%":
+                    marker_kind = "close_marker"
+                else:
+                    marker_kind = "standalone_marker"
                 for token in numbers(marks.replace("(", " (").replace(")", ") ")):
                     occurrences[(token, marker_kind, row_role or "body")] += 1
             if row.own and len(row_tokens) >= 2 and is_data_row(values, row_index < header_rows):

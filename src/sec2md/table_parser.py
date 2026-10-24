@@ -18,6 +18,7 @@ from functools import lru_cache
 from typing import Callable, List, Literal, Optional, Sequence, cast
 from urllib.parse import urljoin
 
+from sec2md.positioned_layout import ABSOLUTE_RE, is_line_fragment, space_between
 from sec2md.quality import _normalized_numbers, normalize_numeric_token
 from sec2md.table_roles import (
     CURRENCY_MARKERS,
@@ -46,6 +47,10 @@ EXTENDED_MARKERS: dict[str, StructuralColumn] = {
     ")%": "close_paren",
     **{marker: "currency" for marker in CURRENCY_MARKERS},
 }
+# EXTENDED (spec 2026-10-24 D8): a close marker followed only by footnote references,
+# ")%<sup>(3)</sup>" read as ")% (3)", is that marker; the references follow the merged token.
+_FOOTNOTED_CLOSE_MARKER = re.compile(r"^(\)%?|%)\s*((?:(?:\(\d{1,2}\)|\[\w{1,2}\]|\*+)\s*)+)$")
+_CLOSE_SIDE = frozenset({"close_paren", "percent"})
 # Local numeric rules for EXTENDED validation (R3.3, R4); strict's normalizer is unchanged.
 _CURRENCY_PREFIX = re.compile(rf"^(\(?\s*){CURRENCY_PATTERN}\s*")
 _LEADING_DOT = re.compile(r"(?<!\d)\.(?=\d)")
@@ -80,7 +85,7 @@ _MARKER_TAGS = {"sup", "sub"}
 # horizontal padding or margin (Workiva's "Item 1.<span style="padding-left:22.5pt">").
 _SEPARATE_STYLE = re.compile(
     r"display\s*:\s*(?:block|inline-block|flex|grid|table|list-item)"
-    r"|position\s*:\s*absolute|vertical-align\s*:\s*(?:super|sub)"
+    r"|(?<![\w-])position\s*:\s*absolute|vertical-align\s*:\s*(?:super|sub)"
     r"|(?<![\w-])top\s*:\s*-\s*\d*\.?\d*[1-9]"
     r"|(?:padding|margin)-(?:left|right)\s*:\s*\d*\.?\d*[1-9]",
     re.I,
@@ -98,13 +103,21 @@ def separates_inline(tag: Tag) -> bool:
     sub, or raised by its style), a box laid out on its own (display block or inline-block,
     absolute position) and text after or before a padding or margin gap still separate
     their text from their neighbours'.
+
+    A line fragment of a positioned line box is not set apart by its position:
+    positioned_layout.space_between decides the space between it and its siblings.
     """
 
     name = (tag.name or "").lower()
     if name in _BLOCK_DESCENDANT_TAGS or name in _MARKER_TAGS:
         return True
     style = tag.get("style")
-    return bool(style) and bool(_SEPARATE_STYLE.search(str(style)))
+    if not style:
+        return False
+    style = str(style)
+    if is_line_fragment(tag):
+        style = ABSOLUTE_RE.sub("", style)
+    return bool(_SEPARATE_STYLE.search(style))
 
 
 @dataclass(frozen=True)
@@ -125,9 +138,13 @@ def _inline_fragments(
     """Walk a cell's descendants in DOM order without inventing inline spaces."""
 
     fragments: list[InlineFragment] = []
+    previous = None
     for child in node.children:
         if isinstance(child, _NON_TEXT_STRINGS):
             continue
+        if space_between(previous, child):
+            fragments.append(InlineFragment(text=" ", boundary=True))
+        previous = child
         if isinstance(child, NavigableString):
             text = str(child).replace("\xa0", " ").translate(_ZERO_WIDTH)
             if text:
@@ -258,10 +275,12 @@ def _joins_inline(first: Tag, second: Tag) -> bool:
         if isinstance(cursor, NavigableString):
             if not isinstance(cursor, _NON_TEXT_STRINGS) and str(cursor):
                 return False
-        elif isinstance(cursor, Tag) and separates_inline(cursor):
+        elif isinstance(cursor, Tag) and (
+            separates_inline(cursor) or space_between(cursor.previous_sibling, cursor)
+        ):
             return False
         cursor = cursor.next_element
-    return cursor is second
+    return cursor is second and not space_between(second.previous_sibling, second)
 
 
 def inline_source_text(nodes: Sequence[Tag]) -> str:
@@ -443,12 +462,25 @@ def _marker_class(
     """
 
     if policy is EXTENDED:
-        text = visible_text(value)
+        text = _footnoted_marker(value)[0]
         marker_class = EXTENDED_MARKERS.get(text)
         if label and marker_class == "currency" and text != "$":
             return None
         return marker_class
     return STRUCTURAL_MARKERS.get(value)
+
+
+def _footnoted_marker(value: str) -> tuple[str, str]:
+    """(marker, footnote references) of an EXTENDED cell's visible text (spec 2026-10-24 D8).
+
+    ")% (3)" is (")%", "(3)"); any other text is (text, "").
+    """
+
+    text = visible_text(value)
+    match = _FOOTNOTED_CLOSE_MARKER.match(text)
+    if match:
+        return match.group(1), " ".join(match.group(2).split())
+    return text, ""
 
 
 def _classify_structural_column(
@@ -936,7 +968,10 @@ class TableParser:
                     and classes.count("currency") >= 2
                     and classes.count("close_paren") >= 2
                 )
-                if not legacy_mixed:
+                # EXTENDED (spec 2026-10-24 D8): ")%" and "%" both join the value on their
+                # left, so a column holding only these merges row by row.
+                close_mixed = policy is EXTENDED and set(classes) == _CLOSE_SIDE
+                if not (legacy_mixed or close_mixed):
                     continue
 
             row_actions: dict[int, int] = {}
@@ -1036,7 +1071,7 @@ class TableParser:
                             suffixes.append(value)
                     target_value = grid[row][target].text if grid[row][target] else ""
                     merged = self._join_structural_text(
-                        prefixes, target_value, suffixes, policy=policy
+                        prefixes, target_value, suffixes, policy=policy, footnotes=False
                     )
                     if self._numeric_token(merged, policy=policy) is None:
                         invalid_sources.add(source)
@@ -1057,7 +1092,13 @@ class TableParser:
         suffixes: Sequence[str],
         *,
         policy: StructuralPolicy = LEGACY,
+        footnotes: bool = True,
     ) -> str:
+        """A value and its structural markers joined into one token.
+
+        Under EXTENDED a close marker's footnote references follow the token: "(14" with
+        ")% (3)" is "(14)% (3)". Without ``footnotes`` (validation) they are left out.
+        """
         parts = [part for part in [*prefixes, target, *suffixes] if part]
         if not parts:
             return ""
@@ -1072,8 +1113,15 @@ class TableParser:
                 merged = f"{marker} {merged}"
             else:
                 merged = f"{marker}{merged}"
+        references: list[str] = []
         for marker in suffixes:
+            if policy is EXTENDED:
+                marker, reference = _footnoted_marker(marker)
+                if reference:
+                    references.append(reference)
             merged = f"{merged} %" if marker == "%" else f"{merged}{marker}"
+        if footnotes and references:
+            merged = f"{merged} {' '.join(references)}"
         return merged
 
     @staticmethod

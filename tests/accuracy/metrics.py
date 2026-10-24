@@ -118,12 +118,13 @@ def _normalize_number(match: str) -> str:
     negative = token.startswith("(")
     if token.startswith("("):
         token = token[1:]
+    # A merged percent negative "(14)%" ends in "%" after its ")" (spec 2026-10-24 D8).
+    if token.endswith("%"):
+        token = token[:-1]
     if token.endswith(")"):
         token = token[:-1]
     token = token.replace("−", "-").replace("–", "-")
     token = token.replace(",", "").replace(" ", "")
-    if token.endswith("%"):
-        token = token[:-1]
     if negative and not token.startswith("-"):
         token = "-" + token
     return token

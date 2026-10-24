@@ -1,7 +1,8 @@
 # Audited SEC HTML corpus
 
-These seven files are the offline, byte-frozen SEC HTML sources audited by the
-2026-08-28 UTC SEC HTML bakeoff. The two source manifests used as capture
+The first seven files are the offline, byte-frozen SEC HTML sources audited by the
+2026-08-28 UTC SEC HTML bakeoff. The last three were added by the positioned page layout
+spec (`docs/superpowers/specs/2026-10-24-sec2md-positioned-page-layout-design.md`). The two source manifests used as capture
 evidence were `source-manifest.json` and `supplemental-source-manifest.json`.
 The uncompressed SHA-256 values below are repeated in `manifest.json` and are
 verified before any fixture is returned by the loader.
@@ -15,6 +16,14 @@ verified before any fixture is returned by the loader.
 | nvda-2026-08-26-8k | https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/nvda-20260826.htm | 84335b3247873da9fc91b4d9aa146be012801158183a7e9b0e98f0d31e50d0ea |
 | nvda-2026-ex99-1 | https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm | 1809cb206590dcfeb959f3a1a64157f4e5ee42788ec51289b74f3ea299931eb7 |
 | nvda-2026-ex99-2 | https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27cfocommentary.htm | 6a522635d049044b2ff9ff63cb78220cf29d960e96614c88afe30560c3ee0659 |
+| tsm-2026-q2-ex99-1 | https://www.sec.gov/Archives/edgar/data/1046179/000104617926000541/a2026q2consolidatedreport-.htm | f421f6fe7b0c14ba15969f57749effdd54a04342cbfff49ef1fadf128f495251 |
+| baba-2026-ex99-1 | https://www.sec.gov/Archives/edgar/data/1577552/000110465926099220/tm2623667d1_ex99-1.htm | 2d08995e61c8d6d368f3ef88650c7a90f32812f9ef8cc3c4d4e4a4e351d36d2e |
+| asml-2025-ex99-3 | https://www.sec.gov/Archives/edgar/data/937966/000093796625000014/financialstatementsusgaapq.htm | 61991ad593a10d6c8a8262b7a671bb4e808922afaa35195c4adbe274dbeaff4f |
+
+The three added files were fetched from sec.gov on 2026-10-24 and stored as served, less
+the one `<script>` tag sec.gov injects into every served page: with it removed, each file is
+the size its filing's `index.json` gives. They keep the SGML `<DOCUMENT>` wrapper EDGAR serves,
+as the NVIDIA exhibits do.
 
 The `.html.gz` members use deterministic gzip (`mtime=0`, empty embedded
 filename). They are immutable test inputs: update a fixture only with a new
