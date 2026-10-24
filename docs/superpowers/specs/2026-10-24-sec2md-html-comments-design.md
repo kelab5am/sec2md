@@ -1,8 +1,10 @@
 # sec2md HTML Comments in the Text Stream
 
-Date: 2026-10-24 (revision 2)
+Date: 2026-10-24 (revision 3)
 
-Status: Draft for review. Revision 2 applies the Codex review below.
+Status: Implemented on branch `fix/baba-mapping-gaps`, pending the user's review of the PR.
+- Revision 2 applies the Codex review below.
+- Revision 3 records the measured results: fixtures, tests and the corpus check.
 
 ## Review history
 
@@ -88,7 +90,7 @@ Nothing else changes:
 
 ## Effect on the fixtures
 
-Measured with the change applied as a monkeypatch on `main` at `2690d9f`:
+Measured with D1–D3 against `main` at `2690d9f`:
 
 | Fixture | Gaps before → after | Rendered output |
 |---|---|---|
@@ -96,18 +98,18 @@ Measured with the change applied as a monkeypatch on `main` at `2690d9f`:
 | `nvda-2026-ex99-1`, `nvda-2026-ex99-2`, `asml-2025-ex99-3` | (0, 0) → (0, 0) | One line changes in each. The Workiva comments `<!-- Document created using Wdesk -->` and `<!-- Copyright 2026 Workiva -->` (2025 for ASML) leave the SGML header line, for example `EX-99.1 2 q2fy27pr.htm EX-99.1 Document created using Wdesk Copyright 2026 Workiva Document` → `EX-99.1 2 q2fy27pr.htm EX-99.1 Document`. |
 | the other six | (0, 0) → (0, 0) | Identical: Markdown, pages and annotated HTML. |
 
-In the three changed exhibits, the first element's content changes, so its id hash changes. Every other element id and mapping is the same.
+In the three changed Workiva exhibits, only the first element's content changes, so only its id changes. In the other six fixtures every element id is the same.
 
 ## Tests
 
-1. **Regression tests** in `tests/test_parser.py`. Each one fails on `main`.
-   - **BABA's shape.** A small document has an SGML `<DOCUMENT>`/`<TEXT>` wrapper and two pages split by `page-break-before`. It has `Field:` comments with numbers: directly under `<TEXT>`, inside a paragraph, and two in a row. The test asserts:
+1. **Regression tests**: the BABA-shape and inline tests are in `tests/test_parser.py` (`TestHtmlComments`), and the D2 and D3 tests are in `tests/test_positioned_layout.py`. Each one fails on `main`. Removing any one of the four skips (stream, inline, spacing, bold) fails at least one of them.
+   - **BABA's shape.** A small document has an SGML `<DOCUMENT>`/`<TEXT>` wrapper and four pages. It has `Field:` comments with numbers: directly under `<TEXT>`, inside a paragraph, and two in a row. As in BABA, a page opens with `<!-- Field: /Page -->` and a bold heading, so the comment forms an element of its own that maps only to `<TEXT>`. On `main` this reproduces both symptoms: one element without a mapping (`sec2md-p3-t0-93cc5d45`, the same content hash as BABA's) and five trace failures. The test asserts:
      - each page's exact content;
      - every element's id appears as a `data-sec2md-block` in `parser.html()`;
      - every element has non-null offsets whose page slice equals its content (the document has no links);
      - the accuracy harness's `_mapping_and_trace` finds no gaps.
-   - **Inline (D1, `_render_inline`).** The same paragraph is rendered with and without comments, in a bold wrapper and in a list item, which take the `_render_inline` path. A comment sits between spans (`2<!-- c -->0`), with whitespace on either side (`a <!-- c --> b`), and as a downlevel-hidden conditional. The output must be identical with and without comments: `20`, `a b`. Each skip is needed: the stream test alone passes without the `_render_inline` skip, and this one does not.
-   - **Positioned fragments (D2).** In a line box, two touching fragments `2` and `0` with an empty comment `<!---->` between them read `20`, and two separated fragments read `2 0`, exactly as without the comment.
+   - **Inline (D1, `_render_inline`).** The same paragraph is rendered with and without comments, in a bold wrapper and in a list item, which take the `_render_inline` path. A comment sits between spans (`2<!-- c -->0`), with whitespace on either side (`a <!-- c --> b`), and as a downlevel-hidden conditional. The output must be identical with and without comments: `20`, `a b`.
+   - **Positioned fragments (D2).** In a line box, two touching fragments `2` and `0` read `20`, and two separated fragments read `2 0`, exactly as without a comment. The comment between them is empty (`<!---->`), has text, or comes as two in a row.
    - **Bold continuation (D3).** Two bold line boxes, one above the other, join into one paragraph (`**First** **Second**`) both with and without a comment outside the first `<b>`.
 2. **Release contract.** Remove `KNOWN_MAPPING_GAPS` and its comment from `tests/accuracy/test_sec_accuracy.py`, and restore the two plain assertions from before PR #14:
    - `missing_element_mappings == ()` and `trace_numeric_failures == ()` in `test_rcq_release_contract`;
@@ -123,11 +125,31 @@ This is the same check as PR #14's (`docs/superpowers/audits/2026-10-24-position
 - No document's table-check failures, reported tokens or structure findings rise.
 - Every changed document is explained by comment removal: each removed or changed line differs only by text that occurs in that document's comments.
 
-The record goes in `docs/superpowers/audits/2026-10-24-html-comments-corpus/`: a README and the results, with the Markdown dumps left in scratch.
+The record is in `docs/superpowers/audits/2026-10-24-html-comments-corpus/`: a README, `explain.py` and `explained.json`. The Markdown dumps stay in scratch.
+
+**Result: accepted.**
+- No conversion errors on either side.
+- No table-check failure, reported token or structure finding changed in any document.
+- 686 documents are identical. 1,531 changed, all through page content, and every one is explained by comment removal (two after review; see the audit README).
+
+The comments that leaked:
+
+| Source | Documents |
+|---|---|
+| Workiva `Document created using Wdesk` / `Copyright … Workiva` | 939 |
+| `<!DOCTYPE …>` text inside the SGML wrapper (`html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" …`) | 491 |
+| EDGAR filing-index pages: the SEC's Google Tag Manager script, `BEGIN BANNER` and other markers | 461 |
+| Broadridge PROfile banners and page-number codes | 11 |
+| Toppan Merrill `Field:` codes: BABA, and three CRDO 8-K documents | 4 |
+| Other generator banners (DFIN ActiveDisclosure, older Workiva) and image file names | 43 |
+
+418 documents have both a Workiva banner and a DOCTYPE, so the column adds to more than 1,531.
 
 ## Effect on rcq-wealth
 
-Once rcq-wealth moves its sec2md pin, documents with comments in the body convert differently: Workiva exhibits lose the `Document created using Wdesk Copyright … Workiva` words from their first line. Under rcq-wealth's rules, such a document is re-converted only as a new derivative revision, if the user chooses to; nothing is rebuilt. The corpus check gives the count of vault documents affected.
+Once rcq-wealth moves its sec2md pin, documents with comments in the body convert differently. The corpus check counts 1,527 vault documents: 5 primary documents and 1,522 retained exhibits and filing-index pages. Most lose one banner line at the top. The index pages lose the SEC's tag-manager script text.
+
+Under rcq-wealth's rules, an existing document changes only by re-conversion into a new derivative revision, if the user chooses that. Nothing is rebuilt.
 
 ## Out of scope
 
