@@ -2,6 +2,16 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- HTML comments no longer reach the Markdown.
+  - Toppan Merrill's typesetting comments (`<!-- Field: Page; Sequence: 2; Value: 1 -->`)
+    were written out as text.
+  - Workiva exhibits began `… EX-99.1 Document created using Wdesk Copyright 2026 Workiva
+    Document`.
+  - A comment now adds no text and no space. It does not set positioned fragments apart,
+    and it does not stop a bold line from joining the next.
+  - This fixes BABA's EX-99.1, whose 16 elements without a source mapping and 48 numeric
+    trace failures all came from comment text.
+  - Spec: `docs/superpowers/specs/2026-10-24-sec2md-html-comments-design.md`.
 - Text split across adjacent inline nodes is joined as the source writes it. A space
   is written only where the source has whitespace, or at a block, line break, table
   cell, footnote marker (`sup`, `sub`, raised by style), inline-block box or padding gap.

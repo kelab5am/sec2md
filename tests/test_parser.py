@@ -952,3 +952,75 @@ class TestSpacerPreservation:
         container = parser.soup.find("div", style=re.compile("position:relative"))
         children = parser._extract_absolutely_positioned_children(container)
         assert len(children) == 3, f"Expected 3 children (including spacer), got {len(children)}"
+
+
+_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
+
+# BABA's EX-99.1 in miniature (spec 2026-10-24-sec2md-html-comments-design.md): Toppan
+# Merrill's typesetting comments, with numbers, under the SGML <TEXT> wrapper and in paragraphs.
+_TYPESET_EXHIBIT = """<DOCUMENT>
+<TYPE>EX-99.1
+<SEQUENCE>2
+<TEXT>
+<HTML><BODY>
+<!-- Field: Page; Sequence: 1; Options: NewSection; Value: 1 -->
+<P>Revenue was RMB247,652 million, up 2%.<!-- Field: Rule-Page --></P>
+<P>Free cash flow was RMB 3,051 million.</P>
+<!-- Field: /Page -->
+<P STYLE="page-break-before: always"><!-- Field: Page; Sequence: 2; Value: 1 -->Diluted
+earnings per ADS was RMB3.71.<!-- Field: Sequence; Type: Arabic; Name: PageNo --><!-- Field: /Sequence --></P>
+<HR STYLE="page-break-after: always">
+<!-- Field: /Page -->
+<P><B>SUMMARY FINANCIAL RESULTS</B></P>
+<TABLE><TR><TD>Revenue</TD><TD>247,652</TD></TR><TR><TD>Cost of revenue</TD><TD>(150,001)</TD></TR></TABLE>
+<HR STYLE="page-break-after: always">
+<!-- Field: /Page -->
+<!-- Field: Split-Segment; Name: 1 -->
+<P><B>NET INCOME</B></P>
+<TABLE><TR><TD>Net income</TD><TD>43,116</TD></TR><TR><TD>Diluted</TD><TD>3.71</TD></TR></TABLE>
+</BODY></HTML>
+</TEXT>
+</DOCUMENT>"""
+
+
+def _pages_and_html(source):
+    parser = Parser(source)
+    pages = parser.get_pages(include_elements=True)
+    return pages, parser.html()
+
+
+class TestHtmlComments:
+    """A comment is inert: the output is what it would be without the comment."""
+
+    def test_typesetting_comments_leave_no_text_and_every_element_maps(self):
+        from tests.accuracy.metrics import _mapping_and_trace
+
+        pages, annotated = _pages_and_html(_TYPESET_EXHIBIT)
+        bare_pages, _ = _pages_and_html(_COMMENT_RE.sub("", _TYPESET_EXHIBIT))
+
+        assert [page.content for page in pages] == [page.content for page in bare_pages]
+        assert len(pages) == 4
+        assert "Field" not in "".join(page.content for page in pages)
+        assert "Diluted earnings per ADS was RMB3.71." in pages[1].content
+
+        soup = BeautifulSoup(annotated, "lxml")
+        mapped = {node["data-sec2md-block"] for node in soup.find_all(attrs={"data-sec2md-block": True})}
+        for page in pages:
+            for element in page.elements:
+                assert element.id in mapped
+                assert element.content_start_offset is not None
+                start, end = element.content_start_offset, element.content_end_offset
+                assert page.content[start:end] == element.content
+        assert _mapping_and_trace(pages, annotated) == ((), (), ())
+
+    @pytest.mark.parametrize("markup", [
+        "<p><b>Revenue grew 2<!-- c -->0% to a <!-- c --> b<!--[if IE]>hidden 7<![endif]--></b></p>",
+        "<ul><li>Revenue grew 2<!-- c -->0% to a <!-- c --><!----> b<!--[if IE]>hidden 7<![endif]--></li></ul>",
+    ])
+    def test_comments_in_inline_rendering_leave_no_text_or_space(self, markup):
+        html = f"<html><body>{markup}</body></html>"
+        content = Parser(html).get_pages(include_elements=False)[0].content
+        bare = Parser(_COMMENT_RE.sub("", html)).get_pages(include_elements=False)[0].content
+        assert content == bare
+        assert "20% to a b" in content
+        assert "hidden" not in content and " c " not in content

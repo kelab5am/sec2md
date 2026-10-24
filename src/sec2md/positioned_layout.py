@@ -11,7 +11,9 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-from bs4.element import NavigableString, PageElement, Tag
+from bs4.element import (
+    Comment, Declaration, Doctype, NavigableString, PageElement, ProcessingInstruction, Tag,
+)
 
 # position:absolute as a property, not inside a custom property such as "--position:absolute" (D1).
 ABSOLUTE_RE = re.compile(r"(?<![\w-])position\s*:\s*absolute", re.I)
@@ -24,6 +26,8 @@ _INLINE_TAGS = frozenset({
     "small", "span", "strike", "strong", "sub", "sup", "u",
     "ix:nonfraction", "ix:nonnumeric", "ix:footnote", "nonfraction", "nonnumeric",
 })
+# Strings a browser does not draw; a comment between two nodes leaves them as if adjacent.
+NON_TEXT_STRINGS = (Comment, Declaration, Doctype, ProcessingInstruction)
 # Two fragments touch when the gap between them is at most this, in points (D6).
 TOUCH_TOLERANCE_PT = 0.5
 
@@ -83,9 +87,14 @@ def space_between(previous: Optional[PageElement], node: PageElement) -> bool:
 
     A line fragment is not set apart by its position alone (separates_inline). Next to a
     sibling it is still separated by one space, as all positioned text is, unless both are
-    line fragments whose written geometry proves they touch (D6).
+    line fragments whose written geometry proves they touch (D6). Comments are not siblings
+    here: ``2<!-- x -->0`` in touching fragments reads ``20``.
     """
 
+    if isinstance(node, NON_TEXT_STRINGS):
+        return False
+    while isinstance(previous, NON_TEXT_STRINGS):
+        previous = previous.previous_sibling
     if previous is None:
         return False
     if isinstance(previous, NavigableString) and not str(previous).strip():

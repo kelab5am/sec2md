@@ -93,13 +93,6 @@ def all_accuracy_results():
     return tuple(results)
 
 
-# Element-mapping gaps a fixture had before it joined the corpus, as (elements without a
-# source mapping, numeric trace failures). BABA's exhibit has the same 16 and 48 on main
-# c6e120a, so they are not caused by the 2026-10-24 spec's changes and are pinned here until
-# they are fixed; any other count fails.
-KNOWN_MAPPING_GAPS = {"baba-2026-ex99-1": (16, 48)}
-
-
 def test_rcq_release_contract(all_accuracy_results):
     assert len(all_accuracy_results) == 10
     results_by_id = {}
@@ -115,8 +108,8 @@ def test_rcq_release_contract(all_accuracy_results):
         assert first.replacement_characters == 0
         assert first.c1_control_characters == 0
         assert first.duplicate_element_ids == ()
-        gaps = (len(first.missing_element_mappings), len(first.trace_numeric_failures))
-        assert gaps == KNOWN_MAPPING_GAPS.get(contract.fixture_id, (0, 0)), contract.fixture_id
+        assert first.missing_element_mappings == ()
+        assert first.trace_numeric_failures == ()
         assert first.invalid_xbrl_tags == ()
         assert set(contract.expected_sections) <= set(first.sections)
         assert first.representative_row_failures == ()
@@ -189,8 +182,8 @@ def test_audited_document_meets_baseline_contract(fixture_id: str):
     assert result.replacement_characters == 0
     assert result.c1_control_characters == 0
     assert not result.duplicate_element_ids
-    gaps = (len(result.missing_mappings), len(result.trace_failures))
-    assert gaps == KNOWN_MAPPING_GAPS.get(fixture_id, (0, 0))
+    assert not result.missing_mappings
+    assert not result.trace_failures
     assert not result.invalid_visible_node_xbrl_tags
     assert result.deterministic_markdown
     assert result.deterministic_pages
