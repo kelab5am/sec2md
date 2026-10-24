@@ -321,3 +321,23 @@ def test_legacy_policy_is_unchanged():
     assert _marker_class(")% (3)", policy=EXTENDED) == "close_paren"
     assert TableParser._join_structural_text([], "(14", [")% (3)"], policy=LEGACY) == "(14 )% (3)"
     assert TableParser._join_structural_text([], "(14", [")% (3)"], policy=EXTENDED) == "(14)% (3)"
+
+
+# --- HTML comments (spec 2026-10-24-sec2md-html-comments-design.md) ----------------------
+
+@pytest.mark.parametrize("comment", ["<!---->", "<!-- c -->", "<!-- c --><!-- d -->"])
+def test_a_comment_between_fragments_does_not_change_their_spacing(comment):
+    touching = page(body(line(100, (85.5, "2", 6.0), comment, (91.5, "0", 6.0))))
+    apart = page(body(line(100, (85.5, "2", 6.0), comment, (104.0, "0", 6.0))))
+    assert content(touching) == "20"
+    assert content(apart) == "2 0"
+
+
+def test_a_comment_in_a_bold_line_does_not_end_the_paragraph():
+    plain = page(body(line(100, (85.5, "First", None, True)), line(113.2, (85.5, "Second", None, True))))
+    commented = page(body(
+        line(100, "<!-- c -->", (85.5, "First", None, True)),
+        line(113.2, (85.5, "Second", None, True)),
+    ))
+    assert content(plain) == content(commented)
+    assert "\n\n" not in content(commented)

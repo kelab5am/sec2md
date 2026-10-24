@@ -13,6 +13,7 @@ from bs4.element import NavigableString, Tag
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
 from sec2md.positioned_layout import (
+    NON_TEXT_STRINGS,
     css_length_pt,
     font_size_pt,
     is_absolute,
@@ -669,6 +670,8 @@ class Parser:
         break, table cell, footnote marker; separates_inline) on both sides of its text.
         """
 
+        if isinstance(element, NON_TEXT_STRINGS):
+            return ""
         if isinstance(element, NavigableString):
             text = self._process_text_node(element)
             lead, trail = _edge_whitespace(str(element))
@@ -1117,7 +1120,7 @@ class Parser:
     def _all_bold(line: Tag) -> bool:
         """Whether every visible string of a line box is bold, by its own tag or an ancestor's."""
         for string in line.find_all(string=True):
-            if not string.strip():
+            if isinstance(string, NON_TEXT_STRINGS) or not string.strip():
                 continue
             node = string.parent
             while isinstance(node, Tag) and not Parser._is_bold(node):
@@ -1135,6 +1138,8 @@ class Parser:
 
     def _stream_pages(self, root: Union[Tag, NavigableString], page_num: int = 1) -> int:
         """Walk the DOM once; split only on CSS break styles."""
+        if isinstance(root, NON_TEXT_STRINGS):
+            return page_num  # a comment is not drawn, nor its whitespace
         if isinstance(root, Tag) and self._has_break_before(root):
             page_num += 1
 
