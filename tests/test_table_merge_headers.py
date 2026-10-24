@@ -339,8 +339,11 @@ PERCENT_CLOSE_ROWS = [
 
 
 def test_percent_close_marker_merges_under_extended_only():
-    # Column 2 mixes "%" and ")%" (percent and close classes), so it stays split.
-    assert _actions(PERCENT_CLOSE_ROWS, EXTENDED) == {4: {1: 3, 2: 3}}
+    # Column 2 mixes "%" and ")%". Both join the value on their left, so it merges row by
+    # row (spec 2026-10-24 D8); before that spec it stayed split.
+    assert _actions(PERCENT_CLOSE_ROWS, EXTENDED) == {2: {1: 1, 2: 1}, 4: {1: 3, 2: 3}}
+    assert _markdown(_html(PERCENT_CLOSE_ROWS))[-2:] == [
+        "| Net margin | (3.2)% | (4.5)% |", "| Growth | 1.5 % | (2.0)% |"]
     assert _actions(PERCENT_CLOSE_ROWS) == {}
     rows = [["", "2023", ""], ["Net margin", "(3.2", ")%"], ["Growth", "(1.5", ")%"]]
     assert _actions(rows, EXTENDED) == {2: {1: 1, 2: 1}}

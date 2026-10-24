@@ -12,6 +12,14 @@ from bs4.element import NavigableString, Tag
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
 from sec2md.utils import median, clean_text
+from sec2md.positioned_layout import (
+    css_length_pt,
+    font_size_pt,
+    is_absolute,
+    is_line_box,
+    is_relative,
+    space_between,
+)
 from sec2md.table_parser import (
     TableHeaderRecord,
     TableParser,
@@ -46,6 +54,18 @@ _css_decl = re.compile(r"^[a-zA-Z\-]+\s*:\s*[^;]+;\s*$")
 ITEM_HEADER_CELL_RE = re.compile(r"^\s*Item\s+([0-9IVX]+)\.\s*$", re.I)
 PART_HEADER_CELL_RE = re.compile(r"^\s*Part\s+([IVX]+)\s*$", re.I)
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+# A positioned page's footer holding only its page number: "3", "- 3 -", "Page 3 of 60" (spec
+# 2026-10-24 D4). Unlike _extract_page_number_from_footer, the whole text must match.
+_PAGE_NUMBER_FOOTER_RE = re.compile(
+    r"^[\s\-–—]*(\d{1,4})[\s\-–—]*$|^page\s+(\d{1,4})(?:\s+of\s+\d{1,4})?$", re.I
+)
+# A footer-zone child starts in the bottom fifth of its page box.
+_FOOTER_ZONE = 0.8
+# A line continues the previous one's paragraph when it is at most this many font sizes lower.
+_LINE_PITCH_LIMIT = 1.5
+_DEFAULT_FONT_PT = 10.0
+# A line ending in a letter and a hyphen (emphasis markers aside) joins the next with no space.
+_LINE_END_HYPHEN_RE = re.compile(r"[^\W\d_]-[*_]*$")
 # A Markdown table divider row, with or without outer pipes (as quality._TABLE_DIVIDER_RE).
 _MARKDOWN_TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
 
@@ -166,6 +186,7 @@ class Parser:
         self.current_text_block: Optional[TextBlockInfo] = None
         self.continuation_map: Dict[str, TextBlockInfo] = {}
         self.footer_page_numbers: Dict[int, int] = {}
+        self._page_box_depth = 0
         self.block_nodes_map: Dict[str, List[Tag]] = {}
         self.trace_numeric_failures: tuple[str, ...] = ()
         # R6a header accounting: the normal render's header record per table node until
@@ -262,10 +283,7 @@ class Parser:
 
     @staticmethod
     def _is_absolutely_positioned(el: Tag) -> bool:
-        if not isinstance(el, Tag):
-            return False
-        style = (el.get("style") or "").lower().replace(" ", "")
-        return "position:absolute" in style
+        return is_absolute(el)
 
     @staticmethod
     def _extract_top_px(el: Tag, fallback_height: float = 10000.0) -> Optional[float]:
@@ -702,6 +720,8 @@ class Parser:
         parts: List[str] = []
         for child in children:
             part = self._render_inline(child)
+            if part and not part[:1].isspace() and space_between(child.previous_sibling, child):
+                part = f" {part}"
             if part[:1] == " " and parts and parts[-1][-1:].isspace():
                 part = part[1:]
             if part and parts and not parts[-1][-1:].isspace() and not part[:1].isspace():
@@ -746,7 +766,7 @@ class Parser:
 
         style = (el.get("style") or "").lower().replace(" ", "")
 
-        if not ("position:absolute" in style and "bottom:0" in style):
+        if not (is_absolute(el) and "bottom:0" in style):
             return False
 
         if "width:100%" in style:
@@ -896,6 +916,9 @@ class Parser:
         return result if result else [elements]
 
     def _process_absolutely_positioned_container(self, container: Tag, page_num: int) -> int:
+        if self._takes_flow_path(container):
+            return self._process_positioned_flow(container, page_num)
+
         positioned_children = self._extract_absolutely_positioned_children(container)
 
         if not positioned_children:
@@ -955,6 +978,155 @@ class Parser:
                     )
 
         return page_num
+
+    # --- positioned pages read in source order (spec 2026-10-24) ---------------------------
+
+    def _is_measurable(self, child: Tag) -> bool:
+        """A child the measured path reads: positioned with a px left and top, or a footer."""
+        return self._is_absolutely_positioned(child) and (
+            self._is_footer_element(child)
+            or AbsolutelyPositionedTableParser([])._get_position(child) is not None
+        )
+
+    def _takes_flow_path(self, container: Tag) -> bool:
+        """D2: the measured path would read none of this container's visible text.
+
+        True when a child has visible text and no child is measurable. A container with any
+        measurable child keeps the measured path, whatever else it holds.
+        """
+        has_text = False
+        for child in container.children:
+            if isinstance(child, NavigableString):
+                has_text = has_text or (type(child) is NavigableString and bool(self._process_text_node(child)))
+                continue
+            if not isinstance(child, Tag) or self._is_hidden(child):
+                continue
+            if self._is_measurable(child):
+                return False
+            has_text = has_text or bool(child.get_text(strip=True))
+        return has_text
+
+    def _is_page_box(self, container: Tag) -> bool:
+        """D4: a flow-path box, not inside another, with position:relative and a height."""
+        return (
+            self._page_box_depth == 0
+            and is_relative(container)
+            and css_length_pt(container, "height") is not None
+        )
+
+    def _page_has_content(self, page_num: int) -> bool:
+        return any(piece.strip() for piece in self.pages.get(page_num, ()))
+
+    def _page_number_footer(self, child: Union[Tag, NavigableString]) -> Optional[int]:
+        """D4: the page number a footer-zone child holds as its whole text, if any."""
+        if not isinstance(child, Tag) or child.find("table") is not None:
+            return None
+        match = _PAGE_NUMBER_FOOTER_RE.match(child.get_text(" ", strip=True))
+        if not match:
+            return None
+        number = int(match.group(1) or match.group(2))
+        return number if self._is_plausible_page_number(number) else None
+
+    def _process_positioned_flow(self, container: Tag, page_num: int) -> int:
+        """D3-D5: read a positioned container in source order, its line boxes as paragraphs.
+
+        A page box starts a new page when the current one has content, records a footer
+        that holds only its page number as the page's display number, and reads the rest of
+        its footer zone after its other children.
+        """
+        current = page_num
+        children = list(container.children)
+        page_box = self._is_page_box(container)
+        if page_box:
+            if self._page_has_content(current):
+                current += 1
+            height = css_length_pt(container, "height")
+            body: List[Union[Tag, NavigableString]] = []
+            footer_zone: List[Union[Tag, NavigableString]] = []
+            for child in children:
+                top = css_length_pt(child, "top") if self._is_absolutely_positioned(child) else None
+                if top is None or top < _FOOTER_ZONE * height:
+                    body.append(child)
+                    continue
+                number = self._page_number_footer(child)
+                if number is not None:
+                    self.footer_page_numbers[current] = number
+                    continue
+                footer_zone.append(child)
+            children = body + footer_zone
+            self._page_box_depth += 1
+        try:
+            previous_line: Optional[Tag] = None
+            for child in children:
+                if is_line_box(child) and self._has_visible_text(child):
+                    if previous_line is not None and self._continues_line(previous_line, child):
+                        if not _LINE_END_HYPHEN_RE.search(self._last_text(current)):
+                            self._separate(current)
+                    else:
+                        self._blankline_before(current)
+                    current = self._stream_line(child, current)
+                    previous_line = child
+                    continue
+                if previous_line is not None and self._has_visible_text(child):
+                    self._blankline_after(current)
+                    previous_line = None
+                current = self._stream_pages(child, current)
+            if previous_line is not None:
+                self._blankline_after(current)
+        finally:
+            if page_box:
+                self._page_box_depth -= 1
+        return current
+
+    def _has_visible_text(self, node: Union[Tag, NavigableString]) -> bool:
+        if isinstance(node, NavigableString):
+            return type(node) is NavigableString and bool(self._process_text_node(node))
+        return isinstance(node, Tag) and not self._is_hidden(node) and bool(node.get_text(strip=True))
+
+    def _last_text(self, page_num: int) -> str:
+        buf = self.pages.get(page_num)
+        return buf[-1].rstrip(" ") if buf else ""
+
+    def _stream_line(self, line: Tag, page_num: int) -> int:
+        """Stream a line box's content without the space its own position would add.
+
+        The flow path decides what comes before a line: a space, nothing (after a hyphen) or
+        a paragraph break. A line box written bold or italic as a whole keeps the general path.
+        """
+        if self._wrap_markdown(line):
+            return self._stream_pages(line, page_num)
+        current = page_num
+        for child in line.children:
+            if space_between(child.previous_sibling, child):
+                self._separate(current)
+            current = self._stream_pages(child, current)
+        return current
+
+    @staticmethod
+    def _continues_line(previous: Tag, line: Tag) -> bool:
+        """D5: the next line down, at most 1.5 times the larger font size lower, same weight."""
+        top, previous_top = css_length_pt(line, "top"), css_length_pt(previous, "top")
+        if top is None or previous_top is None:
+            return False
+        size = max(font_size_pt(line) or 0.0, font_size_pt(previous) or 0.0) or _DEFAULT_FONT_PT
+        if not 0 < top - previous_top <= _LINE_PITCH_LIMIT * size:
+            return False
+        return Parser._all_bold(previous) == Parser._all_bold(line)
+
+    @staticmethod
+    def _all_bold(line: Tag) -> bool:
+        """Whether every visible string of a line box is bold, by its own tag or an ancestor's."""
+        for string in line.find_all(string=True):
+            if not string.strip():
+                continue
+            node = string.parent
+            while isinstance(node, Tag) and not Parser._is_bold(node):
+                if node is line:
+                    return False
+                node = node.parent
+            if not isinstance(node, Tag):
+                return False
+        return True
 
     def _restore_text_block(self, started: bool, has_continuation: bool,
                             ends_block: bool, previous: Optional[TextBlockInfo]) -> None:
@@ -1111,6 +1283,8 @@ class Parser:
 
         current = page_num
         for child in root.children:
+            if space_between(child.previous_sibling, child):
+                self._separate(current)
             current = self._stream_pages(child, current)
 
         if separates:
