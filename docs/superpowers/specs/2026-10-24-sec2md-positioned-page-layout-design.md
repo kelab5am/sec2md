@@ -1,10 +1,11 @@
 # sec2md Positioned Page Layout Design
 
-Date: 2026-10-24 (revision 3)
+Date: 2026-10-24 (revision 4)
 
 Status: Approved by the user on 2026-10-24, together with the fixture fetch from sec.gov.
 - Revision 2 applied the Codex review below.
 - Revision 3 adds the corpus check the user asked for.
+- Revision 4 records what implementation found: D7.3 keeps identifiers on both sides instead of dropping them, and the "Implementation notes" section is new.
 - The numbers below come from a throwaway spike.
 
 ## Purpose
@@ -20,7 +21,7 @@ Measured on `main` at `c6e120a`:
 | ASML EX-99.3, 0000937966-25-000014, `financialstatementsusgaapq.htm` | 0.43 MB | 8 checked | normal | clean |
 
 **What the spike shows.**
-- **TSM.** It recovers 166,445 characters on 66 pages, with display page numbers. 125 tables are checked; 2 still have missing values, and both trace to the completeness check, not the render (D7).
+- **TSM.** It recovers 166,445 characters on 66 pages, with display page numbers; the implementation gives 65 pages, one per page box (the spike left an empty page at the end). 125 tables are checked; 2 still have missing values, and both trace to the completeness check, not the render (D7).
 - **Existing fixtures.** On the seven existing fixtures the spike passes every pin and golden test: 2633 passed. The one failure, `test_internal_version_matches_distribution`, comes from the borrowed venv's installed metadata, not the code.
 
 ## Review history
@@ -115,7 +116,7 @@ A **page box** is a container on the flow path whose own style has `position:rel
 - **Page breaks.**
   - A page box starts a new page when the current page already has content. A CSS `page-break-before` or `page-break-after` that has already opened an empty page is therefore not counted twice.
   - A page box inside another page box does not break.
-  - TSM becomes 66 pages. The first (the cover) has no display number; the rest are numbered 1, 2, 3 … from their footers.
+  - TSM's 65 page boxes become 65 pages. The first (the cover) has no display number; the rest are numbered 1, 2, 3 … from their footers. With the SGML wrapper, the wrapper's header line takes page 1 and the cover moves to page 2.
 
 Only flow-path page boxes break pages, so no existing document's paging changes.
 
@@ -168,7 +169,8 @@ The spike's remaining TSM findings, and one introduced by D8, are check-side mis
    - **Fix.** Header lines will count identifier tokens, as body lines already do (`_output_cell_positions`).
 3. **Identifier references in check 2.**
    - **Problem.** Check 2's source rows carry the `6` of `Cash and cash equivalents (Note 6)` as a token. The output tokenizer drops a parenthesized `(Note 6)` but keeps a bare `Note 6`. The balance sheet's rows are therefore reported as "values present but split across output rows" (TSM table 2, 21 messages).
-   - **Fix.** Identifier tokens (`_IDENTIFIER` matches) are removed from both sides of check 2: from the source rows, and from each output line before `output_line_numbers` tokenizes it for `row_structure`. Check 2 is about where values sit, and an identifier is a label, not a value.
+   - **Fix (revision 4).** Output lines are tokenized for check 2 with `classify_cell`, the function that tokenizes source rows. It takes an identifier's number even where `numbers()` drops it, so both sides carry the same tokens.
+   - **Why not the revision 3 fix.** Revision 3 removed identifier tokens from both sides. On aapl's table of contents that left each row with one token (its page number), so check 2 skipped those rows and missed a row-swap mutation it catches on `main`. Keeping identifiers on both sides fixes the `(Note 6)` false finding and keeps that coverage. Codex's `Cash Note 6` case reads the same on both sides either way.
 4. **Footnotes that travel with a merged marker (review finding 5).**
    - **Problem.** In the source, the `(3)` of `)%<sup>(3)</sup>` sits in a cell with no alphanumeric value. That makes it a `standalone_marker`, which claims only `numeric_cell`, `header_line` and `text_rendering` positions. After D8's merge, the output `(14)% (3)` puts it in a `text_cell` tail. The check then reports `missing -3 [standalone_marker]` (probe).
    - **Fix.** A footnote whose source cell value is only a close marker (`_CLOSE`: `)` or `)%`) or `%` gets its own kind. That kind may claim `text_cell` as well as the `standalone_marker` positions, so it matches whether or not the render merged the cell.
@@ -279,7 +281,8 @@ Each manifest entry carries:
 
 The seven fixtures are a small sample of US filings, so this branch is also compared with `main` on the existing audit corpora:
 - Phase A, the 109 documents of `audits/2026-10-03-table-completeness-corpus/`, including the RCQ set read from `E:\RCQWealth` (read only);
-- the 70 annual reports of `audits/2026-10-06-recent-filings-corpus/`.
+- the 70 annual reports of `audits/2026-10-06-recent-filings-corpus/`;
+- (added in implementation) every SEC original in the vault `E:\RCQWealth`, read only: 461 primary filings and 1,658 retained exhibit and index pages for AAPL, CRDO, CRM, META, MSFT, NVDA, RDDT and SPCX. These are what rcq-wealth actually ingests. Phase A's RCQ set is a subset of them.
 
 **Method.**
 - Each document is converted on both sides, `main` at `c6e120a` (a `git archive` tree) and the branch, each in its own subprocess with its own `PYTHONPATH`.
@@ -291,6 +294,17 @@ The seven fixtures are a small sample of US filings, so this branch is also comp
 - **What counts as a regression.** An unexplained difference, or a new loss.
 
 **Where it lives.** The tooling and its results go in `audits/2026-10-24-positioned-layout-corpus/`: a script, `results.json` and a short `README.md`. Corpus bytes stay in the ignored `outputs/` folders as today.
+
+## Implementation notes (revision 4)
+
+- **Accuracy harness fix.** `tests/accuracy/metrics._normalize_number` stripped `)` before `%`, so a merged `(14)%` read `-14)`. With D8 that cost BABA's financial-row recall 0.955 → 0.80, though the rows are rendered correctly. It now strips `%` first. BABA's recall then equals `main`'s: the same 8 rows are missing on both sides.
+- **An existing unit test changes on purpose.** `test_percent_close_marker_merges_under_extended_only` pinned "a column mixing `%` and `)%` stays split", a consequence of the uniform-class rule that the 2026-10-05 spec gives no reason for. D8 merges such a column: `(3.2)%` and `1.5 %`.
+- **A gap in BABA that `main` shares.** BABA's exhibit has 16 elements without a source mapping and 48 numeric trace failures, on `main` at `c6e120a` as on the branch. They come from the element builder, not this spec. The release-contract test pins them as `KNOWN_MAPPING_GAPS`, so any other count fails. Fixing them is a follow-up.
+- **TSM's numeric recall is 0.985 by design.** The 62 numbers it misses are the page footers (`- 1 -` … `- 65 -`) that D4 turns into display page numbers. Nothing else is missing.
+- **Body-row baseline.** `body_rows_main.json` gains the new fixtures' rows, recorded from `main` at `c6e120a` and named under a new `fixture_commits` key. The generator's `--only` option replaces just those entries.
+  - **Why not `c674828`.** Recorded from there, BABA's and ASML's caption and year rows would count as body rows that the 2026-10-05 header-zone rules have since moved into header lines. Those moves predate this branch.
+  - **What the guard checks for them.** Recorded from `main`, it holds them to what `main` rendered just before this change.
+  - **The existing seven.** Their entries keep `c674828` and are unchanged.
 
 ## Acceptance
 
