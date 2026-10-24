@@ -1,8 +1,11 @@
 # sec2md Positioned Page Layout Design
 
-Date: 2026-10-24 (revision 2)
+Date: 2026-10-24 (revision 3)
 
-Status: Draft for the user's review. Revision 2 applies the Codex review below. The numbers below come from a throwaway spike, uncommitted on branch `fix/positioned-layout`. Nothing is implemented until the user approves this spec.
+Status: Approved by the user on 2026-10-24, together with the fixture fetch from sec.gov.
+- Revision 2 applied the Codex review below.
+- Revision 3 adds the corpus check the user asked for.
+- The numbers below come from a throwaway spike.
 
 ## Purpose
 
@@ -200,15 +203,18 @@ The EXTENDED structural-marker merge already joins `)`, `)%` and `%` columns int
 
 The three exhibits become deterministic-gzip fixtures in `tests/fixtures/sec/`: `tsm-2026-q2-ex99-1`, `baba-2026-ex99-1` and `asml-2025-ex99-3`. Each gets a `manifest.json` entry and a README row.
 
-**Fixture bytes (needs the user's decision).** The cached copies differ from what EDGAR serves in two ways:
+**Fixture bytes (user decision, 2026-10-24: fetch from sec.gov).** The cached copies differ from what EDGAR serves in two ways:
 - **SGML wrapper.** They begin with the SGML `<DOCUMENT>…<TEXT>` wrapper.
   - EDGAR serves that wrapper on non-inline-XBRL exhibits, and the existing `nvda-2026-ex99-1` and `ex99-2` fixtures keep it.
   - The brief's instruction to strip it would make these fixtures unlike the real file.
 - **Injected script.** They end with a `<script src="/GZe8DtCU…">` tag that sec.gov's bot manager injects into served pages. It is not part of the filing, and no existing fixture has it.
 
-**Proposal.**
-- Fetch the three files once from `https://www.sec.gov/Archives/edgar/data/…`, with the User-Agent the user gives.
-- Keep the bytes exactly as served, without the injected script, and record their SHA-256 values. The cached copies serve only as a cross-check.
+**Decision.**
+- Fetch the three files once from `https://www.sec.gov/Archives/edgar/data/…`, with the User-Agent rcq-wealth's intake uses.
+- Keep the bytes exactly as served, without the injected script, and record their SHA-256 values.
+  - The existing fixtures carry no injected tag.
+  - With the tag removed, each file's size must equal the size in the filing's `index.json`, as in the recent corpus's Ruling 1.
+- The cached copies serve only as a cross-check.
 - Fixture tests strip nothing. With the wrapper, the output gains only the SGML header line (about 110 characters); tables and check results are identical, as for the NVIDIA exhibit fixtures.
 
 ### Contracts
@@ -269,11 +275,29 @@ Each manifest entry carries:
   - a mixed column with one row that does not validate stays unmerged;
   - LEGACY output is unchanged.
 
+## Corpus check (user, 2026-10-24)
+
+The seven fixtures are a small sample of US filings, so this branch is also compared with `main` on the existing audit corpora:
+- Phase A, the 109 documents of `audits/2026-10-03-table-completeness-corpus/`, including the RCQ set read from `E:\RCQWealth` (read only);
+- the 70 annual reports of `audits/2026-10-06-recent-filings-corpus/`.
+
+**Method.**
+- Each document is converted on both sides, `main` at `c6e120a` (a `git archive` tree) and the branch, each in its own subprocess with its own `PYTHONPATH`.
+- Two things are compared per document:
+  - every page's content, number and display page;
+  - the table-completeness report (failures, reported tokens, structure, tables checked).
+- **Expected result.** A document whose source has no positioned container that takes the flow path is identical on both sides.
+- **Explaining a difference.** Each document that differs is listed with its cause: a flow-path container, a D6 join, a D8 merge or a D7 check change. Each cause is explained from the diff.
+- **What counts as a regression.** An unexplained difference, or a new loss.
+
+**Where it lives.** The tooling and its results go in `audits/2026-10-24-positioned-layout-corpus/`: a script, `results.json` and a short `README.md`. Corpus bytes stay in the ignored `outputs/` folders as today.
+
 ## Acceptance
 
 1. The seven existing fixtures render byte-identically. Their Markdown hashes, golden files and every existing pin stay unchanged.
 2. TSM converts with its tables. `check_tables` reports no missing values, no missing references and no structure findings on TSM, BABA and ASML.
 3. The full sec2md suite passes.
+4. The corpus check finds no unexplained difference from `main`.
 
 ## Out of scope
 
