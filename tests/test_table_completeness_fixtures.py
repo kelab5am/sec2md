@@ -26,11 +26,20 @@ PINNED_FAILURES = {
     "nvda-2026-08-26-8k": {},
     "nvda-2026-ex99-1": {},
     "nvda-2026-ex99-2": {},
+    # Positioned page layouts and split percent negatives (spec 2026-10-24).
+    "tsm-2026-q2-ex99-1": {},
+    "baba-2026-ex99-1": {},
+    "asml-2025-ex99-3": {},
 }
 TABLES_CHECKED = {
     "aapl-2023-10k": 57, "nvda-2026-10k": 62, "nvda-2002-10k": 97, "nvda-2026-q2-10q": 49,
     "nvda-2026-08-26-8k": 4, "nvda-2026-ex99-1": 10, "nvda-2026-ex99-2": 11,
+    "tsm-2026-q2-ex99-1": 125, "baba-2026-ex99-1": 44, "asml-2025-ex99-3": 8,
 }
+# Reference-class tokens reported missing (they do not fail). The 8-K's exhibit index
+# reference 101 was reported before the 2026-10-24 spec; the spec's fixtures report none.
+PINNED_REPORTED = {fixture_id: () for fixture_id in TABLES_CHECKED}
+PINNED_REPORTED["nvda-2026-08-26-8k"] = ("table 4 (snapshot 3, page 2): missing 101 x1 [reference] (total 1)",)
 
 
 @lru_cache(maxsize=None)
@@ -47,7 +56,7 @@ def parse(fixture_id, **kwargs):
 
 
 def test_pinned_list_covers_every_fixture():
-    assert set(PINNED_FAILURES) == set(FIXTURE_IDS) == set(TABLES_CHECKED)
+    assert set(PINNED_FAILURES) == set(FIXTURE_IDS) == set(TABLES_CHECKED) == set(PINNED_REPORTED)
 
 
 @pytest.mark.parametrize("capture", [False, True], ids=["normal", "capture"])
@@ -59,6 +68,9 @@ def test_fixture_reports_exactly_the_pinned_failures(fixture_id, capture):
     assert actual == PINNED_FAILURES[fixture_id]
     assert report.tables_checked == TABLES_CHECKED[fixture_id]
     assert report.structure == ()
+    if not capture:  # capture mode names snapshots in its messages
+        assert report.reported == PINNED_REPORTED[fixture_id]
+    assert len(report.reported) == len(PINNED_REPORTED[fixture_id])
     assert not any(ambiguous for f in report.findings for _, _, ambiguous in f.missing_values)
 
 
@@ -76,6 +88,9 @@ ALIGNMENT_COVERAGE = {
     "nvda-2026-08-26-8k": (5, 0, 1, 0, 1, 2, 1, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     "nvda-2026-ex99-1": (11, 0, 0, 0, 2, 1, 8, 109, 0, 10, 99, 363, 5, 5, 0, 13, 0, 0, 340, 340, 0),
     "nvda-2026-ex99-2": (12, 0, 0, 0, 2, 1, 9, 65, 0, 4, 61, 296, 16, 5, 0, 19, 0, 0, 256, 256, 0),
+    "tsm-2026-q2-ex99-1": (133, 0, 9, 0, 0, 11, 113, 808, 14, 245, 549, 2218, 438, 7, 8, 446, 0, 0, 1319, 1319, 0),
+    "baba-2026-ex99-1": (56, 0, 41, 0, 1, 0, 14, 171, 0, 29, 142, 441, 3, 0, 0, 2, 0, 0, 436, 436, 0),
+    "asml-2025-ex99-3": (8, 0, 0, 0, 0, 0, 8, 166, 0, 12, 154, 542, 10, 0, 0, 15, 0, 0, 517, 517, 0),
 }
 
 
@@ -130,22 +145,45 @@ def swap_first_body_rows(segment):
     return "\n".join(lines)
 
 
-def test_blank_table_renderer_is_detected(monkeypatch):
+# (tables checked, units with value failures, reference-only units) with a blank renderer.
+# aapl's 7 units without value failures: 6 reference-only units (3 exhibit indexes, 3
+# signature blocks) whose losses are reported, and one one-row table rendered as text. The
+# others' unflagged units are one-row tables too, which render as text without md(): 41 of
+# BABA's 44 checked units are one-row layout tables (bullets).
+BLANK_RENDERER = {
+    "aapl-2023-10k": (57, 50, 6),
+    "tsm-2026-q2-ex99-1": (125, 116, 0),
+    "baba-2026-ex99-1": (44, 15, 0),
+    "asml-2025-ex99-3": (8, 8, 0),
+}
+
+
+@pytest.mark.parametrize("fixture_id", BLANK_RENDERER)
+def test_blank_table_renderer_is_detected(monkeypatch, fixture_id):
     monkeypatch.setattr(TableParser, "md", lambda self, *args, **kwargs: "")
-    report = parse("aapl-2023-10k")[0].table_report
+    report = parse(fixture_id)[0].table_report
     value_flagged = [f for f in report.findings if f.missing_values]
     reference_only = [f for f in report.findings if not f.missing_values and f.missing_reported]
-    # The 7 units without value failures: 6 reference-only units (3 exhibit indexes,
-    # 3 signature blocks) whose losses are reported, and one one-row table rendered as text.
-    assert (report.tables_checked, len(value_flagged), len(reference_only)) == (57, 50, 6)
+    assert (report.tables_checked, len(value_flagged), len(reference_only)) == BLANK_RENDERER[fixture_id]
 
 
-@pytest.mark.parametrize("mutate, message, expected", [
-    (reverse_numeric_cells, "values out of order within the row", 50),
-    (swap_first_body_rows, "appears before an earlier source row", 48),
+# Units in which each mutation is detected, per fixture.
+MUTATIONS_DETECTED = {
+    "aapl-2023-10k": (50, 48),
+    "tsm-2026-q2-ex99-1": (102, 74),
+    "baba-2026-ex99-1": (14, 14),
+    "asml-2025-ex99-3": (8, 8),
+}
+
+
+@pytest.mark.parametrize("fixture_id", MUTATIONS_DETECTED)
+@pytest.mark.parametrize("mutate, message, index", [
+    (reverse_numeric_cells, "values out of order within the row", 0),
+    (swap_first_body_rows, "appears before an earlier source row", 1),
 ])
-def test_row_structure_mutations_are_detected(mutate, message, expected):
-    parser, _ = parse("aapl-2023-10k")
+def test_row_structure_mutations_are_detected(mutate, message, index, fixture_id):
+    expected = MUTATIONS_DETECTED[fixture_id][index]
+    parser, _ = parse(fixture_id)
     outputs = {key: mutate(value) for key, value in parser.table_outputs.items()}
     report = check_tables(parser.soup, outputs, parser._table_pages, parser._snapshot_ordinals)
     assert sum(1 for f in report.findings if any(message in s for s in f.structure)) == expected

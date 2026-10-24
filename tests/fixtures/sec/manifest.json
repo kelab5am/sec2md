@@ -149,6 +149,63 @@
       "representative_rows": [
         {"label": "Data Center", "numbers": ["89023", "75246", "41096"]}
       ]
+    },
+    {
+      "fixture_id": "tsm-2026-q2-ex99-1",
+      "filename": "tsm-2026-q2-ex99-1.html.gz",
+      "cik": "0001046179",
+      "accession": "0001046179-26-000541",
+      "form": "EX-99.1",
+      "report_date": "2026-06-30",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000541/a2026q2consolidatedreport-.htm",
+      "role": "exhibit",
+      "sha256": "f421f6fe7b0c14ba15969f57749effdd54a04342cbfff49ef1fadf128f495251",
+      "expected_encoding_reason": "strict-utf-8",
+      "min_word_recall": 0.99,
+      "min_numeric_recall": 0.98,
+      "min_financial_row_recall": 1.0,
+      "expected_sections": [],
+      "representative_rows": [
+        {"label": "Total current assets", "numbers": ["4565700742", "3817130817", "3264917475"]}
+      ]
+    },
+    {
+      "fixture_id": "baba-2026-ex99-1",
+      "filename": "baba-2026-ex99-1.html.gz",
+      "cik": "0001577552",
+      "accession": "0001104659-26-099220",
+      "form": "EX-99.1",
+      "report_date": "2026-06-30",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/1577552/000110465926099220/tm2623667d1_ex99-1.htm",
+      "role": "exhibit",
+      "sha256": "2d08995e61c8d6d368f3ef88650c7a90f32812f9ef8cc3c4d4e4a4e351d36d2e",
+      "expected_encoding_reason": "strict-utf-8",
+      "min_word_recall": 1.0,
+      "min_numeric_recall": 1.0,
+      "min_financial_row_recall": 0.95,
+      "expected_sections": [],
+      "representative_rows": [
+        {"label": "Revenue", "numbers": ["247652", "268953", "39639"]}
+      ]
+    },
+    {
+      "fixture_id": "asml-2025-ex99-3",
+      "filename": "asml-2025-ex99-3.html.gz",
+      "cik": "0000937966",
+      "accession": "0000937966-25-000014",
+      "form": "EX-99.3",
+      "report_date": "2025-03-30",
+      "sec_url": "https://www.sec.gov/Archives/edgar/data/937966/000093796625000014/financialstatementsusgaapq.htm",
+      "role": "exhibit",
+      "sha256": "61991ad593a10d6c8a8262b7a671bb4e808922afaa35195c4adbe274dbeaff4f",
+      "expected_encoding_reason": "strict-utf-8",
+      "min_word_recall": 1.0,
+      "min_numeric_recall": 1.0,
+      "min_financial_row_recall": 1.0,
+      "expected_sections": [],
+      "representative_rows": [
+        {"label": "Total net sales", "numbers": ["5290.0", "7741.5"]}
+      ]
     }
   ]
 }
