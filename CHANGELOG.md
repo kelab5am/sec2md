@@ -2,6 +2,18 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- The EDGAR document envelope no longer reaches the Markdown.
+  - EDGAR stores each document of a filing under `<DOCUMENT>`, `<TYPE>`, `<SEQUENCE>`,
+    `<FILENAME>`, `<DESCRIPTION>` and `<TEXT>`. Parsed as HTML, those fields led page 1
+    (`EX-3.1 2 meta06302024-ex31.htm EX-3.1`), and the document's own `<head>` landed in
+    the body, so its `<title>` and `<script>` text followed
+    (`Documentbazadebezolkohpepadr="1742889685"`), as in Meta's 10-Q EX-3.1.
+  - `strip_edgar_envelope` removes a leading envelope, and its closing `</TEXT>` and
+    `</DOCUMENT>`, before parsing. Only an envelope at the very start, with only those
+    header fields before `<TEXT>`, is removed; anything else, such as a `<PDF>` or
+    `<XBRL>` body or a full `<SEC-DOCUMENT>` submission, is parsed as before.
+  - Text in `<title>`, `<script>`, `<style>` and `<noscript>` is never rendered, in the
+    stream, in inline runs or in table cells, wherever the parser places it.
 - A line break inside a bold or italic run, or inside a list item, is a space again,
   as it is in plain text. Credo's `HOLDING LTD<br>EXECUTIVE` heading in bold read
   `**…LTDEXECUTIVE…**`, and Salesforce's bylaws `ARTICLE III<br>OFFICERS` read
