@@ -248,3 +248,76 @@ class TestTableCells:
         assert _content(f"<table><tr><td>{S}Net sales rose 2</span>{S}0</span>%</td></tr></table>") == (
             "Net sales rose 20%"
         )
+
+
+class TestLineBreakInEmphasis:
+    """A <br> inside a bold or italic run is a space, as it is in plain text.
+
+    Credo's EX-10.1 heading "HOLDING LTD<br>EXECUTIVE" in bold read "LTDEXECUTIVE", and
+    Salesforce's bylaws "ARTICLE III<br>OFFICERS" read "IIIOFFICERS".
+    """
+
+    @pytest.mark.parametrize(
+        "body, expected",
+        [
+            (
+                '<div><font style="font-weight:700">HOLDING LTD<br>EXECUTIVE PLAN</font></div>',
+                "**HOLDING LTD EXECUTIVE PLAN**",
+            ),
+            ("<div><b>ARTICLE III<br>OFFICERS</b></div>", "**ARTICLE III OFFICERS**"),
+            ("<div><b>ARTICLE III<br/>OFFICERS</b></div>", "**ARTICLE III OFFICERS**"),
+            ("<div><i>Restated<br>Certificate</i></div>", "*Restated Certificate*"),
+            (
+                '<div><span style="font-weight:bold;font-style:italic">A<br>B</span></div>',
+                "***A B***",
+            ),
+        ],
+    )
+    def test_line_break_inside_emphasis_is_one_space(self, body, expected):
+        assert _content(body) == expected
+
+    def test_plain_line_break_is_unchanged(self):
+        assert _content('<div><font style="font-weight:400">Plain LTD<br>EXECUTIVE</font></div>') == (
+            "Plain LTD EXECUTIVE"
+        )
+
+    def test_consecutive_line_breaks_are_one_space(self):
+        assert _content("<div><b>ARTICLE VII<br><br>AMENDMENTS</b></div>") == "**ARTICLE VII AMENDMENTS**"
+        assert _content("<div><b>ARTICLE VII<br> <br>\n<br>AMENDMENTS</b></div>") == (
+            "**ARTICLE VII AMENDMENTS**"
+        )
+
+    def test_line_break_at_the_edges_of_a_run_stays_outside_the_markers(self):
+        assert _content("<p>See <b><br>Article III</b> below</p>") == "See **Article III** below"
+        assert _content("<p>See <b>Article III<br></b>below</p>") == "See **Article III** below"
+        assert _content("<p>See <b><br><br>Article III<br><br></b>below</p>") == (
+            "See **Article III** below"
+        )
+
+    def test_line_break_in_a_nested_run(self):
+        assert _content("<div><b><span>RESTATED<br></span>CERTIFICATE</b></div>") == (
+            "**RESTATED CERTIFICATE**"
+        )
+
+    def test_line_break_in_a_list_item(self):
+        assert _content("<ul><li><b>ARTICLE III<br>OFFICERS</b></li></ul>") == (
+            "- **ARTICLE III OFFICERS**"
+        )
+        assert _content("<ul><li>Line one<br>line two</li></ul>") == "- Line one line two"
+
+    def test_empty_rule_inside_a_run_separates(self):
+        assert _content("<div><b>ARTICLE III<hr>OFFICERS</b></div>") == "**ARTICLE III OFFICERS**"
+
+    def test_line_break_in_a_bold_table_cell(self):
+        content = _content(
+            "<table>"
+            "<tr><td><b>HOLDING LTD<br>EXECUTIVE</b></td><td><b>2024</b></td></tr>"
+            "<tr><td>Revenue</td><td>1,234</td></tr>"
+            "</table>"
+        )
+        assert "LTDEXECUTIVE" not in content
+        assert "HOLDING LTD EXECUTIVE" in content.replace("*", "")
+
+    def test_line_break_in_a_bold_one_row_table(self):
+        content = _content("<table><tr><td><b>HOLDING LTD<br>EXECUTIVE</b></td></tr></table>")
+        assert content.replace("*", "") == "HOLDING LTD EXECUTIVE"

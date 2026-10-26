@@ -2,6 +2,12 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- A line break inside a bold or italic run, or inside a list item, is a space again,
+  as it is in plain text. Credo's `HOLDING LTD<br>EXECUTIVE` heading in bold read
+  `**…LTDEXECUTIVE…**`, and Salesforce's bylaws `ARTICLE III<br>OFFICERS` read
+  `IIIOFFICERS`. An empty `<hr>` in a run, or any other empty tag that sets its text
+  apart (`separates_inline`), gives the same single space; the space never lands
+  inside the `**` markers.
 - HTML comments no longer reach the Markdown.
   - Toppan Merrill's typesetting comments (`<!-- Field: Page; Sequence: 2; Value: 1 -->`)
     were written out as text.

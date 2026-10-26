@@ -707,7 +707,8 @@ class Parser:
         inner = self._join_inline(element.children)
         text = inner.strip()
         if not text:
-            return " " if inner else ""
+            # An empty separating tag (<br>, <hr>) is a space, as it is in the stream.
+            return " " if inner or separates_inline(element) else ""
 
         if element.name != "li":
             wrap = self._wrap_markdown(element)
