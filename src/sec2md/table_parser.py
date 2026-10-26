@@ -91,6 +91,8 @@ _SEPARATE_STYLE = re.compile(
     re.I,
 )
 _NON_TEXT_STRINGS = (Comment, Declaration, Doctype, ProcessingInstruction)
+# Tags whose text a browser never draws in the page, wherever the parser places them.
+NON_RENDERED_TAGS = frozenset({"title", "script", "style", "noscript"})
 _HIDDEN_STYLE = re.compile(r"display\s*:\s*none", re.I)
 _STRUCTURAL_BOUNDARY = "\x00"
 
@@ -154,6 +156,8 @@ def _inline_fragments(
             continue
 
         tag_name = child.name.lower()
+        if tag_name in NON_RENDERED_TAGS:
+            continue
         if _HIDDEN_STYLE.search(str(child.get("style") or "")):
             continue  # not drawn, as the stream skips it: "100<span hidden>999</span>" is "100"
         if separates_inline(child):

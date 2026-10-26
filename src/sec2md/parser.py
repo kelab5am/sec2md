@@ -22,6 +22,7 @@ from sec2md.positioned_layout import (
     space_between,
 )
 from sec2md.table_parser import (
+    NON_RENDERED_TAGS,
     TableHeaderRecord,
     TableParser,
     inline_text,
@@ -69,8 +70,34 @@ _DEFAULT_FONT_PT = 10.0
 _LINE_END_HYPHEN_RE = re.compile(r"[^\W\d_]-[*_]*$")
 # A Markdown table divider row, with or without outer pipes (as quality._TABLE_DIVIDER_RE).
 _MARKDOWN_TABLE_DIVIDER_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$")
+# EDGAR's SGML envelope around one document of a filing: <DOCUMENT>, the document header's
+# fields, then <TEXT>, where the document itself begins. A <PDF> or <XBRL> body is not text.
+_EDGAR_ENVELOPE_RE = re.compile(
+    r"\A[\s﻿]*<DOCUMENT>\s*"
+    r"(?:<(?:TYPE|SEQUENCE|FILENAME|DESCRIPTION)>[^<\r\n]*\s*)*"
+    r"<TEXT>[ \t]*(?:\r\n|\r|\n)?",
+    re.I,
+)
+_EDGAR_TRAILER_RE = re.compile(r"</TEXT>\s*(?:</DOCUMENT>\s*)?\Z", re.I)
 
 logger = logging.getLogger(__name__)
+
+
+def strip_edgar_envelope(content: str) -> str:
+    """The document inside a leading EDGAR <DOCUMENT> ... <TEXT> envelope, else content itself.
+
+    Parsed as HTML, the envelope's fields became text at the top of page 1, and the
+    document's own <head> landed in the body. Only an envelope at the very start, with
+    only the document header's fields before <TEXT>, is removed, with its closing
+    </TEXT></DOCUMENT>. Any other input is returned unchanged.
+    """
+
+    match = _EDGAR_ENVELOPE_RE.match(content)
+    if match is None:
+        return content
+    document = content[match.end():]
+    trailer = _EDGAR_TRAILER_RE.search(document)
+    return document[:trailer.start()] if trailer else document
 
 
 def _edge_whitespace(raw: str) -> tuple[bool, bool]:
@@ -154,7 +181,7 @@ class Parser:
         capture_tables: bool = False,
         table_checks: bool = True,
     ):
-        content = normalize_legacy_characters(content)
+        content = strip_edgar_envelope(normalize_legacy_characters(content))
         self.source_text = content
         self.source_url = source_url
         self.decode_diagnostics = decode_diagnostics
@@ -679,6 +706,9 @@ class Parser:
                 return " " if lead else ""
             return f"{' ' if lead else ''}{text}{' ' if trail else ''}"
 
+        if element.name in NON_RENDERED_TAGS:
+            return ""
+
         if element.name == "img":
             if self.include_images:
                 md = self._img_to_markdown(element)
@@ -707,7 +737,8 @@ class Parser:
         inner = self._join_inline(element.children)
         text = inner.strip()
         if not text:
-            return " " if inner else ""
+            # An empty separating tag (<br>, <hr>) is a space, as it is in the stream.
+            return " " if inner or separates_inline(element) else ""
 
         if element.name != "li":
             wrap = self._wrap_markdown(element)
@@ -1159,7 +1190,7 @@ class Parser:
         if not isinstance(root, Tag):
             return page_num
 
-        if self._is_hidden(root):
+        if self._is_hidden(root) or root.name in NON_RENDERED_TAGS:
             return page_num
 
         if root.name == "img" and self.include_images:
