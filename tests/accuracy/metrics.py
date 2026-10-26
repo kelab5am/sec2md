@@ -16,7 +16,7 @@ from bs4.element import NavigableString, Tag
 
 from sec2md.encoding import decode_html, normalize_legacy_characters
 from sec2md.models import Page
-from sec2md.parser import Parser
+from sec2md.parser import Parser, strip_edgar_envelope
 from sec2md.quality import ParseDiagnostics, enforce_quality
 from sec2md.sections import extract_sections
 from sec2md.table_parser import render_cell_content
@@ -1166,7 +1166,9 @@ def audit_document(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", XMLParsedAsHTMLWarning)
         source_text, _ = decode_html(source)
-        source_soup = BeautifulSoup(normalize_legacy_characters(source_text), "lxml")
+        # EDGAR's document envelope is not on the page, as the <head> is not (_source_visible).
+        source_text = strip_edgar_envelope(normalize_legacy_characters(source_text))
+        source_soup = BeautifulSoup(source_text, "lxml")
     source_visible, footer_lines = _source_visible(source_soup)
     output_visible = _output_visible_text(markdown, footer_lines)
     output_words = BeautifulSoup(output_visible, "lxml").get_text(" ", strip=True)
