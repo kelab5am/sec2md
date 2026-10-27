@@ -11,7 +11,10 @@ from bs4 import Tag
 from bs4.element import Comment, Declaration, Doctype, NavigableString, ProcessingInstruction
 
 from sec2md.absolute_table_parser import AbsolutelyPositionedTableParser
-from sec2md.table_parser import EXTENDED, LEGACY, Cell, GridCell, TableParser
+from sec2md.table_parser import (
+    EXTENDED, LEGACY, STRIKE_MARKER, Cell, GridCell, TableParser, is_struck, join_struck_runs,
+    marks_struck_text,
+)
 from sec2md.xlsx_values import CellValue, convert_cell
 
 
@@ -66,8 +69,12 @@ def _hidden(node: Tag) -> bool:
     return 'display:none' in style or 'visibility:hidden' in style or node.has_attr('hidden')
 
 
-def _text_fragments(node: Tag) -> str:
-    """Keep inline whitespace until all fragments have been assembled."""
+def _text_fragments(node: Tag, struck: bool = False) -> str:
+    """Keep inline whitespace until all fragments have been assembled.
+
+    Struck text is marked as the Markdown marks it, so a blacklined "84" struck before "86"
+    reads "~~84~~86", never the number 8486. struck says an ancestor already marks it.
+    """
     parts = []
     for child in node.children:
         if isinstance(child, (Comment, Declaration, Doctype, ProcessingInstruction)):
@@ -75,15 +82,33 @@ def _text_fragments(node: Tag) -> str:
         if isinstance(child, NavigableString):
             parts.append(str(child))
         elif isinstance(child, Tag) and not _hidden(child) and child.name not in {'script', 'style'}:
-            text = _text_fragments(child)
+            strikes = not struck and is_struck(child)
+            text = _text_fragments(child, struck or strikes)
+            if strikes:
+                text = _struck_text(text)
             boundary = child.name in {'br', 'p', 'div', 'tr', 'td', 'th', 'table', 'li'} or _numeric_marker(child)
+            if not boundary and parts and (joined := join_struck_runs(parts[-1], text)):
+                parts[-1] = joined
+                continue
             parts.append(f' {text} ' if boundary else text)
     return ''.join(parts)
 
 
+def _struck_text(text: str) -> str:
+    """Struck text between strikethrough markers, inside its edge whitespace, when it holds
+    a letter or digit (table_parser.marks_struck_text)."""
+    if not marks_struck_text(text):
+        return text
+    body = text.strip()
+    start = text.index(body)
+    return f'{text[:start]}{STRIKE_MARKER}{body}{STRIKE_MARKER}{text[start + len(body):]}'
+
+
 def _visible_text(node: Tag) -> str:
     """Keep inline token fragments together, separating only structural boundaries."""
-    return ' '.join(_text_fragments(node).split())
+    struck = is_struck(node)
+    text = _text_fragments(node, struck)
+    return ' '.join((_struck_text(text) if struck else text).split())
 
 
 def _numeric_marker(node: Tag) -> bool:
