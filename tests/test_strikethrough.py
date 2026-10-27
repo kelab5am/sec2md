@@ -228,6 +228,21 @@ class TestTableCells:
         ).table
         assert "~~84~~86" in TableParser(table).md()
 
+    def test_struck_cells_keep_the_table_structure(self):
+        # Tesla's EX-10.44 contents: with "~~88~~115" read as text, the first row became a
+        # header, and a spanning section row was copied into the next column.
+        rows = (
+            "<tr><td>5.02.</td><td>Mandatory Repayments</td><td>{a}88{b}115</td></tr>"
+            "<tr><td>5.03.</td><td>Method and Place of Payment</td><td>{a}90{b}117</td></tr>"
+            '<tr><td colspan="2">{a}SECTION{b}SECTION 14. NATURE OF OBLIGATIONS</td>'
+            "<td>{a}162{b}199</td></tr>"
+        )
+        struck = BeautifulSoup(f"<table>{rows.format(a='<s>', b='</s>')}</table>", "lxml").table
+        plain = BeautifulSoup(f"<table>{rows.format(a='', b='')}</table>", "lxml").table
+        rendered = TableParser(struck).md()
+        assert "~~88~~115" in rendered
+        assert rendered.replace("~~", "") == TableParser(plain).md()
+
     def test_document_table_traces_struck_numbers(self):
         parser = Parser(
             "<html><body><table>"

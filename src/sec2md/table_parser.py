@@ -23,6 +23,7 @@ from sec2md.quality import _normalized_numbers, normalize_numeric_token
 from sec2md.table_roles import (
     CURRENCY_MARKERS,
     CURRENCY_PATTERN,
+    STRIKE_MARKER,
     ZERO_WIDTH_CHARACTERS,
     OriginCell,
     row_roles,
@@ -94,7 +95,6 @@ _SEPARATE_STYLE = re.compile(
 _STRIKE_TAGS = {"s", "strike", "del"}
 _STRIKE_STYLE = re.compile(r"text-decoration(?:-line)?\s*:[^;]*line-through", re.I)
 _LETTER_OR_DIGIT = re.compile(r"[^\W_]")
-STRIKE_MARKER = "~~"
 _NON_TEXT_STRINGS = (Comment, Declaration, Doctype, ProcessingInstruction)
 # Tags whose text a browser never draws in the page, wherever the parser places them.
 NON_RENDERED_TAGS = frozenset({"title", "script", "style", "noscript"})

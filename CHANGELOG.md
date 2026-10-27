@@ -24,7 +24,8 @@
     `needs_review`; `~~84~~86` no longer exports as the number 8486. The numeric checks
     read the numbers inside the markers (`84`, `86`), and the table completeness check
     reads source cells with the same markers, so Tesla's struck page `100` before `127`
-    is not reported missing as `100127`.
+    is not reported missing as `100127`. A table's structure (header rows, spans, roles)
+    reads cell text without the markers, so marking struck text never changes it.
 
 - The EDGAR document envelope no longer reaches the Markdown.
   - EDGAR stores each document of a filing under `<DOCUMENT>`, `<TYPE>`, `<SEQUENCE>`,
