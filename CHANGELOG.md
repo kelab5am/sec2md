@@ -2,6 +2,28 @@
 
 ## 0.1.22+rcq.4 (unreleased, pending review)
 
+- Struck-through text renders as GFM strikethrough when it holds a letter or digit.
+  - Blacklined credit agreements show an amendment as a struck deletion directly followed
+    by an underlined insertion, with no whitespace between them. Joined as the source
+    writes it, Salesforce's table of contents read `Judgments 8486` (page 84 struck, 86
+    inserted) and `LIBORthe Term SOFR Reference Rate`; Amazon's read `(xy) other Liens`.
+    They now read `Judgments ~~84~~86`, `~~LIBOR~~the Term SOFR Reference Rate` and
+    `(~~x~~y) other Liens`. The markers are the boundary; no space is added.
+  - Struck text is a `text-decoration` or `text-decoration-line` with `line-through`, or
+    an `<s>`, `<strike>` or `<del>` element. Struck text with no letter or digit (a full
+    stop, bullet or dash, as in Alphabet's `derivatives.`, Salesforce's bold `•` and
+    TSMC's `-` cells) renders as before, plain and joined as the source writes it.
+  - This applies in the text stream, bold and italic runs, table cells and positioned
+    text. The markers go inside emphasis and inside source whitespace
+    (`*~~Internal Control - Integrated Framework~~*`, as Tesla's 2019 10-K strikes it), and
+    struck runs that meet merge into one (`~~Eurocurrency~~`). Underlined text has no
+    marker. In the text stream, a struck block (`<div>`, `<p>`) and a struck element
+    holding a table or list are not marked.
+  - A struck number in a table cell reads `~~1,234~~`. XLSX export marks the HTML cell the
+    same way, so a deleted value stays source text with a review reason and its table is
+    `needs_review`; `~~84~~86` no longer exports as the number 8486. The numeric checks
+    read the numbers inside the markers (`84`, `86`).
+
 - The EDGAR document envelope no longer reaches the Markdown.
   - EDGAR stores each document of a filing under `<DOCUMENT>`, `<TYPE>`, `<SEQUENCE>`,
     `<FILENAME>`, `<DESCRIPTION>` and `<TEXT>`. Parsed as HTML, those fields led page 1
