@@ -241,6 +241,31 @@ class TestTableCells:
         assert parser.trace_numeric_failures == ()
 
 
+class TestTableCompleteness:
+    """The completeness check reads source cells with the same markers as the output.
+
+    Tesla's EX-10.44 (2020 10-K) table of contents strikes page 100 before 127; read
+    joined, the source held 100127, which the output "~~100~~127" does not.
+    """
+
+    @pytest.mark.parametrize("capture", [False, True], ids=["normal", "capture"])
+    def test_struck_cells_leave_nothing_missing(self, capture):
+        parser = Parser(
+            "<html><body><table>"
+            "<tr><td>Section</td><td>Heading</td><td>Page</td></tr>"
+            "<tr><td>8.05.</td><td>Financial Condition<strike>; Undisclosed Liabilities</strike></td>"
+            f"<td><strike>100</strike>{INSERTED}127</font></td></tr>"
+            "<tr><td>8.06.</td><td>Litigation</td><td><s>1,2</s><s>34</s></td></tr>"
+            "<tr><td>8.07.</td><td>Taxes</td><td><s>-</s>129</td></tr>"
+            "</table></body></html>",
+            capture_tables=capture,
+        )
+        content = parser.get_pages(include_images=False)[0].content
+        assert "~~100~~127" in content and "~~1,234~~" in content
+        assert parser.table_report.findings == ()
+        assert parser.trace_numeric_failures == ()
+
+
 class TestStruckNumberValues:
     """A struck number in a cell is deleted text, not a value: XLSX keeps it as text.
 

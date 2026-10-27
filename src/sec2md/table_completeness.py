@@ -20,7 +20,7 @@ from bs4.element import Comment, Declaration, Doctype, ProcessingInstruction
 from sec2md.chunker.blocks import is_separator_row
 from sec2md.positioned_layout import is_absolute, is_line_fragment, space_between
 from sec2md.quality import _MARKDOWN_LINK_RE, _is_hidden_tag, _normalized_numbers
-from sec2md.table_parser import has_descendant
+from sec2md.table_parser import STRIKE_MARKER, has_descendant, is_struck, marks_struck_text
 from sec2md.xlsx_tables import _header_count, _hidden as _grid_hidden, _visible_text
 
 _BLOCK = {"p", "div", "br", "li", "tr", "table", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6", "td", "th"}
@@ -169,7 +169,24 @@ def _is_marker(tag: Tag) -> bool:
             and bool(_MARKER_TEXT.fullmatch(tag.get_text(strip=True))))
 
 
-def _walk(node: Tag, hidden: set[int], out: list, marker: bool) -> None:
+def _struck_pieces(pieces: list, marker: bool) -> list:
+    """A struck tag's pieces between strikethrough markers, inside their edge whitespace,
+    when its text holds a letter or digit, as the output marks it ("~~100~~127")."""
+    if not marks_struck_text("".join(t for t, _ in pieces)):
+        return pieces
+    texts = [i for i, (t, _) in enumerate(pieces) if t.strip()]
+    first, last = texts[0], texts[-1]
+    marked = list(pieces)
+    text, flag = marked[last]
+    body = text.rstrip()
+    marked[last:last + 1] = [(body, flag), (STRIKE_MARKER, marker), (text[len(body):], flag)]
+    text, flag = marked[first]
+    body = text.lstrip()
+    marked[first:first + 1] = [(text[:len(text) - len(body)], flag), (STRIKE_MARKER, marker), (body, flag)]
+    return [piece for piece in marked if piece[0]]
+
+
+def _walk(node: Tag, hidden: set[int], out: list, marker: bool, struck: bool = False) -> None:
     previous = None
     for child in node.children:
         if isinstance(child, _SKIP_STRINGS):
@@ -187,11 +204,19 @@ def _walk(node: Tag, hidden: set[int], out: list, marker: bool) -> None:
         child_marker = marker or _is_marker(child)
         separate = (child.name in _BLOCK or child_marker != marker
                     or (is_absolute(child) and not is_line_fragment(child)))
+        strikes = not struck and is_struck(child)
+        pieces = [] if strikes else out
         if separate:
-            out.append((" ", marker))
-        _walk(child, hidden, out, child_marker)
+            pieces.append((" ", marker))
+        _walk(child, hidden, pieces, child_marker, struck or strikes)
         if separate:
-            out.append((" ", marker))
+            pieces.append((" ", marker))
+        if strikes:
+            pieces = _struck_pieces(pieces, marker)
+            if out and pieces and out[-1][0] == pieces[0][0] == STRIKE_MARKER:
+                out.pop()  # struck runs that meet merge, as in the output: "~~1,234~~"
+                pieces = pieces[1:]
+            out.extend(pieces)
 
 
 def cell_text(cell: Tag, hidden: set[int]) -> tuple[str, str]:

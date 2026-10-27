@@ -22,7 +22,9 @@
   - A struck number in a table cell reads `~~1,234~~`. XLSX export marks the HTML cell the
     same way, so a deleted value stays source text with a review reason and its table is
     `needs_review`; `~~84~~86` no longer exports as the number 8486. The numeric checks
-    read the numbers inside the markers (`84`, `86`).
+    read the numbers inside the markers (`84`, `86`), and the table completeness check
+    reads source cells with the same markers, so Tesla's struck page `100` before `127`
+    is not reported missing as `100127`.
 
 - The EDGAR document envelope no longer reaches the Markdown.
   - EDGAR stores each document of a filing under `<DOCUMENT>`, `<TYPE>`, `<SEQUENCE>`,
