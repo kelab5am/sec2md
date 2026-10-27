@@ -24,8 +24,12 @@ from sec2md.positioned_layout import (
 from sec2md.table_parser import (
     NON_RENDERED_TAGS,
     TableHeaderRecord,
+    STRIKE_MARKER,
     TableParser,
     inline_text,
+    is_struck,
+    join_struck_runs,
+    marks_struck_text,
     render_cell_content,
     separates_inline,
 )
@@ -56,6 +60,9 @@ _css_decl = re.compile(r"^[a-zA-Z\-]+\s*:\s*[^;]+;\s*$")
 ITEM_HEADER_CELL_RE = re.compile(r"^\s*Item\s+([0-9IVX]+)\.\s*$", re.I)
 PART_HEADER_CELL_RE = re.compile(r"^\s*Part\s+([IVX]+)\s*$", re.I)
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
+_MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+# Struck text is marked inline only: a table or list inside it keeps its own Markdown.
+_STRUCK_STRUCTURE_TAGS = ("table", "ul", "ol")
 # A positioned page's footer holding only its page number: "3", "- 3 -", "Page 3 of 60" (spec
 # 2026-10-24 D4). Unlike _extract_page_number_from_footer, the whole text must match.
 _PAGE_NUMBER_FOOTER_RE = re.compile(
@@ -226,6 +233,8 @@ class Parser:
         # segment position is noted when it is appended; after streaming, each record is bound
         # from the wrapper's final segment, and the wrapper maps to its bound tables.
         self._table_collector: list[tuple[Tag, str]] | None = None
+        # Depth of struck elements being rendered inline: a strike inside one adds no markers.
+        self._strike_depth = 0
         self._wrapped_renders: list[tuple[int, int, Tag, list[tuple[Tag, str]]]] = []
         self._wrapped_tables: dict[int, list[Tag]] = {}
         self.header_accounting_misses: tuple[str, ...] = ()
@@ -375,6 +384,14 @@ class Parser:
             return "*"
         return ""
 
+    def _strikes(self, el: Tag) -> bool:
+        """Whether el's text renders between strikethrough markers, once checked for a letter
+        or digit: el strikes its text through, inline, and no struck element around it does."""
+        return (
+            self._strike_depth == 0 and is_struck(el)
+            and not any(child.name in _STRUCK_STRUCTURE_TAGS for child in el.descendants)
+        )
+
     @staticmethod
     def _is_plausible_page_number(num: int, min_val: int = 1) -> bool:
         return min_val <= num <= 9999 and not (1900 <= num <= 2100)
@@ -456,8 +473,11 @@ class Parser:
             if not last_text[-1:].isspace() and not s[:1].isspace():
                 left_run, right_run = _meeting_emphasis_runs(last_text, s)
                 if left_run and left_run == right_run:
-                    merged = last_text[:-left_run] + s[right_run:]
-                elif left_run:
+                    left, right = last_text[:-left_run], s[right_run:]
+                    merged = join_struck_runs(left, right) or left + right
+                elif not left_run:
+                    merged = join_struck_runs(last_text, s)
+                else:
                     self._separate(page_num)
                     last_text = buf[-1]
             merged = merged or self._try_merge_inline_spans(last_text, s, last_source, source_node)
@@ -734,12 +754,19 @@ class Parser:
                 listed = "\n".join(f"- {t}" for t in items)
             return f" {listed} "
 
-        inner = self._join_inline(element.children)
+        strikes = self._strikes(element)
+        self._strike_depth += strikes
+        try:
+            inner = self._join_inline(element.children)
+        finally:
+            self._strike_depth -= strikes
         text = inner.strip()
         if not text:
             # An empty separating tag (<br>, <hr>) is a space, as it is in the stream.
             return " " if inner or separates_inline(element) else ""
 
+        if strikes and marks_struck_text(MARKDOWN_LINK_RE.sub(r"\1", _MARKDOWN_IMAGE_RE.sub("", text))):
+            text = f"{STRIKE_MARKER}{text}{STRIKE_MARKER}"
         if element.name != "li":
             wrap = self._wrap_markdown(element)
             if wrap:
@@ -761,7 +788,11 @@ class Parser:
             if part and parts and not parts[-1][-1:].isspace() and not part[:1].isspace():
                 left_run, right_run = _meeting_emphasis_runs(parts[-1], part)
                 if left_run and left_run == right_run:
-                    parts[-1] = parts[-1][:-left_run] + part[right_run:]
+                    left, right = parts[-1][:-left_run], part[right_run:]
+                    parts[-1] = join_struck_runs(left, right) or left + right
+                    continue
+                if not left_run and (struck := join_struck_runs(parts[-1], part)):
+                    parts[-1] = struck
                     continue
                 if left_run:
                     part = f" {part}"
@@ -1125,9 +1156,12 @@ class Parser:
         """Stream a line box's content without the space its own position would add.
 
         The flow path decides what comes before a line: a space, nothing (after a hyphen) or
-        a paragraph break. A line box written bold or italic as a whole keeps the general path.
+        a paragraph break. A line box written bold, italic or struck through as a whole keeps
+        the general path.
         """
-        if self._wrap_markdown(line):
+        if self._wrap_markdown(line) or (
+                self._strikes(line) and marks_struck_text(line.get_text())
+        ):
             return self._stream_pages(line, page_num)
         current = page_num
         for child in line.children:
@@ -1295,7 +1329,10 @@ class Parser:
                                      continuation_ends_text_block, previous_text_block)
             return page_num
 
-        wrap = self._wrap_markdown(root)
+        # A struck element renders as a wrapper too, so its text goes between "~~" markers.
+        wrap = self._wrap_markdown(root) or (
+            self._strikes(root) and marks_struck_text(root.get_text())
+        )
         if wrap and not is_block:
             rendered, tables = self._process_wrapper(root)
             t = rendered.strip()

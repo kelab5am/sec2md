@@ -17,6 +17,9 @@ from typing import Literal, Pattern, Sequence, Union
 
 from sec2md.quality import _MARKDOWN_LINK_RE
 
+# Struck-through text in rendered cell text: "~~84~~86" (table_parser re-exports it).
+STRIKE_MARKER = "~~"
+
 
 @dataclass(frozen=True)
 class OriginCell:
@@ -131,13 +134,17 @@ def _slot_text(slot: OriginSlot) -> str | None:
 
 
 def visible_text(text: str | None) -> str:
-    """Cell text without zero-width characters, with each Markdown link reduced to its label."""
+    """Cell text without zero-width characters, with each Markdown link reduced to its label.
+
+    Strikethrough markers are dropped too, so a blacklined cell ("~~88~~115") plays the same
+    role in the table's structure as its text did before struck text was marked.
+    """
 
     if not text:
         return ""
-    if text.isascii() and "[" not in text:
-        return text.strip()  # no link, zero-width character or no-break space to remove
-    text = _MARKDOWN_LINK_RE.sub(r"\1", text.translate(_ZERO_WIDTH))
+    if text.isascii() and "[" not in text and STRIKE_MARKER not in text:
+        return text.strip()  # no link, marker, zero-width character or no-break space to remove
+    text = _MARKDOWN_LINK_RE.sub(r"\1", text.translate(_ZERO_WIDTH)).replace(STRIKE_MARKER, "")
     return text.replace("\xa0", " ").strip()
 
 

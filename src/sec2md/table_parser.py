@@ -12,7 +12,7 @@ from bs4.element import (
     PageElement,
     ProcessingInstruction,
 )
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from functools import lru_cache
 from typing import Callable, List, Literal, Optional, Sequence, cast
@@ -23,6 +23,7 @@ from sec2md.quality import _normalized_numbers, normalize_numeric_token
 from sec2md.table_roles import (
     CURRENCY_MARKERS,
     CURRENCY_PATTERN,
+    STRIKE_MARKER,
     ZERO_WIDTH_CHARACTERS,
     OriginCell,
     row_roles,
@@ -90,6 +91,10 @@ _SEPARATE_STYLE = re.compile(
     r"|(?:padding|margin)-(?:left|right)\s*:\s*\d*\.?\d*[1-9]",
     re.I,
 )
+# Struck-through text: a blacklined deletion ("84</font><font>86", 84 struck, 86 inserted).
+_STRIKE_TAGS = {"s", "strike", "del"}
+_STRIKE_STYLE = re.compile(r"text-decoration(?:-line)?\s*:[^;]*line-through", re.I)
+_LETTER_OR_DIGIT = re.compile(r"[^\W_]")
 _NON_TEXT_STRINGS = (Comment, Declaration, Doctype, ProcessingInstruction)
 # Tags whose text a browser never draws in the page, wherever the parser places them.
 NON_RENDERED_TAGS = frozenset({"title", "script", "style", "noscript"})
@@ -122,13 +127,111 @@ def separates_inline(tag: Tag) -> bool:
     return bool(_SEPARATE_STYLE.search(style))
 
 
+def is_struck(tag: Tag) -> bool:
+    """Whether a tag strikes its text through: <s>, <strike>, <del> or a line-through style."""
+
+    if (tag.name or "").lower() in _STRIKE_TAGS:
+        return True
+    style = tag.get("style")
+    return bool(style) and bool(_STRIKE_STYLE.search(str(style)))
+
+
+def marks_struck_text(text: str) -> bool:
+    """Whether struck text renders between strikethrough markers: it holds a letter or digit.
+
+    A blacklined deletion such as "84" or "LIBOR" reads "~~84~~86". A struck full stop,
+    bullet or dash is a formatting accident, not a deletion, and renders as plain text.
+    """
+
+    return bool(_LETTER_OR_DIGIT.search(text))
+
+
+def join_struck_runs(left: str, right: str) -> str | None:
+    """left + right as one struck run where a closing and an opening marker meet, else None.
+
+    "~~Euro~~" + "~~currency~~" is "~~Eurocurrency~~": "~~~~" would close neither run.
+    """
+
+    if (
+        left.endswith(STRIKE_MARKER) and right.startswith(STRIKE_MARKER)
+        and len(left) > 2 * len(STRIKE_MARKER) and len(right) > 2 * len(STRIKE_MARKER)
+    ):
+        return left[:-len(STRIKE_MARKER)] + right[len(STRIKE_MARKER):]
+    return None
+
+
 @dataclass(frozen=True)
 class InlineFragment:
-    """A rendered text fragment with optional link and structural boundary."""
+    """A rendered text fragment with optional link and structural boundary.
+
+    strike marks a strikethrough marker ("~~"), so the markers of two struck runs that meet
+    can merge.
+    """
 
     text: str
     href: str | None = None
     boundary: bool = False
+    strike: bool = False
+
+
+def _extend_fragments(fragments: list[InlineFragment], new: Sequence[InlineFragment]) -> None:
+    """Append new fragments, merging two struck runs that meet: "~~Euro~~~~currency~~"."""
+
+    if (
+        fragments and new and fragments[-1].strike and new[0].strike
+        and fragments[-1].href == new[0].href
+    ):
+        fragments.pop()
+        new = new[1:]
+    fragments.extend(new)
+
+
+def _struck_fragments(fragments: list[InlineFragment], href: str | None) -> list[InlineFragment]:
+    """Fragments between strikethrough markers, inside their leading and trailing whitespace.
+
+    Struck text with no letter or digit (marks_struck_text) is returned unmarked.
+    """
+
+    texts = [index for index, fragment in enumerate(fragments) if not fragment.boundary]
+    if not marks_struck_text("".join(fragments[index].text for index in texts)):
+        return fragments
+    first = next(index for index in texts if fragments[index].text.strip())
+    last = next(index for index in reversed(texts) if fragments[index].text.strip())
+    marked = list(fragments)
+    tail = marked[last]
+    body = tail.text.rstrip()
+    marked[last:last + 1] = [
+        replace(tail, text=body),
+        InlineFragment(text=STRIKE_MARKER, href=href, strike=True),
+        replace(tail, text=tail.text[len(body):]),
+    ]
+    head = marked[first]
+    body = head.text.lstrip()
+    marked[first:first + 1] = [
+        replace(head, text=head.text[:len(head.text) - len(body)]),
+        InlineFragment(text=STRIKE_MARKER, href=href, strike=True),
+        replace(head, text=body),
+    ]
+    return [fragment for fragment in marked if fragment.text]
+
+
+def _element_fragments(
+    node: Tag,
+    *,
+    base_url: str | None = None,
+    inherited_href: str | None = None,
+    struck: bool = False,
+) -> list[InlineFragment]:
+    """A tag's fragments, between strikethrough markers when it strikes its text through.
+
+    struck says an ancestor already marks the text, so a nested strike adds no markers.
+    """
+
+    strikes = not struck and is_struck(node)
+    fragments = _inline_fragments(
+        node, base_url=base_url, inherited_href=inherited_href, struck=struck or strikes
+    )
+    return _struck_fragments(fragments, inherited_href) if strikes else fragments
 
 
 def _inline_fragments(
@@ -136,6 +239,7 @@ def _inline_fragments(
     *,
     base_url: str | None = None,
     inherited_href: str | None = None,
+    struck: bool = False,
 ) -> list[InlineFragment]:
     """Walk a cell's descendants in DOM order without inventing inline spaces."""
 
@@ -164,10 +268,11 @@ def _inline_fragments(
             fragments.append(InlineFragment(text=" ", boundary=True))
             if tag_name != "br":
                 fragments.extend(
-                    _inline_fragments(
+                    _element_fragments(
                         child,
                         base_url=base_url,
                         inherited_href=inherited_href,
+                        struck=struck,
                     )
                 )
             fragments.append(InlineFragment(text=" ", boundary=True))
@@ -178,12 +283,14 @@ def _inline_fragments(
             raw_href = child.get("href")
             if raw_href is not None:
                 href = urljoin(base_url, raw_href) if base_url else raw_href
-        fragments.extend(
-            _inline_fragments(
+        _extend_fragments(
+            fragments,
+            _element_fragments(
                 child,
                 base_url=base_url,
                 inherited_href=href,
-            )
+                struck=struck,
+            ),
         )
     return fragments
 
@@ -220,7 +327,7 @@ def _collapse_structural_whitespace(text: str) -> str:
 def render_cell_content(cell: Tag, *, base_url: str | None = None) -> str:
     """Render visible table-cell content, retaining links as Markdown."""
 
-    fragments = _coalesce_same_href(_inline_fragments(cell, base_url=base_url))
+    fragments = _coalesce_same_href(_element_fragments(cell, base_url=base_url))
     rendered: list[str] = []
     for fragment in fragments:
         if fragment.boundary:
@@ -245,7 +352,7 @@ def inline_text(node: Tag) -> str:
 
 
 def _raw_inline_text(node: Tag) -> str:
-    return "".join(fragment.text for fragment in _inline_fragments(node))
+    return "".join(fragment.text for fragment in _element_fragments(node))
 
 
 def _separating_ancestor(node: Tag, other: Tag) -> bool:
