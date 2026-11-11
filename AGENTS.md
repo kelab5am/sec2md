@@ -17,6 +17,7 @@ CI (`.github/workflows/ci.yml`) runs the tests on Linux and Windows, Ruff, and a
 - **Pull requests go to this fork, not upstream.** For a fork, `gh pr create` targets the parent repository unless told otherwise: always pass `--repo kelab5am/sec2md --base main`.
 - **This repository is public.** Nothing private goes into code, tests, fixtures, docs, commit messages or pull requests.
 - **A downstream project pins this repository by commit,** so `main` has to stay green and every behaviour change gets a `CHANGELOG.md` entry under the current `+rcq.N` version.
+- **Design specs and plans are committed on `main`** (`docs/superpowers/specs/`, `docs/superpowers/plans/`), not on a feature branch or in a feature worktree, so the owner has one copy to find. Write them in the checkout that has `main` checked out: this repository's own folder, or `.worktrees/main` when that folder is on another branch (create it with `git worktree add .worktrees/main main` if it is missing; never switch the branch of a folder that has work in progress). Run `git pull --ff-only` there first. Uploading `main` is the owner's step: say that the document is committed on this PC and still needs `git push`. Code changes still go in their own worktree and through a pull request. These documents are public like everything else here.
 
 ## Before opening a pull request
 
